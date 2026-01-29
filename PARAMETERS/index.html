@@ -1,0 +1,3063 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/PARAMETERS/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+
+    
+<title>AlignTune Configuration Parameters - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../css/base.min.css" rel="stylesheet">
+    <link href="../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+<link rel="manifest" href="../assets/site.webmanifest">
+<link rel="shortcut icon" href="../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#aligntune-configuration-parameters">AlignTune Configuration Parameters</a></li>
+            <li class="second-level"><a href="#table-of-contents">Table of Contents</a></li>
+                
+            <li class="second-level"><a href="#sft-supervised-fine-tuning-parameters">SFT (Supervised Fine-Tuning) Parameters</a></li>
+                
+                <li class="third-level"><a href="#model-configuration-modelconfig">Model Configuration (ModelConfig)</a></li>
+                <li class="third-level"><a href="#dataset-configuration-datasetconfig">Dataset Configuration (DatasetConfig)</a></li>
+                <li class="third-level"><a href="#training-configuration-trainingconfig">Training Configuration (TrainingConfig)</a></li>
+                <li class="third-level"><a href="#evaluation-configuration-evaluationconfig">Evaluation Configuration (EvaluationConfig)</a></li>
+                <li class="third-level"><a href="#logging-configuration-loggingconfig">Logging Configuration (LoggingConfig)</a></li>
+            <li class="second-level"><a href="#rl-reinforcement-learning-common-parameters">RL (Reinforcement Learning) Common Parameters</a></li>
+                
+                <li class="third-level"><a href="#model-configuration-modelconfig_1">Model Configuration (ModelConfig)</a></li>
+                <li class="third-level"><a href="#dataset-configuration-datasetconfig_1">Dataset Configuration (DatasetConfig)</a></li>
+                <li class="third-level"><a href="#training-configuration-trainingconfig_1">Training Configuration (TrainingConfig)</a></li>
+                <li class="third-level"><a href="#sample-logging-configuration-sampleloggingconfig">Sample Logging Configuration (SampleLoggingConfig)</a></li>
+                <li class="third-level"><a href="#logging-configuration-loggingconfig_1">Logging Configuration (LoggingConfig)</a></li>
+                <li class="third-level"><a href="#reward-configuration-rewardconfig">Reward Configuration (RewardConfig)</a></li>
+                <li class="third-level"><a href="#reward-model-training-configuration-rewardmodeltrainingconfig">Reward Model Training Configuration (RewardModelTrainingConfig)</a></li>
+                <li class="third-level"><a href="#reward-model-source-configuration-rewardmodelsourceconfig">Reward Model Source Configuration (RewardModelSourceConfig)</a></li>
+            <li class="second-level"><a href="#algorithm-specific-rl-parameters">Algorithm-Specific RL Parameters</a></li>
+                
+                <li class="third-level"><a href="#ppo-proximal-policy-optimization">PPO (Proximal Policy Optimization)</a></li>
+                <li class="third-level"><a href="#dpo-direct-preference-optimization">DPO (Direct Preference Optimization)</a></li>
+                <li class="third-level"><a href="#grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)</a></li>
+                <li class="third-level"><a href="#dapo-drgrpo">DAPO / DRGRPO</a></li>
+                <li class="third-level"><a href="#gspo-generalized-scoring-proximal-objective">GSPO (Generalized Scoring Proximal Objective)</a></li>
+                <li class="third-level"><a href="#neural-mirror-grpo">Neural Mirror GRPO</a></li>
+                <li class="third-level"><a href="#meta-es">Meta-ES</a></li>
+            <li class="second-level"><a href="#backend-selection">Backend Selection</a></li>
+                
+            <li class="second-level"><a href="#task-types-sft">Task Types (SFT)</a></li>
+                
+            <li class="second-level"><a href="#convenience-functions">Convenience Functions</a></li>
+                
+                <li class="third-level"><a href="#sft-training">SFT Training</a></li>
+                <li class="third-level"><a href="#rl-training">RL Training</a></li>
+            <li class="second-level"><a href="#notes">Notes</a></li>
+                
+            <li class="second-level"><a href="#additional-resources">Additional Resources</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="aligntune-configuration-parameters">AlignTune Configuration Parameters<a class="headerlink" href="#aligntune-configuration-parameters" title="Permanent link">&para;</a></h1>
+<p>This document provides a comprehensive reference for all configuration parameters available in AlignTune, organized by training type (SFT vs RL) and algorithm-specific settings.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#sft-supervised-fine-tuning-parameters">SFT (Supervised Fine-Tuning) Parameters</a></li>
+<li><a href="#rl-reinforcement-learning-common-parameters">RL (Reinforcement Learning) Common Parameters</a></li>
+<li><a href="#algorithm-specific-rl-parameters">Algorithm-Specific RL Parameters</a></li>
+<li><a href="#ppo-proximal-policy-optimization">PPO (Proximal Policy Optimization)</a></li>
+<li><a href="#dpo-direct-preference-optimization">DPO (Direct Preference Optimization)</a></li>
+<li><a href="#grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)</a></li>
+<li><a href="#dapo-drgrpo">DAPO / DRGRPO</a></li>
+<li><a href="#gspo-generalized-scoring-proximal-objective">GSPO (Generalized Scoring Proximal Objective)</a></li>
+<li><a href="#neural-mirror-grpo">Neural Mirror GRPO</a></li>
+<li><a href="#meta-es">Meta-ES</a></li>
+</ol>
+<hr />
+<h2 id="sft-supervised-fine-tuning-parameters">SFT (Supervised Fine-Tuning) Parameters<a class="headerlink" href="#sft-supervised-fine-tuning-parameters" title="Permanent link">&para;</a></h2>
+<h3 id="model-configuration-modelconfig">Model Configuration (<code>ModelConfig</code>)<a class="headerlink" href="#model-configuration-modelconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name_or_path</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>HuggingFace model name or local path</td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td>PrecisionType</td>
+<td><code>bf16</code></td>
+<td>Model precision (<code>bf16</code>, <code>fp16</code>, <code>fp32</code>, <code>auto</code>)</td>
+</tr>
+<tr>
+<td><code>quantization</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Quantization config (e.g., <code>{"load_in_4bit": True}</code>)</td>
+</tr>
+<tr>
+<td><code>attn_implementation</code></td>
+<td>str</td>
+<td><code>"auto"</code></td>
+<td>Attention implementation (<code>auto</code>, <code>flash_attention_2</code>, <code>sdpa</code>)</td>
+</tr>
+<tr>
+<td><code>gradient_checkpointing</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable gradient checkpointing for memory efficiency</td>
+</tr>
+<tr>
+<td><code>max_memory</code></td>
+<td>Dict</td>
+<td><code>None</code></td>
+<td>Max memory per device (e.g., <code>{"0": "20GB"}</code>)</td>
+</tr>
+<tr>
+<td><code>device_map</code></td>
+<td>str/Dict</td>
+<td><code>"auto"</code></td>
+<td>Device mapping strategy</td>
+</tr>
+<tr>
+<td><code>use_unsloth</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable Unsloth acceleration</td>
+</tr>
+<tr>
+<td><code>max_seq_length</code></td>
+<td>int</td>
+<td><code>2048</code></td>
+<td>Maximum sequence length</td>
+</tr>
+<tr>
+<td><code>peft_enabled</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable PEFT/LoRA</td>
+</tr>
+<tr>
+<td><code>lora_rank</code></td>
+<td>int</td>
+<td><code>16</code></td>
+<td>LoRA rank</td>
+</tr>
+<tr>
+<td><code>lora_alpha</code></td>
+<td>int</td>
+<td><code>32</code></td>
+<td>LoRA alpha scaling</td>
+</tr>
+<tr>
+<td><code>lora_dropout</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>LoRA dropout rate</td>
+</tr>
+<tr>
+<td><code>target_modules</code></td>
+<td>List[str]</td>
+<td><code>None</code></td>
+<td>LoRA target modules (e.g., <code>["q_proj", "v_proj"]</code>)</td>
+</tr>
+<tr>
+<td><code>bias</code></td>
+<td>str</td>
+<td><code>"none"</code></td>
+<td>Bias training (<code>none</code>, <code>all</code>, <code>lora_only</code>)</td>
+</tr>
+<tr>
+<td><code>use_gradient_checkpointing</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable gradient checkpointing (legacy)</td>
+</tr>
+<tr>
+<td><code>num_labels</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Number of labels (classification tasks)</td>
+</tr>
+<tr>
+<td><code>model_init_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Additional model initialization arguments</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dataset-configuration-datasetconfig">Dataset Configuration (<code>DatasetConfig</code>)<a class="headerlink" href="#dataset-configuration-datasetconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>HuggingFace dataset name or local path</td>
+</tr>
+<tr>
+<td><code>split</code></td>
+<td>str</td>
+<td><code>"train"</code></td>
+<td>Dataset split to use</td>
+</tr>
+<tr>
+<td><code>subset</code> / <code>config</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Dataset subset/config name</td>
+</tr>
+<tr>
+<td><code>percent</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Percentage of data to use (0-100)</td>
+</tr>
+<tr>
+<td><code>max_samples</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Maximum number of samples</td>
+</tr>
+<tr>
+<td><code>column_mapping</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Column name mappings</td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>TaskType</td>
+<td><code>SUPERVISED_FINE_TUNING</code></td>
+<td>Task type enum</td>
+</tr>
+<tr>
+<td><code>auto_detect_fields</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Auto-detect dataset fields</td>
+</tr>
+<tr>
+<td><code>format_type</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Dataset format (<code>alpaca</code>, <code>dolly</code>, etc.)</td>
+</tr>
+<tr>
+<td><code>text_column</code></td>
+<td>str</td>
+<td><code>"text"</code></td>
+<td>Text column name</td>
+</tr>
+<tr>
+<td><code>instruction_column</code></td>
+<td>str</td>
+<td><code>"instruction"</code></td>
+<td>Instruction column name</td>
+</tr>
+<tr>
+<td><code>response_column</code></td>
+<td>str</td>
+<td><code>"response"</code></td>
+<td>Response column name</td>
+</tr>
+<tr>
+<td><code>output_column</code></td>
+<td>str</td>
+<td><code>"output"</code></td>
+<td>Output column name</td>
+</tr>
+<tr>
+<td><code>input_column</code></td>
+<td>str</td>
+<td><code>"input"</code></td>
+<td>Input column name</td>
+</tr>
+<tr>
+<td><code>context_column</code></td>
+<td>str</td>
+<td><code>"context"</code></td>
+<td>Context column name</td>
+</tr>
+<tr>
+<td><code>label_column</code></td>
+<td>str</td>
+<td><code>"label"</code></td>
+<td>Label column (classification)</td>
+</tr>
+<tr>
+<td><code>tokens_column</code></td>
+<td>str</td>
+<td><code>"tokens"</code></td>
+<td>Tokens column (token classification)</td>
+</tr>
+<tr>
+<td><code>tags_column</code></td>
+<td>str</td>
+<td><code>"ner_tags"</code></td>
+<td>Tags column (NER)</td>
+</tr>
+<tr>
+<td><code>messages_column</code></td>
+<td>str</td>
+<td><code>"messages"</code></td>
+<td>Messages column (chat)</td>
+</tr>
+<tr>
+<td><code>dataset_text_field</code></td>
+<td>str</td>
+<td><code>"text"</code></td>
+<td>Dataset text field for trainers</td>
+</tr>
+<tr>
+<td><code>chat_template</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Chat template string</td>
+</tr>
+<tr>
+<td><code>dataset_num_proc</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Number of parallel processes</td>
+</tr>
+<tr>
+<td><code>pad_token</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Padding token</td>
+</tr>
+<tr>
+<td><code>preserve_columns</code></td>
+<td>List[str]</td>
+<td><code>None</code></td>
+<td>Columns to preserve during processing</td>
+</tr>
+<tr>
+<td><code>processing_fn</code></td>
+<td>Callable</td>
+<td><code>None</code></td>
+<td>Custom processing function</td>
+</tr>
+<tr>
+<td><code>processing_batched</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whether processing is batched</td>
+</tr>
+<tr>
+<td><code>processing_fn_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Arguments for processing function</td>
+</tr>
+</tbody>
+</table>
+<h3 id="training-configuration-trainingconfig">Training Configuration (<code>TrainingConfig</code>)<a class="headerlink" href="#training-configuration-trainingconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>per_device_batch_size</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Batch size per device</td>
+</tr>
+<tr>
+<td><code>gradient_accumulation_steps</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Gradient accumulation steps</td>
+</tr>
+<tr>
+<td><code>max_steps</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Maximum training steps</td>
+</tr>
+<tr>
+<td><code>epochs</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Number of training epochs (if max_steps not set)</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>1e-5</code></td>
+<td>Learning rate</td>
+</tr>
+<tr>
+<td><code>weight_decay</code></td>
+<td>float</td>
+<td><code>0.01</code></td>
+<td>Weight decay</td>
+</tr>
+<tr>
+<td><code>warmup_steps</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>Warmup steps (or calculated from warmup_ratio)</td>
+</tr>
+<tr>
+<td><code>warmup_ratio</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Warmup ratio of total steps</td>
+</tr>
+<tr>
+<td><code>eval_interval</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Evaluation interval (steps)</td>
+</tr>
+<tr>
+<td><code>save_interval</code></td>
+<td>int</td>
+<td><code>500</code></td>
+<td>Save checkpoint interval (steps)</td>
+</tr>
+<tr>
+<td><code>max_grad_norm</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Maximum gradient norm for clipping</td>
+</tr>
+<tr>
+<td><code>fp16</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use FP16 training</td>
+</tr>
+<tr>
+<td><code>bf16</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use BF16 training</td>
+</tr>
+<tr>
+<td><code>dataloader_num_workers</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>Number of dataloader workers</td>
+</tr>
+<tr>
+<td><code>remove_unused_columns</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Remove unused dataset columns</td>
+</tr>
+<tr>
+<td><code>optimizer</code></td>
+<td>str</td>
+<td><code>"adamw_torch"</code></td>
+<td>Optimizer type</td>
+</tr>
+<tr>
+<td><code>lr_scheduler</code></td>
+<td>str</td>
+<td><code>"cosine"</code></td>
+<td>Learning rate scheduler</td>
+</tr>
+<tr>
+<td><code>group_by_length</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Group sequences by length</td>
+</tr>
+<tr>
+<td><code>dataloader_drop_last</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Drop last incomplete batch</td>
+</tr>
+<tr>
+<td><code>eval_accumulation_steps</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Evaluation accumulation steps</td>
+</tr>
+<tr>
+<td><code>label_smoothing_factor</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>Label smoothing factor</td>
+</tr>
+<tr>
+<td><code>early_stopping_patience</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Early stopping patience</td>
+</tr>
+<tr>
+<td><code>early_stopping_threshold</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>Early stopping threshold</td>
+</tr>
+<tr>
+<td><code>load_best_model_at_end</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Load best model at end</td>
+</tr>
+<tr>
+<td><code>metric_for_best_model</code></td>
+<td>str</td>
+<td><code>"eval_loss"</code></td>
+<td>Metric for best model selection</td>
+</tr>
+<tr>
+<td><code>greater_is_better</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whether higher metric is better</td>
+</tr>
+<tr>
+<td><code>use_trl</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use TRL backend</td>
+</tr>
+<tr>
+<td><code>dataset_num_proc</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Dataset processing processes</td>
+</tr>
+<tr>
+<td><code>dataset_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Additional dataset arguments</td>
+</tr>
+<tr>
+<td><code>packing</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable sequence packing</td>
+</tr>
+<tr>
+<td><code>packing_strategy</code></td>
+<td>str</td>
+<td><code>"bfd"</code></td>
+<td>Packing strategy (<code>bfd</code>, <code>wrapped</code>)</td>
+</tr>
+<tr>
+<td><code>eval_packing</code></td>
+<td>bool</td>
+<td><code>None</code></td>
+<td>Enable packing for evaluation</td>
+</tr>
+<tr>
+<td><code>padding_free</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Padding-free training</td>
+</tr>
+<tr>
+<td><code>pad_to_multiple_of</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Pad sequences to multiple of N</td>
+</tr>
+<tr>
+<td><code>completion_only_loss</code></td>
+<td>bool</td>
+<td><code>None</code></td>
+<td>Compute loss only on completions</td>
+</tr>
+<tr>
+<td><code>assistant_only_loss</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Compute loss only on assistant turns</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str</td>
+<td><code>"nll"</code></td>
+<td>Loss type (<code>nll</code>, <code>dft</code>)</td>
+</tr>
+<tr>
+<td><code>activation_offloading</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable activation offloading</td>
+</tr>
+<tr>
+<td><code>use_flash_attention_2</code></td>
+<td>bool</td>
+<td><code>None</code></td>
+<td>Use Flash Attention 2</td>
+</tr>
+<tr>
+<td><code>gradient_checkpointing</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable gradient checkpointing</td>
+</tr>
+<tr>
+<td><code>gradient_checkpointing_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Gradient checkpointing arguments</td>
+</tr>
+</tbody>
+</table>
+<h3 id="evaluation-configuration-evaluationconfig">Evaluation Configuration (<code>EvaluationConfig</code>)<a class="headerlink" href="#evaluation-configuration-evaluationconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compute_perplexity</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Compute perplexity metric</td>
+</tr>
+<tr>
+<td><code>compute_rouge</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Compute ROUGE scores</td>
+</tr>
+<tr>
+<td><code>compute_bleu</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Compute BLEU scores</td>
+</tr>
+<tr>
+<td><code>compute_meteor</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Compute METEOR scores (requires nltk)</td>
+</tr>
+<tr>
+<td><code>compute_bertscore</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Compute BERTScore (requires bert-score)</td>
+</tr>
+<tr>
+<td><code>compute_semantic_similarity</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Compute semantic similarity</td>
+</tr>
+<tr>
+<td><code>compute_codebleu</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Compute CodeBLEU (for code tasks)</td>
+</tr>
+<tr>
+<td><code>custom_metrics</code></td>
+<td>List[Callable]</td>
+<td><code>None</code></td>
+<td>Custom metric functions</td>
+</tr>
+<tr>
+<td><code>max_samples_for_quality_metrics</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>Max samples for quality metrics</td>
+</tr>
+<tr>
+<td><code>bertscore_model</code></td>
+<td>str</td>
+<td><code>"microsoft/deberta-xlarge-mnli"</code></td>
+<td>Model for BERTScore</td>
+</tr>
+<tr>
+<td><code>semantic_similarity_model</code></td>
+<td>str</td>
+<td><code>"sentence-transformers/all-MiniLM-L6-v2"</code></td>
+<td>Model for semantic similarity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-configuration-loggingconfig">Logging Configuration (<code>LoggingConfig</code>)<a class="headerlink" href="#logging-configuration-loggingconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output_dir</code></td>
+<td>str</td>
+<td><code>"./output"</code></td>
+<td>Output directory</td>
+</tr>
+<tr>
+<td><code>run_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Run name for logging</td>
+</tr>
+<tr>
+<td><code>loggers</code></td>
+<td>List[str]</td>
+<td><code>["tensorboard"]</code></td>
+<td>Logger types (<code>tensorboard</code>, <code>wandb</code>)</td>
+</tr>
+<tr>
+<td><code>log_level</code></td>
+<td>str</td>
+<td><code>"INFO"</code></td>
+<td>Logging level</td>
+</tr>
+<tr>
+<td><code>log_interval</code></td>
+<td>int</td>
+<td><code>10</code></td>
+<td>Logging interval (steps)</td>
+</tr>
+<tr>
+<td><code>save_strategy</code></td>
+<td>str</td>
+<td><code>"steps"</code></td>
+<td>Save strategy</td>
+</tr>
+<tr>
+<td><code>eval_strategy</code></td>
+<td>str</td>
+<td><code>"steps"</code></td>
+<td>Evaluation strategy</td>
+</tr>
+<tr>
+<td><code>report_to</code></td>
+<td>str</td>
+<td><code>"none"</code></td>
+<td>Reporting destination</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rl-reinforcement-learning-common-parameters">RL (Reinforcement Learning) Common Parameters<a class="headerlink" href="#rl-reinforcement-learning-common-parameters" title="Permanent link">&para;</a></h2>
+<h3 id="model-configuration-modelconfig_1">Model Configuration (<code>ModelConfig</code>)<a class="headerlink" href="#model-configuration-modelconfig_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name_or_path</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>Policy model name or path</td>
+</tr>
+<tr>
+<td><code>sft_path</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>SFT checkpoint path</td>
+</tr>
+<tr>
+<td><code>reward_path</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Reward model path</td>
+</tr>
+<tr>
+<td><code>reward_model_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Separate reward model name</td>
+</tr>
+<tr>
+<td><code>reward_model_source</code></td>
+<td>RewardModelSourceConfig</td>
+<td><code>None</code></td>
+<td>Reward model source configuration</td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td>PrecisionType</td>
+<td><code>AUTO</code></td>
+<td>Model precision</td>
+</tr>
+<tr>
+<td><code>quantization</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Quantization config</td>
+</tr>
+<tr>
+<td><code>attn_implementation</code></td>
+<td>str</td>
+<td><code>"auto"</code></td>
+<td>Attention implementation</td>
+</tr>
+<tr>
+<td><code>gradient_checkpointing</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable gradient checkpointing</td>
+</tr>
+<tr>
+<td><code>max_memory</code></td>
+<td>Dict</td>
+<td><code>None</code></td>
+<td>Max memory per device</td>
+</tr>
+<tr>
+<td><code>device_map</code></td>
+<td>str/Dict</td>
+<td><code>None</code></td>
+<td>Device mapping</td>
+</tr>
+<tr>
+<td><code>use_unsloth</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable Unsloth acceleration</td>
+</tr>
+<tr>
+<td><code>max_seq_length</code></td>
+<td>int</td>
+<td><code>2048</code></td>
+<td>Maximum sequence length</td>
+</tr>
+<tr>
+<td><code>reward_value_model</code></td>
+<td>str</td>
+<td><code>"meta-llama/Llama-3.2-1B-Instruct"</code></td>
+<td>Reward/value model name</td>
+</tr>
+<tr>
+<td><code>reward_value_loading_type</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Loading type (<code>unsloth</code>, <code>standard</code>)</td>
+</tr>
+<tr>
+<td><code>reward_model_quantization</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Reward model quantization</td>
+</tr>
+<tr>
+<td><code>value_model_quantization</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Value model quantization</td>
+</tr>
+<tr>
+<td><code>use_peft</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable PEFT/LoRA</td>
+</tr>
+<tr>
+<td><code>lora_r</code></td>
+<td>int</td>
+<td><code>16</code></td>
+<td>LoRA rank</td>
+</tr>
+<tr>
+<td><code>lora_alpha</code></td>
+<td>int</td>
+<td><code>32</code></td>
+<td>LoRA alpha</td>
+</tr>
+<tr>
+<td><code>lora_dropout</code></td>
+<td>float</td>
+<td><code>0.05</code></td>
+<td>LoRA dropout</td>
+</tr>
+<tr>
+<td><code>lora_target_modules</code></td>
+<td>List[str]</td>
+<td><code>["q_proj", "k_proj", "v_proj", "o_proj"]</code></td>
+<td>LoRA target modules</td>
+</tr>
+<tr>
+<td><code>trust_remote_code</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Trust remote code</td>
+</tr>
+<tr>
+<td><code>model_init_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Model initialization arguments</td>
+</tr>
+<tr>
+<td><code>ref_model_init_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Reference model init arguments</td>
+</tr>
+<tr>
+<td><code>model_adapter_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Model adapter name</td>
+</tr>
+<tr>
+<td><code>ref_adapter_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Reference adapter name</td>
+</tr>
+<tr>
+<td><code>force_use_ref_model</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Force use of reference model</td>
+</tr>
+<tr>
+<td><code>disable_dropout</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Disable dropout</td>
+</tr>
+<tr>
+<td><code>use_logits_to_keep</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use logits_to_keep optimization</td>
+</tr>
+<tr>
+<td><code>reward_device</code></td>
+<td>str</td>
+<td><code>"auto"</code></td>
+<td>Reward model device (<code>auto</code>, <code>cpu</code>, <code>cuda</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dataset-configuration-datasetconfig_1">Dataset Configuration (<code>DatasetConfig</code>)<a class="headerlink" href="#dataset-configuration-datasetconfig_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>Dataset name or path</td>
+</tr>
+<tr>
+<td><code>split</code></td>
+<td>str</td>
+<td><code>"train"</code></td>
+<td>Dataset split</td>
+</tr>
+<tr>
+<td><code>percent</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Percentage of data (0-100)</td>
+</tr>
+<tr>
+<td><code>max_samples</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Maximum samples</td>
+</tr>
+<tr>
+<td><code>field_mappings</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Field name mappings</td>
+</tr>
+<tr>
+<td><code>format_type</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Dataset format type</td>
+</tr>
+<tr>
+<td><code>auto_detect_fields</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Auto-detect fields</td>
+</tr>
+<tr>
+<td><code>column_mapping</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Column mappings (legacy)</td>
+</tr>
+<tr>
+<td><code>task_type</code></td>
+<td>str</td>
+<td><code>"conversation"</code></td>
+<td>Task type</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Dataset weight</td>
+</tr>
+<tr>
+<td><code>chat_template</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Chat template</td>
+</tr>
+<tr>
+<td><code>system_prompt</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>System prompt</td>
+</tr>
+<tr>
+<td><code>dataset_num_proc</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Processing processes</td>
+</tr>
+<tr>
+<td><code>pad_token</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Padding token</td>
+</tr>
+<tr>
+<td><code>label_pad_token_id</code></td>
+<td>int</td>
+<td><code>-100</code></td>
+<td>Label padding token ID</td>
+</tr>
+<tr>
+<td><code>truncation_mode</code></td>
+<td>str</td>
+<td><code>"keep_end"</code></td>
+<td>Truncation mode</td>
+</tr>
+<tr>
+<td><code>padding_free</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Padding-free training</td>
+</tr>
+<tr>
+<td><code>precompute_ref_log_probs</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Precompute reference log probs</td>
+</tr>
+<tr>
+<td><code>precompute_ref_batch_size</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Batch size for precomputation</td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>Any</td>
+<td><code>None</code></td>
+<td>Tools configuration</td>
+</tr>
+<tr>
+<td><code>preserve_columns</code></td>
+<td>List[str]</td>
+<td><code>None</code></td>
+<td>Columns to preserve</td>
+</tr>
+<tr>
+<td><code>processing_fn</code></td>
+<td>Callable</td>
+<td><code>None</code></td>
+<td>Custom processing function</td>
+</tr>
+<tr>
+<td><code>processing_batched</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Batched processing</td>
+</tr>
+<tr>
+<td><code>processing_fn_kwargs</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Processing function arguments</td>
+</tr>
+<tr>
+<td><code>config_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Dataset config name</td>
+</tr>
+</tbody>
+</table>
+<h3 id="training-configuration-trainingconfig_1">Training Configuration (<code>TrainingConfig</code>)<a class="headerlink" href="#training-configuration-trainingconfig_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>per_device_batch_size</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Batch size per device</td>
+</tr>
+<tr>
+<td><code>per_device_eval_batch_size</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Eval batch size per device</td>
+</tr>
+<tr>
+<td><code>gradient_accumulation_steps</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Gradient accumulation steps</td>
+</tr>
+<tr>
+<td><code>max_steps</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Maximum training steps</td>
+</tr>
+<tr>
+<td><code>epochs</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Number of epochs</td>
+</tr>
+<tr>
+<td><code>eval_interval</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Evaluation interval</td>
+</tr>
+<tr>
+<td><code>save_interval</code></td>
+<td>int</td>
+<td><code>500</code></td>
+<td>Save interval</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>1e-5</code></td>
+<td>Learning rate</td>
+</tr>
+<tr>
+<td><code>max_grad_norm</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Max gradient norm</td>
+</tr>
+<tr>
+<td><code>weight_decay</code></td>
+<td>float</td>
+<td><code>0.01</code></td>
+<td>Weight decay</td>
+</tr>
+<tr>
+<td><code>optimizer</code></td>
+<td>str</td>
+<td><code>"adamw_torch"</code></td>
+<td>Optimizer type</td>
+</tr>
+<tr>
+<td><code>lr_scheduler</code></td>
+<td>str</td>
+<td><code>"cosine"</code></td>
+<td>LR scheduler type</td>
+</tr>
+<tr>
+<td><code>warmup_steps</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>Warmup steps</td>
+</tr>
+<tr>
+<td><code>warmup_ratio</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>Warmup ratio</td>
+</tr>
+<tr>
+<td><code>rollout_batch_size</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Rollout batch size</td>
+</tr>
+<tr>
+<td><code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>KL divergence coefficient</td>
+</tr>
+<tr>
+<td><code>cliprange</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>PPO clip range</td>
+</tr>
+<tr>
+<td><code>cliprange_value</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>Value function clip range</td>
+</tr>
+<tr>
+<td><code>num_ppo_epochs</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>PPO epochs per batch</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>0.6</code></td>
+<td>Sampling temperature</td>
+</tr>
+<tr>
+<td><code>whiten_rewards</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whiten rewards</td>
+</tr>
+<tr>
+<td><code>kl_estimator</code></td>
+<td>str</td>
+<td><code>"k1"</code></td>
+<td>KL estimator type</td>
+</tr>
+<tr>
+<td><code>vf_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Value function coefficient</td>
+</tr>
+<tr>
+<td><code>gamma</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Discount factor</td>
+</tr>
+<tr>
+<td><code>lam</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td>GAE lambda</td>
+</tr>
+<tr>
+<td><code>response_length</code></td>
+<td>int</td>
+<td><code>128</code></td>
+<td>Response length</td>
+</tr>
+<tr>
+<td><code>stop_token</code></td>
+<td>str</td>
+<td><code>"eos"</code></td>
+<td>Stop token</td>
+</tr>
+<tr>
+<td><code>missing_eos_penalty</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Missing EOS penalty</td>
+</tr>
+<tr>
+<td><code>ds3_gather_for_generation</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>DeepSpeed Stage 3 gather</td>
+</tr>
+<tr>
+<td><code>generation_kwargs</code></td>
+<td>Dict</td>
+<td><code>None</code></td>
+<td>Generation arguments</td>
+</tr>
+<tr>
+<td><code>max_length</code></td>
+<td>int</td>
+<td><code>1024</code></td>
+<td>Max sequence length</td>
+</tr>
+<tr>
+<td><code>max_prompt_length</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Max prompt length</td>
+</tr>
+<tr>
+<td><code>max_target_length</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Max target length</td>
+</tr>
+<tr>
+<td><code>max_completion_length</code></td>
+<td>int</td>
+<td><code>256</code></td>
+<td>Max completion length</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td>Nucleus sampling parameter</td>
+</tr>
+<tr>
+<td><code>padding_free</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Padding-free training</td>
+</tr>
+<tr>
+<td><code>truncation_mode</code></td>
+<td>str</td>
+<td><code>"keep_end"</code></td>
+<td>Truncation mode</td>
+</tr>
+<tr>
+<td><code>beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>DPO beta parameter</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Loss type</td>
+</tr>
+<tr>
+<td><code>loss_weights</code></td>
+<td>Dict</td>
+<td><code>None</code></td>
+<td>Loss weights</td>
+</tr>
+<tr>
+<td><code>f_divergence_type</code></td>
+<td>str</td>
+<td><code>"reverse_kl"</code></td>
+<td>F-divergence type</td>
+</tr>
+<tr>
+<td><code>f_alpha_divergence_coef</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Alpha divergence coefficient</td>
+</tr>
+<tr>
+<td><code>reference_free</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Reference-free training</td>
+</tr>
+<tr>
+<td><code>label_smoothing</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>Label smoothing</td>
+</tr>
+<tr>
+<td><code>use_weighting</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use importance weighting</td>
+</tr>
+<tr>
+<td><code>rpo_alpha</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>RPO alpha parameter</td>
+</tr>
+<tr>
+<td><code>ld_alpha</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>LD alpha parameter</td>
+</tr>
+<tr>
+<td><code>discopop_tau</code></td>
+<td>float</td>
+<td><code>0.05</code></td>
+<td>DiscoPOP tau parameter</td>
+</tr>
+<tr>
+<td><code>sync_ref_model</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Sync reference model</td>
+</tr>
+<tr>
+<td><code>ref_model_mixup_alpha</code></td>
+<td>float</td>
+<td><code>0.6</code></td>
+<td>Reference model mixup alpha</td>
+</tr>
+<tr>
+<td><code>ref_model_sync_steps</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Reference sync steps</td>
+</tr>
+<tr>
+<td><code>grpo_alpha</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GRPO alpha parameter</td>
+</tr>
+<tr>
+<td><code>grpo_beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GRPO beta parameter</td>
+</tr>
+<tr>
+<td><code>gspo_gamma</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GSPO gamma parameter</td>
+</tr>
+<tr>
+<td><code>gspo_delta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GSPO delta parameter</td>
+</tr>
+<tr>
+<td><code>eval_steps</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Evaluation steps</td>
+</tr>
+<tr>
+<td><code>eval_strategy</code></td>
+<td>str</td>
+<td><code>"no"</code></td>
+<td>Evaluation strategy</td>
+</tr>
+<tr>
+<td><code>save_steps</code></td>
+<td>int</td>
+<td><code>500</code></td>
+<td>Save steps</td>
+</tr>
+<tr>
+<td><code>save_strategy</code></td>
+<td>str</td>
+<td><code>"steps"</code></td>
+<td>Save strategy</td>
+</tr>
+<tr>
+<td><code>save_total_limit</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Max checkpoints to keep</td>
+</tr>
+<tr>
+<td><code>load_best_model_at_end</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Load best model at end</td>
+</tr>
+<tr>
+<td><code>metric_for_best_model</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Best model metric</td>
+</tr>
+<tr>
+<td><code>greater_is_better</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whether higher is better</td>
+</tr>
+<tr>
+<td><code>logging_steps</code></td>
+<td>int</td>
+<td><code>10</code></td>
+<td>Logging steps</td>
+</tr>
+<tr>
+<td><code>logging_strategy</code></td>
+<td>str</td>
+<td><code>"steps"</code></td>
+<td>Logging strategy</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Number of generations per prompt</td>
+</tr>
+<tr>
+<td><code>mask_truncated_completions</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Mask truncated completions</td>
+</tr>
+<tr>
+<td><code>scale_rewards</code></td>
+<td>str</td>
+<td><code>"group"</code></td>
+<td>Reward scaling (<code>group</code>, <code>batch</code>)</td>
+</tr>
+<tr>
+<td><code>reward_weights</code></td>
+<td>List[float]</td>
+<td><code>None</code></td>
+<td>Reward function weights</td>
+</tr>
+<tr>
+<td><code>enable_thinking</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable Qwen3 thinking mode</td>
+</tr>
+<tr>
+<td><code>fast_inference</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable Unsloth vLLM (faster)</td>
+</tr>
+<tr>
+<td><code>vllm_gpu_memory_utilization</code></td>
+<td>float</td>
+<td><code>0.7</code></td>
+<td>vLLM GPU memory (0.95 for max)</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Random seed</td>
+</tr>
+<tr>
+<td><code>data_seed</code></td>
+<td>int</td>
+<td><code>47</code></td>
+<td>Data seed</td>
+</tr>
+<tr>
+<td><code>use_liger_kernel</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use Liger kernel</td>
+</tr>
+<tr>
+<td><code>use_liger_loss</code></td>
+<td>bool</td>
+<td><code>None</code></td>
+<td>Use Liger loss</td>
+</tr>
+<tr>
+<td><code>gradient_checkpointing_kwargs</code></td>
+<td>Dict</td>
+<td><code>{"use_reentrant": False}</code></td>
+<td>Gradient checkpointing args</td>
+</tr>
+<tr>
+<td><code>group_by_length</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Group sequences by length</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sample-logging-configuration-sampleloggingconfig">Sample Logging Configuration (<code>SampleLoggingConfig</code>)<a class="headerlink" href="#sample-logging-configuration-sampleloggingconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enabled</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable sample logging</td>
+</tr>
+<tr>
+<td><code>prompts</code></td>
+<td>List[str]</td>
+<td><code>None</code></td>
+<td>Prompts for sample generation</td>
+</tr>
+<tr>
+<td><code>interval_steps</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Steps between samples</td>
+</tr>
+<tr>
+<td><code>percent_of_max_steps</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Percent of max steps (0-1)</td>
+</tr>
+<tr>
+<td><code>max_new_tokens</code></td>
+<td>int</td>
+<td><code>80</code></td>
+<td>Max tokens to generate</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>0.6</code></td>
+<td>Generation temperature</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>float</td>
+<td><code>0.9</code></td>
+<td>Nucleus sampling parameter</td>
+</tr>
+<tr>
+<td><code>num_samples</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Number of samples per prompt</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-configuration-loggingconfig_1">Logging Configuration (<code>LoggingConfig</code>)<a class="headerlink" href="#logging-configuration-loggingconfig_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>loggers</code></td>
+<td>List[str]</td>
+<td><code>["tensorboard"]</code></td>
+<td>Logger types</td>
+</tr>
+<tr>
+<td><code>run_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Run name</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td>str</td>
+<td><code>"./output"</code></td>
+<td>Output directory</td>
+</tr>
+<tr>
+<td><code>log_level</code></td>
+<td>str</td>
+<td><code>"INFO"</code></td>
+<td>Logging level</td>
+</tr>
+<tr>
+<td><code>sample_logging</code></td>
+<td>SampleLoggingConfig</td>
+<td>See above</td>
+<td>Sample logging config</td>
+</tr>
+<tr>
+<td><code>report_to</code></td>
+<td>str</td>
+<td><code>"none"</code></td>
+<td>Reporting destination</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reward-configuration-rewardconfig">Reward Configuration (<code>RewardConfig</code>)<a class="headerlink" href="#reward-configuration-rewardconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>Reward function type</td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Reward weight</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Reward function parameters</td>
+</tr>
+<tr>
+<td><code>shield</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable safety shield</td>
+</tr>
+<tr>
+<td><code>clip</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Clip reward values</td>
+</tr>
+<tr>
+<td><code>normalize</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Normalize rewards</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reward-model-training-configuration-rewardmodeltrainingconfig">Reward Model Training Configuration (<code>RewardModelTrainingConfig</code>)<a class="headerlink" href="#reward-model-training-configuration-rewardmodeltrainingconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base_model_name</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>Base model for reward training</td>
+</tr>
+<tr>
+<td><code>training_texts</code></td>
+<td>List[str]</td>
+<td><strong>Required</strong></td>
+<td>Training texts (min 10)</td>
+</tr>
+<tr>
+<td><code>reward_functions</code></td>
+<td>List[str]</td>
+<td><strong>Required</strong></td>
+<td>Reward functions to use</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>Output directory</td>
+</tr>
+<tr>
+<td><code>reference_texts</code></td>
+<td>List[str]</td>
+<td><code>None</code></td>
+<td>Reference texts (optional)</td>
+</tr>
+<tr>
+<td><code>reward_weights</code></td>
+<td>List[float]</td>
+<td><code>None</code></td>
+<td>Reward function weights</td>
+</tr>
+<tr>
+<td><code>num_epochs</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Training epochs</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>1e-5</code></td>
+<td>Learning rate</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>int</td>
+<td><code>8</code></td>
+<td>Batch size</td>
+</tr>
+<tr>
+<td><code>gradient_accumulation_steps</code></td>
+<td>int</td>
+<td><code>4</code></td>
+<td>Gradient accumulation</td>
+</tr>
+<tr>
+<td><code>max_length</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Max sequence length</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reward-model-source-configuration-rewardmodelsourceconfig">Reward Model Source Configuration (<code>RewardModelSourceConfig</code>)<a class="headerlink" href="#reward-model-source-configuration-rewardmodelsourceconfig" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_type</code></td>
+<td>str</td>
+<td><strong>Required</strong></td>
+<td>Source type (<code>pretrained_hf</code>, <code>pretrained_local</code>, <code>custom_trained</code>)</td>
+</tr>
+<tr>
+<td><code>model_name</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>HuggingFace model name (for <code>pretrained_hf</code>)</td>
+</tr>
+<tr>
+<td><code>model_path</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Local model path (for <code>pretrained_local</code>)</td>
+</tr>
+<tr>
+<td><code>training_config</code></td>
+<td>RewardModelTrainingConfig</td>
+<td><code>None</code></td>
+<td>Training config (for <code>custom_trained</code>)</td>
+</tr>
+<tr>
+<td><code>fine_tune_with_rewards</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Fine-tune pretrained with reward functions</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="algorithm-specific-rl-parameters">Algorithm-Specific RL Parameters<a class="headerlink" href="#algorithm-specific-rl-parameters" title="Permanent link">&para;</a></h2>
+<h3 id="ppo-proximal-policy-optimization">PPO (Proximal Policy Optimization)<a class="headerlink" href="#ppo-proximal-policy-optimization" title="Permanent link">&para;</a></h3>
+<p>PPO uses the common RL parameters plus:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>num_ppo_epochs</code></td>
+<td>int</td>
+<td><code>4</code></td>
+<td>Number of PPO epochs per batch</td>
+</tr>
+<tr>
+<td><code>cliprange</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>PPO policy clip range</td>
+</tr>
+<tr>
+<td><code>cliprange_value</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>PPO value function clip range</td>
+</tr>
+<tr>
+<td><code>vf_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Value function coefficient</td>
+</tr>
+<tr>
+<td><code>gamma</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Discount factor (GAE)</td>
+</tr>
+<tr>
+<td><code>lam</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td>GAE lambda parameter</td>
+</tr>
+<tr>
+<td><code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>KL penalty coefficient</td>
+</tr>
+<tr>
+<td><code>kl_estimator</code></td>
+<td>str</td>
+<td><code>"k1"</code></td>
+<td>KL estimator (<code>k1</code>, <code>k2</code>, <code>k3</code>)</td>
+</tr>
+<tr>
+<td><code>whiten_rewards</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whiten advantages/rewards</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note</strong>: For optimal performance, ensure policy_model, reward_model, and value_model are from the same model family.</p>
+<hr />
+<h3 id="dpo-direct-preference-optimization">DPO (Direct Preference Optimization)<a class="headerlink" href="#dpo-direct-preference-optimization" title="Permanent link">&para;</a></h3>
+<p>DPO uses the common RL parameters plus:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>DPO beta (inverse temperature)</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str</td>
+<td><code>"sigmoid"</code></td>
+<td>Loss type (<code>sigmoid</code>, <code>hinge</code>, <code>ipo</code>, <code>kto</code>)</td>
+</tr>
+<tr>
+<td><code>label_smoothing</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>Label smoothing factor</td>
+</tr>
+<tr>
+<td><code>reference_free</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Reference-free DPO</td>
+</tr>
+<tr>
+<td><code>precompute_ref_log_probs</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Precompute reference log probs</td>
+</tr>
+<tr>
+<td><code>sync_ref_model</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Sync reference model periodically</td>
+</tr>
+<tr>
+<td><code>ref_model_mixup_alpha</code></td>
+<td>float</td>
+<td><code>0.6</code></td>
+<td>Reference model mixup alpha</td>
+</tr>
+<tr>
+<td><code>ref_model_sync_steps</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Steps between reference syncs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DPO Evaluation Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dpo_eval_enabled</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable DPO evaluation</td>
+</tr>
+<tr>
+<td><code>dpo_eval_max_samples</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Max samples for eval</td>
+</tr>
+<tr>
+<td><code>dpo_zero_shot_max_samples</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>Zero-shot eval samples</td>
+</tr>
+<tr>
+<td><code>dpo_few_shot_max_samples</code></td>
+<td>int</td>
+<td><code>30</code></td>
+<td>Few-shot eval samples</td>
+</tr>
+<tr>
+<td><code>dpo_few_shot_examples_text</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Few-shot examples</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)<a class="headerlink" href="#grpo-group-relative-policy-optimization" title="Permanent link">&para;</a></h3>
+<p>GRPO uses the common RL parameters plus:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grpo_alpha</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GRPO alpha parameter</td>
+</tr>
+<tr>
+<td><code>grpo_beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GRPO beta parameter</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
+<td>int</td>
+<td><code>batch_size</code></td>
+<td>Generations per prompt</td>
+</tr>
+<tr>
+<td><code>scale_rewards</code></td>
+<td>str</td>
+<td><code>"group"</code></td>
+<td>Reward scaling (<code>group</code>, <code>batch</code>)</td>
+</tr>
+<tr>
+<td><code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>KL penalty coefficient</td>
+</tr>
+<tr>
+<td><code>cliprange</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>Policy clip range</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dapo-drgrpo">DAPO / DRGRPO<a class="headerlink" href="#dapo-drgrpo" title="Permanent link">&para;</a></h3>
+<p><strong>DAPO</strong> (Direct Advantage Policy Optimization) and <strong>DRGRPO</strong> (Distributional Robust GRPO) share identical parameters with GRPO:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grpo_alpha</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Alpha parameter</td>
+</tr>
+<tr>
+<td><code>grpo_beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Beta parameter</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
+<td>int</td>
+<td><code>batch_size</code></td>
+<td>Generations per prompt</td>
+</tr>
+<tr>
+<td><code>scale_rewards</code></td>
+<td>str</td>
+<td><code>"group"</code></td>
+<td>Reward scaling</td>
+</tr>
+<tr>
+<td><code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>KL penalty coefficient</td>
+</tr>
+<tr>
+<td><code>cliprange</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>Policy clip range</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="gspo-generalized-scoring-proximal-objective">GSPO (Generalized Scoring Proximal Objective)<a class="headerlink" href="#gspo-generalized-scoring-proximal-objective" title="Permanent link">&para;</a></h3>
+<p>GSPO uses scoring-based policy optimization:</p>
+<p><strong>Note</strong>: GSPO is only supported by TRL backend, not Unsloth.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gspo_gamma</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GSPO gamma parameter</td>
+</tr>
+<tr>
+<td><code>gspo_delta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>GSPO delta parameter</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
+<td>int</td>
+<td><code>batch_size</code></td>
+<td>Generations per prompt</td>
+</tr>
+<tr>
+<td><code>scale_rewards</code></td>
+<td>str</td>
+<td><code>"group"</code></td>
+<td>Reward scaling strategy</td>
+</tr>
+<tr>
+<td><code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>KL penalty coefficient</td>
+</tr>
+<tr>
+<td><code>cliprange</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td>Policy clip range</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="neural-mirror-grpo">Neural Mirror GRPO<a class="headerlink" href="#neural-mirror-grpo" title="Permanent link">&para;</a></h3>
+<p>Neural Mirror GRPO combines GRPO with neural mirror descent for improved optimization:</p>
+<p><strong>Base GRPO Parameters</strong> plus neural mirror-specific optimizations.</p>
+<p>Uses standard GRPO parameters with enhanced optimization through mirror descent. No additional unique parameters.</p>
+<hr />
+<h3 id="meta-es">Meta-ES<a class="headerlink" href="#meta-es" title="Permanent link">&para;</a></h3>
+<p>Meta-ES uses evolution strategies for meta-learning the reward function:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>meta_iterations</code></td>
+<td>int</td>
+<td><code>15</code></td>
+<td>Number of meta-iterations</td>
+</tr>
+<tr>
+<td><code>patience</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Early stopping patience</td>
+</tr>
+<tr>
+<td><code>min_delta</code></td>
+<td>float</td>
+<td><code>0.001</code></td>
+<td>Minimum improvement for early stopping</td>
+</tr>
+<tr>
+<td><code>init_scale</code></td>
+<td>float</td>
+<td><code>0.01</code></td>
+<td>Initial parameter scale</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td>int</td>
+<td><code>10</code></td>
+<td>Population size (must be even)</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Training steps per evaluation</td>
+</tr>
+<tr>
+<td><code>sigma</code></td>
+<td>float</td>
+<td><code>0.01</code></td>
+<td>ES noise standard deviation</td>
+</tr>
+<tr>
+<td><code>sigma_decay</code></td>
+<td>float</td>
+<td><code>0.99</code></td>
+<td>ES sigma decay per iteration</td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td>float</td>
+<td><code>0.01</code></td>
+<td>ES learning rate</td>
+</tr>
+<tr>
+<td><code>mirror_coefficient</code></td>
+<td>float</td>
+<td><code>0.0001</code></td>
+<td>Mirror descent coefficient</td>
+</tr>
+<tr>
+<td><code>debug_mode</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
+</tr>
+<tr>
+<td><code>eval_timeout</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Evaluation timeout (seconds)</td>
+</tr>
+<tr>
+<td><code>eval_max_tokens</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Max tokens for evaluation</td>
+</tr>
+<tr>
+<td><code>eval_k</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Top-k sampling for evaluation</td>
+</tr>
+<tr>
+<td><code>eval_temperature</code></td>
+<td>float</td>
+<td><code>0.8</code></td>
+<td>Temperature for evaluation</td>
+</tr>
+<tr>
+<td><code>num_workers</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Number of parallel workers</td>
+</tr>
+<tr>
+<td><code>no_wandb</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Disable Weights &amp; Biases logging</td>
+</tr>
+<tr>
+<td><code>wandb_project</code></td>
+<td>str</td>
+<td><code>"neural-mirror-es"</code></td>
+<td>W&amp;B project name</td>
+</tr>
+<tr>
+<td><code>resume</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Path to checkpoint for resuming</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Usage Notes:</strong>
+- Meta-ES optimizes the reward function itself through evolution
+- Population size <code>N</code> must be even for symmetric perturbations
+- <code>T</code> controls how long each candidate is trained before evaluation
+- <code>sigma</code> controls exploration; decay helps convergence
+- Suitable for scenarios where reward design is critical</p>
+<hr />
+<h2 id="backend-selection">Backend Selection<a class="headerlink" href="#backend-selection" title="Permanent link">&para;</a></h2>
+<p>AlignTune supports two backends with automatic fallback:</p>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Description</th>
+<th>Availability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TRL</strong></td>
+<td>HuggingFace Transformers RL library</td>
+<td>Standard, widely supported</td>
+</tr>
+<tr>
+<td><strong>Unsloth</strong></td>
+<td>Optimized training with memory efficiency</td>
+<td>Requires Unsloth installation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Backend Priority:</strong>
+- SFT: Unsloth → TRL
+- RL: Unsloth → TRL</p>
+<p><strong>Setting Backend:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Auto-select best available</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<span class="c1"># Explicit selection</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">)</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Note</strong>: When TRL is selected, Unsloth is disabled to prevent interference. GSPO algorithm is TRL-only.</p>
+<hr />
+<h2 id="task-types-sft">Task Types (SFT)<a class="headerlink" href="#task-types-sft" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Task Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INSTRUCTION_FOLLOWING</code></td>
+<td>Instruction-response pairs</td>
+</tr>
+<tr>
+<td><code>SUPERVISED_FINE_TUNING</code></td>
+<td>General supervised training</td>
+</tr>
+<tr>
+<td><code>TEXT_CLASSIFICATION</code></td>
+<td>Text classification tasks</td>
+</tr>
+<tr>
+<td><code>TOKEN_CLASSIFICATION</code></td>
+<td>Token-level classification (NER)</td>
+</tr>
+<tr>
+<td><code>TEXT_GENERATION</code></td>
+<td>General text generation</td>
+</tr>
+<tr>
+<td><code>CHAT_COMPLETION</code></td>
+<td>Multi-turn chat completion</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="convenience-functions">Convenience Functions<a class="headerlink" href="#convenience-functions" title="Permanent link">&para;</a></h2>
+<h3 id="sft-training">SFT Training<a class="headerlink" href="#sft-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="rl-training">RL Training<a class="headerlink" href="#rl-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;OpenAssistant/reward-model-deberta-v3-large-v2&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>All parameters with <strong>Required</strong> must be explicitly provided</li>
+<li>Parameters with defaults can be omitted to use default values</li>
+<li>Enum parameters accept both enum values and strings (e.g., <code>"bf16"</code> or <code>PrecisionType.BF16</code>)</li>
+<li>For classification tasks, <code>num_labels</code> must be set in ModelConfig</li>
+<li>Reward model configuration supports three modes: pretrained HF, pretrained local, or custom trained</li>
+<li>DPO evaluation is optional and controlled by <code>dpo_eval_enabled</code></li>
+<li>Sample logging is optional for monitoring generation quality during training</li>
+</ul>
+<hr />
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#">FinetuneHub Documentation</a></li>
+<li><a href="#">Backend Comparison Guide</a></li>
+<li><a href="#">Algorithm Selection Guide</a></li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = ".."</script>
+    
+    <script src="../js/base.js"></script>
+    <script src="../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support" name="description"/>
+<meta content="AlignTune Contributors" name="author"/>
+<link href="https://aligntune.github.io/" rel="canonical"/>
+<link href="img/favicon.ico" rel="shortcut icon"/>
+<title>Home - AlignTune</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="css/base.min.css" rel="stylesheet"/>
+<link href="css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<!-- Favicons -->
+<link href="assets/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="assets/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="assets/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="assets/site.webmanifest" rel="manifest"/>
+<link href="assets/favicon.ico" rel="shortcut icon"/>
+<!-- Android Chrome Icons -->
+<link href="assets/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="assets/android-chrome-512x512.png" rel="icon" sizes="512x512" type="image/png"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href=".">AlignTune</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="active">
+<a href=".">Home</a>
+</li>
+<li>
+<a href="getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="getting-started/quickstart/">Quick Start</a>
+</li>
+<li>
+<a href="getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+<li>
+<a href="getting-started/configuration/">Configuration</a>
+</li>
+<li>
+<a href="getting-started/backend-selection/">Backend Selection</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="user-guide/overview/">Overview</a>
+</li>
+<li>
+<a href="user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+<li>
+<a href="user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+<li>
+<a href="user-guide/reward-functions/">Reward Functions</a>
+</li>
+<li>
+<a href="user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+<li>
+<a href="user-guide/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="user-guide/model-management/">Model Management</a>
+</li>
+<li>
+<a href="user-guide/sample-logging/">Sample Logging</a>
+</li>
+<li>
+<a href="user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Algorithms</a>
+<ul class="dropdown-menu">
+<li>
+<a href="algorithms/overview/">Overview</a>
+</li>
+<li>
+<a href="algorithms/dpo/">DPO</a>
+</li>
+<li>
+<a href="algorithms/ppo/">PPO</a>
+</li>
+<li>
+<a href="algorithms/grpo/">GRPO</a>
+</li>
+<li>
+<a href="algorithms/gspo/">GSPO</a>
+</li>
+<li>
+<a href="algorithms/dapo/">DAPO</a>
+</li>
+<li>
+<a href="algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Backends</a>
+<ul class="dropdown-menu">
+<li>
+<a href="backends/overview/">Overview</a>
+</li>
+<li>
+<a href="backends/trl/">TRL Backend</a>
+</li>
+<li>
+<a href="backends/unsloth/">Unsloth Backend</a>
+</li>
+<li>
+<a href="backends/comparison/">Comparison</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="advanced/architecture/">Architecture</a>
+</li>
+<li>
+<a href="advanced/custom-backends.md">Custom Backends</a>
+</li>
+<li>
+<a href="advanced/distributed.md">Distributed Training</a>
+</li>
+<li>
+<a href="advanced/performance.md">Performance Optimization</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="api-reference/overview/">Overview</a>
+</li>
+<li>
+<a href="api-reference/core/">Core API</a>
+</li>
+<li>
+<a href="api-reference/backend-factory/">Backend Factory</a>
+</li>
+<li>
+<a href="api-reference/configuration/">Configuration Classes</a>
+</li>
+<li>
+<a href="api-reference/trainers/">Trainers</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="examples/overview/">Overview</a>
+</li>
+<li>
+<a href="examples/sft/">SFT Examples</a>
+</li>
+<li>
+<a href="examples/rl/">RL Examples</a>
+</li>
+<li>
+<a href="examples/advanced/">Advanced Examples</a>
+</li>
+<li>
+<a href="notebooks/">Notebooks</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="cli-reference/">CLI Reference</a>
+</li>
+<li>
+<a href="cli/commands/">CLI Commands</a>
+</li>
+<li>
+<a href="cli/configuration/">CLI Configuration Files</a>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Compatibility</a>
+<ul class="dropdown-menu">
+<li>
+<a href="unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+<li>
+<a href="compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="contributing/guide/">Contributing Guide</a>
+</li>
+<li>
+<a href="contributing/code-style/">Code Style</a>
+</li>
+<li>
+<a href="contributing/testing/">Testing</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+ </a>
+</li>
+<li>
+<a href="https://github.com/Lexsi-Labs/aligntune">Lexsi-Labs/aligntune</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#core-features">Core Features</a></li>
+<li class="first-level"><a href="#quick-start">Quick Start</a></li>
+<li class="first-level"><a href="#supported-algorithms">Supported Algorithms</a></li>
+<li class="first-level"><a href="#key-capabilities">Key Capabilities</a></li>
+<li class="first-level"><a href="#demo-notebooks">Demo Notebooks</a></li>
+<li class="second-level"><a href="#supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)</a></li>
+<li class="second-level"><a href="#reinforcement-learning-rl">Reinforcement Learning (RL)</a></li>
+<li class="first-level"><a href="#explore-the-documentation">Explore the Documentation</a></li>
+<li class="first-level"><a href="#architecture">Architecture</a></li>
+<li class="first-level"><a href="#why-aligntune">Why AlignTune?</a></li>
+<li class="first-level"><a href="#contributing">Contributing</a></li>
+<li class="first-level"><a href="#license">License</a></li>
+<li class="first-level"><a href="#citation">Citation</a></li>
+<li class="first-level"><a href="#acknowledgments">Acknowledgments</a></li>
+<li class="first-level"><a href="#support">Support</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<p align="center">
+<img alt="AlignTune Banner" src="assets/aligntune-banner.png" width="1000px"/>
+</p>
+<div style="text-align: center;">
+<a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg"/></a>
+<a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg"/></a>
+<a href="https://badge.fury.io/py/aligntune"><img src="https://badge.fury.io/py/aligntune.svg"/></a>
+</div>
+<hr/>
+<p><strong>AlignTune</strong> is a production-ready fine-tuning library designed to simplify training and fine-tuning of Large Language Models (LLMs) with both Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL) methods. 
+It provides a high-level, unified API that abstracts away the complexities of backend selection, algorithm configuration, and training loops, letting you focus on delivering results.
+Whether you are a practitioner aiming for production-grade pipelines or a researcher exploring advanced RLHF algorithms, AlignTune streamlines your workflow for LLM fine-tuning.</p>
+<hr/>
+<h2 id="core-features">Core Features<a class="headerlink" href="#core-features" title="Permanent link">¶</a></h2>
+<p><strong>Multi-Backend Architecture</strong>: Choose between TRL (reliable, battle-tested) and Unsloth (faster) backends with intelligent auto-selection.</p>
+<p><strong>Complete RLHF Coverage</strong>: RL algorithms including DPO, PPO, GRPO, GSPO, DAPO, and Dr. GRPO.</p>
+<p><strong>27+ Reward Functions</strong>: Built-in reward functions for quality, safety, style, and task-specific metrics.</p>
+<p><strong>Production-Ready</strong>: No mock code, comprehensive error handling, extensive testing, and robust validation.</p>
+<hr/>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Create and train SFT model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">"microsoft/DialoGPT-small"</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"tatsu-lab/alpaca"</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span>
+<span class="p">)</span>
+
+<span class="c1"># Train the model</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<p><a href="getting-started/installation/">Get Started →</a></p>
+<hr/>
+<h2 id="supported-algorithms">Supported Algorithms<a class="headerlink" href="#supported-algorithms" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>TRL Backend</th>
+<th>Unsloth Backend</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SFT</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Supervised Fine-Tuning</td>
+</tr>
+<tr>
+<td><strong>DPO</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Direct Preference Optimization</td>
+</tr>
+<tr>
+<td><strong>PPO</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Proximal Policy Optimization</td>
+</tr>
+<tr>
+<td><strong>GRPO</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Group Relative Policy Optimization</td>
+</tr>
+<tr>
+<td><strong>GSPO</strong></td>
+<td>Yes</td>
+<td>No</td>
+<td>Group Sequential Policy Optimization (TRL only)</td>
+</tr>
+<tr>
+<td><strong>DAPO</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Decouple Clip and Dynamic sAmpling Policy Optimization</td>
+</tr>
+<tr>
+<td><strong>Dr. GRPO</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>GRPO Done Right (unbiased variant)</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="key-capabilities">Key Capabilities<a class="headerlink" href="#key-capabilities" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Multiple Training Paradigms</strong>: Supports SFT, DPO, PPO, GRPO, and advanced RL algorithms</li>
+<li><strong>Backend Flexibility</strong>: TRL and Unsloth backends with automatic fallback</li>
+<li><strong>Reward Model Training</strong>: Train custom reward models from rule-based functions</li>
+<li><strong>Comprehensive Evaluation</strong>: Multi-level evaluation with lm-eval integration</li>
+<li><strong>Production Ready</strong>: Model serialization, reproducible training, and deployment-ready pipelines</li>
+<li><strong>Extensible Architecture</strong>: Modular design for easy integration of custom algorithms and backends</li>
+</ul>
+<hr/>
+<h2 id="demo-notebooks">Demo Notebooks<a class="headerlink" href="#demo-notebooks" title="Permanent link">¶</a></h2>
+<p>Interactive Colab notebooks demonstrating various AlignTune workflows:</p>
+<h3 id="supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)<a class="headerlink" href="#supervised-fine-tuning-sft" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Model</th>
+<th>Dataset</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRL</td>
+<td>Gemma-7b</td>
+<td>philschmid/dolly-15k-oai-style (messages format)</td>
+<td><a href="https://colab.research.google.com/drive/1XYwChep74fhHi_g_gk4DNIFddStGUrF_?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>TRL</td>
+<td>GemmaTX</td>
+<td>TrialBench adverse event prediction</td>
+<td><a href="https://colab.research.google.com/drive/1GB2mpwfr3AO5N6LZkO8Fz9TXWjD5wuw1?usp=sharing">Open in Drive</a></td>
+</tr>
+<tr>
+<td>Unsloth</td>
+<td>Qwen-2.5-0.5-I</td>
+<td>gaming</td>
+<td><a href="https://colab.research.google.com/drive/1BsJa4I41pLJ6-1HCy6BFInxdFOwddEv7?usp=sharing">Open in Colab</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="reinforcement-learning-rl">Reinforcement Learning (RL)<a class="headerlink" href="#reinforcement-learning-rl" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Algorithm</th>
+<th>Dataset</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRL</td>
+<td>DPO</td>
+<td>hh-rlhf</td>
+<td><a href="https://colab.research.google.com/drive/1vLNVdGOkZhIBhKSqkL38IQQJ1TSwwK5g?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>TRL</td>
+<td>GRPO</td>
+<td>GSM8K</td>
+<td><a href="https://colab.research.google.com/drive/1kQnYc0AQW3DSsjcCYrqaGJiVwLr8B48O?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>TRL</td>
+<td>PPO</td>
+<td>openai_summarize_tldr</td>
+<td><a href="https://colab.research.google.com/drive/15WwkPYrz8YnR6wyQIqMb4kS7J-SrVArW?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>Unsloth</td>
+<td>DPO</td>
+<td>distilabel-intel-orca-dpo-pairs</td>
+<td><a href="https://colab.research.google.com/drive/1ukUkn98IlIfym_e3NbEY0vzhha3izmRW?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>Unsloth</td>
+<td>GRPO</td>
+<td>GSM8K</td>
+<td><a href="https://colab.research.google.com/drive/1x_PxjoIaFcZvjnlWKAA0nETGEMONlUoL?usp=sharing">Open in Colab</a></td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="explore-the-documentation">Explore the Documentation<a class="headerlink" href="#explore-the-documentation" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong><a href="getting-started/installation/">Getting Started</a></strong>: Installation, setup, and basic usage</li>
+<li><strong><a href="user-guide/overview/">User Guide</a></strong>: In-depth tutorials for SFT and RL training</li>
+<li><strong><a href="api-reference/overview/">API Reference</a></strong>: Complete Python API and class/method details</li>
+<li><strong><a href="examples/overview/">Examples</a></strong>: End-to-end code examples</li>
+<li><strong><a href="advanced/architecture/">Advanced Topics</a></strong>: Architecture, custom backends, and performance optimization</li>
+<li><strong><a href="notebooks/">Notebooks</a></strong>: Interactive Colab notebooks and local Jupyter notebooks</li>
+</ul>
+<hr/>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">¶</a></h2>
+<p>AlignTune uses a flexible backend architecture:</p>
+<div class="mermaid">flowchart TD
+ Factory[Backend Factory] --&gt; TRL[TRL Backend]
+ Factory --&gt; Unsloth[Unsloth Backend]
+ TRL --&gt; TRL_Algos[TRL Algorithms]
+ Unsloth --&gt; Unsloth_Algos[Unsloth Algorithms]
+</div>
+<p><strong>TRL Backend:</strong> SFT, DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO</p>
+<p><strong>Unsloth Backend:</strong> SFT, DPO, PPO, GRPO, DAPO, Dr. GRPO</p>
+<p>See <a href="advanced/architecture/">Architecture</a> for details.</p>
+<hr/>
+<h2 id="why-aligntune">Why AlignTune?<a class="headerlink" href="#why-aligntune" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>No Boilerplate</strong>: Avoids repetitive code for model-specific data loading, training, and inference</li>
+<li><strong>Consistent Results</strong>: Automates best practices for RLHF research and model selection</li>
+<li><strong>Fast Iteration</strong>: Easily compare different algorithms and backends with the same consistent API</li>
+<li><strong>Production Ready</strong>: Model and config serialization for robust deployment and reproducibility</li>
+<li><strong>Community-Driven</strong>: Extensible design and open contribution policy</li>
+</ul>
+<hr/>
+<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">¶</a></h2>
+<p>We welcome contributions! See <a href="contributing/guide/">Contributing Guide</a> for details.</p>
+<hr/>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">¶</a></h2>
+<p>This project is licensed under the AlignTune Source Available License (ASAL) v1.0 - see the <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE">LICENSE</a> file for details.</p>
+<hr/>
+<h2 id="citation">Citation<a class="headerlink" href="#citation" title="Permanent link">¶</a></h2>
+<p>If you use AlignTune in your research, please cite:</p>
+<p><strong>BibTeX:</strong>
+<div class="highlight"><pre><span></span><code><span class="nc">@software</span><span class="p">{</span><span class="nl">alignTune2025</span><span class="p">,</span>
+<span class="w"> </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{AlignTune: A Comprehensive Fine-Tuning Library for SFT and RL Training}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Chawla, Chirag and Lyngkhoi, Zera and Seth, Pratinav and Avaiya, Utsav and Bhattacharjee, Soham and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">note</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Equal contribution: Chirag Chawla, Zera Lyngkhoi, Pratinav Seth}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">organization</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Lexsi Labs}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/Lexsi-Labs/aligntune}</span><span class="p">,</span>
+<span class="w"> </span><span class="na">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{0.0.0}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Plain Text:</strong>
+<div class="highlight"><pre><span></span><code>Chawla, C., Lyngkhoi, Z., Seth, P., Avaiya, U., Bhattacharjee, S., Khandoga, M.,
+Yuan, R., &amp; Sankarapu, V. K. (2025). AlignTune: A Comprehensive Fine-Tuning Library
+for SFT and RL Training. Lexsi Labs. https://github.com/Lexsi-Labs/aligntune
+
+*Equal contribution: Chirag Chawla, Zera Lyngkhoi, Pratinav Seth
+</code></pre></div></p>
+<hr/>
+<h2 id="acknowledgments">Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permanent link">¶</a></h2>
+<p>AlignTune is built upon the excellent work of the following projects:</p>
+<ul>
+<li><strong><a href="https://github.com/huggingface/transformers">HuggingFace Transformers</a></strong> - Model architectures and tokenizers</li>
+<li><strong><a href="https://github.com/huggingface/trl">TRL</a></strong> - Transformer Reinforcement Learning library</li>
+<li><strong><a href="https://github.com/unslothai/unsloth">Unsloth</a></strong> - Fast and memory-efficient training</li>
+<li><strong><a href="https://github.com/huggingface/datasets">HuggingFace Datasets</a></strong> - Dataset loading and processing</li>
+</ul>
+<hr/>
+<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Documentation</strong>: <a href="https://docs.aligntune.io">docs.aligntune.io</a></li>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/Lexsi-Labs/aligntune/issues">github.com/Lexsi-Labs/aligntune/issues</a></li>
+<li><strong>Discussions</strong>: <a href="https://github.com/Lexsi-Labs/aligntune/discussions">github.com/Lexsi-Labs/aligntune/discussions</a></li>
+</ul>
+<hr/>
+<p><strong>Get started with AlignTune and accelerate your LLM fine-tuning workflows today!</strong></p></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "."</script>
+<script src="js/base.js"></script>
+<script src="search/main.js"></script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: true
+});</script></body>
+</html>

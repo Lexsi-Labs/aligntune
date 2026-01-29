@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/user-guide/model-management/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Model Management - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../evaluation/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../sample-logging/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#model-management">Model Management</a></li>
+            <li class="second-level"><a href="#saving-models">Saving Models</a></li>
+                
+                <li class="third-level"><a href="#basic-save">Basic Save</a></li>
+                <li class="third-level"><a href="#custom-save-path">Custom Save Path</a></li>
+                <li class="third-level"><a href="#what-gets-saved">What Gets Saved</a></li>
+            <li class="second-level"><a href="#loading-models">Loading Models</a></li>
+                
+                <li class="third-level"><a href="#load-saved-model">Load Saved Model</a></li>
+                <li class="third-level"><a href="#load-with-aligntune">Load with AlignTune</a></li>
+            <li class="second-level"><a href="#pushing-to-huggingface-hub">Pushing to HuggingFace Hub</a></li>
+                
+                <li class="third-level"><a href="#basic-push">Basic Push</a></li>
+                <li class="third-level"><a href="#private-repository">Private Repository</a></li>
+                <li class="third-level"><a href="#custom-commit-message">Custom Commit Message</a></li>
+            <li class="second-level"><a href="#generating-predictions">Generating Predictions</a></li>
+                
+                <li class="third-level"><a href="#single-prediction">Single Prediction</a></li>
+                <li class="third-level"><a href="#batch-predictions">Batch Predictions</a></li>
+                <li class="third-level"><a href="#custom-generation-parameters">Custom Generation Parameters</a></li>
+            <li class="second-level"><a href="#model-evaluation">Model Evaluation</a></li>
+                
+                <li class="third-level"><a href="#basic-evaluation">Basic Evaluation</a></li>
+                <li class="third-level"><a href="#custom-evaluation-dataset">Custom Evaluation Dataset</a></li>
+                <li class="third-level"><a href="#custom-metric-prefix">Custom Metric Prefix</a></li>
+            <li class="second-level"><a href="#checkpointing">Checkpointing</a></li>
+                
+                <li class="third-level"><a href="#save-checkpoints">Save Checkpoints</a></li>
+                <li class="third-level"><a href="#load-checkpoint">Load Checkpoint</a></li>
+            <li class="second-level"><a href="#model-information">Model Information</a></li>
+                
+                <li class="third-level"><a href="#get-model-path">Get Model Path</a></li>
+                <li class="third-level"><a href="#check-model-status">Check Model Status</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+                <li class="third-level"><a href="#1-save-regularly">1. Save Regularly</a></li>
+                <li class="third-level"><a href="#2-version-your-models">2. Version Your Models</a></li>
+                <li class="third-level"><a href="#3-push-important-models">3. Push Important Models</a></li>
+                <li class="third-level"><a href="#4-document-your-models">4. Document Your Models</a></li>
+            <li class="second-level"><a href="#troubleshooting">Troubleshooting</a></li>
+                
+                <li class="third-level"><a href="#model-not-found">Model Not Found</a></li>
+                <li class="third-level"><a href="#push-to-hub-fails">Push to Hub Fails</a></li>
+                <li class="third-level"><a href="#memory-issues">Memory Issues</a></li>
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="model-management">Model Management<a class="headerlink" href="#model-management" title="Permanent link">&para;</a></h1>
+<p>Learn how to save, load, and share your trained models with AlignTune.</p>
+<h2 id="saving-models">Saving Models<a class="headerlink" href="#saving-models" title="Permanent link">&para;</a></h2>
+<h3 id="basic-save">Basic Save<a class="headerlink" href="#basic-save" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Save model</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model saved to: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-save-path">Custom Save Path<a class="headerlink" href="#custom-save-path" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save to custom directory</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./my_models/experiment_1&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="what-gets-saved">What Gets Saved<a class="headerlink" href="#what-gets-saved" title="Permanent link">&para;</a></h3>
+<p>When you call <code>save_model()</code>, AlignTune saves:</p>
+<ul>
+<li>Model weights (<code>pytorch_model.bin</code> or <code>model.safetensors</code>)</li>
+<li>Tokenizer files (<code>tokenizer.json</code>, <code>tokenizer_config.json</code>, etc.)</li>
+<li>Model configuration (<code>config.json</code>)</li>
+<li>Training configuration (<code>training_config.yaml</code>)</li>
+<li>Task metadata (if applicable)</li>
+</ul>
+<h2 id="loading-models">Loading Models<a class="headerlink" href="#loading-models" title="Permanent link">&para;</a></h2>
+<h3 id="load-saved-model">Load Saved Model<a class="headerlink" href="#load-saved-model" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+
+<span class="c1"># Load model and tokenizer</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;./output/my_model&quot;</span><span class="p">)</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;./output/my_model&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="load-with-aligntune">Load with AlignTune<a class="headerlink" href="#load-with-aligntune" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Create trainer and load model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;./output/my_model&quot;</span><span class="p">,</span> <span class="c1"># Path to saved model</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Model is automatically loaded</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s2">&quot;Hello!&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="pushing-to-huggingface-hub">Pushing to HuggingFace Hub<a class="headerlink" href="#pushing-to-huggingface-hub" title="Permanent link">&para;</a></h2>
+<h3 id="basic-push">Basic Push<a class="headerlink" href="#basic-push" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+
+<span class="c1"># Push to Hub</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+ <span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;username/my-model&quot;</span><span class="p">,</span>
+ <span class="n">private</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model available at: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="private-repository">Private Repository<a class="headerlink" href="#private-repository" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">url</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+ <span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;username/my-private-model&quot;</span><span class="p">,</span>
+ <span class="n">private</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">token</span><span class="o">=</span><span class="s2">&quot;hf_...&quot;</span> <span class="c1"># Your HuggingFace token</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-commit-message">Custom Commit Message<a class="headerlink" href="#custom-commit-message" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">url</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+ <span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;username/my-model&quot;</span><span class="p">,</span>
+ <span class="n">commit_message</span><span class="o">=</span><span class="s2">&quot;Trained on Alpaca dataset with 3 epochs&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="generating-predictions">Generating Predictions<a class="headerlink" href="#generating-predictions" title="Permanent link">&para;</a></h2>
+<h3 id="single-prediction">Single Prediction<a class="headerlink" href="#single-prediction" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate from single input</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s2">&quot;What is machine learning?&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="batch-predictions">Batch Predictions<a class="headerlink" href="#batch-predictions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate from multiple inputs</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span>
+ <span class="s2">&quot;What is AI?&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;Explain deep learning&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;What is NLP?&quot;</span>
+<span class="p">])</span>
+<span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+ <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-generation-parameters">Custom Generation Parameters<a class="headerlink" href="#custom-generation-parameters" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+ <span class="s2">&quot;What is machine learning?&quot;</span><span class="p">,</span>
+ <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+ <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+ <span class="n">top_p</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+ <span class="n">do_sample</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="model-evaluation">Model Evaluation<a class="headerlink" href="#model-evaluation" title="Permanent link">&para;</a></h2>
+<h3 id="basic-evaluation">Basic Evaluation<a class="headerlink" href="#basic-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Evaluate on default validation set</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-evaluation-dataset">Custom Evaluation Dataset<a class="headerlink" href="#custom-evaluation-dataset" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="c1"># Load custom evaluation dataset</span>
+<span class="n">eval_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-metric-prefix">Custom Metric Prefix<a class="headerlink" href="#custom-metric-prefix" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+ <span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">,</span>
+ <span class="n">metric_key_prefix</span><span class="o">=</span><span class="s2">&quot;test&quot;</span>
+<span class="p">)</span>
+<span class="c1"># Metrics will have &quot;test/&quot; prefix</span>
+</code></pre></div>
+<h2 id="checkpointing">Checkpointing<a class="headerlink" href="#checkpointing" title="Permanent link">&para;</a></h2>
+<h3 id="save-checkpoints">Save Checkpoints<a class="headerlink" href="#save-checkpoints" title="Permanent link">&para;</a></h3>
+<p>Checkpoints are automatically saved during training:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="o">...</span><span class="p">,</span>
+ <span class="n">save_interval</span><span class="o">=</span><span class="mi">500</span> <span class="c1"># Save every 500 steps</span>
+<span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="load-checkpoint">Load Checkpoint<a class="headerlink" href="#load-checkpoint" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Resume from checkpoint</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="s2">&quot;./output/checkpoint-1000&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="model-information">Model Information<a class="headerlink" href="#model-information" title="Permanent link">&para;</a></h2>
+<h3 id="get-model-path">Get Model Path<a class="headerlink" href="#get-model-path" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># After saving</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model path: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="check-model-status">Check Model Status<a class="headerlink" href="#check-model-status" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if model is loaded</span>
+<span class="k">if</span> <span class="n">trainer</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+ <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model is loaded&quot;</span><span class="p">)</span>
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Device: </span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">trainer</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-save-regularly">1. Save Regularly<a class="headerlink" href="#1-save-regularly" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save after training</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+
+<span class="c1"># Also save checkpoints during training</span>
+<span class="c1"># (automatic with save_interval)</span>
+</code></pre></div>
+<h3 id="2-version-your-models">2. Version Your Models<a class="headerlink" href="#2-version-your-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+
+<span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">output_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;./models/experiment_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="3-push-important-models">3. Push Important Models<a class="headerlink" href="#3-push-important-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Push production models to Hub</span>
+<span class="k">if</span> <span class="n">is_production_model</span><span class="p">:</span>
+ <span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+ <span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;username/production-model&quot;</span><span class="p">,</span>
+ <span class="n">private</span><span class="o">=</span><span class="kc">False</span>
+ <span class="p">)</span>
+</code></pre></div>
+<h3 id="4-document-your-models">4. Document Your Models<a class="headerlink" href="#4-document-your-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save with metadata</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+<span class="c1"># Edit training_config.yaml to add notes</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="model-not-found">Model Not Found<a class="headerlink" href="#model-not-found" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if model exists</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./output/my_model&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">model_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+ <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model not found!&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="push-to-hub-fails">Push to Hub Fails<a class="headerlink" href="#push-to-hub-fails" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Ensure you&#39;re logged in</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">login</span>
+
+<span class="n">login</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="s2">&quot;hf_...&quot;</span><span class="p">)</span>
+
+<span class="c1"># Then push</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span><span class="s2">&quot;username/my-model&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="memory-issues">Memory Issues<a class="headerlink" href="#memory-issues" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use smaller batch size for prediction</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+ <span class="s2">&quot;Your input&quot;</span><span class="p">,</span>
+ <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">50</span> <span class="c1"># Reduce if needed</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../evaluation/">Evaluation Guide</a> - Learn about evaluation metrics</li>
+<li><a href="../sft/">SFT Guide</a> - SFT-specific model management</li>
+<li><a href="../rl/">RL Guide</a> - RL-specific model management</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

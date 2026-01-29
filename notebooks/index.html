@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/notebooks/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+
+    
+<title>Notebooks - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../css/base.min.css" rel="stylesheet">
+    <link href="../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+<link rel="manifest" href="../assets/site.webmanifest">
+<link rel="shortcut icon" href="../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../examples/advanced/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../cli-reference/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#aligntune-notebooks">AlignTune Notebooks</a></li>
+            <li class="second-level"><a href="#running-the-notebooks">Running the Notebooks</a></li>
+                
+                <li class="third-level"><a href="#local-setup">Local Setup</a></li>
+                <li class="third-level"><a href="#requirements">Requirements</a></li>
+            <li class="second-level"><a href="#demo-notebooks">Demo Notebooks</a></li>
+                
+                <li class="third-level"><a href="#supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)</a></li>
+                <li class="third-level"><a href="#reinforcement-learning-rl">Reinforcement Learning (RL)</a></li>
+            <li class="second-level"><a href="#contributing">Contributing</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="aligntune-notebooks">AlignTune Notebooks<a class="headerlink" href="#aligntune-notebooks" title="Permanent link">&para;</a></h1>
+<p>Two notebooks demonstrate the core AlignTune workflows.</p>
+<div class="grid cards" markdown>
+
+- __01 - Basic SFT Training__
+
+ ---
+
+ End-to-end Supervised Fine-Tuning on a small dataset for a fast demo.
+
+ :octicons-arrow-right-24: [Open notebook](./01_basic_sft_training.ipynb)
+
+- __02 - DPO Preference Training__
+
+ ---
+
+ Direct Preference Optimization training using a preference dataset.
+
+ :octicons-arrow-right-24: [Open notebook](./02_dpo_preference_training.ipynb)
+
+</div>
+
+<h2 id="running-the-notebooks">Running the Notebooks<a class="headerlink" href="#running-the-notebooks" title="Permanent link">&para;</a></h2>
+<h3 id="local-setup">Local Setup<a class="headerlink" href="#local-setup" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Clone the repository:</strong>
+ <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Lexsi-Labs/aligntune.git
+<span class="nb">cd</span><span class="w"> </span>AlignTune
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Install dependencies:</strong>
+ <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+pip<span class="w"> </span>install<span class="w"> </span>jupyter<span class="w"> </span>notebook
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Launch Jupyter:</strong>
+ <div class="highlight"><pre><span></span><code>jupyter<span class="w"> </span>notebook<span class="w"> </span>docs/notebooks/
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Python 3.8+</li>
+<li>PyTorch 2.0+</li>
+<li>CUDA-compatible GPU (recommended for faster training)</li>
+</ul>
+<h2 id="demo-notebooks">Demo Notebooks<a class="headerlink" href="#demo-notebooks" title="Permanent link">&para;</a></h2>
+<p>Interactive Colab notebooks demonstrating various AlignTune workflows:</p>
+<h3 id="supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)<a class="headerlink" href="#supervised-fine-tuning-sft" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Model</th>
+<th>Dataset</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRL</td>
+<td>Gemma-7b</td>
+<td>philschmid/dolly-15k-oai-style (messages format)</td>
+<td><a href="https://colab.research.google.com/drive/1iKnvNS1vanAv_-ZmMbCrN1dbaS01clmE?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>TRL</td>
+<td>GemmaTX</td>
+<td>TrialBench adverse event prediction</td>
+<td><a href="https://drive.google.com/file/d/1rA80FTpiQHuQJHBs5KyN2UYgU-ie4-lO/view?usp=sharing">Open in Drive</a></td>
+</tr>
+<tr>
+<td>Unsloth</td>
+<td>Qwen-2.5-0.5-I</td>
+<td>gaming</td>
+<td><a href="https://colab.research.google.com/drive/11DrRbG30MUCegZTDXwR9nxEdvKaLfWCb?usp=sharing">Open in Colab</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="reinforcement-learning-rl">Reinforcement Learning (RL)<a class="headerlink" href="#reinforcement-learning-rl" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Algorithm</th>
+<th>Dataset</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRL</td>
+<td>DPO</td>
+<td>-</td>
+<td><a href="https://colab.research.google.com/drive/11G3W3otAuD7OqmQBhOqT0n5Hoj6AypfG?usp=sharing">Open in Colab</a></td>
+</tr>
+<tr>
+<td>TRL</td>
+<td>GRPO</td>
+<td>GSM8K</td>
+<td><a href="https://colab.research.google.com/drive/1A_u9xlJN6oBMtYfUqK1AapsjOFC_qgNG?usp=sharing">Open in Colab</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
+<p>Want to improve a notebook? See our <a href="../contributing/guide/">Contributing Guide</a>.</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = ".."</script>
+    
+    <script src="../js/base.js"></script>
+    <script src="../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

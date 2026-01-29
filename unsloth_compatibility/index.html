@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/unsloth_compatibility/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+
+    
+<title>Unsloth Compatibility - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../css/base.min.css" rel="stylesheet">
+    <link href="../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+<link rel="manifest" href="../assets/site.webmanifest">
+<link rel="shortcut icon" href="../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li class="active">
+    <a href="./">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../cli/configuration/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../compatibility/backend-matrix/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#unsloth-compatibility-guide">Unsloth Compatibility Guide</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#supported-versions">Supported Versions</a></li>
+                
+                <li class="third-level"><a href="#recommended-combinations">Recommended Combinations</a></li>
+                <li class="third-level"><a href="#python-requirements">Python Requirements</a></li>
+            <li class="second-level"><a href="#known-compatibility-issues">Known Compatibility Issues</a></li>
+                
+                <li class="third-level"><a href="#1-cuda-symbol-errors">1. CUDA Symbol Errors</a></li>
+                <li class="third-level"><a href="#2-flash-attention-issues">2. Flash Attention Issues</a></li>
+                <li class="third-level"><a href="#3-version-mismatches">3. Version Mismatches</a></li>
+            <li class="second-level"><a href="#environment-setup">Environment Setup</a></li>
+                
+                <li class="third-level"><a href="#optimal-setup">Optimal Setup</a></li>
+                <li class="third-level"><a href="#alternative-setup-if-cuda-issues-persist">Alternative Setup (if CUDA issues persist)</a></li>
+            <li class="second-level"><a href="#troubleshooting">Troubleshooting</a></li>
+                
+                <li class="third-level"><a href="#1-check-environment">1. Check Environment</a></li>
+                <li class="third-level"><a href="#2-common-issues-and-solutions">2. Common Issues and Solutions</a></li>
+                <li class="third-level"><a href="#3-fallback-to-trl-backends">3. Fallback to TRL Backends</a></li>
+            <li class="second-level"><a href="#performance-comparison">Performance Comparison</a></li>
+                
+            <li class="second-level"><a href="#diagnostic-commands">Diagnostic Commands</a></li>
+                
+                <li class="third-level"><a href="#basic-information">Basic Information</a></li>
+                <li class="third-level"><a href="#comprehensive-diagnostics">Comprehensive Diagnostics</a></li>
+                <li class="third-level"><a href="#backend-selection">Backend Selection</a></li>
+            <li class="second-level"><a href="#error-messages-and-solutions">Error Messages and Solutions</a></li>
+                
+                <li class="third-level"><a href="#unsloth-not-available-cuda_symbol_error">"Unsloth not available: cuda_symbol_error"</a></li>
+                <li class="third-level"><a href="#unsloth-not-available-flash_attention_error">"Unsloth not available: flash_attention_error"</a></li>
+                <li class="third-level"><a href="#unsloth-not-available-missing_dependency">"Unsloth not available: missing_dependency"</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+            <li class="second-level"><a href="#getting-help">Getting Help</a></li>
+                
+            <li class="second-level"><a href="#version-history">Version History</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="unsloth-compatibility-guide">Unsloth Compatibility Guide<a class="headerlink" href="#unsloth-compatibility-guide" title="Permanent link">&para;</a></h1>
+<p>This document provides comprehensive information about Unsloth compatibility with AlignTune, including supported versions, known issues, and troubleshooting steps.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Unsloth provides faster training with memory optimizations, but requires specific environment configurations. AlignTune includes robust detection and fallback mechanisms to ensure training works even when Unsloth is unavailable.</p>
+<h2 id="supported-versions">Supported Versions<a class="headerlink" href="#supported-versions" title="Permanent link">&para;</a></h2>
+<h3 id="recommended-combinations">Recommended Combinations<a class="headerlink" href="#recommended-combinations" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>PyTorch</th>
+<th>CUDA</th>
+<th>Unsloth</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.0.0-2.7.0</td>
+<td>11.8, 12.1, 12.4</td>
+<td>latest</td>
+<td>Optimal</td>
+</tr>
+<tr>
+<td>2.8.0+</td>
+<td>12.8+</td>
+<td>latest</td>
+<td>Known Issues</td>
+</tr>
+</tbody>
+</table>
+<h3 id="python-requirements">Python Requirements<a class="headerlink" href="#python-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Python 3.8-3.12</li>
+<li>CUDA-capable GPU (for GPU training)</li>
+</ul>
+<h2 id="known-compatibility-issues">Known Compatibility Issues<a class="headerlink" href="#known-compatibility-issues" title="Permanent link">&para;</a></h2>
+<h3 id="1-cuda-symbol-errors">1. CUDA Symbol Errors<a class="headerlink" href="#1-cuda-symbol-errors" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>undefined symbol: _ZN3c104cuda9SetDeviceEa</code></p>
+<p><strong>Cause</strong>: Version incompatibility between PyTorch 2.8.0+ and Unsloth's CUDA extensions.</p>
+<p><strong>Solutions</strong>:
+- Use PyTorch 2.7.0 or earlier
+- Update Unsloth: <code>pip install --upgrade unsloth</code>
+- Use TRL backends instead: <code>--backend trl</code></p>
+<h3 id="2-flash-attention-issues">2. Flash Attention Issues<a class="headerlink" href="#2-flash-attention-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: Flash Attention 2 installation broken</p>
+<p><strong>Cause</strong>: CUDA version incompatibility with Flash Attention.</p>
+<p><strong>Solutions</strong>:
+- Unsloth automatically falls back to Xformers
+- Update Flash Attention: <code>pip install --upgrade flash-attn</code>
+- Use TRL backends: <code>--backend trl</code></p>
+<h3 id="3-version-mismatches">3. Version Mismatches<a class="headerlink" href="#3-version-mismatches" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: Version incompatibility between dependencies</p>
+<p><strong>Solutions</strong>:
+- Check compatibility matrix above
+- Update all dependencies: <code>pip install --upgrade torch unsloth</code>
+- Use TRL backends: <code>--backend trl</code></p>
+<h2 id="environment-setup">Environment Setup<a class="headerlink" href="#environment-setup" title="Permanent link">&para;</a></h2>
+<h3 id="optimal-setup">Optimal Setup<a class="headerlink" href="#optimal-setup" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install PyTorch with CUDA support</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="nv">torch</span><span class="o">==</span><span class="m">2</span>.7.0<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+
+<span class="c1"># Install Unsloth</span>
+pip<span class="w"> </span>install<span class="w"> </span>unsloth
+
+<span class="c1"># Install AlignTune</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<h3 id="alternative-setup-if-cuda-issues-persist">Alternative Setup (if CUDA issues persist)<a class="headerlink" href="#alternative-setup-if-cuda-issues-persist" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use TRL backends instead</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>transformers<span class="w"> </span>trl
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="1-check-environment">1. Check Environment<a class="headerlink" href="#1-check-environment" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run comprehensive diagnostics</span>
+aligntune<span class="w"> </span>diagnose
+
+<span class="c1"># Check basic info with verbose output</span>
+aligntune<span class="w"> </span>info<span class="w"> </span>--verbose
+</code></pre></div>
+<h3 id="2-common-issues-and-solutions">2. Common Issues and Solutions<a class="headerlink" href="#2-common-issues-and-solutions" title="Permanent link">&para;</a></h3>
+<h4 id="unsloth-not-detected">Unsloth Not Detected<a class="headerlink" href="#unsloth-not-detected" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if Unsloth is installed</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import unsloth; print(&#39;Unsloth available&#39;)&quot;</span>
+
+<span class="c1"># If error occurs, check CUDA compatibility</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import torch; print(f&#39;PyTorch: {torch.__version__}, CUDA: {torch.version.cuda}&#39;)&quot;</span>
+</code></pre></div>
+<h4 id="cuda-symbol-errors">CUDA Symbol Errors<a class="headerlink" href="#cuda-symbol-errors" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Solution 1</strong>: Downgrade PyTorch to 2.7.0</li>
+<li><strong>Solution 2</strong>: Use TRL backends: <code>--backend trl</code></li>
+<li><strong>Solution 3</strong>: Update Unsloth: <code>pip install --upgrade unsloth</code></li>
+</ul>
+<h4 id="flash-attention-issues">Flash Attention Issues<a class="headerlink" href="#flash-attention-issues" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Unsloth automatically falls back to Xformers</li>
+<li>No action required, but performance may be slightly reduced</li>
+</ul>
+<h3 id="3-fallback-to-trl-backends">3. Fallback to TRL Backends<a class="headerlink" href="#3-fallback-to-trl-backends" title="Permanent link">&para;</a></h3>
+<p>If Unsloth is not available, AlignTune automatically falls back to TRL backends:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Explicitly use TRL backends</span>
+aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span>microsoft/DialoGPT-medium<span class="w"> </span>--dataset<span class="w"> </span>tatsu-lab/alpaca<span class="w"> </span>--backend<span class="w"> </span>trl
+
+<span class="c1"># Or let AlignTune auto-select</span>
+aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span>microsoft/DialoGPT-medium<span class="w"> </span>--dataset<span class="w"> </span>tatsu-lab/alpaca<span class="w"> </span>--backend<span class="w"> </span>auto
+</code></pre></div>
+<h2 id="performance-comparison">Performance Comparison<a class="headerlink" href="#performance-comparison" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Speed</th>
+<th>Memory</th>
+<th>Compatibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unsloth</td>
+<td>faster</td>
+<td>80% less</td>
+<td>Requires specific setup</td>
+</tr>
+<tr>
+<td>TRL</td>
+<td>Standard</td>
+<td>Standard</td>
+<td>Universal</td>
+</tr>
+<tr>
+<td>Legacy</td>
+<td>Standard</td>
+<td>Standard</td>
+<td>Universal</td>
+</tr>
+</tbody>
+</table>
+<h2 id="diagnostic-commands">Diagnostic Commands<a class="headerlink" href="#diagnostic-commands" title="Permanent link">&para;</a></h2>
+<h3 id="basic-information">Basic Information<a class="headerlink" href="#basic-information" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Show system status</span>
+aligntune<span class="w"> </span>info
+
+<span class="c1"># Show detailed diagnostics</span>
+aligntune<span class="w"> </span>info<span class="w"> </span>--verbose
+</code></pre></div>
+<h3 id="comprehensive-diagnostics">Comprehensive Diagnostics<a class="headerlink" href="#comprehensive-diagnostics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run full environment check</span>
+aligntune<span class="w"> </span>diagnose
+</code></pre></div>
+<h3 id="backend-selection">Backend Selection<a class="headerlink" href="#backend-selection" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># List available backends</span>
+aligntune<span class="w"> </span>list-backends
+
+<span class="c1"># Validate model compatibility</span>
+aligntune<span class="w"> </span>validate<span class="w"> </span>--model<span class="w"> </span>microsoft/DialoGPT-medium<span class="w"> </span>--backend<span class="w"> </span>auto
+</code></pre></div>
+<h2 id="error-messages-and-solutions">Error Messages and Solutions<a class="headerlink" href="#error-messages-and-solutions" title="Permanent link">&para;</a></h2>
+<h3 id="unsloth-not-available-cuda_symbol_error">"Unsloth not available: cuda_symbol_error"<a class="headerlink" href="#unsloth-not-available-cuda_symbol_error" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cause</strong>: CUDA version incompatibility</li>
+<li><strong>Solution</strong>: Use TRL backends or fix CUDA setup</li>
+</ul>
+<h3 id="unsloth-not-available-flash_attention_error">"Unsloth not available: flash_attention_error"<a class="headerlink" href="#unsloth-not-available-flash_attention_error" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cause</strong>: Flash Attention compatibility issues</li>
+<li><strong>Solution</strong>: Unsloth will auto-fallback to Xformers</li>
+</ul>
+<h3 id="unsloth-not-available-missing_dependency">"Unsloth not available: missing_dependency"<a class="headerlink" href="#unsloth-not-available-missing_dependency" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Cause</strong>: Unsloth not installed</li>
+<li><strong>Solution</strong>: <code>pip install unsloth</code> or use TRL backends</li>
+</ul>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Always test with <code>aligntune diagnose</code></strong> before training</li>
+<li><strong>Use <code>--backend auto</code></strong> to let AlignTune choose the best available backend</li>
+<li><strong>Check logs</strong> for detailed error information</li>
+<li><strong>Fallback to TRL</strong> if Unsloth has issues</li>
+<li><strong>Update dependencies</strong> regularly for best compatibility</li>
+</ol>
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<p>If you encounter issues not covered in this guide:</p>
+<ol>
+<li>Run <code>aligntune diagnose</code> and share the output</li>
+<li>Check the logs for detailed error messages</li>
+<li>Try using TRL backends as a fallback</li>
+<li>Report issues with full diagnostic output</li>
+</ol>
+<h2 id="version-history">Version History<a class="headerlink" href="#version-history" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>v0.2.0</strong>: Enhanced error detection and diagnostics</li>
+<li><strong>v0.1.0</strong>: Initial Unsloth support with basic detection</li>
+</ul>
+<hr />
+<p>For more information, see the <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/README.md">main README</a> or run <code>aligntune info --help</code>.</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = ".."</script>
+    
+    <script src="../js/base.js"></script>
+    <script src="../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

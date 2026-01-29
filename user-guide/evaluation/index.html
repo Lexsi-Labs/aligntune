@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/user-guide/evaluation/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Evaluation - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../reward-model-training/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../model-management/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#evaluation-guide">Evaluation Guide</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#quick-start">Quick Start</a></li>
+                
+                <li class="third-level"><a href="#basic-training-evaluation">Basic Training Evaluation</a></li>
+                <li class="third-level"><a href="#standalone-model-evaluation">Standalone Model Evaluation</a></li>
+                <li class="third-level"><a href="#rl-model-evaluation">RL Model Evaluation</a></li>
+            <li class="second-level"><a href="#evaluation-types">Evaluation Types</a></li>
+                
+                <li class="third-level"><a href="#1-training-evaluation">1. Training Evaluation</a></li>
+                <li class="third-level"><a href="#2-standalone-evaluation">2. Standalone Evaluation</a></li>
+                <li class="third-level"><a href="#3-zero-shot-evaluation">3. Zero-Shot Evaluation</a></li>
+                <li class="third-level"><a href="#4-benchmark-evaluation">4. Benchmark Evaluation</a></li>
+                <li class="third-level"><a href="#5-custom-evaluation">5. Custom Evaluation</a></li>
+                <li class="third-level"><a href="#6-rl-evaluation">6. RL Evaluation</a></li>
+            <li class="second-level"><a href="#evaluation-metrics">Evaluation Metrics</a></li>
+                
+                <li class="third-level"><a href="#classification-metrics">Classification Metrics</a></li>
+                <li class="third-level"><a href="#generation-metrics">Generation Metrics</a></li>
+                <li class="third-level"><a href="#rl-metrics">RL Metrics</a></li>
+                <li class="third-level"><a href="#custom-metrics">Custom Metrics</a></li>
+            <li class="second-level"><a href="#evaluation-configuration">Evaluation Configuration</a></li>
+                
+                <li class="third-level"><a href="#training-evaluation-config">Training Evaluation Config</a></li>
+                <li class="third-level"><a href="#standalone-evaluation-config">Standalone Evaluation Config</a></li>
+                <li class="third-level"><a href="#rl-evaluation-config">RL Evaluation Config</a></li>
+            <li class="second-level"><a href="#task-type-reference">Task Type Reference</a></li>
+                
+            <li class="second-level"><a href="#complete-examples">Complete Examples</a></li>
+                
+                <li class="third-level"><a href="#sft-evaluation">SFT Evaluation</a></li>
+                <li class="third-level"><a href="#rl-evaluation">RL Evaluation</a></li>
+                <li class="third-level"><a href="#benchmark-evaluation">Benchmark Evaluation</a></li>
+                <li class="third-level"><a href="#custom-task-evaluation">Custom Task Evaluation</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+                <li class="third-level"><a href="#1-evaluation-during-training">1. Evaluation During Training</a></li>
+                <li class="third-level"><a href="#2-comprehensive-evaluation">2. Comprehensive Evaluation</a></li>
+                <li class="third-level"><a href="#3-zero-shot-evaluation_1">3. Zero-Shot Evaluation</a></li>
+                <li class="third-level"><a href="#4-benchmark-evaluation_1">4. Benchmark Evaluation</a></li>
+                <li class="third-level"><a href="#5-custom-evaluation_1">5. Custom Evaluation</a></li>
+                <li class="third-level"><a href="#6-rl-evaluation_1">6. RL Evaluation</a></li>
+            <li class="second-level"><a href="#troubleshooting">Troubleshooting</a></li>
+                
+                <li class="third-level"><a href="#evaluation-too-slow">Evaluation Too Slow</a></li>
+                <li class="third-level"><a href="#out-of-memory">Out of Memory</a></li>
+                <li class="third-level"><a href="#missing-metrics">Missing Metrics</a></li>
+                <li class="third-level"><a href="#rl-evaluation-issues">RL Evaluation Issues</a></li>
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+            <li class="second-level"><a href="#additional-resources">Additional Resources</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="evaluation-guide">Evaluation Guide<a class="headerlink" href="#evaluation-guide" title="Permanent link">&para;</a></h1>
+<p>Complete guide to evaluating fine-tuned models with AlignTune, covering training evaluation, standalone evaluation, benchmarks, and custom evaluation tasks.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>AlignTune provides comprehensive evaluation capabilities:</p>
+<ol>
+<li><strong>Training Evaluation</strong> - Evaluate during training</li>
+<li><strong>Standalone Evaluation</strong> - Evaluate saved models</li>
+<li><strong>Benchmark Evaluation</strong> - Standard benchmarks (lm-eval)</li>
+<li><strong>Custom Evaluation</strong> - Task-specific evaluation</li>
+<li><strong>RL Evaluation</strong> - DPO, PPO, GRPO evaluation</li>
+</ol>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="basic-training-evaluation">Basic Training Evaluation<a class="headerlink" href="#basic-training-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span>
+<span class="p">)</span>
+
+<span class="c1"># Train with automatic evaluation</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Evaluate on validation set</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="standalone-model-evaluation">Standalone Model Evaluation<a class="headerlink" href="#standalone-model-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="c1"># Load evaluation dataset</span>
+<span class="n">eval_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loss: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;eval_loss&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Perplexity: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eval_perplexity&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="rl-model-evaluation">RL Model Evaluation<a class="headerlink" href="#rl-model-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalConfig</span><span class="p">,</span> <span class="n">run_eval</span>
+
+<span class="c1"># Evaluate DPO model</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;./output/dpo_model&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results&quot;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;preference_accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Win Rate: </span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;win_rate&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="evaluation-types">Evaluation Types<a class="headerlink" href="#evaluation-types" title="Permanent link">&para;</a></h2>
+<h3 id="1-training-evaluation">1. Training Evaluation<a class="headerlink" href="#1-training-evaluation" title="Permanent link">&para;</a></h3>
+<p>Automatic evaluation during training:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">eval_interval</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Evaluate every 100 steps</span>
+    <span class="n">save_interval</span><span class="o">=</span><span class="mi">500</span>   <span class="c1"># Save every 500 steps</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>  <span class="c1"># Evaluation runs automatically</span>
+</code></pre></div>
+<h3 id="2-standalone-evaluation">2. Standalone Evaluation<a class="headerlink" href="#2-standalone-evaluation" title="Permanent link">&para;</a></h3>
+<p>Evaluate after training:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># After training</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+
+<span class="c1"># With custom dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="n">eval_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+
+<span class="c1"># With custom metric prefix</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">,</span>
+    <span class="n">metric_key_prefix</span><span class="o">=</span><span class="s2">&quot;test&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="3-zero-shot-evaluation">3. Zero-Shot Evaluation<a class="headerlink" href="#3-zero-shot-evaluation" title="Permanent link">&para;</a></h3>
+<p>Generate predictions for test prompts:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Single prediction</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s2">&quot;What is machine learning?&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="c1"># Batch predictions</span>
+<span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;What is AI?&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Explain deep learning&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;What is NLP?&quot;</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prompts</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;A: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="4-benchmark-evaluation">4. Benchmark Evaluation<a class="headerlink" href="#4-benchmark-evaluation" title="Permanent link">&para;</a></h3>
+<p>Run standard benchmarks with lm-eval:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.lm_eval_integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">LMEvalRunner</span>
+
+<span class="n">runner</span> <span class="o">=</span> <span class="n">LMEvalRunner</span><span class="p">()</span>
+
+<span class="c1"># Run standard benchmarks</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run_benchmark</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;your-model-name&quot;</span><span class="p">,</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;hellaswag&quot;</span><span class="p">,</span> <span class="s2">&quot;arc&quot;</span><span class="p">,</span> <span class="s2">&quot;mmlu&quot;</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="5-custom-evaluation">5. Custom Evaluation<a class="headerlink" href="#5-custom-evaluation" title="Permanent link">&para;</a></h3>
+<p>Create custom evaluation tasks:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalRunner</span><span class="p">,</span> <span class="n">EvalTask</span><span class="p">,</span> <span class="n">TaskCategory</span>
+
+<span class="c1"># Create custom task</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">EvalTask</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;custom_sentiment&quot;</span><span class="p">,</span>
+    <span class="n">category</span><span class="o">=</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">SENTIMENT_ANALYSIS</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Custom sentiment analysis task&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;imdb&quot;</span><span class="p">,</span>
+    <span class="n">input_column</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+    <span class="n">target_column</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;f1&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Run evaluation</span>
+<span class="n">runner</span> <span class="o">=</span> <span class="n">EvalRunner</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run_evaluation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="n">task</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="6-rl-evaluation">6. RL Evaluation<a class="headerlink" href="#6-rl-evaluation" title="Permanent link">&para;</a></h3>
+<p>Evaluate RL-trained models (DPO, PPO, GRPO):</p>
+<h4 id="dpo-evaluation">DPO Evaluation<a class="headerlink" href="#dpo-evaluation" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalConfig</span><span class="p">,</span> <span class="n">run_eval</span>
+
+<span class="c1"># Evaluate DPO model</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;./output/dpo_model&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results/dpo&quot;</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Task configuration</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+
+    <span class="c1"># DPO metrics</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;preference_accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">reference_model_path</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span><span class="p">,</span>  <span class="c1"># For KL divergence</span>
+
+    <span class="c1"># Dataset</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+
+    <span class="c1"># Generation</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="mi">1536</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+
+    <span class="c1"># Model loading</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span><span class="p">,</span>
+    <span class="n">use_unsloth</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Win Rate: </span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;win_rate&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="ppo-evaluation">PPO Evaluation<a class="headerlink" href="#ppo-evaluation" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;./output/ppo_model&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results/ppo&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Task configuration</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;sft&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Metrics</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;perplexity&quot;</span><span class="p">,</span> <span class="s2">&quot;reward_accuracy&quot;</span><span class="p">],</span>
+
+    <span class="c1"># Dataset</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrachat_200k&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test_sft&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+
+    <span class="c1"># Generation</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Perplexity: </span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;perplexity&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="beforeafter-comparison">Before/After Comparison<a class="headerlink" href="#beforeafter-comparison" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="c1"># Train DPO model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<span class="n">trained_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+
+<span class="c1"># Evaluate base model</span>
+<span class="n">base_config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results/base&quot;</span>
+<span class="p">)</span>
+<span class="n">base_results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">base_config</span><span class="p">,</span> <span class="n">trainer</span><span class="o">.</span><span class="n">dataset_dict</span><span class="p">)</span>
+
+<span class="c1"># Evaluate trained model</span>
+<span class="n">trained_config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="n">trained_path</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">reference_model_path</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results/trained&quot;</span>
+<span class="p">)</span>
+<span class="n">trained_results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">trained_config</span><span class="p">,</span> <span class="n">trainer</span><span class="o">.</span><span class="n">dataset_dict</span><span class="p">)</span>
+
+<span class="c1"># Compare</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Base: </span><span class="si">{</span><span class="n">base_results</span><span class="p">[</span><span class="s1">&#39;win_rate&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trained: </span><span class="si">{</span><span class="n">trained_results</span><span class="p">[</span><span class="s1">&#39;win_rate&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Improvement: </span><span class="si">{</span><span class="n">trained_results</span><span class="p">[</span><span class="s1">&#39;win_rate&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">base_results</span><span class="p">[</span><span class="s1">&#39;win_rate&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="evaluation-metrics">Evaluation Metrics<a class="headerlink" href="#evaluation-metrics" title="Permanent link">&para;</a></h2>
+<h3 id="classification-metrics">Classification Metrics<a class="headerlink" href="#classification-metrics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># For text classification</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+<span class="c1"># Returns: accuracy, f1, precision, recall</span>
+</code></pre></div>
+<h3 id="generation-metrics">Generation Metrics<a class="headerlink" href="#generation-metrics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># For text generation</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+<span class="c1"># Returns: perplexity, loss, BLEU, ROUGE (if applicable)</span>
+</code></pre></div>
+<h3 id="rl-metrics">RL Metrics<a class="headerlink" href="#rl-metrics" title="Permanent link">&para;</a></h3>
+<h4 id="dpo-metrics">DPO Metrics<a class="headerlink" href="#dpo-metrics" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span>       <span class="c1"># Difference between chosen/rejected rewards</span>
+    <span class="s2">&quot;preference_accuracy&quot;</span><span class="p">,</span> <span class="c1"># How often model prefers chosen</span>
+    <span class="s2">&quot;win_rate&quot;</span><span class="p">,</span>           <span class="c1"># % matching human preferences</span>
+    <span class="s2">&quot;kl_divergence&quot;</span><span class="p">,</span>      <span class="c1"># KL from reference (needs reference_model_path)</span>
+    <span class="s2">&quot;log_ratio&quot;</span><span class="p">,</span>          <span class="c1"># Log probability ratio</span>
+    <span class="s2">&quot;implicit_reward&quot;</span><span class="p">,</span>    <span class="c1"># Implicit reward signal</span>
+    <span class="s2">&quot;calibration&quot;</span>         <span class="c1"># Calibration score</span>
+<span class="p">]</span>
+</code></pre></div>
+<h4 id="ppo-metrics">PPO Metrics<a class="headerlink" href="#ppo-metrics" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;perplexity&quot;</span><span class="p">,</span>        <span class="c1"># Language modeling quality</span>
+    <span class="s2">&quot;reward_accuracy&quot;</span><span class="p">,</span>   <span class="c1"># Alignment with reward model</span>
+    <span class="s2">&quot;policy_entropy&quot;</span>     <span class="c1"># Policy output diversity</span>
+<span class="p">]</span>
+</code></pre></div>
+<h4 id="rl-metrics_1">RL Metrics<a class="headerlink" href="#rl-metrics_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;kl_divergence&quot;</span><span class="p">,</span>     <span class="c1"># KL divergence from reference</span>
+    <span class="s2">&quot;reward_accuracy&quot;</span><span class="p">,</span>   <span class="c1"># Reward model alignment</span>
+    <span class="s2">&quot;policy_entropy&quot;</span>     <span class="c1"># Output diversity</span>
+<span class="p">]</span>
+</code></pre></div>
+<h3 id="custom-metrics">Custom Metrics<a class="headerlink" href="#custom-metrics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalTask</span><span class="p">,</span> <span class="n">TaskCategory</span>
+
+<span class="n">task</span> <span class="o">=</span> <span class="n">EvalTask</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;custom_task&quot;</span><span class="p">,</span>
+    <span class="n">category</span><span class="o">=</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">TEXT_GENERATION</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="s2">&quot;custom_metric&quot;</span><span class="p">],</span>
+    <span class="n">custom_metrics</span><span class="o">=</span><span class="p">[</span><span class="n">your_custom_metric_function</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="evaluation-configuration">Evaluation Configuration<a class="headerlink" href="#evaluation-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="training-evaluation-config">Training Evaluation Config<a class="headerlink" href="#training-evaluation-config" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+    <span class="c1"># Evaluation settings</span>
+    <span class="n">eval_interval</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>              <span class="c1"># Evaluate every N steps</span>
+    <span class="n">save_interval</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>              <span class="c1"># Save every N steps</span>
+    <span class="n">load_best_model_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>   <span class="c1"># Load best model</span>
+    <span class="n">metric_for_best_model</span><span class="o">=</span><span class="s2">&quot;eval_loss&quot;</span><span class="p">,</span>  <span class="c1"># Metric to track</span>
+    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span>         <span class="c1"># Lower is better for loss</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="standalone-evaluation-config">Standalone Evaluation Config<a class="headerlink" href="#standalone-evaluation-config" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalConfig</span><span class="p">,</span> <span class="n">EvalType</span><span class="p">,</span> <span class="n">TaskCategory</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">eval_type</span><span class="o">=</span><span class="n">EvalType</span><span class="o">.</span><span class="n">STANDALONE</span><span class="p">,</span>
+    <span class="n">task_categories</span><span class="o">=</span><span class="p">[</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">TEXT_GENERATION</span><span class="p">],</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="s2">&quot;bleu&quot;</span><span class="p">,</span> <span class="s2">&quot;rouge&quot;</span><span class="p">],</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;bf16&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results&quot;</span><span class="p">,</span>
+    <span class="n">save_predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_metrics</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="rl-evaluation-config">RL Evaluation Config<a class="headerlink" href="#rl-evaluation-config" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalConfig</span><span class="p">,</span> <span class="n">run_eval</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="c1"># Model configuration</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;./model&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./eval_results&quot;</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Task configuration</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>              <span class="c1"># Evaluation task: dpo, ppo, grpo, text, math, code</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>         <span class="c1"># Data schema: dpo, sft, grpo</span>
+
+    <span class="c1"># Metrics</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">reference_model_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>    <span class="c1"># Reference model (for KL)</span>
+    <span class="n">reward_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>            <span class="c1"># Reward model (optional)</span>
+
+    <span class="c1"># Dataset</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;dataset_name&quot;</span><span class="p">,</span>
+    <span class="n">dataset_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+
+    <span class="c1"># Generation</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>              <span class="c1"># Context window</span>
+    <span class="n">max_new_tokens</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>           <span class="c1"># Generation length</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>              <span class="c1"># Sampling temperature</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+
+    <span class="c1"># Model loading</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_unsloth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_vllm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;bf16&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Advanced</span>
+    <span class="n">column_mapping</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="task-type-reference">Task Type Reference<a class="headerlink" href="#task-type-reference" title="Permanent link">&para;</a></h2>
+<p>Supported <code>task_type</code> values for evaluation:</p>
+<table>
+<thead>
+<tr>
+<th>Task Type</th>
+<th>Description</th>
+<th>Default Metrics</th>
+<th>Data Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"text"</code></td>
+<td>Text generation</td>
+<td>perplexity, accuracy</td>
+<td>sft</td>
+</tr>
+<tr>
+<td><code>"math"</code></td>
+<td>Math problems</td>
+<td>math_accuracy, pass_at_k</td>
+<td>sft</td>
+</tr>
+<tr>
+<td><code>"code"</code></td>
+<td>Code generation</td>
+<td>pass_at_k</td>
+<td>code</td>
+</tr>
+<tr>
+<td><code>"dpo"</code></td>
+<td>DPO models</td>
+<td>reward_margin, preference_accuracy, win_rate</td>
+<td>dpo</td>
+</tr>
+<tr>
+<td><code>"ppo"</code></td>
+<td>PPO models</td>
+<td>perplexity, reward_accuracy</td>
+<td>sft</td>
+</tr>
+<tr>
+<td><code>"generic"</code></td>
+<td>Generic evaluation</td>
+<td>perplexity, accuracy</td>
+<td>sft</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note</strong>: For RL evaluation, <code>task_type</code> and <code>data_task_type</code> must match (e.g., both <code>"dpo"</code> for DPO models).</p>
+<h2 id="complete-examples">Complete Examples<a class="headerlink" href="#complete-examples" title="Permanent link">&para;</a></h2>
+<h3 id="sft-evaluation">SFT Evaluation<a class="headerlink" href="#sft-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="c1"># Create trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">eval_interval</span><span class="o">=</span><span class="mi">100</span>
+<span class="p">)</span>
+
+<span class="c1"># Train</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Evaluate on test set</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">test_dataset</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test metrics: </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Zero-shot evaluation</span>
+<span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;What is AI?&quot;</span><span class="p">,</span> <span class="s2">&quot;Explain machine learning&quot;</span><span class="p">]</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prompts</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="se">\n</span><span class="s2">A: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="rl-evaluation">RL Evaluation<a class="headerlink" href="#rl-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalConfig</span><span class="p">,</span> <span class="n">run_eval</span>
+
+<span class="n">MODEL_NAME</span> <span class="o">=</span> <span class="s2">&quot;microsoft/phi-2&quot;</span>
+<span class="n">DATASET</span> <span class="o">=</span> <span class="s2">&quot;Anthropic/hh-rlhf&quot;</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="s2">&quot;./output/dpo_phi2&quot;</span>
+
+<span class="c1"># Train DPO model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="n">DATASET</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="n">OUTPUT_DIR</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<span class="n">trained_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+
+<span class="c1"># Evaluate base model</span>
+<span class="n">base_config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">OUTPUT_DIR</span><span class="si">}</span><span class="s2">/eval_base&quot;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;preference_accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="n">DATASET</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_unsloth</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">base_results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">base_config</span><span class="p">,</span> <span class="n">trainer</span><span class="o">.</span><span class="n">dataset_dict</span><span class="p">)</span>
+
+<span class="c1"># Evaluate trained model</span>
+<span class="n">trained_config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="n">trained_path</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">OUTPUT_DIR</span><span class="si">}</span><span class="s2">/eval_trained&quot;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;preference_accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">reference_model_path</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="n">DATASET</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+    <span class="n">use_unsloth</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">trained_results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">trained_config</span><span class="p">,</span> <span class="n">trainer</span><span class="o">.</span><span class="n">dataset_dict</span><span class="p">)</span>
+
+<span class="c1"># Print comparison</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Base Model:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Win Rate: </span><span class="si">{</span><span class="n">base_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;win_rate&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Trained Model:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Win Rate: </span><span class="si">{</span><span class="n">trained_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;win_rate&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Improvement: </span><span class="si">{</span><span class="n">trained_results</span><span class="p">[</span><span class="s1">&#39;win_rate&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">base_results</span><span class="p">[</span><span class="s1">&#39;win_rate&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="benchmark-evaluation">Benchmark Evaluation<a class="headerlink" href="#benchmark-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.lm_eval_integration</span><span class="w"> </span><span class="kn">import</span> <span class="n">LMEvalRunner</span>
+
+<span class="n">runner</span> <span class="o">=</span> <span class="n">LMEvalRunner</span><span class="p">()</span>
+
+<span class="c1"># Run multiple benchmarks</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run_benchmark</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;your-model-name&quot;</span><span class="p">,</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;hellaswag&quot;</span><span class="p">,</span>    <span class="c1"># Commonsense reasoning</span>
+        <span class="s2">&quot;arc&quot;</span><span class="p">,</span>          <span class="c1"># Science questions</span>
+        <span class="s2">&quot;mmlu&quot;</span><span class="p">,</span>         <span class="c1"># Multitask language understanding</span>
+        <span class="s2">&quot;truthfulqa&quot;</span>    <span class="c1"># Truthful question answering</span>
+    <span class="p">],</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">limit</span><span class="o">=</span><span class="mi">100</span>  <span class="c1"># Limit samples per task</span>
+<span class="p">)</span>
+
+<span class="c1"># Print results</span>
+<span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-task-evaluation">Custom Task Evaluation<a class="headerlink" href="#custom-task-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalRunner</span><span class="p">,</span> <span class="n">EvalTask</span><span class="p">,</span> <span class="n">TaskCategory</span>
+
+<span class="c1"># Create custom tasks</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">EvalTask</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sentiment_analysis&quot;</span><span class="p">,</span>
+        <span class="n">category</span><span class="o">=</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">SENTIMENT_ANALYSIS</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;IMDB sentiment analysis&quot;</span><span class="p">,</span>
+        <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;imdb&quot;</span><span class="p">,</span>
+        <span class="n">input_column</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+        <span class="n">target_column</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;f1&quot;</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">EvalTask</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text_generation&quot;</span><span class="p">,</span>
+        <span class="n">category</span><span class="o">=</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">TEXT_GENERATION</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Alpaca instruction following&quot;</span><span class="p">,</span>
+        <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+        <span class="n">input_column</span><span class="o">=</span><span class="s2">&quot;instruction&quot;</span><span class="p">,</span>
+        <span class="n">target_column</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bleu&quot;</span><span class="p">,</span> <span class="s2">&quot;rouge&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># Run evaluation</span>
+<span class="n">runner</span> <span class="o">=</span> <span class="n">EvalRunner</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run_evaluation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+
+<span class="c1"># Print results</span>
+<span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-evaluation-during-training">1. Evaluation During Training<a class="headerlink" href="#1-evaluation-during-training" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Set appropriate <code>eval_interval</code> (100-500 steps)</li>
+<li>Use validation split for evaluation</li>
+<li>Track best model with <code>load_best_model_at_end</code></li>
+</ul>
+<h3 id="2-comprehensive-evaluation">2. Comprehensive Evaluation<a class="headerlink" href="#2-comprehensive-evaluation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Evaluate on multiple metrics</li>
+<li>Use both automatic and manual evaluation</li>
+<li>Test on diverse datasets</li>
+</ul>
+<h3 id="3-zero-shot-evaluation_1">3. Zero-Shot Evaluation<a class="headerlink" href="#3-zero-shot-evaluation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Test on unseen prompts</li>
+<li>Evaluate qualitative samples</li>
+<li>Check for common failure modes</li>
+</ul>
+<h3 id="4-benchmark-evaluation_1">4. Benchmark Evaluation<a class="headerlink" href="#4-benchmark-evaluation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use standard benchmarks for comparison</li>
+<li>Run multiple benchmarks</li>
+<li>Document results for reproducibility</li>
+</ul>
+<h3 id="5-custom-evaluation_1">5. Custom Evaluation<a class="headerlink" href="#5-custom-evaluation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Create task-specific evaluation</li>
+<li>Use domain-specific metrics</li>
+<li>Validate on real-world data</li>
+</ul>
+<h3 id="6-rl-evaluation_1">6. RL Evaluation<a class="headerlink" href="#6-rl-evaluation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Always compare base and trained models</li>
+<li>Use consistent evaluation settings</li>
+<li>Use greedy decoding (temperature=0.0) for deterministic results</li>
+<li>Reuse dataset_dict when possible</li>
+<li>Match task_type and data_task_type for RL models</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="evaluation-too-slow">Evaluation Too Slow<a class="headerlink" href="#evaluation-too-slow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Reduce batch size or max samples</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>    <span class="c1"># Reduce from default</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">500</span>   <span class="c1"># Limit samples</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="out-of-memory">Out of Memory<a class="headerlink" href="#out-of-memory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use smaller batch size</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>      <span class="c1"># Smaller batch</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>   <span class="c1"># Limit samples</span>
+    <span class="n">precision</span><span class="o">=</span><span class="s2">&quot;fp16&quot;</span>   <span class="c1"># Lower precision</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="missing-metrics">Missing Metrics<a class="headerlink" href="#missing-metrics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Specify metrics explicitly</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">EvalTask</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_task&quot;</span><span class="p">,</span>
+    <span class="n">category</span><span class="o">=</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">TEXT_CLASSIFICATION</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span> <span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="s2">&quot;recall&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="rl-evaluation-issues">RL Evaluation Issues<a class="headerlink" href="#rl-evaluation-issues" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Missing required columns for DPO</span>
+<span class="c1"># Fix: Ensure task types match</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span>  <span class="c1"># Must match</span>
+<span class="p">)</span>
+
+<span class="c1"># KL divergence requires reference model</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;kl_divergence&quot;</span><span class="p">],</span>
+    <span class="n">reference_model_path</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># LoRA adapter not loading</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;./lora_adapter&quot;</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/phi-2&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../sft/">SFT Guide</a> - SFT training and evaluation</li>
+<li><a href="../rl/">RL Guide</a> - RL training and evaluation</li>
+<li><a href="../model-management/">Model Management</a> - Model saving and loading</li>
+</ul>
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../api-reference/core/">API Reference</a> - API documentation</li>
+<li><a href="../../examples/sft/">Examples</a> - Code examples</li>
+<li><a href="../../api-reference/core/">Evaluation System</a> - Detailed system docs</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/api-reference/reward-model-training-reference/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Reward Model Training System - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#reward-model-training-system">Reward Model Training System</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#architecture">Architecture</a></li>
+                
+                <li class="third-level"><a href="#core-components">Core Components</a></li>
+                <li class="third-level"><a href="#integration-points">Integration Points</a></li>
+            <li class="second-level"><a href="#usage-modes">Usage Modes</a></li>
+                
+                <li class="third-level"><a href="#1-standalone-reward-model-training">1. Standalone Reward Model Training</a></li>
+                <li class="third-level"><a href="#2-ppo-with-custom-reward-model-training">2. PPO with Custom Reward Model Training</a></li>
+                <li class="third-level"><a href="#3-ppo-with-pre-trained-reward-models">3. PPO with Pre-trained Reward Models</a></li>
+            <li class="second-level"><a href="#configuration">Configuration</a></li>
+                
+                <li class="third-level"><a href="#rewardmodeltrainingconfig">RewardModelTrainingConfig</a></li>
+                <li class="third-level"><a href="#rewardmodelsourceconfig">RewardModelSourceConfig</a></li>
+            <li class="second-level"><a href="#validation">Validation</a></li>
+                
+                <li class="third-level"><a href="#strict-validation-rules">Strict Validation Rules</a></li>
+                <li class="third-level"><a href="#error-handling">Error Handling</a></li>
+            <li class="second-level"><a href="#examples">Examples</a></li>
+                
+                <li class="third-level"><a href="#complete-custom-training-example">Complete Custom Training Example</a></li>
+                <li class="third-level"><a href="#standalone-training-example">Standalone Training Example</a></li>
+            <li class="second-level"><a href="#supported-reward-functions">Supported Reward Functions</a></li>
+                
+            <li class="second-level"><a href="#troubleshooting">Troubleshooting</a></li>
+                
+                <li class="third-level"><a href="#common-issues">Common Issues</a></li>
+                <li class="third-level"><a href="#debug-mode">Debug Mode</a></li>
+                <li class="third-level"><a href="#validation-helpers">Validation Helpers</a></li>
+            <li class="second-level"><a href="#performance-considerations">Performance Considerations</a></li>
+                
+                <li class="third-level"><a href="#memory-usage">Memory Usage</a></li>
+                <li class="third-level"><a href="#training-speed">Training Speed</a></li>
+                <li class="third-level"><a href="#scalability">Scalability</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+            <li class="second-level"><a href="#api-reference">API Reference</a></li>
+                
+                <li class="third-level"><a href="#rewardmodeltrainer">RewardModelTrainer</a></li>
+                <li class="third-level"><a href="#rewardmodeldataset">RewardModelDataset</a></li>
+                <li class="third-level"><a href="#rewardmodelvalidator">RewardModelValidator</a></li>
+                <li class="third-level"><a href="#rewardmodelloader">RewardModelLoader</a></li>
+            <li class="second-level"><a href="#contributing">Contributing</a></li>
+                
+            <li class="second-level"><a href="#license">License</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="reward-model-training-system">Reward Model Training System<a class="headerlink" href="#reward-model-training-system" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Reward Model Training System provides comprehensive capabilities for training neural reward models from rule-based reward functions and integrating them into PPO training pipelines. This system enables scalable reward model training with strict validation, no fallbacks, and production-ready implementations.</p>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<h3 id="core-components">Core Components<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>RewardModelTrainer</strong>: Main training class using TRL's RewardTrainer</li>
+<li><strong>RewardModelDataset</strong>: PyTorch Dataset for reward training data</li>
+<li><strong>RewardModelValidator</strong>: Strict validation with no fallbacks</li>
+<li><strong>RewardModelLoader</strong>: Loads HF Hub, local, or custom trained models</li>
+<li><strong>RewardModelTrainingConfig</strong>: Configuration for training parameters</li>
+<li><strong>RewardModelSourceConfig</strong>: Configuration for reward model sources</li>
+</ol>
+<h3 id="integration-points">Integration Points<a class="headerlink" href="#integration-points" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>PPO Integration</strong>: Both Unsloth and TRL PPO backends support reward model loading</li>
+<li><strong>Reward Functions</strong>: Uses existing CompositeReward system for training data generation</li>
+<li><strong>Configuration</strong>: Integrates with existing dataclass-based config system</li>
+<li><strong>Validation</strong>: Strict validation throughout with clear error messages</li>
+</ul>
+<h2 id="usage-modes">Usage Modes<a class="headerlink" href="#usage-modes" title="Permanent link">&para;</a></h2>
+<h3 id="1-standalone-reward-model-training">1. Standalone Reward Model Training<a class="headerlink" href="#1-standalone-reward-model-training" title="Permanent link">&para;</a></h3>
+<p>Train reward models independently without PPO:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.rewards.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardModelTrainer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.rewards.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardRegistry</span>
+
+<span class="c1"># Get reward functions</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">RewardRegistry</span><span class="p">()</span>
+<span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">)</span>
+<span class="n">sentiment_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;sentiment&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">RewardModelTrainer</span><span class="p">(</span>
+ <span class="n">base_model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="n">length_func</span><span class="p">,</span> <span class="n">sentiment_func</span><span class="p">],</span>
+ <span class="n">composite_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Generate training data</span>
+<span class="n">training_data</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">generate_training_data</span><span class="p">(</span>
+ <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;This is a good response.&quot;</span><span class="p">,</span> <span class="s2">&quot;This is a bad response.&quot;</span><span class="p">],</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span>
+<span class="p">)</span>
+
+<span class="c1"># Train model</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_reward_model</span><span class="p">(</span>
+ <span class="n">training_data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="2-ppo-with-custom-reward-model-training">2. PPO with Custom Reward Model Training<a class="headerlink" href="#2-ppo-with-custom-reward-model-training" title="Permanent link">&para;</a></h3>
+<p>Train custom reward models as part of PPO training:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="c1"># Create PPO trainer with custom reward model training</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+
+ <span class="c1"># Custom reward model training</span>
+ <span class="n">train_custom_reward_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">reward_training_texts</span><span class="o">=</span><span class="n">load_training_texts</span><span class="p">(),</span>
+ <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">,</span> <span class="s2">&quot;coherence&quot;</span><span class="p">],</span>
+ <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+ <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom_ppo&quot;</span><span class="p">,</span>
+
+ <span class="c1"># PPO configuration</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="3-ppo-with-pre-trained-reward-models">3. PPO with Pre-trained Reward Models<a class="headerlink" href="#3-ppo-with-pre-trained-reward-models" title="Permanent link">&para;</a></h3>
+<p>Use existing reward models from HuggingFace Hub or local paths:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># HuggingFace Hub model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;OpenAssistant/reward-model-deberta-v3-large-v2&quot;</span><span class="p">,</span>
+ <span class="c1"># ... other config</span>
+<span class="p">)</span>
+
+<span class="c1"># Local model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_path</span><span class="o">=</span><span class="s2">&quot;./reward_models/my_custom_model&quot;</span><span class="p">,</span>
+ <span class="c1"># ... other config</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<h3 id="rewardmodeltrainingconfig">RewardModelTrainingConfig<a class="headerlink" href="#rewardmodeltrainingconfig" title="Permanent link">&para;</a></h3>
+<p>Configuration for reward model training with strict validation:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RewardModelTrainingConfig</span><span class="p">:</span>
+ <span class="n">base_model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># Required - no default</span>
+ <span class="n">training_texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="c1"># Required - no default</span>
+ <span class="n">reward_functions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="c1"># Required - no default</span>
+ <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># Required - no default</span>
+
+ <span class="c1"># Optional but validated if provided</span>
+ <span class="n">reference_texts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+ <span class="n">reward_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+ <span class="c1"># Training parameters with justified defaults</span>
+ <span class="n">num_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+ <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-5</span>
+ <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span>
+ <span class="n">gradient_accumulation_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+ <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span>
+</code></pre></div>
+<h3 id="rewardmodelsourceconfig">RewardModelSourceConfig<a class="headerlink" href="#rewardmodelsourceconfig" title="Permanent link">&para;</a></h3>
+<p>Configuration for reward model source with strict mutual exclusivity:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RewardModelSourceConfig</span><span class="p">:</span>
+ <span class="n">source_type</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># &quot;pretrained_hf&quot;, &quot;pretrained_local&quot;, &quot;custom_trained&quot;</span>
+ <span class="n">model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># For HF Hub</span>
+ <span class="n">model_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># For local</span>
+ <span class="n">training_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RewardModelTrainingConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># For custom</span>
+</code></pre></div>
+<h2 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h2>
+<h3 id="strict-validation-rules">Strict Validation Rules<a class="headerlink" href="#strict-validation-rules" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Exactly One Source</strong>: Must specify exactly one reward source (HF Hub, local, or custom)</li>
+<li><strong>No Empty Fields</strong>: All required fields must be non-empty</li>
+<li><strong>Minimum Data</strong>: At least 10 training texts required</li>
+<li><strong>Valid Functions</strong>: All reward functions must exist in registry</li>
+<li><strong>Consistent Lengths</strong>: Reference texts must match training texts length</li>
+<li><strong>Positive Weights</strong>: All reward weights must be positive</li>
+</ol>
+<h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>No Fallbacks</strong>: System fails fast with clear error messages</li>
+<li><strong>No Silent Failures</strong>: All errors are logged and raised</li>
+<li><strong>Comprehensive Validation</strong>: Every input is validated before processing</li>
+<li><strong>Clear Messages</strong>: Error messages include actionable information</li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="complete-custom-training-example">Complete Custom Training Example<a class="headerlink" href="#complete-custom-training-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load_training_texts</span><span class="p">():</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Load your training texts here.&quot;&quot;&quot;</span>
+ <span class="k">return</span> <span class="p">[</span>
+ <span class="s2">&quot;This is a helpful and informative response.&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;I&#39;m not sure about this, but here&#39;s what I think.&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;That&#39;s a great question! Let me explain step by step.&quot;</span><span class="p">,</span>
+ <span class="c1"># ... more texts</span>
+ <span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+ <span class="c1"># Load training data</span>
+ <span class="n">training_texts</span> <span class="o">=</span> <span class="n">load_training_texts</span><span class="p">()</span>
+
+ <span class="c1"># Create PPO trainer with custom reward model</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+
+ <span class="c1"># Custom reward model training</span>
+ <span class="n">train_custom_reward_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">reward_training_texts</span><span class="o">=</span><span class="n">training_texts</span><span class="p">,</span>
+ <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">,</span> <span class="s2">&quot;coherence&quot;</span><span class="p">],</span>
+ <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+ <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span><span class="p">,</span>
+
+ <span class="c1"># Training parameters</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output/ppo_custom_reward&quot;</span>
+ <span class="p">)</span>
+
+ <span class="c1"># Setup and train</span>
+ <span class="n">trainer</span><span class="o">.</span><span class="n">setup_data</span><span class="p">()</span>
+ <span class="n">trainer</span><span class="o">.</span><span class="n">setup_trainer</span><span class="p">()</span>
+ <span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+ <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training completed: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+ <span class="n">main</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="standalone-training-example">Standalone Training Example<a class="headerlink" href="#standalone-training-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.rewards.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardModelTrainer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.rewards.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardRegistry</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">standalone_training</span><span class="p">():</span>
+ <span class="c1"># Get reward functions</span>
+ <span class="n">registry</span> <span class="o">=</span> <span class="n">RewardRegistry</span><span class="p">()</span>
+ <span class="n">reward_functions</span> <span class="o">=</span> <span class="p">[</span>
+ <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">),</span>
+ <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;sentiment&quot;</span><span class="p">),</span>
+ <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;safety&quot;</span><span class="p">)</span>
+ <span class="p">]</span>
+
+ <span class="c1"># Create trainer</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">RewardModelTrainer</span><span class="p">(</span>
+ <span class="n">base_model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">reward_functions</span><span class="o">=</span><span class="n">reward_functions</span><span class="p">,</span>
+ <span class="n">composite_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
+ <span class="p">)</span>
+
+ <span class="c1"># Generate training data</span>
+ <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Your training texts here...&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">20</span>
+ <span class="n">training_data</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">generate_training_data</span><span class="p">(</span><span class="n">texts</span><span class="p">)</span>
+
+ <span class="c1"># Train model</span>
+ <span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_reward_model</span><span class="p">(</span>
+ <span class="n">training_data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/standalone&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span>
+ <span class="p">)</span>
+
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model trained and saved to: </span><span class="si">{</span><span class="n">model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+ <span class="n">standalone_training</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="supported-reward-functions">Supported Reward Functions<a class="headerlink" href="#supported-reward-functions" title="Permanent link">&para;</a></h2>
+<p>The system supports all reward functions available in the registry:</p>
+<ul>
+<li><strong>Length</strong>: Text length rewards</li>
+<li><strong>Sentiment</strong>: Sentiment analysis rewards</li>
+<li><strong>Safety</strong>: Safety and toxicity rewards</li>
+<li><strong>Coherence</strong>: Text coherence rewards</li>
+<li><strong>BLEU</strong>: BLEU score rewards</li>
+<li><strong>ROUGE</strong>: ROUGE score rewards</li>
+<li><strong>Math Correctness</strong>: Mathematical reasoning rewards</li>
+<li><strong>Code Syntax</strong>: Code quality rewards</li>
+<li><strong>Toxicity</strong>: Toxicity detection rewards</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>"Need at least 10 training texts"</strong></li>
+<li>Solution: Provide at least 10 training texts</li>
+<li>
+<p>Check: <code>len(training_texts) &gt;= 10</code></p>
+</li>
+<li>
+<p><strong>"Missing reward functions"</strong></p>
+</li>
+<li>Solution: Use functions available in registry</li>
+<li>
+<p>Check: <code>RewardRegistry().list_reward_functions()</code></p>
+</li>
+<li>
+<p><strong>"Multiple reward sources specified"</strong></p>
+</li>
+<li>Solution: Specify exactly one source (HF Hub, local, or custom)</li>
+<li>
+<p>Check: Only one of <code>reward_model_name</code>, <code>reward_model_path</code>, <code>train_custom_reward_model</code> should be True</p>
+</li>
+<li>
+<p><strong>"reward_model_path does not exist"</strong></p>
+</li>
+<li>Solution: Ensure local path exists and contains model files</li>
+<li>
+<p>Check: Path exists and contains <code>config.json</code> and model files</p>
+</li>
+<li>
+<p><strong>"Model not accessible on HuggingFace Hub"</strong></p>
+</li>
+<li>Solution: Check model name and internet connection</li>
+<li>Check: <code>huggingface_hub.model_info(model_name)</code></li>
+</ol>
+<h3 id="debug-mode">Debug Mode<a class="headerlink" href="#debug-mode" title="Permanent link">&para;</a></h3>
+<p>Enable debug logging for detailed information:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="validation-helpers">Validation Helpers<a class="headerlink" href="#validation-helpers" title="Permanent link">&para;</a></h3>
+<p>Use validation helpers to check configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.rewards.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardModelValidator</span>
+
+<span class="c1"># Validate training config</span>
+<span class="n">RewardModelValidator</span><span class="o">.</span><span class="n">validate_training_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Validate reward source</span>
+<span class="n">RewardModelValidator</span><span class="o">.</span><span class="n">validate_reward_source</span><span class="p">(</span><span class="n">source_config</span><span class="p">)</span>
+
+<span class="c1"># Validate HF model access</span>
+<span class="n">RewardModelValidator</span><span class="o">.</span><span class="n">validate_hf_model_access</span><span class="p">(</span><span class="s2">&quot;model-name&quot;</span><span class="p">)</span>
+
+<span class="c1"># Validate local path</span>
+<span class="n">RewardModelValidator</span><span class="o">.</span><span class="n">validate_local_path</span><span class="p">(</span><span class="s2">&quot;/path/to/model&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="memory-usage">Memory Usage<a class="headerlink" href="#memory-usage" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Batch Processing</strong>: Use appropriate batch sizes for your GPU memory</li>
+<li><strong>Gradient Accumulation</strong>: Use gradient accumulation for effective larger batch sizes</li>
+<li><strong>Model Quantization</strong>: Consider 4-bit quantization for memory efficiency</li>
+</ul>
+<h3 id="training-speed">Training Speed<a class="headerlink" href="#training-speed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Batch Size</strong>: Larger batches generally train faster</li>
+<li><strong>Gradient Accumulation</strong>: Use gradient accumulation to simulate larger batches</li>
+<li><strong>Model Size</strong>: Smaller base models train faster but may have lower quality</li>
+</ul>
+<h3 id="scalability">Scalability<a class="headerlink" href="#scalability" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Distributed Training</strong>: Use multiple GPUs for large-scale training</li>
+<li><strong>Data Parallelism</strong>: Process multiple samples in parallel</li>
+<li><strong>Model Parallelism</strong>: Split large models across devices</li>
+</ul>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Data Quality</strong>: Use high-quality training texts for better reward models</li>
+<li><strong>Function Selection</strong>: Choose reward functions relevant to your task</li>
+<li><strong>Weight Tuning</strong>: Experiment with different reward function weights</li>
+<li><strong>Validation</strong>: Always validate your configuration before training</li>
+<li><strong>Monitoring</strong>: Monitor training progress and adjust parameters as needed</li>
+<li><strong>Testing</strong>: Test trained models before using in production</li>
+</ol>
+<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<h3 id="rewardmodeltrainer">RewardModelTrainer<a class="headerlink" href="#rewardmodeltrainer" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RewardModelTrainer</span><span class="p">:</span>
+ <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reward_functions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RewardFunction</span><span class="p">],</span> <span class="n">composite_weights</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">generate_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">references</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RewardModelDataset</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">train_reward_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_data</span><span class="p">:</span> <span class="n">RewardModelDataset</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">create_scalable_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training_texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</code></pre></div>
+<h3 id="rewardmodeldataset">RewardModelDataset<a class="headerlink" href="#rewardmodeldataset" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RewardModelDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+ <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">reward_scores</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">tokenizer</span><span class="p">:</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span><span class="p">)</span>
+ <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+ <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="rewardmodelvalidator">RewardModelValidator<a class="headerlink" href="#rewardmodelvalidator" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RewardModelValidator</span><span class="p">:</span>
+ <span class="nd">@staticmethod</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">validate_reward_source</span><span class="p">(</span><span class="n">source_config</span><span class="p">:</span> <span class="n">RewardModelSourceConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+ <span class="nd">@staticmethod</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">validate_training_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">RewardModelTrainingConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+ <span class="nd">@staticmethod</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">validate_hf_model_access</span><span class="p">(</span><span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+ <span class="nd">@staticmethod</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">validate_local_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+<h3 id="rewardmodelloader">RewardModelLoader<a class="headerlink" href="#rewardmodelloader" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RewardModelLoader</span><span class="p">:</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">load_from_huggingface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AutoModelForSequenceClassification</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">load_from_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AutoModelForSequenceClassification</span>
+</code></pre></div>
+<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
+<p>When contributing to the reward model training system:</p>
+<ol>
+<li><strong>Follow Validation</strong>: Always use strict validation with no fallbacks</li>
+<li><strong>Add Tests</strong>: Include comprehensive tests for new features</li>
+<li><strong>Document Changes</strong>: Update documentation for any API changes</li>
+<li><strong>Error Handling</strong>: Provide clear, actionable error messages</li>
+<li><strong>Performance</strong>: Consider performance implications of changes</li>
+</ol>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
+<p>This reward model training system is part of the AlignTune project and follows the same license terms.</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

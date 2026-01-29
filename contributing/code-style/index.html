@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/contributing/code-style/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Code Style - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li class="active">
+    <a href="./">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../guide/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../testing/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#code-style-guide">Code Style Guide</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#code-formatting">Code Formatting</a></li>
+                
+                <li class="third-level"><a href="#black">Black</a></li>
+                <li class="third-level"><a href="#isort">isort</a></li>
+            <li class="second-level"><a href="#linting">Linting</a></li>
+                
+                <li class="third-level"><a href="#flake8">Flake8</a></li>
+                <li class="third-level"><a href="#ruff-alternative">Ruff (Alternative)</a></li>
+            <li class="second-level"><a href="#type-hints">Type Hints</a></li>
+                
+                <li class="third-level"><a href="#type-annotations">Type Annotations</a></li>
+                <li class="third-level"><a href="#type-checking">Type Checking</a></li>
+            <li class="second-level"><a href="#documentation">Documentation</a></li>
+                
+                <li class="third-level"><a href="#docstrings">Docstrings</a></li>
+                <li class="third-level"><a href="#inline-comments">Inline Comments</a></li>
+            <li class="second-level"><a href="#naming-conventions">Naming Conventions</a></li>
+                
+                <li class="third-level"><a href="#variables-and-functions">Variables and Functions</a></li>
+                <li class="third-level"><a href="#classes">Classes</a></li>
+                <li class="third-level"><a href="#constants">Constants</a></li>
+            <li class="second-level"><a href="#code-organization">Code Organization</a></li>
+                
+                <li class="third-level"><a href="#imports">Imports</a></li>
+                <li class="third-level"><a href="#file-structure">File Structure</a></li>
+            <li class="second-level"><a href="#error-handling">Error Handling</a></li>
+                
+                <li class="third-level"><a href="#exceptions">Exceptions</a></li>
+                <li class="third-level"><a href="#error-messages">Error Messages</a></li>
+            <li class="second-level"><a href="#testing">Testing</a></li>
+                
+                <li class="third-level"><a href="#test-structure">Test Structure</a></li>
+            <li class="second-level"><a href="#pre-commit-hooks">Pre-commit Hooks</a></li>
+                
+                <li class="third-level"><a href="#setup">Setup</a></li>
+                <li class="third-level"><a href="#hooks">Hooks</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="code-style-guide">Code Style Guide<a class="headerlink" href="#code-style-guide" title="Permanent link">&para;</a></h1>
+<p>Code style guidelines for contributing to AlignTune.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>AlignTune follows Python best practices and uses automated formatting tools to ensure consistent code style.</p>
+<h2 id="code-formatting">Code Formatting<a class="headerlink" href="#code-formatting" title="Permanent link">&para;</a></h2>
+<h3 id="black">Black<a class="headerlink" href="#black" title="Permanent link">&para;</a></h3>
+<p>We use <a href="https://black.readthedocs.io/">Black</a> for code formatting.</p>
+<p><strong>Configuration:</strong>
+- Line length: 100 characters
+- Target Python versions: 3.8, 3.9, 3.10, 3.11</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Format code</span>
+black<span class="w"> </span>src/
+
+<span class="c1"># Check formatting</span>
+black<span class="w"> </span>--check<span class="w"> </span>src/
+</code></pre></div></p>
+<h3 id="isort">isort<a class="headerlink" href="#isort" title="Permanent link">&para;</a></h3>
+<p>We use <a href="https://pycqa.github.io/isort/">isort</a> for import sorting.</p>
+<p><strong>Configuration:</strong>
+- Profile: black
+- Line length: 100
+- Multi-line output: 3</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Sort imports</span>
+isort<span class="w"> </span>src/
+
+<span class="c1"># Check imports</span>
+isort<span class="w"> </span>--check<span class="w"> </span>src/
+</code></pre></div></p>
+<h2 id="linting">Linting<a class="headerlink" href="#linting" title="Permanent link">&para;</a></h2>
+<h3 id="flake8">Flake8<a class="headerlink" href="#flake8" title="Permanent link">&para;</a></h3>
+<p>We use <a href="https://flake8.pycqa.org/">Flake8</a> for linting.</p>
+<p><strong>Configuration:</strong>
+- Line length: 100
+- Ignore: E501 (handled by Black)</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code>flake8<span class="w"> </span>src/
+</code></pre></div></p>
+<h3 id="ruff-alternative">Ruff (Alternative)<a class="headerlink" href="#ruff-alternative" title="Permanent link">&para;</a></h3>
+<p>We also support <a href="https://github.com/astral-sh/ruff">Ruff</a> as a modern alternative.</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code>ruff<span class="w"> </span>check<span class="w"> </span>src/
+ruff<span class="w"> </span>format<span class="w"> </span>src/
+</code></pre></div></p>
+<h2 id="type-hints">Type Hints<a class="headerlink" href="#type-hints" title="Permanent link">&para;</a></h2>
+<h3 id="type-annotations">Type Annotations<a class="headerlink" href="#type-annotations" title="Permanent link">&para;</a></h3>
+<p>Always use type hints for function signatures:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+ <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrainerBase</span><span class="p">:</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Create trainer with specified parameters.&quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+</code></pre></div>
+<h3 id="type-checking">Type Checking<a class="headerlink" href="#type-checking" title="Permanent link">&para;</a></h3>
+<p>We use <a href="https://mypy.readthedocs.io/">mypy</a> for type checking.</p>
+<p><strong>Usage:</strong>
+<div class="highlight"><pre><span></span><code>mypy<span class="w"> </span>src/
+</code></pre></div></p>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<h3 id="docstrings">Docstrings<a class="headerlink" href="#docstrings" title="Permanent link">&para;</a></h3>
+<p>Use Google-style docstrings:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">train_model</span><span class="p">(</span>
+ <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+ <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+ <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Train model on dataset.</span>
+
+<span class="sd"> Args:</span>
+<span class="sd"> model: Model to train</span>
+<span class="sd"> dataset: Training dataset</span>
+<span class="sd"> epochs: Number of training epochs</span>
+
+<span class="sd"> Returns:</span>
+<span class="sd"> Dictionary with training results</span>
+
+<span class="sd"> Raises:</span>
+<span class="sd"> TrainingError: If training fails</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+</code></pre></div>
+<h3 id="inline-comments">Inline Comments<a class="headerlink" href="#inline-comments" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use comments to explain "why", not "what"</li>
+<li>Keep comments up-to-date with code</li>
+<li>Remove commented-out code</li>
+</ul>
+<h2 id="naming-conventions">Naming Conventions<a class="headerlink" href="#naming-conventions" title="Permanent link">&para;</a></h2>
+<h3 id="variables-and-functions">Variables and Functions<a class="headerlink" href="#variables-and-functions" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use <code>snake_case</code> for variables and functions</li>
+<li>Use descriptive names</li>
+<li>Avoid abbreviations</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Good</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_sft_trainer</span><span class="p">():</span> <span class="o">...</span>
+<span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span>
+
+<span class="c1"># Bad</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">createSFT</span><span class="p">():</span> <span class="o">...</span>
+<span class="n">mn</span> <span class="o">=</span> <span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span>
+</code></pre></div>
+<h3 id="classes">Classes<a class="headerlink" href="#classes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use <code>PascalCase</code> for classes</li>
+<li>Use descriptive names</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Good</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SFTTrainerBase</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BackendFactory</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="c1"># Bad</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Trainer</span><span class="p">:</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Factory</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<h3 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use <code>UPPER_SNAKE_CASE</code> for constants</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Good</span>
+<span class="n">MAX_SEQUENCE_LENGTH</span> <span class="o">=</span> <span class="mi">2048</span>
+<span class="n">DEFAULT_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="c1"># Bad</span>
+<span class="n">maxSequenceLength</span> <span class="o">=</span> <span class="mi">2048</span>
+<span class="n">default_batch_size</span> <span class="o">=</span> <span class="mi">4</span>
+</code></pre></div>
+<h2 id="code-organization">Code Organization<a class="headerlink" href="#code-organization" title="Permanent link">&para;</a></h2>
+<h3 id="imports">Imports<a class="headerlink" href="#imports" title="Permanent link">&para;</a></h3>
+<p>Order imports as follows:</p>
+<ol>
+<li>Standard library</li>
+<li>Third-party packages</li>
+<li>Local imports</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Standard library</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="c1"># Third-party</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModel</span>
+
+<span class="c1"># Local</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+</code></pre></div>
+<h3 id="file-structure">File Structure<a class="headerlink" href="#file-structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Module docstring.&quot;&quot;&quot;</span>
+
+<span class="c1"># Imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">...</span>
+
+<span class="c1"># Constants</span>
+<span class="n">DEFAULT_VALUE</span> <span class="o">=</span> <span class="o">...</span>
+
+<span class="c1"># Classes</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="c1"># Functions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p">():</span> <span class="o">...</span>
+
+<span class="c1"># Main (if applicable)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+ <span class="o">...</span>
+</code></pre></div>
+<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
+<h3 id="exceptions">Exceptions<a class="headerlink" href="#exceptions" title="Permanent link">&para;</a></h3>
+<p>Use custom exceptions with clear messages:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.utils.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlignTuneError</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationError</span><span class="p">(</span><span class="n">AlignTuneError</span><span class="p">):</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Configuration error.&quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+
+<span class="c1"># Usage</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+ <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">&quot;Model name is required&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="error-messages">Error Messages<a class="headerlink" href="#error-messages" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Be specific and actionable</li>
+<li>Include context</li>
+<li>Suggest solutions</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Good</span>
+<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+ <span class="sa">f</span><span class="s2">&quot;Invalid backend &#39;</span><span class="si">{</span><span class="n">backend</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+ <span class="sa">f</span><span class="s2">&quot;Available backends: </span><span class="si">{</span><span class="n">available_backends</span><span class="si">}</span><span class="s2">. &quot;</span>
+ <span class="sa">f</span><span class="s2">&quot;Use &#39;auto&#39; for automatic selection.&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Bad</span>
+<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid backend&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<h3 id="test-structure">Test Structure<a class="headerlink" href="#test-structure" title="Permanent link">&para;</a></h3>
+<ul>
+<li>One test file per module</li>
+<li>Test file: <code>test_&lt;module_name&gt;.py</code></li>
+<li>Test class: <code>Test&lt;ClassName&gt;</code></li>
+<li>Test function: <code>test_&lt;function_name&gt;</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># test_backend_factory.py</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestBackendFactory</span><span class="p">:</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">test_create_sft_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test SFT trainer creation.&quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+</code></pre></div>
+<h2 id="pre-commit-hooks">Pre-commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permanent link">&para;</a></h2>
+<h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>pre-commit
+pre-commit<span class="w"> </span>install
+</code></pre></div>
+<h3 id="hooks">Hooks<a class="headerlink" href="#hooks" title="Permanent link">&para;</a></h3>
+<p>We use pre-commit hooks for:
+- Black formatting
+- isort import sorting
+- Flake8 linting
+- mypy type checking</p>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Format Before Committing</strong>: Run Black and isort</li>
+<li><strong>Type Hints</strong>: Add type hints to all functions</li>
+<li><strong>Documentation</strong>: Document public APIs</li>
+<li><strong>Error Handling</strong>: Use custom exceptions</li>
+<li><strong>Testing</strong>: Write tests for new features</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../testing/">Testing Guide</a> - Testing guidelines</li>
+<li><a href="../guide/">Contributing Guide</a> - General contributing guide</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

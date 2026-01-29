@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/user-guide/sft/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Supervised Fine-Tuning (SFT) - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../overview/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../rl/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#supervised-fine-tuning-sft-guide">Supervised Fine-Tuning (SFT) Guide</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+                <li class="third-level"><a href="#supported-task-types">Supported Task Types</a></li>
+            <li class="second-level"><a href="#quick-start">Quick Start</a></li>
+                
+                <li class="third-level"><a href="#basic-sft-training">Basic SFT Training</a></li>
+                <li class="third-level"><a href="#using-yaml-configuration">Using YAML Configuration</a></li>
+            <li class="second-level"><a href="#task-types">Task Types</a></li>
+                
+                <li class="third-level"><a href="#1-instruction-following">1. Instruction Following</a></li>
+                <li class="third-level"><a href="#2-supervised-fine-tuning">2. Supervised Fine-Tuning</a></li>
+                <li class="third-level"><a href="#3-text-classification">3. Text Classification</a></li>
+                <li class="third-level"><a href="#4-token-classification">4. Token Classification</a></li>
+                <li class="third-level"><a href="#5-text-generation">5. Text Generation</a></li>
+                <li class="third-level"><a href="#6-chat-completion">6. Chat Completion</a></li>
+            <li class="second-level"><a href="#backend-selection">Backend Selection</a></li>
+                
+                <li class="third-level"><a href="#trl-backend-recommended-for-classification">TRL Backend (Recommended for Classification)</a></li>
+                <li class="third-level"><a href="#unsloth-backend-recommended-for-generation">Unsloth Backend (Recommended for Generation)</a></li>
+                <li class="third-level"><a href="#auto-backend-selection">Auto Backend Selection</a></li>
+            <li class="second-level"><a href="#configuration-options">Configuration Options</a></li>
+                
+                <li class="third-level"><a href="#model-configuration">Model Configuration</a></li>
+                <li class="third-level"><a href="#training-configuration">Training Configuration</a></li>
+                <li class="third-level"><a href="#dataset-configuration">Dataset Configuration</a></li>
+            <li class="second-level"><a href="#advanced-features">Advanced Features</a></li>
+                
+                <li class="third-level"><a href="#loraqlora-fine-tuning">LoRA/QLoRA Fine-Tuning</a></li>
+                <li class="third-level"><a href="#sequence-packing">Sequence Packing</a></li>
+                <li class="third-level"><a href="#mixed-precision-training">Mixed Precision Training</a></li>
+                <li class="third-level"><a href="#gradient-checkpointing">Gradient Checkpointing</a></li>
+            <li class="second-level"><a href="#evaluation">Evaluation</a></li>
+                
+                <li class="third-level"><a href="#basic-evaluation">Basic Evaluation</a></li>
+                <li class="third-level"><a href="#custom-evaluation-dataset">Custom Evaluation Dataset</a></li>
+                <li class="third-level"><a href="#zero-shot-evaluation">Zero-Shot Evaluation</a></li>
+            <li class="second-level"><a href="#model-management">Model Management</a></li>
+                
+                <li class="third-level"><a href="#saving-models">Saving Models</a></li>
+                <li class="third-level"><a href="#pushing-to-huggingface-hub">Pushing to HuggingFace Hub</a></li>
+                <li class="third-level"><a href="#loading-saved-models">Loading Saved Models</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+                <li class="third-level"><a href="#1-choose-the-right-task-type">1. Choose the Right Task Type</a></li>
+                <li class="third-level"><a href="#2-backend-selection">2. Backend Selection</a></li>
+                <li class="third-level"><a href="#3-memory-optimization">3. Memory Optimization</a></li>
+                <li class="third-level"><a href="#4-learning-rate-scheduling">4. Learning Rate Scheduling</a></li>
+                <li class="third-level"><a href="#5-dataset-size">5. Dataset Size</a></li>
+                <li class="third-level"><a href="#6-sequence-length">6. Sequence Length</a></li>
+                <li class="third-level"><a href="#7-regular-checkpointing">7. Regular Checkpointing</a></li>
+            <li class="second-level"><a href="#troubleshooting">Troubleshooting</a></li>
+                
+                <li class="third-level"><a href="#out-of-memory-errors">Out of Memory Errors</a></li>
+                <li class="third-level"><a href="#slow-training">Slow Training</a></li>
+                <li class="third-level"><a href="#poor-model-performance">Poor Model Performance</a></li>
+                <li class="third-level"><a href="#dataset-format-issues">Dataset Format Issues</a></li>
+            <li class="second-level"><a href="#examples">Examples</a></li>
+                
+                <li class="third-level"><a href="#complete-instruction-following-example">Complete Instruction Following Example</a></li>
+                <li class="third-level"><a href="#complete-classification-example">Complete Classification Example</a></li>
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+            <li class="second-level"><a href="#additional-resources">Additional Resources</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="supervised-fine-tuning-sft-guide">Supervised Fine-Tuning (SFT) Guide<a class="headerlink" href="#supervised-fine-tuning-sft-guide" title="Permanent link">&para;</a></h1>
+<p>Complete guide to Supervised Fine-Tuning with AlignTune, covering all task types, configurations, and best practices.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Supervised Fine-Tuning (SFT) is the process of training a pre-trained language model on a labeled dataset to adapt it for specific tasks. AlignTune provides a unified interface for SFT across multiple task types with support for both TRL and Unsloth backends.</p>
+<h3 id="supported-task-types">Supported Task Types<a class="headerlink" href="#supported-task-types" title="Permanent link">&para;</a></h3>
+<p>AlignTune supports six main SFT task types:</p>
+<ol>
+<li><strong>Instruction Following</strong> - Teach models to follow instructions</li>
+<li><strong>Supervised Fine-Tuning</strong> - General-purpose fine-tuning</li>
+<li><strong>Text Classification</strong> - Classify text into categories</li>
+<li><strong>Token Classification</strong> - Named Entity Recognition (NER), POS tagging</li>
+<li><strong>Text Generation</strong> - Generate coherent text</li>
+<li><strong>Chat Completion</strong> - Conversational AI training</li>
+</ol>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="basic-sft-training">Basic SFT Training<a class="headerlink" href="#basic-sft-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Create and train SFT model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># or &quot;unsloth&quot; for faster training</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">)</span>
+
+<span class="c1"># Train the model</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Save the model</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model saved to: </span><span class="si">{</span><span class="n">model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="using-yaml-configuration">Using YAML Configuration<a class="headerlink" href="#using-yaml-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># config.yaml</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">name_or_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;microsoft/DialoGPT-medium&quot;</span>
+<span class="w"> </span><span class="nt">max_seq_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span>
+
+<span class="nt">dataset</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tatsu-lab/alpaca&quot;</span>
+<span class="w"> </span><span class="nt">max_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w"> </span><span class="nt">task_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;supervised_fine_tuning&quot;</span>
+
+<span class="nt">train</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w"> </span><span class="nt">per_device_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w"> </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2e-4</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./output&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.sft.config_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFTConfigLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Load configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SFTConfigLoader</span><span class="o">.</span><span class="n">load_from_yaml</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create trainer from config</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name_or_path</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">per_device_batch_size</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_seq_length</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">max_samples</span><span class="p">,</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">task_type</span><span class="o">.</span><span class="n">value</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="task-types">Task Types<a class="headerlink" href="#task-types" title="Permanent link">&para;</a></h2>
+<h3 id="1-instruction-following">1. Instruction Following<a class="headerlink" href="#1-instruction-following" title="Permanent link">&para;</a></h3>
+<p>Train models to follow instructions and generate appropriate responses.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-1.5B-Instruct&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span> <span class="c1"># Unsloth recommended for generation tasks</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;instruction_following&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+    <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="c1"># Longer sequences for instructions</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="c1"># Column mappings for instruction datasets</span>
+    <span class="n">instruction_column</span><span class="o">=</span><span class="s2">&quot;instruction&quot;</span><span class="p">,</span>
+    <span class="n">response_column</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
+    <span class="n">input_column</span><span class="o">=</span><span class="s2">&quot;input&quot;</span>
+<span class="p">)</span>
+
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Dataset Format:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w"> </span><span class="nt">&quot;instruction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Explain machine learning&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;input&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;output&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Machine learning is a subset of AI...&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="2-supervised-fine-tuning">2. Supervised Fine-Tuning<a class="headerlink" href="#2-supervised-fine-tuning" title="Permanent link">&para;</a></h3>
+<p>General-purpose fine-tuning for any text-to-text task.</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;databricks/databricks-dolly-15k&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;supervised_fine_tuning&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">auto_detect_fields</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Automatically detect dataset fields</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="3-text-classification">3. Text Classification<a class="headerlink" href="#3-text-classification" title="Permanent link">&para;</a></h3>
+<p>Classify text into predefined categories (sentiment, topic, etc.).</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;distilbert-base-uncased&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;imdb&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># TRL recommended for classification</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;text_classification&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+ <span class="c1"># Classification-specific</span>
+ <span class="n">text_column</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+ <span class="n">label_column</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+ <span class="n">num_labels</span><span class="o">=</span><span class="mi">2</span> <span class="c1"># Binary classification</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Dataset Format:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w"> </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This movie is fantastic!&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="4-token-classification">4. Token Classification<a class="headerlink" href="#4-token-classification" title="Permanent link">&para;</a></h3>
+<p>Named Entity Recognition (NER), Part-of-Speech tagging, etc.</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;lhoestq/conll2003&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># TRL recommended for token classification</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;token_classification&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="c1"># Dataset split</span>
+ <span class="n">tokens_column</span><span class="o">=</span><span class="s2">&quot;tokens&quot;</span><span class="p">,</span>
+ <span class="n">tags_column</span><span class="o">=</span><span class="s2">&quot;ner_tags&quot;</span><span class="p">,</span>
+ <span class="n">num_labels</span><span class="o">=</span><span class="mi">9</span> <span class="c1"># Number of NER tag classes</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Dataset Format:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w"> </span><span class="nt">&quot;tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Apple&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;is&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;company&quot;</span><span class="p">],</span>
+<span class="w"> </span><span class="nt">&quot;ner_tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">B</span><span class="mi">-</span><span class="err">ORG</span><span class="p">,</span><span class="w"> </span><span class="err">O</span><span class="p">,</span><span class="w"> </span><span class="err">O</span><span class="p">,</span><span class="w"> </span><span class="err">O</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="5-text-generation">5. Text Generation<a class="headerlink" href="#5-text-generation" title="Permanent link">&para;</a></h3>
+<p>Generate coherent, context-aware text.</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Salesforce/wikitext&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># Unsloth recommended for generation</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;text_generation&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+    <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">text_column</span><span class="o">=</span><span class="s2">&quot;text&quot;</span>
+<span class="p">)</span>
+
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="6-chat-completion">6. Chat Completion<a class="headerlink" href="#6-chat-completion" title="Permanent link">&para;</a></h3>
+<p>Train conversational AI models with chat templates.</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;mistralai/Mistral-7B-v0.1&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrachat_200k&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;chat_completion&quot;</span><span class="p">,</span>
+ <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train_sft&quot;</span><span class="p">,</span> <span class="c1"># Dataset split</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="c1"># Longer for conversations</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">messages_column</span><span class="o">=</span><span class="s2">&quot;messages&quot;</span><span class="p">,</span>
+ <span class="n">chat_template</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span> <span class="c1"># Auto-detect chat template</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Dataset Format:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w"> </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello!&quot;</span><span class="p">},</span>
+<span class="w"> </span><span class="p">{</span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hi! How can I help?&quot;</span><span class="p">}</span>
+<span class="w"> </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h2 id="backend-selection">Backend Selection<a class="headerlink" href="#backend-selection" title="Permanent link">&para;</a></h2>
+<h3 id="trl-backend-recommended-for-classification">TRL Backend (Recommended for Classification)<a class="headerlink" href="#trl-backend-recommended-for-classification" title="Permanent link">&para;</a></h3>
+<p><strong>Use TRL when:</strong>
+- Training classification models
+- Training token classification (NER)
+- Need maximum compatibility
+- Working with smaller models</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;distilbert-base-uncased&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;imdb&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># Explicit TRL backend</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;text_classification&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="unsloth-backend-recommended-for-generation">Unsloth Backend (Recommended for Generation)<a class="headerlink" href="#unsloth-backend-recommended-for-generation" title="Permanent link">&para;</a></h3>
+<p><strong>Use Unsloth when:</strong>
+- Training generation models (faster)
+- Working with large models
+- Need memory efficiency
+- Training instruction following or chat models</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span> <span class="c1"># Unsloth for speed</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;instruction_following&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="auto-backend-selection">Auto Backend Selection<a class="headerlink" href="#auto-backend-selection" title="Permanent link">&para;</a></h3>
+<p>Let AlignTune choose the best backend:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="c1"># Automatic selection</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;instruction_following&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="configuration-options">Configuration Options<a class="headerlink" href="#configuration-options" title="Permanent link">&para;</a></h2>
+<h3 id="model-configuration">Model Configuration<a class="headerlink" href="#model-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="c1"># Model settings</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span> <span class="c1"># 4-bit quantization</span>
+ <span class="n">peft_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Enable LoRA</span>
+ <span class="n">lora_r</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="c1"># LoRA rank</span>
+ <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="c1"># LoRA alpha</span>
+ <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+ <span class="c1"># For GPT2 models, use: lora_target_modules=[&quot;c_attn&quot;, &quot;c_proj&quot;]</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Memory optimization</span>
+ <span class="n">use_flash_attention_2</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Flash Attention (if available)</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="training-configuration">Training Configuration<a class="headerlink" href="#training-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="c1"># Training settings</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># Use epochs instead</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="c1"># Effective batch size = 16</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+ <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+ <span class="n">warmup_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+ <span class="n">max_grad_norm</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+ <span class="c1"># Advanced settings</span>
+ <span class="n">packing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Sequence packing for efficiency</span>
+ <span class="c1"># Note: For GPT2 models, use backend=&quot;trl&quot; as GPT2 is not supported by Unsloth</span>
+ <span class="n">packing_strategy</span><span class="o">=</span><span class="s2">&quot;bfd&quot;</span><span class="p">,</span> <span class="c1"># &quot;bfd&quot; or &quot;wrapped&quot;</span>
+ <span class="n">loss_type</span><span class="o">=</span><span class="s2">&quot;nll&quot;</span><span class="p">,</span> <span class="c1"># &quot;nll&quot; or &quot;dft&quot;</span>
+ <span class="n">completion_only_loss</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Only compute loss on completion</span>
+ <span class="n">activation_offloading</span><span class="o">=</span><span class="kc">False</span> <span class="c1"># Offload activations to CPU</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="dataset-configuration">Dataset Configuration<a class="headerlink" href="#dataset-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="c1"># Dataset settings</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="c1"># Limit dataset size</span>
+ <span class="n">percent</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="c1"># Use 10% of dataset</span>
+ <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="c1"># Dataset split</span>
+ <span class="c1"># Note: For GPT2 models, use backend=&quot;trl&quot; as GPT2 is not supported by Unsloth</span>
+ <span class="c1"># Column mappings</span>
+ <span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span>
+ <span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="s2">&quot;instruction&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;response&quot;</span>
+ <span class="p">},</span>
+ <span class="c1"># Field detection</span>
+ <span class="n">auto_detect_fields</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Auto-detect dataset fields</span>
+ <span class="n">dataset_num_proc</span><span class="o">=</span><span class="mi">4</span> <span class="c1"># Parallel processing</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">&para;</a></h2>
+<h3 id="loraqlora-fine-tuning">LoRA/QLoRA Fine-Tuning<a class="headerlink" href="#loraqlora-fine-tuning" title="Permanent link">&para;</a></h3>
+<p>Efficient fine-tuning with parameter-efficient methods:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="c1"># LoRA configuration</span>
+ <span class="n">peft_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">lora_r</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+ <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+ <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+ <span class="n">lora_target_modules</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;q_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;k_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;v_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;o_proj&quot;</span><span class="p">],</span>
+ <span class="c1"># Quantization</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span>
+ <span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+ <span class="s2">&quot;bnb_4bit_compute_dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;float16&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;bnb_4bit_quant_type&quot;</span><span class="p">:</span> <span class="s2">&quot;nf4&quot;</span>
+ <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="sequence-packing">Sequence Packing<a class="headerlink" href="#sequence-packing" title="Permanent link">&para;</a></h3>
+<p>Pack multiple sequences into a single batch for efficiency:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># Use TRL for GPT2 models or models not supported by Unsloth</span>
+ <span class="n">packing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Enable packing</span>
+ <span class="n">packing_strategy</span><span class="o">=</span><span class="s2">&quot;bfd&quot;</span><span class="p">,</span> <span class="c1"># &quot;bfd&quot; (best-fit-decreasing) or &quot;wrapped&quot;</span>
+ <span class="n">padding_free</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># No padding needed with packing</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">2048</span> <span class="c1"># Longer sequences with packing</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="mixed-precision-training">Mixed Precision Training<a class="headerlink" href="#mixed-precision-training" title="Permanent link">&para;</a></h3>
+<p>Use FP16 or BF16 for faster training:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="c1"># Precision settings (handled automatically by backend)</span>
+ <span class="c1"># Unsloth uses optimal precision automatically</span>
+ <span class="c1"># TRL: set fp16=True or bf16=True in training config</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="gradient-checkpointing">Gradient Checkpointing<a class="headerlink" href="#gradient-checkpointing" title="Permanent link">&para;</a></h3>
+<p>Reduce memory usage during training:</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Enable checkpointing</span>
+ <span class="n">activation_offloading</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Offload activations to CPU</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="evaluation">Evaluation<a class="headerlink" href="#evaluation" title="Permanent link">&para;</a></h2>
+<h3 id="basic-evaluation">Basic Evaluation<a class="headerlink" href="#basic-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Evaluate on default validation set</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-evaluation-dataset">Custom Evaluation Dataset<a class="headerlink" href="#custom-evaluation-dataset" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="c1"># Load evaluation dataset</span>
+<span class="n">eval_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loss: </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;eval_loss&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Perplexity: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eval_perplexity&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="zero-shot-evaluation">Zero-Shot Evaluation<a class="headerlink" href="#zero-shot-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate predictions for test prompts</span>
+<span class="c1"># Note: Make sure to call trainer.train() or trainer.setup_model() before using predict()</span>
+<span class="n">test_prompts</span> <span class="o">=</span> <span class="p">[</span>
+ <span class="s2">&quot;What is machine learning?&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;Explain deep learning&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;What is NLP?&quot;</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_prompts</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">test_prompts</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;A: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="model-management">Model Management<a class="headerlink" href="#model-management" title="Permanent link">&para;</a></h2>
+<h3 id="saving-models">Saving Models<a class="headerlink" href="#saving-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save after training</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model saved to: </span><span class="si">{</span><span class="n">model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save to custom directory</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./my_models/experiment_1&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="pushing-to-huggingface-hub">Pushing to HuggingFace Hub<a class="headerlink" href="#pushing-to-huggingface-hub" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Push to Hub</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+ <span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;username/my-sft-model&quot;</span><span class="p">,</span>
+ <span class="n">private</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model available at: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Push with custom commit message</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">push_to_hub</span><span class="p">(</span>
+ <span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;username/my-sft-model&quot;</span><span class="p">,</span>
+ <span class="n">commit_message</span><span class="o">=</span><span class="s2">&quot;Trained on Alpaca dataset with 3 epochs&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="loading-saved-models">Loading Saved Models<a class="headerlink" href="#loading-saved-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Load saved model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;./output/my_model&quot;</span><span class="p">,</span> <span class="c1"># Path to saved model</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Use for inference</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s2">&quot;What is AI?&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-choose-the-right-task-type">1. Choose the Right Task Type<a class="headerlink" href="#1-choose-the-right-task-type" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Instruction Following</strong>: For teaching models to follow instructions</li>
+<li><strong>Text Classification</strong>: For categorization tasks</li>
+<li><strong>Token Classification</strong>: For NER, POS tagging</li>
+<li><strong>Chat Completion</strong>: For conversational AI</li>
+<li><strong>Text Generation</strong>: For general text generation</li>
+</ul>
+<h3 id="2-backend-selection">2. Backend Selection<a class="headerlink" href="#2-backend-selection" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>TRL</strong>: Use for classification, token classification, maximum compatibility</li>
+<li><strong>Unsloth</strong>: Use for generation tasks (faster), large models</li>
+</ul>
+<h3 id="3-memory-optimization">3. Memory Optimization<a class="headerlink" href="#3-memory-optimization" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># For large models, use:</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">peft_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># LoRA</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span> <span class="c1"># 4-bit quantization</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Gradient checkpointing</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Smaller batch size</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">8</span> <span class="c1"># Compensate with accumulation</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="4-learning-rate-scheduling">4. Learning Rate Scheduling<a class="headerlink" href="#4-learning-rate-scheduling" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># Warmup for stable training</span>
+ <span class="n">warmup_ratio</span><span class="o">=</span><span class="mf">0.1</span> <span class="c1"># Or use ratio instead</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="5-dataset-size">5. Dataset Size<a class="headerlink" href="#5-dataset-size" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Start with a subset (<code>max_samples=1000</code>) for testing</li>
+<li>Gradually increase dataset size</li>
+<li>Use <code>percent</code> parameter for quick experiments</li>
+</ul>
+<h3 id="6-sequence-length">6. Sequence Length<a class="headerlink" href="#6-sequence-length" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Classification</strong>: 512 tokens is usually sufficient</li>
+<li><strong>Instruction Following</strong>: 1024-2048 tokens</li>
+<li><strong>Chat Completion</strong>: 2048+ tokens for conversations</li>
+<li><strong>Text Generation</strong>: 1024-2048 tokens</li>
+</ul>
+<h3 id="7-regular-checkpointing">7. Regular Checkpointing<a class="headerlink" href="#7-regular-checkpointing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">save_interval</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="c1"># Save every 500 steps</span>
+ <span class="n">eval_interval</span><span class="o">=</span><span class="mi">100</span> <span class="c1"># Evaluate every 100 steps</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="out-of-memory-errors">Out of Memory Errors<a class="headerlink" href="#out-of-memory-errors" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Reduce batch size and use gradient accumulation</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Reduce batch size</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="c1"># Increase accumulation</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Enable checkpointing</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="c1"># Use quantization</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="slow-training">Slow Training<a class="headerlink" href="#slow-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use Unsloth backend for generation tasks</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span> <span class="c1"># faster</span>
+ <span class="n">packing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Enable sequence packing</span>
+ <span class="n">dataset_num_proc</span><span class="o">=</span><span class="mi">4</span> <span class="c1"># Parallel data processing</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="poor-model-performance">Poor Model Performance<a class="headerlink" href="#poor-model-performance" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Increase training duration and adjust learning rate</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># More epochs</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="c1"># Lower learning rate</span>
+ <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="c1"># More warmup</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="kc">None</span> <span class="c1"># Use full dataset</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="dataset-format-issues">Dataset Format Issues<a class="headerlink" href="#dataset-format-issues" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use column mapping for custom datasets</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;my-custom-dataset&quot;</span><span class="p">,</span>
+ <span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span>
+ <span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span> <span class="c1"># Map custom column names</span>
+ <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;completion&quot;</span>
+ <span class="p">},</span>
+ <span class="n">auto_detect_fields</span><span class="o">=</span><span class="kc">False</span> <span class="c1"># Disable auto-detection</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="complete-instruction-following-example">Complete Instruction Following Example<a class="headerlink" href="#complete-instruction-following-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Create trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;gpt2&quot;</span><span class="p">,</span> <span class="c1"># Use Qwen/Llama instead of GPT2 for Unsloth</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># Use TRL for GPT2 models</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;instruction_following&quot;</span><span class="p">,</span>
+ <span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;response&quot;</span><span class="p">},</span> <span class="c1"># Map output column to response</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+ <span class="n">peft_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">lora_target_modules</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;c_attn&quot;</span><span class="p">,</span> <span class="s2">&quot;c_proj&quot;</span><span class="p">],</span> <span class="c1"># For GPT2 models</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Train</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting training...&quot;</span><span class="p">)</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Evaluate</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Evaluating...&quot;</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Evaluation metrics: </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model saved to: </span><span class="si">{</span><span class="n">model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="s2">&quot;What is machine learning?&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prediction: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="complete-classification-example">Complete Classification Example<a class="headerlink" href="#complete-classification-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Create trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;distilbert-base-uncased&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;imdb&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># TRL for classification</span>
+ <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;text_classification&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+ <span class="n">text_column</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+ <span class="n">label_column</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span>
+ <span class="n">num_labels</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+
+<span class="c1"># Train</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="c1"># Evaluate</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Accuracy: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eval_accuracy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../rl/">RL Training Guide</a> - Learn about reinforcement learning training</li>
+<li><a href="../reward-functions/">Reward Functions Guide</a> - Explore reward functions for RL</li>
+<li><a href="../evaluation/">Evaluation Guide</a> - Comprehensive evaluation guide</li>
+<li><a href="../model-management/">Model Management</a> - Advanced model management</li>
+</ul>
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../api-reference/core/">API Reference</a> - Complete API documentation</li>
+<li><a href="../../examples/sft/">Examples</a> - More SFT examples</li>
+<li><a href="../../getting-started/backend-selection/">Backend Selection</a> - Detailed backend guide</li>
+<li><a href="../../getting-started/configuration/">Configuration Guide</a> - Configuration reference</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

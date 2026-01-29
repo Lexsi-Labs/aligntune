@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/algorithms/dpo/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>DPO - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+        
+            
+<li class="active">
+    <a href="./">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../overview/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../ppo/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#dpo-direct-preference-optimization">DPO (Direct Preference Optimization)</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+                <li class="third-level"><a href="#key-features">Key Features</a></li>
+            <li class="second-level"><a href="#how-it-works">How It Works</a></li>
+                
+                <li class="third-level"><a href="#mathematical-formulation">Mathematical Formulation</a></li>
+            <li class="second-level"><a href="#usage">Usage</a></li>
+                
+                <li class="third-level"><a href="#basic-dpo-training">Basic DPO Training</a></li>
+                <li class="third-level"><a href="#dpo-with-unsloth-backend">DPO with Unsloth Backend</a></li>
+                <li class="third-level"><a href="#dpo-with-custom-configuration">DPO with Custom Configuration</a></li>
+            <li class="second-level"><a href="#configuration-parameters">Configuration Parameters</a></li>
+                
+                <li class="third-level"><a href="#dpo-specific-parameters">DPO-Specific Parameters</a></li>
+                <li class="third-level"><a href="#general-rl-parameters">General RL Parameters</a></li>
+            <li class="second-level"><a href="#dataset-format">Dataset Format</a></li>
+                
+                <li class="third-level"><a href="#supported-datasets">Supported Datasets</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+                <li class="third-level"><a href="#1-beta-parameter-tuning">1. Beta Parameter Tuning</a></li>
+                <li class="third-level"><a href="#2-learning-rate">2. Learning Rate</a></li>
+                <li class="third-level"><a href="#3-batch-size">3. Batch Size</a></li>
+                <li class="third-level"><a href="#4-number-of-epochs">4. Number of Epochs</a></li>
+            <li class="second-level"><a href="#evaluation">Evaluation</a></li>
+                
+            <li class="second-level"><a href="#common-issues">Common Issues</a></li>
+                
+                <li class="third-level"><a href="#loss-not-decreasing">Loss Not Decreasing</a></li>
+                <li class="third-level"><a href="#overfitting">Overfitting</a></li>
+            <li class="second-level"><a href="#comparison-with-other-algorithms">Comparison with Other Algorithms</a></li>
+                
+            <li class="second-level"><a href="#references">References</a></li>
+                
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="dpo-direct-preference-optimization">DPO (Direct Preference Optimization)<a class="headerlink" href="#dpo-direct-preference-optimization" title="Permanent link">&para;</a></h1>
+<p>Direct Preference Optimization (DPO) is a popular RLHF algorithm that optimizes language models directly on preference data without requiring a separate reward model.</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>DPO eliminates the need for a reward model by directly optimizing the policy on preference pairs (chosen vs rejected responses). This makes it simpler and faster than PPO-based approaches.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>No Reward Model</strong>: Works directly with preference pairs</li>
+<li><strong>Fast Training</strong>: Simpler optimization than PPO</li>
+<li><strong>Both Backends</strong>: Supported by TRL and Unsloth</li>
+<li><strong>Widely Used</strong>: Industry-standard for preference learning</li>
+</ul>
+<hr />
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<p>DPO optimizes the policy to increase the likelihood of chosen responses while decreasing the likelihood of rejected responses, using a KL divergence constraint to prevent the policy from deviating too far from the reference model.</p>
+<h3 id="mathematical-formulation">Mathematical Formulation<a class="headerlink" href="#mathematical-formulation" title="Permanent link">&para;</a></h3>
+<p>The DPO objective maximizes:</p>
+<div class="highlight"><pre><span></span><code>L_DPO = E[log σ(β * (log π_θ(y_w | x) - log π_ref(y_w | x) - log π_θ(y_l | x) + log π_ref(y_l | x)))]
+</code></pre></div>
+<p>Where:
+- <code>π_θ</code>: Policy model
+- <code>π_ref</code>: Reference model
+- <code>y_w</code>: Chosen response
+- <code>y_l</code>: Rejected response
+- <code>β</code>: Temperature parameter</p>
+<hr />
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<h3 id="basic-dpo-training">Basic DPO Training<a class="headerlink" href="#basic-dpo-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span> <span class="c1"># DPO temperature parameter</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="dpo-with-unsloth-backend">DPO with Unsloth Backend<a class="headerlink" href="#dpo-with-unsloth-backend" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="dpo-with-custom-configuration">DPO with Custom Configuration<a class="headerlink" href="#dpo-with-custom-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-6</span><span class="p">,</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">reference_free</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># Use reference model</span>
+ <span class="n">label_smoothing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+ <span class="n">loss_type</span><span class="o">=</span><span class="s2">&quot;sigmoid&quot;</span> <span class="c1"># DPO loss type</span>
+<span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="configuration-parameters">Configuration Parameters<a class="headerlink" href="#configuration-parameters" title="Permanent link">&para;</a></h2>
+<h3 id="dpo-specific-parameters">DPO-Specific Parameters<a class="headerlink" href="#dpo-specific-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>beta</code></td>
+<td><code>float</code></td>
+<td><code>0.1</code></td>
+<td>DPO temperature parameter (controls KL penalty)</td>
+</tr>
+<tr>
+<td><code>reference_free</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Whether to use reference-free DPO</td>
+</tr>
+<tr>
+<td><code>label_smoothing</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Label smoothing factor</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td><code>str</code></td>
+<td><code>"sigmoid"</code></td>
+<td>Loss function type</td>
+</tr>
+</tbody>
+</table>
+<h3 id="general-rl-parameters">General RL Parameters<a class="headerlink" href="#general-rl-parameters" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>num_epochs</code></td>
+<td><code>int</code></td>
+<td><code>1</code></td>
+<td>Number of training epochs</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td><code>int</code></td>
+<td><code>4</code></td>
+<td>Per-device batch size</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td><code>float</code></td>
+<td><code>1e-6</code></td>
+<td>Learning rate</td>
+</tr>
+<tr>
+<td><code>max_seq_length</code></td>
+<td><code>int</code></td>
+<td><code>512</code></td>
+<td>Maximum sequence length</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="dataset-format">Dataset Format<a class="headerlink" href="#dataset-format" title="Permanent link">&para;</a></h2>
+<p>DPO requires preference pairs in the following format:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+ <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;What is machine learning?&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;Machine learning is a subset of AI...&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;I don&#39;t know about that topic.&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="supported-datasets">Supported Datasets<a class="headerlink" href="#supported-datasets" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Anthropic/hh-rlhf</strong>: Human preference dataset</li>
+<li><strong>OpenAssistant/oasst1</strong>: OpenAssistant conversations</li>
+<li>Custom datasets with <code>prompt</code>, <code>chosen</code>, <code>rejected</code> columns</li>
+</ul>
+<hr />
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-beta-parameter-tuning">1. Beta Parameter Tuning<a class="headerlink" href="#1-beta-parameter-tuning" title="Permanent link">&para;</a></h3>
+<p>The <code>beta</code> parameter controls the strength of the KL penalty:
+- <strong>Low beta (0.01-0.1)</strong>: Stronger preference learning, risk of overfitting
+- <strong>Medium beta (0.1-0.5)</strong>: Balanced learning
+- <strong>High beta (0.5-1.0)</strong>: More conservative, stays closer to reference</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Conservative training</span>
+<span class="n">beta</span><span class="o">=</span><span class="mf">0.5</span>
+
+<span class="c1"># Aggressive training</span>
+<span class="n">beta</span><span class="o">=</span><span class="mf">0.01</span>
+</code></pre></div>
+<h3 id="2-learning-rate">2. Learning Rate<a class="headerlink" href="#2-learning-rate" title="Permanent link">&para;</a></h3>
+<p>DPO typically requires lower learning rates than SFT:
+- Start with <code>1e-6</code> to <code>5e-6</code>
+- Adjust based on loss convergence</p>
+<h3 id="3-batch-size">3. Batch Size<a class="headerlink" href="#3-batch-size" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use batch size 1-4 for smaller models</li>
+<li>Use batch size 4-8 for larger models</li>
+<li>Consider gradient accumulation for effective larger batches</li>
+</ul>
+<h3 id="4-number-of-epochs">4. Number of Epochs<a class="headerlink" href="#4-number-of-epochs" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Usually 1-3 epochs are sufficient</li>
+<li>Monitor validation loss to avoid overfitting</li>
+</ul>
+<hr />
+<h2 id="evaluation">Evaluation<a class="headerlink" href="#evaluation" title="Permanent link">&para;</a></h2>
+<p>DPO evaluation includes:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.eval.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalConfig</span><span class="p">,</span> <span class="n">run_eval</span>
+
+<span class="n">MODEL_NAME</span> <span class="o">=</span> <span class="s2">&quot;microsoft/phi-2&quot;</span>
+<span class="n">DATASET</span> <span class="o">=</span> <span class="s2">&quot;Anthropic/hh-rlhf&quot;</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="s2">&quot;./output/dpo_phi2&quot;</span>
+<span class="n">trained_config</span> <span class="o">=</span> <span class="n">EvalConfig</span><span class="p">(</span>
+    <span class="n">model_path</span><span class="o">=</span><span class="n">trained_path</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">OUTPUT_DIR</span><span class="si">}</span><span class="s2">/eval_trained&quot;</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">data_task_type</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;reward_margin&quot;</span><span class="p">,</span> <span class="s2">&quot;preference_accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;win_rate&quot;</span><span class="p">],</span>
+    <span class="n">reference_model_path</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="n">DATASET</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="n">max_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">use_lora</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+    <span class="n">use_unsloth</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">trained_results</span> <span class="o">=</span> <span class="n">run_eval</span><span class="p">(</span><span class="n">trained_config</span><span class="p">)</span>
+<span class="n">Note</span><span class="p">:</span> <span class="n">For</span> <span class="n">Base</span> <span class="n">model</span> <span class="n">we</span> <span class="n">don</span><span class="s1">&#39;t need to pass model_path also if model is not trained using lora no need to pass base_model also</span>
+</code></pre></div>
+<hr />
+<h2 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h2>
+<h3 id="loss-not-decreasing">Loss Not Decreasing<a class="headerlink" href="#loss-not-decreasing" title="Permanent link">&para;</a></h3>
+<p><strong>Solutions</strong>:
+- Reduce learning rate
+- Increase beta (stronger KL penalty)
+- Check dataset quality
+- Verify preference pairs are correct</p>
+<h3 id="overfitting">Overfitting<a class="headerlink" href="#overfitting" title="Permanent link">&para;</a></h3>
+<p><strong>Solutions</strong>:
+- Increase beta
+- Reduce number of epochs
+- Use more regularization
+- Increase dataset size</p>
+<hr />
+<h2 id="comparison-with-other-algorithms">Comparison with Other Algorithms<a class="headerlink" href="#comparison-with-other-algorithms" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>DPO</th>
+<th>PPO</th>
+<th>GRPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reward Model</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Training Speed</td>
+<td>Fast</td>
+<td>Slow</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Setup Complexity</td>
+<td>Low</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Preference Data</td>
+<td>Required</td>
+<td>Optional</td>
+<td>Required</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization Paper</a></li>
+<li><a href="https://huggingface.co/docs/trl/dpo_trainer">TRL DPO Documentation</a></li>
+</ul>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><a href="../ppo/">PPO Guide</a></strong> - Learn about Proximal Policy Optimization</li>
+<li><strong><a href="../grpo/">GRPO Guide</a></strong> - Learn about Group Relative Policy Optimization</li>
+<li><strong><a href="../../getting-started/backend-selection/">Backend Selection</a></strong> - Choose the right backend</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

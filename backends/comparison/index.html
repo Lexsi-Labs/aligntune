@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support" name="description"/>
+<meta content="AlignTune Contributors" name="author"/>
+<link href="https://aligntune.github.io/backends/comparison/" rel="canonical"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Comparison - AlignTune</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<!-- Favicons -->
+<link href="../../assets/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="../../assets/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../assets/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../assets/site.webmanifest" rel="manifest"/>
+<link href="../../assets/favicon.ico" rel="shortcut icon"/>
+<!-- Android Chrome Icons -->
+<link href="../../assets/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="../../assets/android-chrome-512x512.png" rel="icon" sizes="512x512" type="image/png"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">AlignTune</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../..">Home</a>
+</li>
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+<li>
+<a href="../../getting-started/configuration/">Configuration</a>
+</li>
+<li>
+<a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/overview/">Overview</a>
+</li>
+<li>
+<a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+<li>
+<a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+<li>
+<a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+<li>
+<a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+<li>
+<a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/model-management/">Model Management</a>
+</li>
+<li>
+<a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Algorithms</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../algorithms/overview/">Overview</a>
+</li>
+<li>
+<a href="../../algorithms/dpo/">DPO</a>
+</li>
+<li>
+<a href="../../algorithms/ppo/">PPO</a>
+</li>
+<li>
+<a href="../../algorithms/grpo/">GRPO</a>
+</li>
+<li>
+<a href="../../algorithms/gspo/">GSPO</a>
+</li>
+<li>
+<a href="../../algorithms/dapo/">DAPO</a>
+</li>
+<li>
+<a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Backends</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../overview/">Overview</a>
+</li>
+<li>
+<a href="../trl/">TRL Backend</a>
+</li>
+<li>
+<a href="../unsloth/">Unsloth Backend</a>
+</li>
+<li class="active">
+<a href="./">Comparison</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../advanced/architecture/">Architecture</a>
+</li>
+<li>
+<a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+<li>
+<a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+<li>
+<a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api-reference/overview/">Overview</a>
+</li>
+<li>
+<a href="../../api-reference/core/">Core API</a>
+</li>
+<li>
+<a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+<li>
+<a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+<li>
+<a href="../../api-reference/trainers/">Trainers</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/overview/">Overview</a>
+</li>
+<li>
+<a href="../../examples/sft/">SFT Examples</a>
+</li>
+<li>
+<a href="../../examples/rl/">RL Examples</a>
+</li>
+<li>
+<a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+<li>
+<a href="../../notebooks/">Notebooks</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../cli-reference/">CLI Reference</a>
+</li>
+<li>
+<a href="../../cli/commands/">CLI Commands</a>
+</li>
+<li>
+<a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Compatibility</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+<li>
+<a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+<li>
+<a href="../../contributing/code-style/">Code Style</a>
+</li>
+<li>
+<a href="../../contributing/testing/">Testing</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+ </a>
+</li>
+<li>
+<a href="../unsloth/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+ </a>
+</li>
+<li>
+<a href="../../advanced/architecture/" rel="next">
+ Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#backend-comparison">Backend Comparison</a></li>
+<li class="second-level"><a href="#feature-comparison">Feature Comparison</a></li>
+<li class="second-level"><a href="#algorithm-support">Algorithm Support</a></li>
+<li class="third-level"><a href="#complete-support-matrix">Complete Support Matrix</a></li>
+<li class="second-level"><a href="#use-case-recommendations">Use Case Recommendations</a></li>
+<li class="third-level"><a href="#use-trl-backend-when">Use TRL Backend When:</a></li>
+<li class="third-level"><a href="#use-unsloth-backend-when">Use Unsloth Backend When:</a></li>
+<li class="second-level"><a href="#code-examples">Code Examples</a></li>
+<li class="third-level"><a href="#trl-backend-example">TRL Backend Example</a></li>
+<li class="third-level"><a href="#unsloth-backend-example">Unsloth Backend Example</a></li>
+<li class="second-level"><a href="#migration-scenarios">Migration Scenarios</a></li>
+<li class="third-level"><a href="#scenario-1-speed-optimization">Scenario 1: Speed Optimization</a></li>
+<li class="third-level"><a href="#scenario-2-memory-issues">Scenario 2: Memory Issues</a></li>
+<li class="third-level"><a href="#scenario-3-algorithm-support">Scenario 3: Algorithm Support</a></li>
+<li class="second-level"><a href="#decision-tree">Decision Tree</a></li>
+<li class="second-level"><a href="#summary">Summary</a></li>
+<li class="second-level"><a href="#next-steps">Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="backend-comparison">Backend Comparison<a class="headerlink" href="#backend-comparison" title="Permanent link">¶</a></h1>
+<p>Detailed side-by-side comparison of TRL and Unsloth backends.</p>
+<hr/>
+<h2 id="feature-comparison">Feature Comparison<a class="headerlink" href="#feature-comparison" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>TRL Backend</th>
+<th>Unsloth Backend</th>
+<th>Winner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Training Speed</strong></td>
+<td>Baseline</td>
+<td>faster</td>
+<td>Unsloth</td>
+</tr>
+<tr>
+<td><strong>Memory Usage</strong></td>
+<td>Baseline</td>
+<td>Less memory usage</td>
+<td>Unsloth</td>
+</tr>
+<tr>
+<td><strong>Reliability</strong></td>
+<td>Battle-tested</td>
+<td>Production-ready</td>
+<td>Tie</td>
+</tr>
+<tr>
+<td><strong>Algorithm Support</strong></td>
+<td>All algorithms</td>
+<td>Most algorithms</td>
+<td>TRL</td>
+</tr>
+<tr>
+<td><strong>CPU Support</strong></td>
+<td>Yes</td>
+<td>No</td>
+<td>TRL</td>
+</tr>
+<tr>
+<td><strong>Setup Complexity</strong></td>
+<td>Low</td>
+<td>Medium</td>
+<td>TRL</td>
+</tr>
+<tr>
+<td><strong>Model Compatibility</strong></td>
+<td>All models</td>
+<td>Optimized models</td>
+<td>TRL</td>
+</tr>
+<tr>
+<td><strong>Error Handling</strong></td>
+<td>Comprehensive</td>
+<td>Comprehensive</td>
+<td>Tie</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<!-- ## Performance Benchmarks
+
+### Training Speed (Tokens/Second)
+
+| Model | TRL Backend | Unsloth Backend | Speedup |
+|-------|-------------|-----------------|---------|
+| DialoGPT-small (117M) | 100 tokens/s | 250 tokens/s | Faster |
+| DialoGPT-medium (345M) | 80 tokens/s | 240 tokens/s | Faster |
+| Llama-3.2-1B | 60 tokens/s | 240 tokens/s | Faster |
+| Llama-3.2-3B | 40 tokens/s | 180 tokens/s | Faster |
+
+*Benchmarks on NVIDIA A100 GPU with batch_size=4*
+
+### Memory Usage (GB)
+
+| Model | TRL (Full FT) | TRL (LoRA) | Unsloth (LoRA) | Unsloth (QLoRA) |
+|-------|---------------|------------|----------------|-----------------|
+| DialoGPT-small | 2.0 GB | 1.5 GB | 0.6 GB | 0.4 GB |
+| DialoGPT-medium | 4.0 GB | 2.5 GB | 1.0 GB | 0.6 GB |
+| Llama-3.2-1B | 8.0 GB | 4.0 GB | 1.5 GB | 0.8 GB |
+| Llama-3.2-3B | 20.0 GB | 8.0 GB | 3.0 GB | 1.5 GB |
+
+*Memory usage for training with batch_size=4, max_seq_length=512* -->
+<hr/>
+<h2 id="algorithm-support">Algorithm Support<a class="headerlink" href="#algorithm-support" title="Permanent link">¶</a></h2>
+<h3 id="complete-support-matrix">Complete Support Matrix<a class="headerlink" href="#complete-support-matrix" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>TRL</th>
+<th>Unsloth</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SFT</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both fully supported</td>
+</tr>
+<tr>
+<td>DPO</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both fully supported</td>
+</tr>
+<tr>
+<td>PPO</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both fully supported</td>
+</tr>
+<tr>
+<td>GRPO</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both fully supported</td>
+</tr>
+<tr>
+<td>GSPO</td>
+<td>Yes</td>
+<td>No</td>
+<td>TRL only</td>
+</tr>
+<tr>
+<td>DAPO</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both fully supported</td>
+</tr>
+<tr>
+<td>Dr. GRPO</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both fully supported</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="use-case-recommendations">Use Case Recommendations<a class="headerlink" href="#use-case-recommendations" title="Permanent link">¶</a></h2>
+<h3 id="use-trl-backend-when">Use TRL Backend When:<a class="headerlink" href="#use-trl-backend-when" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Maximum Reliability Needed</strong></li>
+<li>Production deployments</li>
+<li>Critical applications</li>
+<li>
+<p>Long-running training jobs</p>
+</li>
+<li>
+<p><strong>Algorithm Requirements</strong></p>
+</li>
+<li>Using GSPO</li>
+<li>
+<p>Need all algorithm support</p>
+</li>
+<li>
+<p><strong>Hardware Constraints</strong></p>
+</li>
+<li>CPU-only environments</li>
+<li>CUDA compatibility issues</li>
+<li>
+<p>Limited GPU memory</p>
+</li>
+<li>
+<p><strong>Simplicity</strong></p>
+</li>
+<li>Minimal setup required</li>
+<li>Standard HuggingFace workflow</li>
+</ol>
+<h3 id="use-unsloth-backend-when">Use Unsloth Backend When:<a class="headerlink" href="#use-unsloth-backend-when" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Speed is Critical</strong></li>
+<li>Fast iteration needed</li>
+<li>Large-scale training</li>
+<li>
+<p>Time-constrained projects</p>
+</li>
+<li>
+<p><strong>Memory Constraints</strong></p>
+</li>
+<li>Limited GPU memory</li>
+<li>Training large models</li>
+<li>
+<p>Need memory efficiency</p>
+</li>
+<li>
+<p><strong>Supported Algorithms</strong></p>
+</li>
+<li>Using DPO, PPO, GRPO, etc.</li>
+<li>
+<p>Not using GSPO</p>
+</li>
+<li>
+<p><strong>GPU Available</strong></p>
+</li>
+<li>CUDA-capable GPU</li>
+<li>Optimized CUDA setup</li>
+</ol>
+<hr/>
+<h2 id="code-examples">Code Examples<a class="headerlink" href="#code-examples" title="Permanent link">¶</a></h2>
+<h3 id="trl-backend-example">TRL Backend Example<a class="headerlink" href="#trl-backend-example" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">"microsoft/DialoGPT-small"</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"tatsu-lab/alpaca"</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="unsloth-backend-example">Unsloth Backend Example<a class="headerlink" href="#unsloth-backend-example" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">"unsloth/Llama-3.2-1B-Instruct-bnb-4bit"</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"tatsu-lab/alpaca"</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">"unsloth"</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<hr/>
+<h2 id="migration-scenarios">Migration Scenarios<a class="headerlink" href="#migration-scenarios" title="Permanent link">¶</a></h2>
+<h3 id="scenario-1-speed-optimization">Scenario 1: Speed Optimization<a class="headerlink" href="#scenario-1-speed-optimization" title="Permanent link">¶</a></h3>
+<p><strong>Current</strong>: TRL backend, slow training
+<strong>Goal</strong>: Faster training</p>
+<p><strong>Solution</strong>: Switch to Unsloth backend
+<div class="highlight"><pre><span></span><code><span class="n">backend</span><span class="o">=</span><span class="s2">"unsloth"</span> <span class="c1"># faster</span>
+</code></pre></div></p>
+<h3 id="scenario-2-memory-issues">Scenario 2: Memory Issues<a class="headerlink" href="#scenario-2-memory-issues" title="Permanent link">¶</a></h3>
+<p><strong>Current</strong>: TRL backend, OOM errors
+<strong>Goal</strong>: Reduce memory usage</p>
+<p><strong>Solution</strong>: Switch to Unsloth with QLoRA
+<div class="highlight"><pre><span></span><code><span class="n">backend</span><span class="o">=</span><span class="s2">"unsloth"</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">"unsloth/Llama-3.2-1B-Instruct-bnb-4bit"</span> <span class="c1"># 4-bit quantized</span>
+</code></pre></div></p>
+<h3 id="scenario-3-algorithm-support">Scenario 3: Algorithm Support<a class="headerlink" href="#scenario-3-algorithm-support" title="Permanent link">¶</a></h3>
+<p><strong>Current</strong>: Using GSPO with Unsloth (not supported)
+<strong>Goal</strong>: Use GSPO</p>
+<p><strong>Solution</strong>: Switch to TRL backend
+<div class="highlight"><pre><span></span><code><span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span> <span class="c1"># GSPO only supported on TRL</span>
+</code></pre></div></p>
+<hr/>
+<h2 id="decision-tree">Decision Tree<a class="headerlink" href="#decision-tree" title="Permanent link">¶</a></h2>
+<div class="mermaid">flowchart TD
+ Start[Start] --&gt; GSPO{Need GSPO?}
+ GSPO --&gt;|Yes| TRL1[Use TRL Backend]
+ GSPO --&gt;|No| GPU{Have CUDA GPU?}
+ GPU --&gt;|No| TRL2[Use TRL Backend]
+ GPU --&gt;|Yes| Speed{Need Maximum Speed?}
+ Speed --&gt;|Yes| Unsloth1[Use Unsloth Backend]
+ Speed --&gt;|No| Memory{Memory Constrained?}
+ Memory --&gt;|Yes| Unsloth2[Use Unsloth Backend]
+ Memory --&gt;|No| TRL3[Use TRL Backend]
+</div>
+<hr/>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">¶</a></h2>
+<p><strong>Choose TRL Backend if:</strong>
+- You need maximum reliability
+- You're using GSPO
+- You're on CPU or have CUDA issues
+- You want the simplest setup</p>
+<p><strong>Choose Unsloth Backend if:</strong>
+- You have a CUDA GPU
+- You need maximum speed
+- You're memory constrained
+- You're using supported algorithms</p>
+<p><strong>Use Auto Selection if:</strong>
+- You want AlignTune to choose
+- You're unsure which to use
+- You want automatic fallback</p>
+<hr/>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong><a href="../trl/">TRL Backend</a></strong> - Detailed TRL guide</li>
+<li><strong><a href="../unsloth/">Unsloth Backend</a></strong> - Detailed Unsloth guide</li>
+<li><strong><a href="../../getting-started/backend-selection/">Backend Selection</a></strong> - Selection guide</li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: true
+});</script></body>
+</html>

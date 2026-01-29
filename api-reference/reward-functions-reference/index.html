@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/api-reference/reward-functions-reference/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>AlignTune Reward Functions Documentation - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#aligntune-reward-functions-documentation">AlignTune Reward Functions Documentation</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#available-reward-functions">Available Reward Functions</a></li>
+                
+                <li class="third-level"><a href="#basic-quality-rewards">Basic Quality Rewards</a></li>
+                <li class="third-level"><a href="#task-specific-rewards">Task-Specific Rewards</a></li>
+                <li class="third-level"><a href="#generation-quality-metrics">Generation Quality Metrics</a></li>
+                <li class="third-level"><a href="#code-quality-rewards">Code Quality Rewards</a></li>
+                <li class="third-level"><a href="#math-and-reasoning-rewards">Math and Reasoning Rewards</a></li>
+                <li class="third-level"><a href="#specialized-rewards">Specialized Rewards</a></li>
+                <li class="third-level"><a href="#multi-modal-rewards-future">Multi-Modal Rewards (Future)</a></li>
+            <li class="second-level"><a href="#usage-examples">Usage Examples</a></li>
+                
+                <li class="third-level"><a href="#basic-configuration">Basic Configuration</a></li>
+                <li class="third-level"><a href="#multiple-reward-functions">Multiple Reward Functions</a></li>
+                <li class="third-level"><a href="#task-specific-configurations">Task-Specific Configurations</a></li>
+            <li class="second-level"><a href="#advanced-configuration">Advanced Configuration</a></li>
+                
+                <li class="third-level"><a href="#custom-reward-weights">Custom Reward Weights</a></li>
+                <li class="third-level"><a href="#dynamic-reward-weighting">Dynamic Reward Weighting</a></li>
+            <li class="second-level"><a href="#reward-function-performance">Reward Function Performance</a></li>
+                
+                <li class="third-level"><a href="#computational-efficiency">Computational Efficiency</a></li>
+                <li class="third-level"><a href="#memory-usage">Memory Usage</a></li>
+                <li class="third-level"><a href="#accuracy-vs-speed-trade-offs">Accuracy vs Speed Trade-offs</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+                <li class="third-level"><a href="#reward-selection">Reward Selection</a></li>
+                <li class="third-level"><a href="#weight-tuning">Weight Tuning</a></li>
+                <li class="third-level"><a href="#performance-optimization">Performance Optimization</a></li>
+            <li class="second-level"><a href="#extending-reward-functions">Extending Reward Functions</a></li>
+                
+                <li class="third-level"><a href="#custom-reward-functions">Custom Reward Functions</a></li>
+                <li class="third-level"><a href="#combining-rewards">Combining Rewards</a></li>
+            <li class="second-level"><a href="#monitoring-and-debugging">Monitoring and Debugging</a></li>
+                
+                <li class="third-level"><a href="#reward-tracking">Reward Tracking</a></li>
+                <li class="third-level"><a href="#common-issues">Common Issues</a></li>
+                <li class="third-level"><a href="#debugging-tools">Debugging Tools</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="aligntune-reward-functions-documentation">AlignTune Reward Functions Documentation<a class="headerlink" href="#aligntune-reward-functions-documentation" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>AlignTune provides <strong>27+ prebuilt reward functions</strong> covering all major aspects of text generation quality, safety, and task-specific performance. These reward functions can be used individually or combined to create sophisticated reward landscapes for RLHF training.</p>
+<h2 id="available-reward-functions">Available Reward Functions<a class="headerlink" href="#available-reward-functions" title="Permanent link">&para;</a></h2>
+<h3 id="basic-quality-rewards"><strong>Basic Quality Rewards</strong><a class="headerlink" href="#basic-quality-rewards" title="Permanent link">&para;</a></h3>
+<h4 id="1-length-reward-length">1. <strong>Length Reward</strong> (<code>length</code>)<a class="headerlink" href="#1-length-reward-length" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Encourages appropriate response length</li>
+<li><strong>Parameters</strong>: <code>min_length</code>, <code>max_length</code></li>
+<li><strong>Use Case</strong>: Preventing too short or too long responses</li>
+<li><strong>Example</strong>: <code>{"type": "length", "params": {"min_length": 10, "max_length": 500}}</code></li>
+</ul>
+<h4 id="2-coherence-reward-coherence">2. <strong>Coherence Reward</strong> (<code>coherence</code>)<a class="headerlink" href="#2-coherence-reward-coherence" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures logical flow and coherence of text</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Ensuring responses make logical sense</li>
+<li><strong>Example</strong>: <code>{"type": "coherence", "weight": 1.0}</code></li>
+</ul>
+<h4 id="3-fluency-reward-fluency">3. <strong>Fluency Reward</strong> (<code>fluency</code>)<a class="headerlink" href="#3-fluency-reward-fluency" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures grammatical correctness and fluency</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Ensuring grammatically correct responses</li>
+<li><strong>Example</strong>: <code>{"type": "fluency", "weight": 0.8}</code></li>
+</ul>
+<h3 id="task-specific-rewards"><strong>Task-Specific Rewards</strong><a class="headerlink" href="#task-specific-rewards" title="Permanent link">&para;</a></h3>
+<h4 id="4-sentiment-reward-sentiment">4. <strong>Sentiment Reward</strong> (<code>sentiment</code>)<a class="headerlink" href="#4-sentiment-reward-sentiment" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Encourages specific sentiment (positive, negative, neutral)</li>
+<li><strong>Parameters</strong>: <code>target_sentiment</code></li>
+<li><strong>Use Case</strong>: Customer service, emotional support</li>
+<li><strong>Example</strong>: <code>{"type": "sentiment", "params": {"target_sentiment": "positive"}}</code></li>
+</ul>
+<h4 id="5-safety-reward-safety">5. <strong>Safety Reward</strong> (<code>safety</code>)<a class="headerlink" href="#5-safety-reward-safety" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Detects and penalizes harmful content</li>
+<li><strong>Parameters</strong>: <code>strict</code> (bool)</li>
+<li><strong>Use Case</strong>: Content moderation, safe AI</li>
+<li><strong>Example</strong>: <code>{"type": "safety", "params": {"strict": true}}</code></li>
+</ul>
+<h4 id="6-factuality-reward-factuality">6. <strong>Factuality Reward</strong> (<code>factuality</code>)<a class="headerlink" href="#6-factuality-reward-factuality" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures factual accuracy</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Information retrieval, Q&amp;A systems</li>
+<li><strong>Example</strong>: <code>{"type": "factuality", "weight": 1.2}</code></li>
+</ul>
+<h4 id="7-bias-reward-bias">7. <strong>Bias Reward</strong> (<code>bias</code>)<a class="headerlink" href="#7-bias-reward-bias" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Detects and penalizes biased content</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Fair AI, unbiased responses</li>
+<li><strong>Example</strong>: <code>{"type": "bias", "weight": 0.5}</code></li>
+</ul>
+<h3 id="generation-quality-metrics"><strong>Generation Quality Metrics</strong><a class="headerlink" href="#generation-quality-metrics" title="Permanent link">&para;</a></h3>
+<h4 id="8-bleu-reward-bleu">8. <strong>BLEU Reward</strong> (<code>bleu</code>)<a class="headerlink" href="#8-bleu-reward-bleu" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures n-gram overlap with reference</li>
+<li><strong>Parameters</strong>: <code>n_gram</code>, <code>smooth</code></li>
+<li><strong>Use Case</strong>: Translation, summarization</li>
+<li><strong>Example</strong>: <code>{"type": "bleu", "params": {"n_gram": 4}}</code></li>
+</ul>
+<h4 id="9-rouge-reward-rouge">9. <strong>ROUGE Reward</strong> (<code>rouge</code>)<a class="headerlink" href="#9-rouge-reward-rouge" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures recall-oriented understudy for gisting evaluation</li>
+<li><strong>Parameters</strong>: <code>rouge_type</code> (rouge-1, rouge-2, rouge-l)</li>
+<li><strong>Use Case</strong>: Summarization, text generation</li>
+<li><strong>Example</strong>: <code>{"type": "rouge", "params": {"rouge_type": "rouge-l"}}</code></li>
+</ul>
+<h4 id="10-meteor-reward-meteor">10. <strong>METEOR Reward</strong> (<code>meteor</code>)<a class="headerlink" href="#10-meteor-reward-meteor" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Advanced translation evaluation metric</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Translation quality</li>
+<li><strong>Example</strong>: <code>{"type": "meteor", "weight": 0.7}</code></li>
+</ul>
+<h4 id="11-bertscore-reward-bertscore">11. <strong>BERTScore Reward</strong> (<code>bertscore</code>)<a class="headerlink" href="#11-bertscore-reward-bertscore" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Contextual embedding-based similarity</li>
+<li><strong>Parameters</strong>: <code>model_name</code></li>
+<li><strong>Use Case</strong>: Semantic similarity, paraphrase detection</li>
+<li><strong>Example</strong>: <code>{"type": "bertscore", "params": {"model_name": "microsoft/DialoGPT-medium"}}</code></li>
+</ul>
+<h3 id="code-quality-rewards"><strong>Code Quality Rewards</strong><a class="headerlink" href="#code-quality-rewards" title="Permanent link">&para;</a></h3>
+<h4 id="12-code-syntax-reward-code_syntax">12. <strong>Code Syntax Reward</strong> (<code>code_syntax</code>)<a class="headerlink" href="#12-code-syntax-reward-code_syntax" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Validates code syntax correctness</li>
+<li><strong>Parameters</strong>: <code>language</code></li>
+<li><strong>Use Case</strong>: Code generation, programming assistance</li>
+<li><strong>Example</strong>: <code>{"type": "code_syntax", "params": {"language": "python"}}</code></li>
+</ul>
+<h4 id="13-code-execution-reward-code_execution">13. <strong>Code Execution Reward</strong> (<code>code_execution</code>)<a class="headerlink" href="#13-code-execution-reward-code_execution" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Tests if code runs without errors</li>
+<li><strong>Parameters</strong>: <code>timeout</code>, <code>safe_mode</code></li>
+<li><strong>Use Case</strong>: Code generation, programming education</li>
+<li><strong>Example</strong>: <code>{"type": "code_execution", "params": {"timeout": 5, "safe_mode": true}}</code></li>
+</ul>
+<h4 id="14-code-completeness-reward-code_completeness">14. <strong>Code Completeness Reward</strong> (<code>code_completeness</code>)<a class="headerlink" href="#14-code-completeness-reward-code_completeness" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures code completeness and structure</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Code generation quality</li>
+<li><strong>Example</strong>: <code>{"type": "code_completeness", "weight": 1.0}</code></li>
+</ul>
+<h3 id="math-and-reasoning-rewards"><strong>Math and Reasoning Rewards</strong><a class="headerlink" href="#math-and-reasoning-rewards" title="Permanent link">&para;</a></h3>
+<h4 id="15-math-correctness-reward-math_correctness">15. <strong>Math Correctness Reward</strong> (<code>math_correctness</code>)<a class="headerlink" href="#15-math-correctness-reward-math_correctness" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Validates mathematical correctness</li>
+<li><strong>Parameters</strong>: <code>tolerance</code></li>
+<li><strong>Use Case</strong>: Math problem solving, scientific computation</li>
+<li><strong>Example</strong>: <code>{"type": "math_correctness", "params": {"tolerance": 1e-6}}</code></li>
+</ul>
+<h4 id="16-logical-consistency-reward-logical_consistency">16. <strong>Logical Consistency Reward</strong> (<code>logical_consistency</code>)<a class="headerlink" href="#16-logical-consistency-reward-logical_consistency" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures logical consistency in reasoning</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Reasoning tasks, logical problem solving</li>
+<li><strong>Example</strong>: <code>{"type": "logical_consistency", "weight": 1.0}</code></li>
+</ul>
+<h4 id="17-commonsense-reward-commonsense">17. <strong>Commonsense Reward</strong> (<code>commonsense</code>)<a class="headerlink" href="#17-commonsense-reward-commonsense" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Evaluates commonsense reasoning</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: General reasoning, everyday knowledge</li>
+<li><strong>Example</strong>: <code>{"type": "commonsense", "weight": 0.8}</code></li>
+</ul>
+<h3 id="specialized-rewards"><strong>Specialized Rewards</strong><a class="headerlink" href="#specialized-rewards" title="Permanent link">&para;</a></h3>
+<h4 id="18-hallucination-reward-hallucination">18. <strong>Hallucination Reward</strong> (<code>hallucination</code>)<a class="headerlink" href="#18-hallucination-reward-hallucination" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Detects and penalizes hallucinated information</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Factual accuracy, information retrieval</li>
+<li><strong>Example</strong>: <code>{"type": "hallucination", "weight": 1.5}</code></li>
+</ul>
+<h4 id="19-toxicity-reward-toxicity">19. <strong>Toxicity Reward</strong> (<code>toxicity</code>)<a class="headerlink" href="#19-toxicity-reward-toxicity" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Detects toxic, harmful, or offensive content</li>
+<li><strong>Parameters</strong>: <code>threshold</code></li>
+<li><strong>Use Case</strong>: Content moderation, safe AI</li>
+<li><strong>Example</strong>: <code>{"type": "toxicity", "params": {"threshold": 0.5}}</code></li>
+</ul>
+<h4 id="20-politeness-reward-politeness">20. <strong>Politeness Reward</strong> (<code>politeness</code>)<a class="headerlink" href="#20-politeness-reward-politeness" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Encourages polite and respectful language</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Customer service, professional communication</li>
+<li><strong>Example</strong>: <code>{"type": "politeness", "weight": 0.7}</code></li>
+</ul>
+<h4 id="21-helpfulness-reward-helpfulness">21. <strong>Helpfulness Reward</strong> (<code>helpfulness</code>)<a class="headerlink" href="#21-helpfulness-reward-helpfulness" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures how helpful and informative the response is</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Q&amp;A systems, customer support</li>
+<li><strong>Example</strong>: <code>{"type": "helpfulness", "weight": 1.0}</code></li>
+</ul>
+<h4 id="22-honesty-reward-honesty">22. <strong>Honesty Reward</strong> (<code>honesty</code>)<a class="headerlink" href="#22-honesty-reward-honesty" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Encourages honest and truthful responses</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Trustworthy AI, factual accuracy</li>
+<li><strong>Example</strong>: <code>{"type": "honesty", "weight": 1.2}</code></li>
+</ul>
+<h3 id="multi-modal-rewards-future"><strong>Multi-Modal Rewards (Future)</strong><a class="headerlink" href="#multi-modal-rewards-future" title="Permanent link">&para;</a></h3>
+<h4 id="23-image-relevance-reward-image_relevance">23. <strong>Image Relevance Reward</strong> (<code>image_relevance</code>)<a class="headerlink" href="#23-image-relevance-reward-image_relevance" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures relevance to provided images</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Multi-modal tasks, image captioning</li>
+<li><strong>Example</strong>: <code>{"type": "image_relevance", "weight": 1.0}</code></li>
+</ul>
+<h4 id="24-audio-quality-reward-audio_quality">24. <strong>Audio Quality Reward</strong> (<code>audio_quality</code>)<a class="headerlink" href="#24-audio-quality-reward-audio_quality" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Purpose</strong>: Measures audio quality and clarity</li>
+<li><strong>Parameters</strong>: None</li>
+<li><strong>Use Case</strong>: Speech generation, audio processing</li>
+<li><strong>Example</strong>: <code>{"type": "audio_quality", "weight": 1.0}</code></li>
+</ul>
+<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-configuration"><strong>Basic Configuration</strong><a class="headerlink" href="#basic-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Single reward function</span>
+<span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;length&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">min_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w"> </span><span class="nt">max_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+</code></pre></div>
+<h3 id="multiple-reward-functions"><strong>Multiple Reward Functions</strong><a class="headerlink" href="#multiple-reward-functions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Multiple reward functions with different weights</span>
+<span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;length&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">min_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w"> </span><span class="nt">max_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;safety&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;helpfulness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coherence&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+</code></pre></div>
+<h3 id="task-specific-configurations"><strong>Task-Specific Configurations</strong><a class="headerlink" href="#task-specific-configurations" title="Permanent link">&para;</a></h3>
+<h4 id="customer-support-bot"><strong>Customer Support Bot</strong><a class="headerlink" href="#customer-support-bot" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;politeness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;helpfulness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;safety&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;length&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">min_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w"> </span><span class="nt">max_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+</code></pre></div>
+<h4 id="code-generation-assistant"><strong>Code Generation Assistant</strong><a class="headerlink" href="#code-generation-assistant" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;code_syntax&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;python&quot;</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;code_execution&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w"> </span><span class="nt">safe_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;code_completeness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;helpfulness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+</code></pre></div>
+<h4 id="math-problem-solver"><strong>Math Problem Solver</strong><a class="headerlink" href="#math-problem-solver" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;math_correctness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;logical_consistency&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coherence&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;length&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">min_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w"> </span><span class="nt">max_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+</code></pre></div>
+<h4 id="content-moderation-system"><strong>Content Moderation System</strong><a class="headerlink" href="#content-moderation-system" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;safety&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;toxicity&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.5</span>
+<span class="w"> </span><span class="nt">params</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bias&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;factuality&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span>
+</code></pre></div>
+<h2 id="advanced-configuration">Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="custom-reward-weights"><strong>Custom Reward Weights</strong><a class="headerlink" href="#custom-reward-weights" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardConfig</span><span class="p">,</span> <span class="n">RewardType</span>
+
+<span class="c1"># Create custom reward configuration</span>
+<span class="n">rewards</span> <span class="o">=</span> <span class="p">[</span>
+ <span class="n">RewardConfig</span><span class="p">(</span>
+ <span class="n">reward_type</span><span class="o">=</span><span class="n">RewardType</span><span class="o">.</span><span class="n">SAFETY</span><span class="p">,</span>
+ <span class="n">weight</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+ <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;strict&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+ <span class="p">),</span>
+ <span class="n">RewardConfig</span><span class="p">(</span>
+ <span class="n">reward_type</span><span class="o">=</span><span class="n">RewardType</span><span class="o">.</span><span class="n">HELPFULNESS</span><span class="p">,</span>
+ <span class="n">weight</span><span class="o">=</span><span class="mf">1.5</span>
+ <span class="p">),</span>
+ <span class="n">RewardConfig</span><span class="p">(</span>
+ <span class="n">reward_type</span><span class="o">=</span><span class="n">RewardType</span><span class="o">.</span><span class="n">LENGTH</span><span class="p">,</span>
+ <span class="n">weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+ <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;min_length&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;max_length&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">}</span>
+ <span class="p">)</span>
+<span class="p">]</span>
+</code></pre></div>
+<h3 id="dynamic-reward-weighting"><strong>Dynamic Reward Weighting</strong><a class="headerlink" href="#dynamic-reward-weighting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example with dynamic weighting based on task</span>
+<span class="nt">rewards</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;safety&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span><span class="w"> </span><span class="c1"># High priority for safety</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;helpfulness&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span><span class="w"> </span><span class="c1"># Medium-high priority</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;coherence&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w"> </span><span class="c1"># Standard priority</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;length&quot;</span>
+<span class="w"> </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span><span class="w"> </span><span class="c1"># Low priority</span>
+</code></pre></div>
+<h2 id="reward-function-performance">Reward Function Performance<a class="headerlink" href="#reward-function-performance" title="Permanent link">&para;</a></h2>
+<h3 id="computational-efficiency"><strong>Computational Efficiency</strong><a class="headerlink" href="#computational-efficiency" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Fast</strong>: Length, Coherence, Fluency, Sentiment</li>
+<li><strong>Medium</strong>: Safety, Toxicity, Bias, Politeness</li>
+<li><strong>Slow</strong>: BERTScore, Code Execution, Math Correctness</li>
+</ul>
+<h3 id="memory-usage"><strong>Memory Usage</strong><a class="headerlink" href="#memory-usage" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Low</strong>: Basic rewards (Length, Coherence, etc.)</li>
+<li><strong>Medium</strong>: Task-specific rewards (Safety, Sentiment, etc.)</li>
+<li><strong>High</strong>: Model-based rewards (BERTScore, Code Execution, etc.)</li>
+</ul>
+<h3 id="accuracy-vs-speed-trade-offs"><strong>Accuracy vs Speed Trade-offs</strong><a class="headerlink" href="#accuracy-vs-speed-trade-offs" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>High Accuracy</strong>: BERTScore, Math Correctness, Code Execution</li>
+<li><strong>Balanced</strong>: Safety, Toxicity, Helpfulness</li>
+<li><strong>Fast Approximation</strong>: Length, Coherence, Fluency</li>
+</ul>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="reward-selection"><strong>Reward Selection</strong><a class="headerlink" href="#reward-selection" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Start Simple</strong>: Begin with basic rewards (length, coherence, safety)</li>
+<li><strong>Add Task-Specific</strong>: Include rewards relevant to your use case</li>
+<li><strong>Balance Weights</strong>: Ensure no single reward dominates</li>
+<li><strong>Monitor Performance</strong>: Track reward trends during training</li>
+</ol>
+<h3 id="weight-tuning"><strong>Weight Tuning</strong><a class="headerlink" href="#weight-tuning" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Safety First</strong>: Always include safety rewards with high weight</li>
+<li><strong>Task Relevance</strong>: Higher weights for task-specific rewards</li>
+<li><strong>Quality Balance</strong>: Balance between different quality aspects</li>
+<li><strong>Iterative Tuning</strong>: Adjust weights based on training results</li>
+</ol>
+<h3 id="performance-optimization"><strong>Performance Optimization</strong><a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Use Fast Rewards</strong>: Prefer fast rewards for real-time applications</li>
+<li><strong>Batch Processing</strong>: Process multiple texts together when possible</li>
+<li><strong>Caching</strong>: Cache model outputs for repeated computations</li>
+<li><strong>Device Selection</strong>: Use appropriate devices (CPU/GPU) for each reward</li>
+</ol>
+<h2 id="extending-reward-functions">Extending Reward Functions<a class="headerlink" href="#extending-reward-functions" title="Permanent link">&para;</a></h2>
+<h3 id="custom-reward-functions"><strong>Custom Reward Functions</strong><a class="headerlink" href="#custom-reward-functions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardFunction</span><span class="p">,</span> <span class="n">RewardType</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomReward</span><span class="p">(</span><span class="n">RewardFunction</span><span class="p">):</span>
+ <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RewardConfig</span><span class="p">):</span>
+ <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+ <span class="c1"># Initialize your custom reward logic</span>
+
+ <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+ <span class="c1"># Implement your custom reward computation</span>
+ <span class="k">return</span> <span class="mf">0.8</span> <span class="c1"># Return reward score between 0 and 1</span>
+
+<span class="c1"># Register custom reward</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardRegistry</span>
+<span class="n">RewardRegistry</span><span class="o">.</span><span class="n">register_reward</span><span class="p">(</span><span class="s2">&quot;custom&quot;</span><span class="p">,</span> <span class="n">CustomReward</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="combining-rewards"><strong>Combining Rewards</strong><a class="headerlink" href="#combining-rewards" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">combined_reward</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rewards</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RewardFunction</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Combine multiple reward functions.&quot;&quot;&quot;</span>
+ <span class="n">total_score</span> <span class="o">=</span> <span class="mf">0.0</span>
+ <span class="n">total_weight</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+ <span class="k">for</span> <span class="n">reward_func</span> <span class="ow">in</span> <span class="n">rewards</span><span class="p">:</span>
+ <span class="n">score</span> <span class="o">=</span> <span class="n">reward_func</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+ <span class="n">weight</span> <span class="o">=</span> <span class="n">reward_func</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">weight</span>
+ <span class="n">total_score</span> <span class="o">+=</span> <span class="n">score</span> <span class="o">*</span> <span class="n">weight</span>
+ <span class="n">total_weight</span> <span class="o">+=</span> <span class="n">weight</span>
+
+ <span class="k">return</span> <span class="n">total_score</span> <span class="o">/</span> <span class="n">total_weight</span> <span class="k">if</span> <span class="n">total_weight</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+</code></pre></div>
+<h2 id="monitoring-and-debugging">Monitoring and Debugging<a class="headerlink" href="#monitoring-and-debugging" title="Permanent link">&para;</a></h2>
+<h3 id="reward-tracking"><strong>Reward Tracking</strong><a class="headerlink" href="#reward-tracking" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Monitor individual reward scores during training</li>
+<li>Track reward trends and convergence</li>
+<li>Identify which rewards are most influential</li>
+<li>Debug reward computation issues</li>
+</ul>
+<h3 id="common-issues"><strong>Common Issues</strong><a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Reward Collapse</strong>: All rewards converge to similar values</li>
+<li><strong>Reward Instability</strong>: High variance in reward scores</li>
+<li><strong>Reward Conflicts</strong>: Conflicting objectives between rewards</li>
+<li><strong>Performance Bottlenecks</strong>: Slow reward computation</li>
+</ol>
+<h3 id="debugging-tools"><strong>Debugging Tools</strong><a class="headerlink" href="#debugging-tools" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Reward score logging and visualization</li>
+<li>Individual reward breakdown analysis</li>
+<li>Performance profiling for slow rewards</li>
+<li>A/B testing for reward configurations</li>
+</ul>
+<hr />
+<p><strong>AlignTune</strong> provides a comprehensive suite of reward functions to create sophisticated reward landscapes for any RLHF training scenario. Choose the right combination of rewards for your specific use case and achieve optimal model performance!</p></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

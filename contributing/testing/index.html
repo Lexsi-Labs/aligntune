@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/contributing/testing/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Testing - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../code-style/">Code Style</a>
+</li>
+
+        
+            
+<li class="active">
+    <a href="./">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../code-style/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li class="disabled">
+ <a rel="next" >
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#testing-guide">Testing Guide</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#test-structure">Test Structure</a></li>
+                
+                <li class="third-level"><a href="#directory-layout">Directory Layout</a></li>
+                <li class="third-level"><a href="#test-file-naming">Test File Naming</a></li>
+            <li class="second-level"><a href="#writing-tests">Writing Tests</a></li>
+                
+                <li class="third-level"><a href="#basic-test">Basic Test</a></li>
+                <li class="third-level"><a href="#fixtures">Fixtures</a></li>
+                <li class="third-level"><a href="#parametrized-tests">Parametrized Tests</a></li>
+            <li class="second-level"><a href="#test-markers">Test Markers</a></li>
+                
+                <li class="third-level"><a href="#available-markers">Available Markers</a></li>
+                <li class="third-level"><a href="#usage">Usage</a></li>
+                <li class="third-level"><a href="#running-marked-tests">Running Marked Tests</a></li>
+            <li class="second-level"><a href="#test-coverage">Test Coverage</a></li>
+                
+                <li class="third-level"><a href="#coverage-requirements">Coverage Requirements</a></li>
+                <li class="third-level"><a href="#running-coverage">Running Coverage</a></li>
+            <li class="second-level"><a href="#mocking">Mocking</a></li>
+                
+                <li class="third-level"><a href="#external-dependencies">External Dependencies</a></li>
+            <li class="second-level"><a href="#integration-tests">Integration Tests</a></li>
+                
+                <li class="third-level"><a href="#training-pipeline">Training Pipeline</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+            <li class="second-level"><a href="#running-tests">Running Tests</a></li>
+                
+                <li class="third-level"><a href="#all-tests">All Tests</a></li>
+                <li class="third-level"><a href="#specific-test">Specific Test</a></li>
+                <li class="third-level"><a href="#verbose-output">Verbose Output</a></li>
+                <li class="third-level"><a href="#with-coverage">With Coverage</a></li>
+            <li class="second-level"><a href="#continuous-integration">Continuous Integration</a></li>
+                
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="testing-guide">Testing Guide<a class="headerlink" href="#testing-guide" title="Permanent link">&para;</a></h1>
+<p>Testing guidelines for contributing to AlignTune.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>AlignTune uses <a href="https://pytest.org/">pytest</a> for testing with comprehensive coverage requirements.</p>
+<h2 id="test-structure">Test Structure<a class="headerlink" href="#test-structure" title="Permanent link">&para;</a></h2>
+<h3 id="directory-layout">Directory Layout<a class="headerlink" href="#directory-layout" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>tests/
+ __init__.py
+ core/
+ test_backend_factory.py
+ test_config.py
+ backends/
+ trl/
+ unsloth/
+ integration/
+ test_training_pipeline.py
+ fixtures/
+ sample_data.py
+</code></pre></div>
+<h3 id="test-file-naming">Test File Naming<a class="headerlink" href="#test-file-naming" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Test files: <code>test_&lt;module_name&gt;.py</code></li>
+<li>Test classes: <code>Test&lt;ClassName&gt;</code></li>
+<li>Test functions: <code>test_&lt;function_name&gt;</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># test_backend_factory.py</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestBackendFactory</span><span class="p">:</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">test_create_sft_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test SFT trainer creation.&quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+</code></pre></div>
+<h2 id="writing-tests">Writing Tests<a class="headerlink" href="#writing-tests" title="Permanent link">&para;</a></h2>
+<h3 id="basic-test">Basic Test<a class="headerlink" href="#basic-test" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_sft_trainer</span><span class="p">():</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test basic SFT trainer creation.&quot;&quot;&quot;</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">10</span>
+ <span class="p">)</span>
+ <span class="k">assert</span> <span class="n">trainer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+ <span class="k">assert</span> <span class="n">trainer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name_or_path</span> <span class="o">==</span> <span class="s2">&quot;microsoft/DialoGPT-small&quot;</span>
+</code></pre></div>
+<h3 id="fixtures">Fixtures<a class="headerlink" href="#fixtures" title="Permanent link">&para;</a></h3>
+<p>Use pytest fixtures for reusable test data:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.sft.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFTConfig</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_config</span><span class="p">():</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Sample SFT configuration.&quot;&quot;&quot;</span>
+ <span class="k">return</span> <span class="n">SFTConfig</span><span class="p">(</span>
+ <span class="n">model</span><span class="o">=</span><span class="n">ModelConfig</span><span class="p">(</span><span class="n">name_or_path</span><span class="o">=</span><span class="s2">&quot;test-model&quot;</span><span class="p">),</span>
+ <span class="n">dataset</span><span class="o">=</span><span class="n">DatasetConfig</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;test-dataset&quot;</span><span class="p">)</span>
+ <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_trainer_with_config</span><span class="p">(</span><span class="n">sample_config</span><span class="p">):</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test trainer with sample config.&quot;&quot;&quot;</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer_from_config</span><span class="p">(</span><span class="n">sample_config</span><span class="p">)</span>
+ <span class="k">assert</span> <span class="n">trainer</span><span class="o">.</span><span class="n">config</span> <span class="o">==</span> <span class="n">sample_config</span>
+</code></pre></div>
+<h3 id="parametrized-tests">Parametrized Tests<a class="headerlink" href="#parametrized-tests" title="Permanent link">&para;</a></h3>
+<p>Use <code>@pytest.mark.parametrize</code> for multiple test cases:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;backend&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="s2">&quot;unsloth&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_backend_selection</span><span class="p">(</span><span class="n">backend</span><span class="p">):</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test different backend selections.&quot;&quot;&quot;</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="n">backend</span>
+ <span class="p">)</span>
+ <span class="k">assert</span> <span class="n">trainer</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="n">backend</span>
+</code></pre></div>
+<h2 id="test-markers">Test Markers<a class="headerlink" href="#test-markers" title="Permanent link">&para;</a></h2>
+<h3 id="available-markers">Available Markers<a class="headerlink" href="#available-markers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">slow</span> <span class="c1"># Slow tests</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span> <span class="c1"># Integration tests</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">gpu</span> <span class="c1"># Requires GPU</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">unsloth</span> <span class="c1"># Requires Unsloth</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">wandb</span> <span class="c1"># Requires WandB</span>
+</code></pre></div>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">slow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_large_model_training</span><span class="p">():</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test training with large model.&quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">gpu</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_unsloth_backend</span><span class="p">():</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test Unsloth backend (requires GPU).&quot;&quot;&quot;</span>
+ <span class="k">pass</span>
+</code></pre></div>
+<h3 id="running-marked-tests">Running Marked Tests<a class="headerlink" href="#running-marked-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run all tests except slow</span>
+pytest<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;not slow&quot;</span>
+
+<span class="c1"># Run only GPU tests</span>
+pytest<span class="w"> </span>-m<span class="w"> </span>gpu
+
+<span class="c1"># Run integration tests</span>
+pytest<span class="w"> </span>-m<span class="w"> </span>integration
+</code></pre></div>
+<h2 id="test-coverage">Test Coverage<a class="headerlink" href="#test-coverage" title="Permanent link">&para;</a></h2>
+<h3 id="coverage-requirements">Coverage Requirements<a class="headerlink" href="#coverage-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Target: &gt;80% coverage</li>
+<li>Critical paths: 100% coverage</li>
+<li>New features: Must include tests</li>
+</ul>
+<h3 id="running-coverage">Running Coverage<a class="headerlink" href="#running-coverage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run with coverage</span>
+pytest<span class="w"> </span>--cov<span class="o">=</span>src/aligntune<span class="w"> </span>--cov-report<span class="o">=</span>html
+
+<span class="c1"># View HTML report</span>
+open<span class="w"> </span>htmlcov/index.html
+</code></pre></div>
+<h2 id="mocking">Mocking<a class="headerlink" href="#mocking" title="Permanent link">&para;</a></h2>
+<h3 id="external-dependencies">External Dependencies<a class="headerlink" href="#external-dependencies" title="Permanent link">&para;</a></h3>
+<p>Mock external dependencies:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mock</span><span class="p">,</span> <span class="n">patch</span>
+
+<span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;aligntune.core.backend_factory.load_model&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_model_loading</span><span class="p">(</span><span class="n">mock_load</span><span class="p">):</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test model loading with mock.&quot;&quot;&quot;</span>
+ <span class="n">mock_load</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+ <span class="n">mock_load</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="integration-tests">Integration Tests<a class="headerlink" href="#integration-tests" title="Permanent link">&para;</a></h2>
+<h3 id="training-pipeline">Training Pipeline<a class="headerlink" href="#training-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_sft_training_pipeline</span><span class="p">():</span>
+<span class="w"> </span><span class="sd">&quot;&quot;&quot;Test complete SFT training pipeline.&quot;&quot;&quot;</span>
+ <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span>
+ <span class="p">)</span>
+
+ <span class="c1"># Train</span>
+ <span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+ <span class="k">assert</span> <span class="s2">&quot;train_loss&quot;</span> <span class="ow">in</span> <span class="n">results</span>
+
+ <span class="c1"># Evaluate</span>
+ <span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+ <span class="k">assert</span> <span class="s2">&quot;eval_loss&quot;</span> <span class="ow">in</span> <span class="n">metrics</span>
+
+ <span class="c1"># Save</span>
+ <span class="n">path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+ <span class="k">assert</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Test Isolation</strong>: Each test should be independent</li>
+<li><strong>Fast Tests</strong>: Keep unit tests fast (&lt;1s)</li>
+<li><strong>Clear Names</strong>: Use descriptive test names</li>
+<li><strong>One Assertion</strong>: One concept per test</li>
+<li><strong>Fixtures</strong>: Use fixtures for setup/teardown</li>
+</ol>
+<h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h2>
+<h3 id="all-tests">All Tests<a class="headerlink" href="#all-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pytest
+</code></pre></div>
+<h3 id="specific-test">Specific Test<a class="headerlink" href="#specific-test" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>tests/core/test_backend_factory.py::test_create_sft_trainer
+</code></pre></div>
+<h3 id="verbose-output">Verbose Output<a class="headerlink" href="#verbose-output" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>-v
+</code></pre></div>
+<h3 id="with-coverage">With Coverage<a class="headerlink" href="#with-coverage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>--cov<span class="o">=</span>src/aligntune<span class="w"> </span>--cov-report<span class="o">=</span>term-missing
+</code></pre></div>
+<h2 id="continuous-integration">Continuous Integration<a class="headerlink" href="#continuous-integration" title="Permanent link">&para;</a></h2>
+<p>Tests run automatically on:
+- Pull requests
+- Pushes to main
+- Scheduled runs</p>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../code-style/">Code Style Guide</a> - Code style guidelines</li>
+<li><a href="../guide/">Contributing Guide</a> - General contributing guide</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

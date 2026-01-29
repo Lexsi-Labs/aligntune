@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/getting-started/configuration/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Configuration - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../user-guide/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../basic-concepts/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../backend-selection/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#configuration">Configuration</a></li>
+            <li class="second-level"><a href="#configuration-methods">Configuration Methods</a></li>
+                
+                <li class="third-level"><a href="#1-python-code-recommended-for-development">1. Python Code (Recommended for Development)</a></li>
+                <li class="third-level"><a href="#2-yaml-files-recommended-for-production">2. YAML Files (Recommended for Production)</a></li>
+                <li class="third-level"><a href="#3-cli-arguments">3. CLI Arguments</a></li>
+            <li class="second-level"><a href="#configuration-structure">Configuration Structure</a></li>
+                
+                <li class="third-level"><a href="#model-configuration">Model Configuration</a></li>
+                <li class="third-level"><a href="#dataset-configuration">Dataset Configuration</a></li>
+                <li class="third-level"><a href="#training-configuration">Training Configuration</a></li>
+                <li class="third-level"><a href="#logging-configuration">Logging Configuration</a></li>
+            <li class="second-level"><a href="#complete-example">Complete Example</a></li>
+                
+                <li class="third-level"><a href="#yaml-configuration">YAML Configuration</a></li>
+                <li class="third-level"><a href="#python-code">Python Code</a></li>
+            <li class="second-level"><a href="#configuration-validation">Configuration Validation</a></li>
+                
+            <li class="second-level"><a href="#environment-variables">Environment Variables</a></li>
+                
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
+<p>AlignTune supports flexible configuration through Python code, YAML files, or CLI arguments.</p>
+<h2 id="configuration-methods">Configuration Methods<a class="headerlink" href="#configuration-methods" title="Permanent link">&para;</a></h2>
+<h3 id="1-python-code-recommended-for-development">1. Python Code (Recommended for Development)<a class="headerlink" href="#1-python-code-recommended-for-development" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="2-yaml-files-recommended-for-production">2. YAML Files (Recommended for Production)<a class="headerlink" href="#2-yaml-files-recommended-for-production" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># config.yaml</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">name_or_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;microsoft/DialoGPT-small&quot;</span>
+<span class="w"> </span><span class="nt">precision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fp32</span>
+
+<span class="nt">datasets</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tatsu-lab/alpaca&quot;</span>
+<span class="w"> </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;train&quot;</span>
+<span class="w"> </span><span class="nt">max_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+
+<span class="nt">train</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">per_device_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w"> </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w"> </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-5</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./output&quot;</span>
+<span class="w"> </span><span class="nt">run_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_experiment&quot;</span>
+</code></pre></div>
+<h3 id="3-cli-arguments">3. CLI Arguments<a class="headerlink" href="#3-cli-arguments" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>aligntune<span class="w"> </span>train<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--model<span class="w"> </span>microsoft/DialoGPT-small<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--dataset<span class="w"> </span>tatsu-lab/alpaca<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--epochs<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--batch-size<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--lr<span class="w"> </span>5e-5
+</code></pre></div>
+<h2 id="configuration-structure">Configuration Structure<a class="headerlink" href="#configuration-structure" title="Permanent link">&para;</a></h2>
+<h3 id="model-configuration">Model Configuration<a class="headerlink" href="#model-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">model_config</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s2">&quot;name_or_path&quot;</span><span class="p">:</span> <span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span> <span class="c1"># Required</span>
+ <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="s2">&quot;fp32&quot;</span><span class="p">,</span> <span class="c1"># fp32, fp16, bf16</span>
+ <span class="s2">&quot;max_seq_length&quot;</span><span class="p">:</span> <span class="mi">2048</span><span class="p">,</span>
+ <span class="s2">&quot;gradient_checkpointing&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+ <span class="s2">&quot;use_unsloth&quot;</span><span class="p">:</span> <span class="kc">False</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="dataset-configuration">Dataset Configuration<a class="headerlink" href="#dataset-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">dataset_config</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span> <span class="c1"># Required</span>
+ <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;max_samples&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+ <span class="s2">&quot;percent&quot;</span><span class="p">:</span> <span class="mi">100</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="training-configuration">Training Configuration<a class="headerlink" href="#training-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">training_config</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s2">&quot;per_device_batch_size&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="c1"># Required</span>
+ <span class="s2">&quot;num_epochs&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+ <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">5e-5</span><span class="p">,</span>
+ <span class="s2">&quot;gradient_accumulation_steps&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+ <span class="s2">&quot;max_steps&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s2">&quot;warmup_steps&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+ <span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="mf">0.01</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="logging-configuration">Logging Configuration<a class="headerlink" href="#logging-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">logging_config</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;./output&quot;</span><span class="p">,</span> <span class="c1"># Required</span>
+ <span class="s2">&quot;run_name&quot;</span><span class="p">:</span> <span class="s2">&quot;my_experiment&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;loggers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">],</span>
+ <span class="s2">&quot;save_steps&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+ <span class="s2">&quot;eval_steps&quot;</span><span class="p">:</span> <span class="mi">100</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="complete-example">Complete Example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h2>
+<h3 id="yaml-configuration">YAML Configuration<a class="headerlink" href="#yaml-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Complete SFT configuration</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">name_or_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;microsoft/DialoGPT-small&quot;</span>
+<span class="w"> </span><span class="nt">precision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fp32</span>
+<span class="w"> </span><span class="nt">max_seq_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
+<span class="w"> </span><span class="nt">gradient_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">datasets</span><span class="p">:</span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tatsu-lab/alpaca&quot;</span>
+<span class="w"> </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;train&quot;</span>
+<span class="w"> </span><span class="nt">max_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+
+<span class="nt">train</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">per_device_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w"> </span><span class="nt">gradient_accumulation_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w"> </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w"> </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-5</span>
+<span class="w"> </span><span class="nt">warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w"> </span><span class="nt">weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w"> </span><span class="nt">max_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w"> </span><span class="nt">eval_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w"> </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./output&quot;</span>
+<span class="w"> </span><span class="nt">run_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sft_experiment&quot;</span>
+<span class="w"> </span><span class="nt">loggers</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;tensorboard&quot;</span><span class="p p-Indicator">]</span>
+<span class="w"> </span><span class="nt">save_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w"> </span><span class="nt">eval_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+</code></pre></div>
+<h3 id="python-code">Python Code<a class="headerlink" href="#python-code" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.config_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+
+<span class="c1"># Load from YAML</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigLoader</span><span class="o">.</span><span class="n">load_from_yaml</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Train</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="configuration-validation">Configuration Validation<a class="headerlink" href="#configuration-validation" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.config_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigLoader</span>
+
+<span class="c1"># Load and validate</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigLoader</span><span class="o">.</span><span class="n">load_from_yaml</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+<span class="n">ConfigLoader</span><span class="o">.</span><span class="n">validate_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<p>You can override configuration with environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ALIGNTUNE_OUTPUT_DIR</span><span class="o">=</span><span class="s2">&quot;./custom_output&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">ALIGNTUNE_LEARNING_RATE</span><span class="o">=</span>1e-4
+<span class="nb">export</span><span class="w"> </span><span class="nv">ALIGNTUNE_BATCH_SIZE</span><span class="o">=</span><span class="m">8</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../backend-selection/">Backend Selection</a> - Choose the right backend</li>
+<li><a href="../../user-guide/sft/">SFT Guide</a> - SFT-specific configuration</li>
+<li><a href="../../user-guide/rl/">RL Guide</a> - RL-specific configuration</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

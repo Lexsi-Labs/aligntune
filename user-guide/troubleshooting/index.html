@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/user-guide/troubleshooting/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Troubleshooting - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../rl/">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../sample-logging/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../../algorithms/overview/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#troubleshooting">Troubleshooting</a></li>
+            <li class="second-level"><a href="#backend-issues">Backend Issues</a></li>
+                
+                <li class="third-level"><a href="#unsloth-not-available">Unsloth Not Available</a></li>
+                <li class="third-level"><a href="#backend-interference">Backend Interference</a></li>
+            <li class="second-level"><a href="#cuda-and-gpu-issues">CUDA and GPU Issues</a></li>
+                
+                <li class="third-level"><a href="#cuda-out-of-memory-oom">CUDA Out of Memory (OOM)</a></li>
+                <li class="third-level"><a href="#cuda-symbol-errors">CUDA Symbol Errors</a></li>
+            <li class="second-level"><a href="#configuration-issues">Configuration Issues</a></li>
+                
+                <li class="third-level"><a href="#invalid-configuration">Invalid Configuration</a></li>
+                <li class="third-level"><a href="#missing-required-parameters">Missing Required Parameters</a></li>
+            <li class="second-level"><a href="#dataset-issues">Dataset Issues</a></li>
+                
+                <li class="third-level"><a href="#dataset-not-found">Dataset Not Found</a></li>
+                <li class="third-level"><a href="#dataset-format-issues">Dataset Format Issues</a></li>
+            <li class="second-level"><a href="#training-issues">Training Issues</a></li>
+                
+                <li class="third-level"><a href="#loss-not-decreasing">Loss Not Decreasing</a></li>
+                <li class="third-level"><a href="#training-too-slow">Training Too Slow</a></li>
+                <li class="third-level"><a href="#training-crashes">Training Crashes</a></li>
+            <li class="second-level"><a href="#model-issues">Model Issues</a></li>
+                
+                <li class="third-level"><a href="#model-not-found">Model Not Found</a></li>
+                <li class="third-level"><a href="#model-loading-errors">Model Loading Errors</a></li>
+            <li class="second-level"><a href="#evaluation-issues">Evaluation Issues</a></li>
+                
+                <li class="third-level"><a href="#evaluation-fails">Evaluation Fails</a></li>
+            <li class="second-level"><a href="#memory-issues">Memory Issues</a></li>
+                
+                <li class="third-level"><a href="#out-of-memory-oom">Out of Memory (OOM)</a></li>
+            <li class="second-level"><a href="#getting-help">Getting Help</a></li>
+                
+                <li class="third-level"><a href="#diagnostic-commands">Diagnostic Commands</a></li>
+                <li class="third-level"><a href="#useful-resources">Useful Resources</a></li>
+                <li class="third-level"><a href="#reporting-issues">Reporting Issues</a></li>
+            <li class="second-level"><a href="#common-error-messages">Common Error Messages</a></li>
+                
+                <li class="third-level"><a href="#backend-not-available">Backend not available</a></li>
+                <li class="third-level"><a href="#algorithm-not-supported">Algorithm not supported</a></li>
+                <li class="third-level"><a href="#dataset-format-error">Dataset format error</a></li>
+                <li class="third-level"><a href="#model-loading-failed">Model loading failed</a></li>
+                <li class="third-level"><a href="#cuda-out-of-memory">CUDA out of memory</a></li>
+            <li class="second-level"><a href="#prevention-tips">Prevention Tips</a></li>
+                
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
+<p>This guide helps you resolve common issues when using AlignTune.</p>
+<hr />
+<h2 id="backend-issues">Backend Issues<a class="headerlink" href="#backend-issues" title="Permanent link">&para;</a></h2>
+<h3 id="unsloth-not-available">Unsloth Not Available<a class="headerlink" href="#unsloth-not-available" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>Unsloth not available</code> or <code>ImportError: Unsloth backend not available</code></p>
+<p><strong>Causes</strong>:
+- Unsloth not installed
+- CUDA not available
+- PyTorch version mismatch
+- CUDA version incompatibility</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Install Unsloth</strong>:
+ <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>unsloth
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check CUDA Availability</strong>:
+ <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">cuda</span><span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use TRL Backend Instead</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span> <span class="c1"># Use TRL instead</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Run Diagnostics</strong>:
+ <div class="highlight"><pre><span></span><code>aligntune<span class="w"> </span>diagnose
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="backend-interference">Backend Interference<a class="headerlink" href="#backend-interference" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: Unsloth patches interfering with TRL backend</p>
+<p><strong>Cause</strong>: Importing <code>BackendType</code> enum triggers Unsloth loading</p>
+<p><strong>Solution</strong>: Use string-based backend selection</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># CORRECT - String-based selection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span> <span class="c1"># Use string, not BackendType enum</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># AVOID - Importing BackendType causes Unsloth interference</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span><span class="p">,</span> <span class="n">BackendType</span>
+<span class="c1"># This import triggers Unsloth loading even when using TRL backend</span>
+</code></pre></div>
+<hr />
+<h2 id="cuda-and-gpu-issues">CUDA and GPU Issues<a class="headerlink" href="#cuda-and-gpu-issues" title="Permanent link">&para;</a></h2>
+<h3 id="cuda-out-of-memory-oom">CUDA Out of Memory (OOM)<a class="headerlink" href="#cuda-out-of-memory-oom" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>RuntimeError: CUDA out of memory</code></p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Reduce Batch Size</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span> <span class="c1"># Reduce from default</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Enable Gradient Checkpointing</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use LoRA/QLoRA</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">use_peft</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="n">lora_r</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="c1"># Lower rank = less memory</span>
+<span class="n">lora_alpha</span><span class="o">=</span><span class="mi">16</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use 4-bit Quantization</strong> (Unsloth):
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use CPU</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">device_map</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="cuda-symbol-errors">CUDA Symbol Errors<a class="headerlink" href="#cuda-symbol-errors" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>CUDA symbol errors</code> or <code>undefined symbol: cublasLtMatmul</code></p>
+<p><strong>Cause</strong>: PyTorch and CUDA version mismatch</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Use TRL Backend</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span> <span class="c1"># TRL is more compatible</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reinstall PyTorch with Matching CUDA</strong>:
+ <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cu118
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check Compatibility</strong>:
+ <div class="highlight"><pre><span></span><code>aligntune<span class="w"> </span>diagnose
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="configuration-issues">Configuration Issues<a class="headerlink" href="#configuration-issues" title="Permanent link">&para;</a></h2>
+<h3 id="invalid-configuration">Invalid Configuration<a class="headerlink" href="#invalid-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>ConfigurationError</code> or validation errors</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Validate Configuration</strong>:
+ <div class="highlight"><pre><span></span><code>aligntune<span class="w"> </span>validate<span class="w"> </span>config.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check Required Parameters</strong>:</p>
+</li>
+<li><code>model_name</code>: Must be a valid HuggingFace model ID</li>
+<li><code>dataset_name</code>: Must be a valid HuggingFace dataset ID</li>
+<li>
+<p><code>algorithm</code>: Must be one of: <code>dpo</code>, <code>ppo</code>, <code>grpo</code>, <code>gspo</code>, <code>dapo</code>, <code>drgrpo</code>, <code>gbmpo</code>, <code>counterfact_grpo</code>, <code>bolt</code></p>
+</li>
+<li>
+<p><strong>Check Parameter Types</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># CORRECT</span>
+<span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span> <span class="c1"># int</span>
+<span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span> <span class="c1"># float</span>
+<span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span> <span class="c1"># int</span>
+
+<span class="c1"># INCORRECT</span>
+<span class="n">num_epochs</span><span class="o">=</span><span class="s2">&quot;3&quot;</span> <span class="c1"># string</span>
+<span class="n">learning_rate</span><span class="o">=</span><span class="s2">&quot;5e-5&quot;</span> <span class="c1"># string</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="missing-required-parameters">Missing Required Parameters<a class="headerlink" href="#missing-required-parameters" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>ValueError: Missing required parameter</code></p>
+<p><strong>Common Missing Parameters</strong>:</p>
+<ol>
+<li>
+<p><strong>RL Training without Algorithm</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># MISSING algorithm</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># CORRECT</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+<span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>PPO without Reward Model</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># PPO requires reward model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+<span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+<span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;your-reward-model&quot;</span> <span class="c1"># Required for PPO</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="dataset-issues">Dataset Issues<a class="headerlink" href="#dataset-issues" title="Permanent link">&para;</a></h2>
+<h3 id="dataset-not-found">Dataset Not Found<a class="headerlink" href="#dataset-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>DatasetNotFoundError</code> or <code>FileNotFoundError</code></p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Check Dataset Name</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># Use correct HuggingFace dataset ID</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span> <span class="c1"># </span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;alpaca&quot;</span> <span class="c1"># May not work</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check Dataset Access</strong>:</p>
+</li>
+<li>Some datasets require authentication</li>
+<li>
+<p>Use <code>huggingface-cli login</code> to authenticate</p>
+</li>
+<li>
+<p><strong>Use Local Dataset</strong>:
+ <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;path/to/local/dataset&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="dataset-format-issues">Dataset Format Issues<a class="headerlink" href="#dataset-format-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>KeyError</code> or missing columns</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Specify Column Mapping</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="p">,</span>
+<span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span>
+<span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
+<span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;response&quot;</span>
+<span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check Dataset Structure</strong>:
+ <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Check structure</span>
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="training-issues">Training Issues<a class="headerlink" href="#training-issues" title="Permanent link">&para;</a></h2>
+<h3 id="loss-not-decreasing">Loss Not Decreasing<a class="headerlink" href="#loss-not-decreasing" title="Permanent link">&para;</a></h3>
+<p><strong>Symptoms</strong>: Loss stays constant or increases</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Reduce Learning Rate</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span> <span class="c1"># Try lower learning rate</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Increase Warmup Steps</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">warmup_steps</span><span class="o">=</span><span class="mi">100</span>
+<span class="n">warmup_ratio</span><span class="o">=</span><span class="mf">0.1</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check Data Quality</strong>:</p>
+</li>
+<li>Verify dataset is correct</li>
+<li>
+<p>Check for data preprocessing issues</p>
+</li>
+<li>
+<p><strong>Use Different Optimizer</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;adamw_torch&quot;</span> <span class="c1"># or &quot;lion&quot;, &quot;adafactor&quot;</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="training-too-slow">Training Too Slow<a class="headerlink" href="#training-too-slow" title="Permanent link">&para;</a></h3>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Use Unsloth Backend</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span> <span class="c1"># faster</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Increase Batch Size</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span> <span class="c1"># If memory allows</span>
+<span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use Mixed Precision</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">precision</span><span class="o">=</span><span class="s2">&quot;bf16&quot;</span> <span class="c1"># or &quot;fp16&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Enable Flash Attention</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">use_flash_attention_2</span><span class="o">=</span><span class="kc">True</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="training-crashes">Training Crashes<a class="headerlink" href="#training-crashes" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: Training process crashes or hangs</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Check Logs</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># Check training logs</span>
+tail<span class="w"> </span>-f<span class="w"> </span>output/training.log
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reduce Batch Size</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span> <span class="c1"># Minimal batch size</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Disable Gradient Checkpointing</strong> (if causing issues):
+ <div class="highlight"><pre><span></span><code><span class="n">gradient_checkpointing</span><span class="o">=</span><span class="kc">False</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use TRL Backend</strong> (more stable):
+ <div class="highlight"><pre><span></span><code><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span>
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="model-issues">Model Issues<a class="headerlink" href="#model-issues" title="Permanent link">&para;</a></h2>
+<h3 id="model-not-found">Model Not Found<a class="headerlink" href="#model-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>ModelNotFoundError</code> or <code>OSError: Can't load model</code></p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Check Model Name</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># Use correct HuggingFace model ID</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span> <span class="c1"># </span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;DialoGPT-small&quot;</span> <span class="c1"># May not work</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Check Model Access</strong>:</p>
+</li>
+<li>Some models require authentication</li>
+<li>
+<p>Use <code>huggingface-cli login</code> to authenticate</p>
+</li>
+<li>
+<p><strong>Use Local Model</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;./path/to/local/model&quot;</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="model-loading-errors">Model Loading Errors<a class="headerlink" href="#model-loading-errors" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>RuntimeError</code> during model loading</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Check Model Compatibility</strong>:</li>
+<li>Verify model architecture is supported</li>
+<li>
+<p>Check model size vs. available memory</p>
+</li>
+<li>
+<p><strong>Use Device Map</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">device_map</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span> <span class="c1"># Automatic device placement</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use Quantization</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="c1"># 4-bit quantization</span>
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="evaluation-issues">Evaluation Issues<a class="headerlink" href="#evaluation-issues" title="Permanent link">&para;</a></h2>
+<h3 id="evaluation-fails">Evaluation Fails<a class="headerlink" href="#evaluation-fails" title="Permanent link">&para;</a></h3>
+<p><strong>Error</strong>: <code>EvaluationError</code> or evaluation crashes</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>
+<p><strong>Check Evaluation Dataset</strong>:
+ <div class="highlight"><pre><span></span><code><span class="c1"># Ensure eval dataset exists</span>
+<span class="k">if</span> <span class="n">trainer</span><span class="o">.</span><span class="n">eval_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No evaluation dataset available&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reduce Evaluation Samples</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">max_samples_for_quality_metrics</span><span class="o">=</span><span class="mi">50</span> <span class="c1"># Limit samples</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Skip Quality Metrics</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">compute_rouge</span><span class="o">=</span><span class="kc">False</span>
+<span class="n">compute_bleu</span><span class="o">=</span><span class="kc">False</span>
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="memory-issues">Memory Issues<a class="headerlink" href="#memory-issues" title="Permanent link">&para;</a></h2>
+<h3 id="out-of-memory-oom">Out of Memory (OOM)<a class="headerlink" href="#out-of-memory-oom" title="Permanent link">&para;</a></h3>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li><strong>Reduce Model Size</strong>:</li>
+<li>Use smaller models</li>
+<li>
+<p>Use quantized models (4-bit, 8-bit)</p>
+</li>
+<li>
+<p><strong>Optimize Training</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span>
+<span class="n">activation_offloading</span><span class="o">=</span><span class="kc">True</span>
+<span class="n">use_peft</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># LoRA reduces memory</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Reduce Sequence Length</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">max_seq_length</span><span class="o">=</span><span class="mi">256</span> <span class="c1"># Reduce from 512</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use Gradient Accumulation</strong>:
+ <div class="highlight"><pre><span></span><code><span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">8</span> <span class="c1"># Simulates batch_size=8</span>
+</code></pre></div></p>
+</li>
+</ol>
+<hr />
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<h3 id="diagnostic-commands">Diagnostic Commands<a class="headerlink" href="#diagnostic-commands" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run comprehensive diagnostics</span>
+aligntune<span class="w"> </span>diagnose
+
+<span class="c1"># Validate configuration</span>
+aligntune<span class="w"> </span>validate<span class="w"> </span>config.yaml
+
+<span class="c1"># Check backend availability</span>
+aligntune<span class="w"> </span>list-backends-cmd
+</code></pre></div>
+<h3 id="useful-resources">Useful Resources<a class="headerlink" href="#useful-resources" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../../unsloth_compatibility/">Unsloth Compatibility Guide</a> - Unsloth-specific issues</li>
+<li><a href="../../getting-started/backend-selection/">Backend Selection Guide</a> - Backend comparison</li>
+<li><a href="../../getting-started/configuration/">Configuration Guide</a> - Configuration options</li>
+<li><a href="https://github.com/Lexsi-Labs/aligntune/issues">GitHub Issues</a> - Report bugs</li>
+</ul>
+<h3 id="reporting-issues">Reporting Issues<a class="headerlink" href="#reporting-issues" title="Permanent link">&para;</a></h3>
+<p>When reporting issues, please include:</p>
+<ol>
+<li><strong>Error Message</strong>: Full error traceback</li>
+<li><strong>Configuration</strong>: Your configuration file or code</li>
+<li><strong>Environment</strong>: Python version, PyTorch version, CUDA version</li>
+<li><strong>Diagnostics</strong>: Output of <code>aligntune diagnose</code></li>
+</ol>
+<hr />
+<h2 id="common-error-messages">Common Error Messages<a class="headerlink" href="#common-error-messages" title="Permanent link">&para;</a></h2>
+<h3 id="backend-not-available"><code>Backend not available</code><a class="headerlink" href="#backend-not-available" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Use a different backend or install missing dependencies</p>
+<h3 id="algorithm-not-supported"><code>Algorithm not supported</code><a class="headerlink" href="#algorithm-not-supported" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Check algorithm name and backend compatibility</p>
+<h3 id="dataset-format-error"><code>Dataset format error</code><a class="headerlink" href="#dataset-format-error" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Check dataset structure and column mappings</p>
+<h3 id="model-loading-failed"><code>Model loading failed</code><a class="headerlink" href="#model-loading-failed" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Verify model name and access permissions</p>
+<h3 id="cuda-out-of-memory"><code>CUDA out of memory</code><a class="headerlink" href="#cuda-out-of-memory" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: Reduce batch size, enable gradient checkpointing, or use quantization</p>
+<hr />
+<h2 id="prevention-tips">Prevention Tips<a class="headerlink" href="#prevention-tips" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Always Validate Configuration</strong>: Use <code>aligntune validate</code> before training</li>
+<li><strong>Start Small</strong>: Test with small datasets and models first</li>
+<li><strong>Monitor Resources</strong>: Watch GPU memory and CPU usage</li>
+<li><strong>Use Auto Backend</strong>: Let AlignTune select the best backend</li>
+<li><strong>Check Compatibility</strong>: Run <code>aligntune diagnose</code> regularly</li>
+</ol>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../getting-started/backend-selection/">Backend Selection</a> - Choose the right backend</li>
+<li><a href="../../getting-started/configuration/">Configuration Guide</a> - Configure training properly</li>
+<li><a href="../advanced/performance.md">Performance Optimization</a> - Optimize training speed and memory</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>

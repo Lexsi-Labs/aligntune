@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support" name="description"/>
+<meta content="AlignTune Contributors" name="author"/>
+<link href="https://aligntune.github.io/advanced/architecture/" rel="canonical"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Architecture - AlignTune</title>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
+<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
+<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
+<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
+<link href="../../css/bootstrap-custom.min.css" rel="stylesheet"/>
+<link href="../../css/base.min.css" rel="stylesheet"/>
+<link href="../../css/cinder.min.css" rel="stylesheet"/>
+<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../../assets/overrides.css" rel="stylesheet"/>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+<!-- Favicons -->
+<link href="../../assets/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="../../assets/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../assets/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../assets/site.webmanifest" rel="manifest"/>
+<link href="../../assets/favicon.ico" rel="shortcut icon"/>
+<!-- Android Chrome Icons -->
+<link href="../../assets/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="../../assets/android-chrome-512x512.png" rel="icon" sizes="512x512" type="image/png"/>
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Collapsed navigation -->
+<div class="navbar-header">
+<!-- Expander button -->
+<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- Main title -->
+<a class="navbar-brand" href="../..">AlignTune</a>
+</div>
+<!-- Expanded navigation -->
+<div class="navbar-collapse collapse">
+<!-- Main navigation -->
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../..">Home</a>
+</li>
+<li>
+<a href="../../getting-started/installation/">Installation</a>
+</li>
+<li>
+<a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+<li>
+<a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+<li>
+<a href="../../getting-started/configuration/">Configuration</a>
+</li>
+<li>
+<a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../user-guide/overview/">Overview</a>
+</li>
+<li>
+<a href="../../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+<li>
+<a href="../../user-guide/rl/">Reinforcement Learning (RL)</a>
+</li>
+<li>
+<a href="../../user-guide/reward-functions/">Reward Functions</a>
+</li>
+<li>
+<a href="../../user-guide/reward-model-training/">Reward Model Training</a>
+</li>
+<li>
+<a href="../../user-guide/evaluation/">Evaluation</a>
+</li>
+<li>
+<a href="../../user-guide/model-management/">Model Management</a>
+</li>
+<li>
+<a href="../../user-guide/sample-logging/">Sample Logging</a>
+</li>
+<li>
+<a href="../../user-guide/troubleshooting/">Troubleshooting</a>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Algorithms</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../algorithms/overview/">Overview</a>
+</li>
+<li>
+<a href="../../algorithms/dpo/">DPO</a>
+</li>
+<li>
+<a href="../../algorithms/ppo/">PPO</a>
+</li>
+<li>
+<a href="../../algorithms/grpo/">GRPO</a>
+</li>
+<li>
+<a href="../../algorithms/gspo/">GSPO</a>
+</li>
+<li>
+<a href="../../algorithms/dapo/">DAPO</a>
+</li>
+<li>
+<a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Backends</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../backends/overview/">Overview</a>
+</li>
+<li>
+<a href="../../backends/trl/">TRL Backend</a>
+</li>
+<li>
+<a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+<li>
+<a href="../../backends/comparison/">Comparison</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="dropdown active">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li class="active">
+<a href="./">Architecture</a>
+</li>
+<li>
+<a href="../custom-backends.md">Custom Backends</a>
+</li>
+<li>
+<a href="../distributed.md">Distributed Training</a>
+</li>
+<li>
+<a href="../performance.md">Performance Optimization</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../api-reference/overview/">Overview</a>
+</li>
+<li>
+<a href="../../api-reference/core/">Core API</a>
+</li>
+<li>
+<a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+<li>
+<a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+<li>
+<a href="../../api-reference/trainers/">Trainers</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../examples/overview/">Overview</a>
+</li>
+<li>
+<a href="../../examples/sft/">SFT Examples</a>
+</li>
+<li>
+<a href="../../examples/rl/">RL Examples</a>
+</li>
+<li>
+<a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+<li>
+<a href="../../notebooks/">Notebooks</a>
+</li>
+</ul>
+</li>
+<li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../cli-reference/">CLI Reference</a>
+</li>
+<li>
+<a href="../../cli/commands/">CLI Commands</a>
+</li>
+<li>
+<a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Compatibility</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+<li>
+<a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+</ul>
+</li>
+<li class="dropdown-submenu">
+<a href="" tabindex="-1">Contributing</a>
+<ul class="dropdown-menu">
+<li>
+<a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+<li>
+<a href="../../contributing/code-style/">Code Style</a>
+</li>
+<li>
+<a href="../../contributing/testing/">Testing</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
+<i class="fas fa-search"></i> Search
+ </a>
+</li>
+<li>
+<a href="../../backends/comparison/" rel="prev">
+<i class="fas fa-arrow-left"></i> Previous
+ </a>
+</li>
+<li>
+<a href="../../api-reference/overview/" rel="next">
+ Next <i class="fas fa-arrow-right"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+<ul class="nav bs-sidenav">
+<li class="first-level active"><a href="#architecture-overview">Architecture Overview</a></li>
+<li class="second-level"><a href="#system-architecture">System Architecture</a></li>
+<li class="third-level"><a href="#high-level-overview">High-Level Overview</a></li>
+<li class="third-level"><a href="#complete-system-architecture">Complete System Architecture</a></li>
+<li class="second-level"><a href="#core-components">Core Components</a></li>
+<li class="third-level"><a href="#1-backend-factory">1. Backend Factory</a></li>
+<li class="third-level"><a href="#2-configuration-system">2. Configuration System</a></li>
+<li class="third-level"><a href="#3-training-backends">3. Training Backends</a></li>
+<li class="third-level"><a href="#4-reward-system">4. Reward System</a></li>
+<li class="third-level"><a href="#5-evaluation-system">5. Evaluation System</a></li>
+<li class="second-level"><a href="#design-patterns">Design Patterns</a></li>
+<li class="third-level"><a href="#factory-pattern">Factory Pattern</a></li>
+<li class="third-level"><a href="#strategy-pattern">Strategy Pattern</a></li>
+<li class="third-level"><a href="#registry-pattern">Registry Pattern</a></li>
+<li class="second-level"><a href="#data-flow">Data Flow</a></li>
+<li class="third-level"><a href="#training-flow">Training Flow</a></li>
+<li class="third-level"><a href="#evaluation-flow">Evaluation Flow</a></li>
+<li class="second-level"><a href="#extension-points">Extension Points</a></li>
+<li class="third-level"><a href="#custom-backends">Custom Backends</a></li>
+<li class="third-level"><a href="#custom-reward-functions">Custom Reward Functions</a></li>
+<li class="third-level"><a href="#custom-evaluation-tasks">Custom Evaluation Tasks</a></li>
+<li class="second-level"><a href="#next-steps">Next Steps</a></li>
+</ul>
+</div></div>
+<div class="col-md-9" role="main">
+<h1 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">¶</a></h1>
+<p>Complete architecture documentation for AlignTune.</p>
+<h2 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">¶</a></h2>
+<h3 id="high-level-overview">High-Level Overview<a class="headerlink" href="#high-level-overview" title="Permanent link">¶</a></h3>
+<p>AlignTune uses a flexible backend architecture:</p>
+<div class="mermaid">flowchart TD
+ Factory[Backend Factory] --&gt; TRL[TRL Backend]
+ Factory --&gt; Unsloth[Unsloth Backend]
+ TRL --&gt; TRL_Algos[TRL Algorithms]
+ Unsloth --&gt; Unsloth_Algos[Unsloth Algorithms]
+</div>
+<p><strong>TRL Backend supports:</strong>
+- SFT, DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO</p>
+<p><strong>Unsloth Backend supports:</strong>
+- SFT, DPO, PPO, GRPO, DAPO, Dr. GRPO</p>
+<p><strong>Note:</strong> GSPO is a TRL-only algorithm.</p>
+<h3 id="complete-system-architecture">Complete System Architecture<a class="headerlink" href="#complete-system-architecture" title="Permanent link">¶</a></h3>
+<div class="mermaid">flowchart TD
+ UI[User Interface] --&gt; Factory[Backend Factory Layer]
+ Factory --&gt; TRL[TRL Backends]
+ Factory --&gt; Unsloth[Unsloth Backends]
+ TRL --&gt; Core[Core Training Components]
+ Unsloth --&gt; Core
+ Core --&gt; Rewards[Reward System]
+ Core --&gt; Eval[Evaluation System]
+</div>
+<h2 id="core-components">Core Components<a class="headerlink" href="#core-components" title="Permanent link">¶</a></h2>
+<h3 id="1-backend-factory">1. Backend Factory<a class="headerlink" href="#1-backend-factory" title="Permanent link">¶</a></h3>
+<p>The backend factory provides a unified interface for creating trainers:</p>
+<ul>
+<li><strong>Backend Selection</strong>: Automatic or manual backend selection</li>
+<li><strong>Configuration Management</strong>: Unified configuration system</li>
+<li><strong>Fallback Handling</strong>: Automatic fallback to available backends</li>
+</ul>
+<p><strong>Key Classes:</strong>
+- <code>BackendFactory</code>: Main factory class
+- <code>BackendConfig</code>: Backend configuration
+- <code>create_sft_trainer()</code>: SFT trainer creation
+- <code>create_rl_trainer()</code>: RL trainer creation</p>
+<h3 id="2-configuration-system">2. Configuration System<a class="headerlink" href="#2-configuration-system" title="Permanent link">¶</a></h3>
+<p>Unified configuration system with type safety:</p>
+<ul>
+<li><strong>SFT Configuration</strong>: <code>SFTConfig</code>, <code>ModelConfig</code>, <code>DatasetConfig</code>, <code>TrainingConfig</code></li>
+<li><strong>RL Configuration</strong>: <code>UnifiedConfig</code>, algorithm-specific configs</li>
+<li><strong>Validation</strong>: Comprehensive validation with clear error messages</li>
+</ul>
+<h3 id="3-training-backends">3. Training Backends<a class="headerlink" href="#3-training-backends" title="Permanent link">¶</a></h3>
+<h4 id="trl-backends">TRL Backends<a class="headerlink" href="#trl-backends" title="Permanent link">¶</a></h4>
+<ul>
+<li>Pure TRL implementations</li>
+<li>Maximum compatibility</li>
+<li>Battle-tested reliability</li>
+<li>Supports all core algorithms (DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO)</li>
+</ul>
+<h4 id="unsloth-backends">Unsloth Backends<a class="headerlink" href="#unsloth-backends" title="Permanent link">¶</a></h4>
+<ul>
+<li>faster training</li>
+<li>Memory efficient</li>
+<li>Optimized kernels</li>
+<li>Supports DPO, PPO, GRPO, DAPO, Dr. GRPO (not GSPO)</li>
+</ul>
+<h3 id="4-reward-system">4. Reward System<a class="headerlink" href="#4-reward-system" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>27+ Pre-built Functions</strong>: Length, sentiment, safety, etc.</li>
+<li><strong>Composite Rewards</strong>: Combine multiple functions</li>
+<li><strong>Custom Functions</strong>: Extensible reward system</li>
+<li><strong>Reward Model Training</strong>: Train neural reward models</li>
+</ul>
+<h3 id="5-evaluation-system">5. Evaluation System<a class="headerlink" href="#5-evaluation-system" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Training Evaluation</strong>: Automatic during training</li>
+<li><strong>Standalone Evaluation</strong>: Evaluate saved models</li>
+<li><strong>Benchmark Integration</strong>: lm-eval integration</li>
+<li><strong>Custom Tasks</strong>: Task-specific evaluation</li>
+</ul>
+<h2 id="design-patterns">Design Patterns<a class="headerlink" href="#design-patterns" title="Permanent link">¶</a></h2>
+<h3 id="factory-pattern">Factory Pattern<a class="headerlink" href="#factory-pattern" title="Permanent link">¶</a></h3>
+<p>Backend selection uses the factory pattern:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Factory creates appropriate trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">BackendFactory</span><span class="o">.</span><span class="n">create_trainer</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">backend_config</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="strategy-pattern">Strategy Pattern<a class="headerlink" href="#strategy-pattern" title="Permanent link">¶</a></h3>
+<p>Different backends implement the same interface:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Both backends implement TrainerBase</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TRLSFTTrainer</span><span class="p">(</span><span class="n">SFTTrainerBase</span><span class="p">):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnslothSFTTrainer</span><span class="p">(</span><span class="n">SFTTrainerBase</span><span class="p">):</span> <span class="o">...</span>
+</code></pre></div>
+<h3 id="registry-pattern">Registry Pattern<a class="headerlink" href="#registry-pattern" title="Permanent link">¶</a></h3>
+<p>Reward functions use registry pattern:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Register and retrieve functions</span>
+<span class="n">RewardRegistry</span><span class="o">.</span><span class="n">register_reward</span><span class="p">(</span><span class="s2">"custom"</span><span class="p">,</span> <span class="n">CustomReward</span><span class="p">)</span>
+<span class="n">func</span> <span class="o">=</span> <span class="n">RewardRegistry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"custom"</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">¶</a></h2>
+<h3 id="training-flow">Training Flow<a class="headerlink" href="#training-flow" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>1. User creates trainer via factory
+2. Factory selects backend
+3. Backend loads model and dataset
+4. Training loop executes
+5. Metrics logged and checkpoints saved
+6. Model saved to disk
+</code></pre></div>
+<h3 id="evaluation-flow">Evaluation Flow<a class="headerlink" href="#evaluation-flow" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>1. Load model and evaluation dataset
+2. Run inference on dataset
+3. Compute metrics
+4. Return results
+</code></pre></div>
+<h2 id="extension-points">Extension Points<a class="headerlink" href="#extension-points" title="Permanent link">¶</a></h2>
+<h3 id="custom-backends">Custom Backends<a class="headerlink" href="#custom-backends" title="Permanent link">¶</a></h3>
+<p>Create custom backends by implementing trainer base classes:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CustomSFTTrainer</span><span class="p">(</span><span class="n">SFTTrainerBase</span><span class="p">):</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="o">...</span>
+</code></pre></div>
+<h3 id="custom-reward-functions">Custom Reward Functions<a class="headerlink" href="#custom-reward-functions" title="Permanent link">¶</a></h3>
+<p>Extend reward system with custom functions:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CustomReward</span><span class="p">(</span><span class="n">RewardFunction</span><span class="p">):</span>
+ <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<h3 id="custom-evaluation-tasks">Custom Evaluation Tasks<a class="headerlink" href="#custom-evaluation-tasks" title="Permanent link">¶</a></h3>
+<p>Add custom evaluation tasks:</p>
+<div class="highlight"><pre><span></span><code><span class="n">task</span> <span class="o">=</span> <span class="n">EvalTask</span><span class="p">(</span>
+ <span class="n">name</span><span class="o">=</span><span class="s2">"custom"</span><span class="p">,</span>
+ <span class="n">category</span><span class="o">=</span><span class="n">TaskCategory</span><span class="o">.</span><span class="n">CUSTOM</span><span class="p">,</span>
+ <span class="o">...</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="custom-backends.md">Custom Backends</a> - Creating custom backends</li>
+<li><a href="distributed.md">Distributed Training</a> - Distributed training architecture</li>
+<li><a href="performance.md">Performance</a> - Performance optimization</li>
+</ul></div>
+</div>
+<footer class="col-md-12 text-center">
+<hr/>
+<p>
+<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+</p>
+</footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="../../js/bootstrap-3.0.3.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>var base_url = "../.."</script>
+<script src="../../js/base.js"></script>
+<script src="../../search/main.js"></script>
+<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<button class="close" data-dismiss="modal" type="button">
+<span aria-hidden="true">×</span>
+<span class="sr-only">Close</span>
+</button>
+<h4 class="modal-title" id="searchModalLabel">Search</h4>
+</div>
+<div class="modal-body">
+<p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+<form>
+<div class="form-group">
+<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
+</div>
+</form>
+<div id="mkdocs-search-results"></div>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+</div>
+<div class="modal-body">
+<table class="table">
+<thead>
+<tr>
+<th style="width: 20%;">Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="help shortcut"><kbd>?</kbd></td>
+<td>Open this help</td>
+</tr>
+<tr>
+<td class="next shortcut"><kbd>n</kbd></td>
+<td>Next page</td>
+</tr>
+<tr>
+<td class="prev shortcut"><kbd>p</kbd></td>
+<td>Previous page</td>
+</tr>
+<tr>
+<td class="search shortcut"><kbd>s</kbd></td>
+<td>Search</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="modal-footer">
+</div>
+</div>
+</div>
+</div>
+<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
+    securityLevel: "loose",
+    startOnLoad: true
+});</script></body>
+</html>

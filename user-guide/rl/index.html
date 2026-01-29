@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+    <meta name="author" content="AlignTune Contributors">
+    <link rel="canonical" href="https://aligntune.github.io/user-guide/rl/">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+<title>Reinforcement Learning (RL) - AlignTune</title>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+    <link href="../../assets/overrides.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+    
+<!-- Favicons -->
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16x16.png">
+<link rel="manifest" href="../../assets/site.webmanifest">
+<link rel="shortcut icon" href="../../assets/favicon.ico">
+
+<!-- Android Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="../../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../assets/android-chrome-512x512.png">
+
+ 
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+ <div class="container">
+
+ <!-- Collapsed navigation -->
+ <div class="navbar-header">
+ <!-- Expander button -->
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+ <span class="sr-only">Toggle navigation</span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ 
+
+ <!-- Main title -->
+
+ 
+ <a class="navbar-brand" href="../..">AlignTune</a>
+ 
+ </div>
+
+ <!-- Expanded navigation -->
+ <div class="navbar-collapse collapse">
+ <!-- Main navigation -->
+ <ul class="nav navbar-nav">
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../..">Home</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/installation/">Installation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/quickstart/">Quick Start</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/basic-concepts/">Basic Concepts</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/configuration/">Configuration</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../getting-started/backend-selection/">Backend Selection</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown active">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sft/">Supervised Fine-Tuning (SFT)</a>
+</li>
+
+ 
+ 
+<li class="active">
+    <a href="./">Reinforcement Learning (RL)</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-functions/">Reward Functions</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../reward-model-training/">Reward Model Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../evaluation/">Evaluation</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../model-management/">Model Management</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../sample-logging/">Sample Logging</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../troubleshooting/">Troubleshooting</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Algorithms</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../algorithms/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dpo/">DPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/ppo/">PPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/grpo/">GRPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/gspo/">GSPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dapo/">DAPO</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../algorithms/dr-grpo/">Dr. GRPO</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Backends</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../backends/overview/">Overview</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/trl/">TRL Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/unsloth/">Unsloth Backend</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../backends/comparison/">Comparison</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../advanced/architecture/">Architecture</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/distributed.md">Distributed Training</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../advanced/performance.md">Performance Optimization</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../api-reference/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/core/">Core API</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/backend-factory/">Backend Factory</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/configuration/">Configuration Classes</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../api-reference/trainers/">Trainers</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../examples/overview/">Overview</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/sft/">SFT Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/rl/">RL Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../examples/advanced/">Advanced Examples</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../notebooks/">Notebooks</a>
+</li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ 
+ <li class="dropdown">
+ <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
+ <ul class="dropdown-menu">
+ 
+ 
+<li >
+    <a href="../../cli-reference/">CLI Reference</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/commands/">CLI Commands</a>
+</li>
+
+ 
+ 
+<li >
+    <a href="../../cli/configuration/">CLI Configuration Files</a>
+</li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Compatibility</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../unsloth_compatibility/">Unsloth Compatibility</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../compatibility/backend-matrix/">Backend Support Matrix</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ 
+  <li class="dropdown-submenu">
+    <a tabindex="-1" href="">Contributing</a>
+    <ul class="dropdown-menu">
+        
+            
+<li >
+    <a href="../../contributing/guide/">Contributing Guide</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/code-style/">Code Style</a>
+</li>
+
+        
+            
+<li >
+    <a href="../../contributing/testing/">Testing</a>
+</li>
+
+        
+    </ul>
+  </li>
+
+ 
+ </ul>
+ </li>
+ 
+ 
+ </ul>
+
+ <ul class="nav navbar-nav navbar-right">
+ <li>
+ <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+ <i class="fas fa-search"></i> Search
+ </a>
+ </li>
+ <li >
+ <a rel="prev" href="../sft/">
+ <i class="fas fa-arrow-left"></i> Previous
+ </a>
+ </li>
+ <li >
+ <a rel="next" href="../reward-functions/">
+ Next <i class="fas fa-arrow-right"></i>
+ </a>
+ </li>
+ 
+ </ul>
+ </div>
+ </div>
+</div>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#reinforcement-learning-rl-training-guide">Reinforcement Learning (RL) Training Guide</a></li>
+            <li class="second-level"><a href="#overview">Overview</a></li>
+                
+            <li class="second-level"><a href="#quick-start">Quick Start</a></li>
+                
+                <li class="third-level"><a href="#basic-dpo-training">Basic DPO Training</a></li>
+                <li class="third-level"><a href="#basic-ppo-training">Basic PPO Training</a></li>
+            <li class="second-level"><a href="#algorithms">Algorithms</a></li>
+                
+                <li class="third-level"><a href="#1-dpo-direct-preference-optimization">1. DPO (Direct Preference Optimization)</a></li>
+                <li class="third-level"><a href="#2-ppo-proximal-policy-optimization">2. PPO (Proximal Policy Optimization)</a></li>
+                <li class="third-level"><a href="#3-grpo-group-relative-policy-optimization">3. GRPO (Group Relative Policy Optimization)</a></li>
+                <li class="third-level"><a href="#4-gspo-group-sequential-policy-optimization">4. GSPO (Group Sequential Policy Optimization)</a></li>
+            <li class="second-level"><a href="#backend-selection">Backend Selection</a></li>
+                
+                <li class="third-level"><a href="#trl-backend">TRL Backend</a></li>
+                <li class="third-level"><a href="#unsloth-backend">Unsloth Backend</a></li>
+            <li class="second-level"><a href="#configuration">Configuration</a></li>
+                
+                <li class="third-level"><a href="#model-configuration">Model Configuration</a></li>
+                <li class="third-level"><a href="#training-configuration">Training Configuration</a></li>
+                <li class="third-level"><a href="#dataset-configuration">Dataset Configuration</a></li>
+            <li class="second-level"><a href="#reward-models">Reward Models</a></li>
+                
+                <li class="third-level"><a href="#using-pre-trained-reward-models">Using Pre-trained Reward Models</a></li>
+                <li class="third-level"><a href="#training-custom-reward-models">Training Custom Reward Models</a></li>
+            <li class="second-level"><a href="#advanced-features">Advanced Features</a></li>
+                
+                <li class="third-level"><a href="#model-family-consistency-ppo">Model Family Consistency (PPO)</a></li>
+                <li class="third-level"><a href="#loraqlora-fine-tuning">LoRA/QLoRA Fine-Tuning</a></li>
+                <li class="third-level"><a href="#distributed-training">Distributed Training</a></li>
+            <li class="second-level"><a href="#evaluation">Evaluation</a></li>
+                
+                <li class="third-level"><a href="#basic-evaluation">Basic Evaluation</a></li>
+                <li class="third-level"><a href="#custom-evaluation">Custom Evaluation</a></li>
+                <li class="third-level"><a href="#zero-shot-evaluation">Zero-Shot Evaluation</a></li>
+            <li class="second-level"><a href="#best-practices">Best Practices</a></li>
+                
+                <li class="third-level"><a href="#1-algorithm-selection">1. Algorithm Selection</a></li>
+                <li class="third-level"><a href="#2-backend-selection">2. Backend Selection</a></li>
+                <li class="third-level"><a href="#3-reward-models">3. Reward Models</a></li>
+                <li class="third-level"><a href="#4-hyperparameters">4. Hyperparameters</a></li>
+                <li class="third-level"><a href="#5-memory-optimization">5. Memory Optimization</a></li>
+            <li class="second-level"><a href="#troubleshooting">Troubleshooting</a></li>
+                
+                <li class="third-level"><a href="#out-of-memory">Out of Memory</a></li>
+                <li class="third-level"><a href="#model-family-mismatch-ppo">Model Family Mismatch (PPO)</a></li>
+                <li class="third-level"><a href="#slow-training">Slow Training</a></li>
+                <li class="third-level"><a href="#poor-convergence">Poor Convergence</a></li>
+            <li class="second-level"><a href="#complete-examples">Complete Examples</a></li>
+                
+                <li class="third-level"><a href="#dpo-training">DPO Training</a></li>
+                <li class="third-level"><a href="#ppo-with-custom-reward-model">PPO with Custom Reward Model</a></li>
+            <li class="second-level"><a href="#next-steps">Next Steps</a></li>
+                
+            <li class="second-level"><a href="#additional-resources">Additional Resources</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="reinforcement-learning-rl-training-guide">Reinforcement Learning (RL) Training Guide<a class="headerlink" href="#reinforcement-learning-rl-training-guide" title="Permanent link">&para;</a></h1>
+<p>Complete guide to Reinforcement Learning from Human Feedback (RLHF) training with AlignTune, covering all supported RLHF algorithms.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Reinforcement Learning training aligns language models with human preferences using various algorithms. AlignTune supports multiple RLHF algorithms:</p>
+<ol>
+<li><strong>DPO</strong> (Direct Preference Optimization) - No reward model needed</li>
+<li><strong>PPO</strong> (Proximal Policy Optimization) - Flexible policy optimization with reward models</li>
+<li><strong>GRPO</strong> (Group Relative Policy Optimization) - Multi-criteria optimization</li>
+<li><strong>GSPO</strong> (Group Sequential Policy Optimization) - Sequential group learning</li>
+<li><strong>DAPO</strong> (Decouple Clip and Dynamic sAmpling Policy Optimization) - Scaled RL for LLMs while addressing key limitations in GRPO</li>
+<li><strong>Dr. GRPO</strong> (GRPO Done Right) - Unbiased GRPO variant that corrects optimization biases</li>
+</ol>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="basic-dpo-training">Basic DPO Training<a class="headerlink" href="#basic-dpo-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="c1"># Create and train DPO model</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-3.2-3B&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># Use TRL for GPT2 models</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+ <span class="c1"># For GPT2 models, add: lora_target_modules=[&quot;c_attn&quot;, &quot;c_proj&quot;]</span>
+ <span class="c1"># Or use a different model like Qwen/Qwen3-0.6B or Llama models</span>
+<span class="p">)</span>
+
+<span class="c1"># Train the model</span>
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="basic-ppo-training">Basic PPO Training<a class="headerlink" href="#basic-ppo-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+    <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;Skywork/Skywork-Reward-V2-Qwen3-0.6B&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="algorithms">Algorithms<a class="headerlink" href="#algorithms" title="Permanent link">&para;</a></h2>
+<h3 id="1-dpo-direct-preference-optimization">1. DPO (Direct Preference Optimization)<a class="headerlink" href="#1-dpo-direct-preference-optimization" title="Permanent link">&para;</a></h3>
+<p>DPO trains models directly on preference pairs without requiring a separate reward model.</p>
+<p><strong>Advantages:</strong>
+- No reward model needed
+- Simpler training pipeline
+- Direct preference learning</p>
+<p><strong>Use Cases:</strong>
+- Preference alignment
+- Human feedback integration
+- General RLHF training</p>
+<h4 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># Use TRL for GPT2 models</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="c1"># For GPT2 models, add: lora_target_modules=[&quot;c_attn&quot;, &quot;c_proj&quot;]</span>
+ <span class="c1"># Or use a different model like Qwen/Qwen3-0.6B</span>
+ <span class="c1"># DPO-specific parameters</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># KL penalty coefficient</span>
+ <span class="n">reference_free</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># Use reference model</span>
+ <span class="n">loss_type</span><span class="o">=</span><span class="s2">&quot;sigmoid&quot;</span> <span class="c1"># Loss function type</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<p><strong>Dataset Format:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w"> </span><span class="nt">&quot;prompt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;What is machine learning?&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;chosen&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Machine learning is a subset of AI...&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;rejected&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;I don&#39;t know.&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="2-ppo-proximal-policy-optimization">2. PPO (Proximal Policy Optimization)<a class="headerlink" href="#2-ppo-proximal-policy-optimization" title="Permanent link">&para;</a></h3>
+<p>PPO optimizes policies using reward models and value functions.</p>
+<p><strong>Advantages:</strong>
+- Flexible reward shaping
+- Can use custom reward models
+- Supports complex reward landscapes</p>
+<p><strong>Use Cases:</strong>
+- Custom reward model training
+- Complex reward functions
+- Production RLHF systems</p>
+<h4 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+    <span class="c1"># Reward model configuration</span>
+    <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;Skywork/Skywork-Reward-V2-Qwen3-0.6B&quot;</span><span class="p">,</span>
+    <span class="c1"># PPO-specific parameters</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+    <span class="n">kl_coef</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># KL penalty coefficient</span>
+    <span class="n">cliprange</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="c1"># PPO clip range</span>
+    <span class="n">vf_coef</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># Value function coefficient</span>
+    <span class="n">gamma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="c1"># Discount factor</span>
+    <span class="n">lam</span><span class="o">=</span><span class="mf">0.95</span> <span class="c1"># GAE lambda</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="custom-reward-model-training">Custom Reward Model Training<a class="headerlink" href="#custom-reward-model-training" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_training_texts</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load training texts for reward model training.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="s2">&quot;This is a helpful and informative response that addresses the question clearly.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;I&#39;m not sure about this answer.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;This response is clear, concise, and well-structured.&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+    <span class="c1"># Custom reward model training</span>
+    <span class="n">train_custom_reward_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">reward_training_texts</span><span class="o">=</span><span class="n">load_training_texts</span><span class="p">(),</span>
+    <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">,</span> <span class="s2">&quot;coherence&quot;</span><span class="p">],</span>
+    <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+    <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span><span class="p">,</span>
+    <span class="c1"># PPO configuration</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="3-grpo-group-relative-policy-optimization">3. GRPO (Group Relative Policy Optimization)<a class="headerlink" href="#3-grpo-group-relative-policy-optimization" title="Permanent link">&para;</a></h3>
+<p>GRPO optimizes policies using group-based relative comparisons.</p>
+<p><strong>Advantages:</strong>
+- Multi-criteria optimization
+- Group-based learning
+- Flexible reward combinations</p>
+<p><strong>Use Cases:</strong>
+- Multi-objective optimization
+- Complex reward landscapes
+- Group-based preference learning</p>
+<h4 id="example_2">Example<a class="headerlink" href="#example_2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="c1"># GRPO requires minimum batch_size=2 for generations</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+    <span class="n">loss_type</span><span class="o">=</span><span class="s1">&#39;grpo&#39;</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="4-gspo-group-sequential-policy-optimization">4. GSPO (Group Sequential Policy Optimization)<a class="headerlink" href="#4-gspo-group-sequential-policy-optimization" title="Permanent link">&para;</a></h3>
+<p>GSPO uses sequential group learning for policy optimization.</p>
+<p><strong>Note:</strong> GSPO is only supported by TRL backend, not Unsloth.</p>
+<p><strong>Advantages:</strong>
+- Sequential learning
+- Group-based optimization
+- Structured policy updates</p>
+<p><strong>Use Cases:</strong>
+- Sequential preference learning
+- Structured policy optimization
+- Group-based RLHF</p>
+<h4 id="example_3">Example<a class="headerlink" href="#example_3" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;gspo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span> <span class="c1"># GSPO only works with TRL</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="c1"># Note: group_size and sequential_steps are not in standard GRPO config</span>
+ <span class="c1"># These parameters are specific to GSPO implementation</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="backend-selection">Backend Selection<a class="headerlink" href="#backend-selection" title="Permanent link">&para;</a></h2>
+<h3 id="trl-backend">TRL Backend<a class="headerlink" href="#trl-backend" title="Permanent link">&para;</a></h3>
+<p><strong>Use TRL when:</strong>
+- Need maximum compatibility
+- Using GSPO (TRL only)
+- Working with standard models
+- Need reliable, battle-tested training</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="unsloth-backend">Unsloth Backend<a class="headerlink" href="#unsloth-backend" title="Permanent link">&para;</a></h3>
+<p><strong>Use Unsloth when:</strong>
+- Need faster training
+- Working with large models
+- Need memory efficiency
+- Training PPO, DPO, or GRPO</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<h3 id="model-configuration">Model Configuration<a class="headerlink" href="#model-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="c1"># Model settings</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+ <span class="n">use_peft</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Enable LoRA</span>
+ <span class="n">lora_r</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+ <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+ <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="c1"># Reward model settings (for PPO)</span>
+ <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;Skywork/Skywork-Reward-V2-Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="training-configuration">Training Configuration<a class="headerlink" href="#training-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="c1"># Training settings</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># Use epochs</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+ <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+ <span class="n">max_grad_norm</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+ <span class="c1"># Algorithm-specific</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># DPO: KL coefficient</span>
+ <span class="n">kl_coef</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># PPO: KL coefficient</span>
+ <span class="n">cliprange</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="c1"># PPO: clip range</span>
+ <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span> <span class="c1"># Generation temperature</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="dataset-configuration">Dataset Configuration<a class="headerlink" href="#dataset-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="c1"># Dataset settings</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+ <span class="n">percent</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+ <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+ <span class="c1"># Field mappings</span>
+ <span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span>
+ <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;chosen&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;rejected&quot;</span>
+ <span class="p">},</span>
+ <span class="n">truncation_mode</span><span class="o">=</span><span class="s2">&quot;keep_end&quot;</span><span class="p">,</span>
+ <span class="n">padding_free</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="reward-models">Reward Models<a class="headerlink" href="#reward-models" title="Permanent link">&para;</a></h2>
+<h3 id="using-pre-trained-reward-models">Using Pre-trained Reward Models<a class="headerlink" href="#using-pre-trained-reward-models" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># From HuggingFace Hub</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;Skywork/Skywork-Reward-V2-Qwen3-0.6B&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># From local path</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_path</span><span class="o">=</span><span class="s2">&quot;./reward_models/my_reward_model&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="training-custom-reward-models">Training Custom Reward Models<a class="headerlink" href="#training-custom-reward-models" title="Permanent link">&para;</a></h3>
+<p>See <a href="../reward-model-training/">Reward Model Training Guide</a> for detailed instructions.</p>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="c1"># Custom reward model training</span>
+ <span class="n">train_custom_reward_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">reward_training_texts</span><span class="o">=</span><span class="n">training_texts</span><span class="p">,</span>
+ <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">],</span>
+ <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+ <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">&para;</a></h2>
+<h3 id="model-family-consistency-ppo">Model Family Consistency (PPO)<a class="headerlink" href="#model-family-consistency-ppo" title="Permanent link">&para;</a></h3>
+<p>AlignTune automatically checks that all models in PPO training belong to the same family:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Correct: All Qwen models</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;Skywork/Skywork-Reward-V2-Qwen3-0.6B&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Error: Mixed families</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span> <span class="c1"># Different family!</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="loraqlora-fine-tuning">LoRA/QLoRA Fine-Tuning<a class="headerlink" href="#loraqlora-fine-tuning" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="c1"># LoRA configuration</span>
+ <span class="n">use_peft</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">lora_r</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+ <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+ <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+ <span class="n">lora_target_modules</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;q_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;k_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;v_proj&quot;</span><span class="p">,</span> <span class="s2">&quot;o_proj&quot;</span><span class="p">],</span>
+ <span class="c1"># Quantization</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="distributed-training">Distributed Training<a class="headerlink" href="#distributed-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Distributed training</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="c1"># Distributed settings (configure via accelerate)</span>
+ <span class="c1"># See distributed training guide</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="evaluation">Evaluation<a class="headerlink" href="#evaluation" title="Permanent link">&para;</a></h2>
+<h3 id="basic-evaluation">Basic Evaluation<a class="headerlink" href="#basic-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Evaluate on validation set</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-evaluation">Custom Evaluation<a class="headerlink" href="#custom-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">eval_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">eval_dataset</span><span class="o">=</span><span class="n">eval_dataset</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="zero-shot-evaluation">Zero-Shot Evaluation<a class="headerlink" href="#zero-shot-evaluation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate predictions</span>
+<span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span>
+ <span class="s2">&quot;What is machine learning?&quot;</span><span class="p">,</span>
+ <span class="s2">&quot;Explain deep learning&quot;</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">prompts</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+ <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;A: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-algorithm-selection">1. Algorithm Selection<a class="headerlink" href="#1-algorithm-selection" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>DPO</strong>: Start here for preference alignment, simpler setup</li>
+<li><strong>PPO</strong>: Use for custom rewards, complex scenarios</li>
+<li><strong>GRPO</strong>: Multi-criteria optimization</li>
+<li><strong>GSPO</strong>: Sequential learning (TRL only)</li>
+</ul>
+<h3 id="2-backend-selection">2. Backend Selection<a class="headerlink" href="#2-backend-selection" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>TRL</strong>: Maximum compatibility, GSPO support</li>
+<li><strong>Unsloth</strong>: Faster training (Faster), memory efficient</li>
+</ul>
+<h3 id="3-reward-models">3. Reward Models<a class="headerlink" href="#3-reward-models" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use pre-trained models when available</li>
+<li>Train custom models for domain-specific tasks</li>
+<li>Ensure model family consistency for PPO</li>
+</ul>
+<h3 id="4-hyperparameters">4. Hyperparameters<a class="headerlink" href="#4-hyperparameters" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># DPO recommended settings</span>
+<span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span> <span class="c1"># KL coefficient</span>
+<span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+<span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span>
+
+<span class="c1"># PPO recommended settings</span>
+<span class="n">kl_coef</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="n">cliprange</span><span class="o">=</span><span class="mf">0.2</span>
+<span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+<span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span> <span class="c1"># Smaller for PPO</span>
+</code></pre></div>
+<h3 id="5-memory-optimization">5. Memory Optimization<a class="headerlink" href="#5-memory-optimization" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># For large models</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+ <span class="n">use_peft</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">8</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="out-of-memory">Out of Memory<a class="headerlink" href="#out-of-memory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Reduce batch size, use quantization</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Reduce</span>
+ <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="c1"># Compensate</span>
+ <span class="n">quantization</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;load_in_4bit&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+ <span class="n">use_gradient_checkpointing</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="model-family-mismatch-ppo">Model Family Mismatch (PPO)<a class="headerlink" href="#model-family-mismatch-ppo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Ensure all models are same family</span>
+<span class="c1"># Correct</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span>
+<span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;Skywork/Skywork-Reward-V2-Qwen3-0.6B&quot;</span>
+
+<span class="c1"># Wrong</span>
+<span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span>
+<span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span> <span class="c1"># Different family!</span>
+</code></pre></div>
+<h3 id="slow-training">Slow Training<a class="headerlink" href="#slow-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use Unsloth backend</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span> <span class="c1"># faster</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="poor-convergence">Poor Convergence<a class="headerlink" href="#poor-convergence" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Adjust learning rate and KL coefficient</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="c1"># Lower learning rate</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="c1"># Lower KL penalty</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">2</span> <span class="c1"># More epochs</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="complete-examples">Complete Examples<a class="headerlink" href="#complete-examples" title="Permanent link">&para;</a></h2>
+<h3 id="dpo-training">DPO Training<a class="headerlink" href="#dpo-training" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+ <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+ <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+ <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="ppo-with-custom-reward-model">PPO with Custom Reward Model<a class="headerlink" href="#ppo-with-custom-reward-model" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+ <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
+ <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+ <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+ <span class="n">train_custom_reward_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+ <span class="n">reward_training_texts</span><span class="o">=</span><span class="n">load_training_texts</span><span class="p">(),</span>
+ <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">],</span>
+ <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+ <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+ <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span><span class="p">,</span>
+ <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+ <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../reward-functions/">Reward Functions Guide</a> - Explore reward functions</li>
+<li><a href="../reward-model-training/">Reward Model Training</a> - Train custom reward models</li>
+<li><a href="../evaluation/">Evaluation Guide</a> - Comprehensive evaluation</li>
+<li><a href="../sft/">SFT Guide</a> - Supervised fine-tuning</li>
+</ul>
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../api-reference/core/">API Reference</a> - Complete API documentation</li>
+<li><a href="../../examples/rl/">Examples</a> - More RL examples</li>
+<li><a href="../../getting-started/backend-selection/">Backend Selection</a> - Backend guide</li>
+<li><a href="../../unsloth_compatibility/">Unsloth Compatibility</a> - Unsloth setup</li>
+</ul></div>
+        
+        
+    </div>
+
+    
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
+
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+
+</html>
