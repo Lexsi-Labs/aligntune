@@ -61,12 +61,7 @@ Training state tracking dataclass.
 
 #### `TRLSFTTrainer`
 
-TRL backend for Supervised Fine-Tuning.
-
-::: backends.trl.sft.sft.TRLSFTTrainer
- options:
- show_source: true
- heading_level: 3
+TRL backend for Supervised Fine-Tuning. Use [`create_sft_trainer()`](backend-factory.md#create_sft_trainer) with `backend="trl"` instead of instantiating directly.
 
 **Example**:
 
@@ -81,12 +76,7 @@ trainer.train()
 
 #### `TRLDPOTrainer`
 
-TRL backend for Direct Preference Optimization.
-
-::: backends.trl.rl.dpo.dpo.TRLDPOTrainer
- options:
- show_source: true
- heading_level: 3
+TRL backend for Direct Preference Optimization. Use [`create_rl_trainer()`](backend-factory.md#create_rl_trainer) with `algorithm="dpo"` and `backend="trl"`.
 
 **Example**:
 
@@ -103,10 +93,7 @@ trainer.train()
 
 TRL backend for Proximal Policy Optimization.
 
-::: backends.trl.rl.ppo.ppo.TRLPPOTrainer
- options:
- show_source: true
- heading_level: 3
+TRL backend for Proximal Policy Optimization. Use [`create_rl_trainer()`](backend-factory.md#create_rl_trainer) with `algorithm="ppo"` and `backend="trl"`.
 
 **Example**:
 
@@ -123,10 +110,7 @@ trainer.train()
 
 TRL backend for Group Relative Policy Optimization.
 
-::: backends.trl.rl.grpo.grpo.TRLGRPOTrainer
- options:
- show_source: true
- heading_level: 3
+TRL backend for Group Relative Policy Optimization. Use [`create_rl_trainer()`](backend-factory.md#create_rl_trainer) with `algorithm="grpo"` and `backend="trl"`.
 
 ### Unsloth Backends
 
@@ -134,10 +118,7 @@ TRL backend for Group Relative Policy Optimization.
 
 Unsloth backend for Supervised Fine-Tuning (faster).
 
-::: backends.unsloth.sft.sft.UnslothSFTTrainer
- options:
- show_source: true
- heading_level: 3
+Unsloth backend for Supervised Fine-Tuning (faster). Use [`create_sft_trainer()`](backend-factory.md#create_sft_trainer) with `backend="unsloth"`.
 
 **Example**:
 
@@ -154,28 +135,19 @@ trainer.train()
 
 Unsloth backend for Direct Preference Optimization.
 
-::: backends.unsloth.rl.dpo.dpo.UnslothDPOTrainer
- options:
- show_source: true
- heading_level: 3
+Unsloth backend for Direct Preference Optimization. Use [`create_rl_trainer()`](backend-factory.md#create_rl_trainer) with `algorithm="dpo"` and `backend="unsloth"`.
 
 #### `UnslothPPOTrainer`
 
 Unsloth backend for Proximal Policy Optimization.
 
-::: backends.unsloth.rl.ppo.ppo.UnslothPPOTrainer
- options:
- show_source: true
- heading_level: 3
+Unsloth backend for Proximal Policy Optimization. Use [`create_rl_trainer()`](backend-factory.md#create_rl_trainer) with `algorithm="ppo"` and `backend="unsloth"`.
 
 #### `UnslothGRPOTrainer`
 
 Unsloth backend for Group Relative Policy Optimization.
 
-::: backends.unsloth.rl.grpo.grpo.UnslothGRPOTrainer
- options:
- show_source: true
- heading_level: 3
+Unsloth backend for Group Relative Policy Optimization. Use [`create_rl_trainer()`](backend-factory.md#create_rl_trainer) with `algorithm="grpo"` and `backend="unsloth"`.
 
 ---
 
@@ -185,10 +157,7 @@ Unsloth backend for Group Relative Policy Optimization.
 
 Specialized trainer for text classification tasks.
 
-::: backends.trl.sft.Classification_trainer.ClassificationTrainer
- options:
- show_source: true
- heading_level: 3
+Specialized trainer for text classification. Use with TRL backend via [`create_sft_trainer()`](backend-factory.md#create_sft_trainer) and task type configuration.
 
 **Note:** Only available for TRL backend.
 
