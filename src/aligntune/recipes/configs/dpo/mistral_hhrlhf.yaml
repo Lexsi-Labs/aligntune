@@ -1,0 +1,61 @@
+recipe:
+  name: "mistral-hhrlhf-dpo"
+  description: "Fine-tune Mistral 7B on Anthropic HH-RLHF for helpful and harmless responses"
+  model: "mistralai/Mistral-7B-Instruct-v0.3"
+  dataset: "Anthropic/hh-rlhf"
+  task: "safety_alignment"
+  algorithm: "dpo"
+  backend: "trl"
+  tags: ["mistral", "dpo", "safety", "alignment"]
+  requires_auth: false
+  estimated_time: "3-4 hours"
+  estimated_memory: "28GB VRAM"
+
+config:
+  algo: dpo
+  
+  model:
+    name_or_path: "mistralai/Mistral-7B-Instruct-v0.3"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  
+  datasets:
+    - name: "Anthropic/hh-rlhf"
+      split: "train"
+      max_samples: 40000
+      field_mappings:
+        prompt: "prompt"
+        chosen: "chosen"
+        rejected: "rejected"
+  
+  train:
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 8
+    learning_rate: 5e-5
+    warmup_steps: 100
+    max_grad_norm: 1.0
+    beta: 0.1
+    max_prompt_length: 512
+    max_length: 2048
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+  
+  logging:
+    output_dir: "./output/mistral-dpo-hhrlhf"
+    run_name: "mistral-hhrlhf-safety"
+    loggers: []
+  
+  distributed:
+    backend: "single"
+  
+  chat_template: "auto"

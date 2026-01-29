@@ -1,0 +1,126 @@
+site_name: AlignTune
+site_description: Comprehensive fine-tuning library for SFT and RL training with multi-backend support
+site_author: AlignTune Contributors
+site_url: https://aligntune.github.io
+
+repo_name: Lexsi-Labs/aligntune
+repo_url: https://github.com/Lexsi-Labs/aligntune
+# Disable "Edit on ..." link; keep repo link in header
+edit_uri: null
+
+theme:
+  name: cinder
+  custom_dir: docs/_overrides
+  logo: assets/aligntune-logo.png
+  favicon: assets/favicon.ico
+  highlightjs: true
+  hljs_languages:
+    - python
+    - yaml
+  navigation_depth: 3
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.emoji
+  - toc:
+      permalink: true
+  - tables
+
+extra_css:
+  - assets/overrides.css
+
+nav:
+  - Getting Started:
+    - Home: index.md
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Basic Concepts: getting-started/basic-concepts.md
+    - Configuration: getting-started/configuration.md
+    - Backend Selection: getting-started/backend-selection.md
+  - User Guide:
+    - Overview: user-guide/overview.md
+    - Supervised Fine-Tuning (SFT): user-guide/sft.md
+    - Reinforcement Learning (RL): user-guide/rl.md
+    - Reward Functions: user-guide/reward-functions.md
+    - Reward Model Training: user-guide/reward-model-training.md
+    - Evaluation: user-guide/evaluation.md
+    - Model Management: user-guide/model-management.md
+    - Sample Logging: user-guide/sample-logging.md
+    - Troubleshooting: user-guide/troubleshooting.md
+    - Algorithms:
+      - Overview: algorithms/overview.md
+      - DPO: algorithms/dpo.md
+      - PPO: algorithms/ppo.md
+      - GRPO: algorithms/grpo.md
+      - GSPO: algorithms/gspo.md
+      - DAPO: algorithms/dapo.md
+      - Dr. GRPO: algorithms/dr-grpo.md
+    - Backends:
+      - Overview: backends/overview.md
+      - TRL Backend: backends/trl.md
+      - Unsloth Backend: backends/unsloth.md
+      - Comparison: backends/comparison.md
+  - Advanced Topics:
+    - Architecture: advanced/architecture.md
+    - Custom Backends: advanced/custom-backends.md
+    - Distributed Training: advanced/distributed.md
+    - Performance Optimization: advanced/performance.md
+  - API Reference:
+    - Overview: api-reference/overview.md
+    - Core API: api-reference/core.md
+    - Backend Factory: api-reference/backend-factory.md
+    - Configuration Classes: api-reference/configuration.md
+    - Trainers: api-reference/trainers.md
+  - Examples:
+    - Overview: examples/overview.md
+    - SFT Examples: examples/sft.md
+    - RL Examples: examples/rl.md
+    - Advanced Examples: examples/advanced.md
+    - Notebooks: notebooks/index.md
+  - Project:
+    - CLI Reference: cli-reference.md
+    - CLI Commands: cli/commands.md
+    - CLI Configuration Files: cli/configuration.md
+    - Compatibility:
+      - Unsloth Compatibility: unsloth_compatibility.md
+      - Backend Support Matrix: compatibility/backend-matrix.md
+    - Contributing:
+      - Contributing Guide: contributing/guide.md
+      - Code Style: contributing/code-style.md
+      - Testing: contributing/testing.md
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Lexsi-Labs/aligntune
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/aligntune/
+
+plugins:
+  - search
+  - mermaid2:
+      javascript: https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js
+      arguments:
+        securityLevel: 'loose'
+        startOnLoad: true
+  - mkdocs-jupyter
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src/aligntune
+          options:
+            show_source: true
+            heading_level: 3
+            allow_inspection: false
+

@@ -1,0 +1,56 @@
+recipe:
+  name: "llama3-instruct-orca"
+  description: "Fine-tune LLaMA 3 8B on SlimOrca for instruction following with memory-efficient settings"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "Open-Orca/SlimOrca"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "unsloth"
+  tags: ["llama", "instruction-tuning", "memory-efficient", "popular"]
+  requires_auth: true
+  estimated_time: "3-4 hours"
+  estimated_memory: "24GB VRAM"
+
+config:
+  algo: sft
+  
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  
+  datasets:
+    - name: "Open-Orca/SlimOrca"
+      split: "train"
+      max_samples: 100000
+      column_mapping:
+        text: "conversations"
+  
+  train:
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 8
+    learning_rate: 2e-4
+    warmup_steps: 100
+    max_grad_norm: 1.0
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+    eval_steps: 500
+  
+  logging:
+    output_dir: "./output/llama3-orca-sft"
+    run_name: "llama3-instruction-orca"
+    loggers: []
+  
+  distributed:
+    backend: "single"
+  
+  chat_template: "llama3"

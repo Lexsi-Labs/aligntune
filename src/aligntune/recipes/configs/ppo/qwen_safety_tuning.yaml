@@ -1,0 +1,76 @@
+recipe:
+  name: "qwen-safety-ppo"
+  description: "Train Qwen 2.5 3B with PPO for improved safety and alignment"
+  model: "Qwen/Qwen2.5-3B-Instruct"
+  dataset: "Anthropic/hh-rlhf"
+  task: "safety_rlhf"
+  algorithm: "ppo"
+  backend: "trl"
+  tags: ["qwen", "ppo", "safety", "alignment"]
+  requires_auth: false
+  estimated_time: "2-3 hours"
+  estimated_memory: "20GB VRAM"
+
+config:
+  algo: ppo
+  
+  model:
+    name_or_path: "Qwen/Qwen2.5-3B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 1024
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  
+  datasets:
+    - name: "Anthropic/hh-rlhf"
+      split: "train"
+      max_samples: 15000
+      column_mapping:
+        text: "chosen"
+  
+  rewards:
+    - type: "safety"
+      weight: 0.4
+      params: {}
+    - type: "harmlessness"
+      weight: 0.3
+      params: {}
+    - type: "toxicity"
+      weight: -0.2
+      params: {}
+    - type: "helpfulness"
+      weight: 0.1
+      params: {}
+  
+  train:
+    epochs: 1
+    max_steps: 1500
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 1e-5
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    num_generations: 16
+    max_prompt_length: 512
+    max_completion_length: 512
+    temperature: 0.7
+    top_p: 0.9
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+  
+  logging:
+    output_dir: "./output/qwen-ppo-safety"
+    run_name: "qwen-safety-ppo"
+    loggers: []
+  
+  distributed:
+    backend: "single"
+  
+  chat_template: "auto"

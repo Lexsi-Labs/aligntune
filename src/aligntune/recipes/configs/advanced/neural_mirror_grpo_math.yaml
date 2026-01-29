@@ -1,0 +1,71 @@
+recipe:
+  name: "neural-mirror-grpo-math"
+  description: "Advanced GRPO with learnable mirror maps for mathematical reasoning"
+  model: "Qwen/Qwen2.5-7B-Instruct"
+  dataset: "hendrycks/MATH"
+  task: "math_reasoning"
+  algorithm: "nmgrpo"
+  backend: "trl"
+  tags: ["advanced", "research", "math", "adaptive", "neural-mirror"]
+  requires_auth: false
+  estimated_time: "8-12 hours"
+  estimated_memory: "32GB VRAM"
+
+config:
+  algo: nmgrpo
+  model:
+    name_or_path: "Qwen/Qwen2.5-7B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 128
+    lora_alpha: 256
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  datasets:
+    - name: "hendrycks/MATH"
+      split: "train"
+      column_mapping:
+        prompt: "problem"
+        text: "solution"
+  rewards:
+    - type: "math_correctness"
+      weight: 0.6
+      params: {}
+    - type: "math_reasoning"
+      weight: 0.3
+      params: {}
+    - type: "logical_consistency"
+      weight: 0.1
+      params: {}
+  train:
+    epochs: 3
+    max_steps: 5000
+    per_device_batch_size: 8
+    gradient_accumulation_steps: 8
+    learning_rate: 0.00001
+    num_generations: 32
+    mirror_coefficient: 0.001
+    mirror_init_scale: 0.01
+    mirror_seed: 42
+    divergence_type: "neural_mirror"
+    max_prompt_length: 512
+    max_completion_length: 1024
+    temperature: 0.7
+    top_p: 0.9
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    warmup_steps: 100
+    max_grad_norm: 1.0
+    logging_steps: 10
+    save_steps: 500
+    eval_steps: 500
+  logging:
+    output_dir: "./output/neural-mirror-math"
+    run_name: "qwen-nmgrpo-math"
+    loggers: []
+  distributed:
+    backend: "single"
+  chat_template: "auto"

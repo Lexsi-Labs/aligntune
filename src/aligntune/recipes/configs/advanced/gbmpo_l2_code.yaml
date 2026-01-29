@@ -1,0 +1,67 @@
+recipe:
+  name: "gbmpo-l2-code"
+  description: "GBMPO with L2 divergence for code generation with fine-grained policy control"
+  model: "deepseek-ai/deepseek-coder-6.7b-instruct"
+  dataset: "openai/humaneval"
+  task: "code_generation"
+  algorithm: "gbmpo"
+  backend: "trl"
+  tags: ["advanced", "research", "code", "gbmpo", "divergence"]
+  requires_auth: false
+  estimated_time: "3-4 hours"
+  estimated_memory: "24GB VRAM"
+
+config:
+  algo: gbmpo
+  model:
+    name_or_path: "deepseek-ai/deepseek-coder-6.7b-instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 32
+    lora_alpha: 64
+    lora_dropout: 0.1
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  datasets:
+    - name: "openai/humaneval"
+      split: "test"
+      column_mapping:
+        text: "prompt"
+  rewards:
+    - type: "code_correctness"
+      weight: 0.5
+      params: {}
+    - type: "code_quality"
+      weight: 0.3
+      params: {}
+    - type: "code_execution"
+      weight: 0.2
+      params: {}
+  train:
+    epochs: 1
+    max_steps: 1000
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 0.00001
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.01
+    divergence_type: "l2"
+    num_generations: 16
+    max_prompt_length: 512
+    max_completion_length: 1536
+    temperature: 0.6
+    top_p: 0.95
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+  logging:
+    output_dir: "./output/gbmpo-l2-code"
+    run_name: "deepseek-gbmpo-l2"
+    loggers: []
+  distributed:
+    backend: "single"
+  chat_template: "auto"

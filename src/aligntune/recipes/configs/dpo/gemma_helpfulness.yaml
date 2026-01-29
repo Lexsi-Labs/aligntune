@@ -1,0 +1,61 @@
+recipe:
+  name: "gemma-helpfulness-dpo"
+  description: "Train Gemma 2 2B for improved helpfulness using DPO on curated preferences"
+  model: "google/gemma-2-2b-it"
+  dataset: "argilla/ultrafeedback-binarized-preferences-cleaned"
+  task: "helpfulness_optimization"
+  algorithm: "dpo"
+  backend: "trl"
+  tags: ["gemma", "dpo", "helpfulness", "efficient"]
+  requires_auth: true
+  estimated_time: "1-2 hours"
+  estimated_memory: "12GB VRAM"
+
+config:
+  algo: dpo
+  
+  model:
+    name_or_path: "google/gemma-2-2b-it"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 8
+    lora_alpha: 16
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  
+  datasets:
+    - name: "argilla/ultrafeedback-binarized-preferences-cleaned"
+      split: "train"
+      max_samples: 25000
+      field_mappings:
+        prompt: "instruction"
+        chosen: "chosen"
+        rejected: "rejected"
+  
+  train:
+    epochs: 1
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 5e-5
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.1
+    max_prompt_length: 512
+    max_length: 2048
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+  
+  logging:
+    output_dir: "./output/gemma-dpo-helpfulness"
+    run_name: "gemma-helpfulness-dpo"
+    loggers: []
+  
+  distributed:
+    backend: "single"
+  
+  chat_template: "auto"

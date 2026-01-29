@@ -1,0 +1,62 @@
+recipe:
+  name: "llama3-gsm8k-grpo"
+  description: "Train LLaMA 3 8B on GSM8K math reasoning using GRPO"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "openai/gsm8k"
+  task: "math_reasoning"
+  algorithm: "grpo"
+  backend: "trl"
+  tags: ["llama", "grpo", "math", "reasoning"]
+  requires_auth: true
+  estimated_time: "3-4 hours"
+  estimated_memory: "28GB VRAM"
+
+config:
+  algo: grpo
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 1024
+    use_peft: true
+    lora_r: 32
+    lora_alpha: 64
+    lora_dropout: 0.1
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  datasets:
+    - name: "openai/gsm8k"
+      split: "train"
+      config_name: "main"
+      max_samples: 5000
+      column_mapping:
+        text: "question"
+  rewards:
+    - type: "math_correctness"
+      weight: 1.0
+      params: {}
+  train:
+    epochs: 1
+    max_steps: 1000
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 0.00001
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.01
+    num_generations: 16
+    max_prompt_length: 512
+    max_completion_length: 512
+    temperature: 0.7
+    top_p: 0.9
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+  logging:
+    output_dir: "./output/llama3-gsm8k-grpo"
+    run_name: "llama3-math-grpo"
+    loggers: []
+  distributed:
+    backend: "single"
+  chat_template: "llama3"

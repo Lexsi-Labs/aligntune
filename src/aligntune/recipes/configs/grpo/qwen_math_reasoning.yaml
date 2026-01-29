@@ -1,0 +1,65 @@
+recipe:
+  name: "qwen-math-grpo"
+  description: "Train Qwen 2.5 3B on GSM8K for mathematical reasoning with GRPO"
+  model: "Qwen/Qwen2.5-3B-Instruct"
+  dataset: "openai/gsm8k"
+  task: "math_reasoning"
+  algorithm: "grpo"
+  backend: "trl"
+  tags: ["qwen", "grpo", "math", "efficient"]
+  requires_auth: false
+  estimated_time: "2-3 hours"
+  estimated_memory: "18GB VRAM"
+
+config:
+  algo: grpo
+  model:
+    name_or_path: "Qwen/Qwen2.5-3B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 1024
+    use_peft: true
+    lora_r: 32
+    lora_alpha: 64
+    lora_dropout: 0.1
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  datasets:
+    - name: "openai/gsm8k"
+      split: "train"
+      config_name: "main"
+      max_samples: 3000
+      column_mapping:
+        text: "question"
+  rewards:
+    - type: "math_correctness"
+      weight: 0.7
+      params: {}
+    - type: "math_reasoning"
+      weight: 0.3
+      params: {}
+  train:
+    epochs: 1
+    max_steps: 800
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 0.00001
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.01
+    num_generations: 16
+    max_prompt_length: 512
+    max_completion_length: 512
+    temperature: 0.7
+    top_p: 0.9
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+  logging:
+    output_dir: "./output/qwen-gsm8k-grpo"
+    run_name: "qwen-math-grpo"
+    loggers: []
+  distributed:
+    backend: "single"
+  chat_template: "auto"
