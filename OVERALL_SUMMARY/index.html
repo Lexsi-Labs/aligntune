@@ -288,19 +288,19 @@
  
  
 <li >
-    <a href="../advanced/custom-backends.md">Custom Backends</a>
+    <a href="../advanced/custom-backends/">Custom Backends</a>
 </li>
 
  
  
 <li >
-    <a href="../advanced/distributed.md">Distributed Training</a>
+    <a href="../advanced/distributed/">Distributed Training</a>
 </li>
 
  
  
 <li >
-    <a href="../advanced/performance.md">Performance Optimization</a>
+    <a href="../advanced/performance/">Performance Optimization</a>
 </li>
 
  
@@ -752,13 +752,13 @@
 <div class="highlight"><pre><span></span><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
  <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
  <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;google-research-datasets/mbpp&quot;</span><span class="p">,</span>
- <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;bolt&quot;</span><span class="p">,</span>
+ <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
  <span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span>
  <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
  <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;response&quot;</span>
  <span class="p">},</span>
  <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
- <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output/bolt_model&quot;</span><span class="p">,</span>
+ <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output/grpo_model&quot;</span><span class="p">,</span>
  <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
  <span class="n">num_generations</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 <span class="p">)</span>

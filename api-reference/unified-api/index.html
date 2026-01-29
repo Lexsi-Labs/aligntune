@@ -288,19 +288,19 @@
  
  
 <li >
-    <a href="../../advanced/custom-backends.md">Custom Backends</a>
+    <a href="../../advanced/custom-backends/">Custom Backends</a>
 </li>
 
  
  
 <li >
-    <a href="../../advanced/distributed.md">Distributed Training</a>
+    <a href="../../advanced/distributed/">Distributed Training</a>
 </li>
 
  
  
 <li >
-    <a href="../../advanced/performance.md">Performance Optimization</a>
+    <a href="../../advanced/performance/">Performance Optimization</a>
 </li>
 
  
@@ -544,7 +544,7 @@
         <div class="col-md-9" role="main">
 
 <h1 id="unified-rlhf-api-documentation">Unified RLHF API Documentation<a class="headerlink" href="#unified-rlhf-api-documentation" title="Permanent link">&para;</a></h1>
-<p>This document describes the unified RLHF training system that provides a consistent interface for training with PPO, DPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, and BOLT algorithms.</p>
+<p>This document describes the unified RLHF training system that provides a consistent interface for training with PPO, DPO, GRPO, GSPO, DAPO, and Dr. GRPO algorithms.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The unified system provides:
 - <strong>Consistent API</strong>: Same interface for all RLHF algorithms
@@ -608,9 +608,6 @@ python<span class="w"> </span>-m<span class="w"> </span>aligntune.cli.train_unif
  <span class="n">GSPO</span> <span class="o">=</span> <span class="s2">&quot;gspo&quot;</span> <span class="c1"># Generalized Scoring Proximal Objective</span>
  <span class="n">DAPO</span> <span class="o">=</span> <span class="s2">&quot;dapo&quot;</span> <span class="c1"># Decouple Clip and Dynamic sAmpling Policy Optimization</span>
  <span class="n">DRGRPO</span> <span class="o">=</span> <span class="s2">&quot;drgrpo&quot;</span> <span class="c1"># Dr. GRPO (GRPO Done Right)</span>
- <span class="n">GBMPO</span> <span class="o">=</span> <span class="s2">&quot;gbmpo&quot;</span> <span class="c1"># Group-Based Mirror Policy Optimization</span>
- <span class="n">COUNTERFACT_GRPO</span> <span class="o">=</span> <span class="s2">&quot;counterfact_grpo&quot;</span> <span class="c1"># Counterfactual GRPO</span>
- <span class="n">BOLT</span> <span class="o">=</span> <span class="s2">&quot;bolt&quot;</span> <span class="c1"># Baseline-Optimized Learning Technique</span>
 </code></pre></div>
 <h3 id="model-configuration">Model Configuration<a class="headerlink" href="#model-configuration" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
