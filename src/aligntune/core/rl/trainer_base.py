@@ -484,7 +484,7 @@ class TrainerBase(ABC):
 
         return eval_results
 
-    def _evaluate_native(self, eval_dataset=None, **kwargs) -> Dict[str, float]:
+    def _evaluate_native(self, eval_dataset: Optional[Any] = None, **kwargs: Any) -> Dict[str, float]:
         """Native evaluation - uses UnifiedEvaluator or trainer's built-in evaluate.
 
         Subclasses can override this to use their trainer-specific evaluation.
@@ -515,11 +515,11 @@ class TrainerBase(ABC):
     
     def evaluate(
         self,
-        eval_dataset=None,
+        eval_dataset: Optional[Any] = None,
         metric_key_prefix: str = "eval",
         use_custom_evaluator: bool = False,
         metrics: Optional[List] = None,
-        **kwargs
+        **kwargs: Any,
     ) -> Dict[str, float]:
         """
         Evaluate the trained model with flexible evaluation strategies.
@@ -722,7 +722,7 @@ class TrainerBase(ABC):
         private: bool = False,
         token: Optional[str] = None,
         commit_message: str = "Upload fine-tuned model",
-        **kwargs
+        **kwargs: Any,
     ) -> str:
         """Push model to HuggingFace Hub.
         
@@ -793,7 +793,7 @@ class TrainerBase(ABC):
         temperature: float = 1.0,
         top_p: float = 0.9,
         do_sample: bool = True,
-        **kwargs
+        **kwargs: Any,
     ) -> Union[str, List[str]]:
         """Generate predictions from trained model.
         

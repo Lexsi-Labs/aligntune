@@ -168,7 +168,7 @@ from aligntune.core.backend_factory import create_rl_trainer, BackendType
 2. **Check Required Parameters**:
  - `model_name`: Must be a valid HuggingFace model ID
  - `dataset_name`: Must be a valid HuggingFace dataset ID
- - `algorithm`: Must be one of: `dpo`, `ppo`, `grpo`, `gspo`, `dapo`, `drgrpo`, `gbmpo`, `counterfact_grpo`, `bolt`
+ - `algorithm`: Must be one of: `dpo`, `ppo`, `grpo`, `gspo`, `dapo`, `drgrpo`
 
 3. **Check Parameter Types**:
  ```python

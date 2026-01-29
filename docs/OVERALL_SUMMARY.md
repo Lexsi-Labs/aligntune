@@ -236,13 +236,13 @@ Map dataset columns to expected format without writing a preprocessing function:
 trainer = create_rl_trainer(
  model_name="Qwen/Qwen3-0.6B",
  dataset_name="google-research-datasets/mbpp",
- algorithm="bolt",
+ algorithm="grpo",
  column_mapping={
  "text": "prompt",
  "code": "response"
  },
  backend="trl",
- output_dir="./output/bolt_model",
+ output_dir="./output/grpo_model",
  batch_size=8,
  num_generations=4,
 )

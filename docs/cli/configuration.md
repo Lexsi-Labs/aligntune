@@ -40,7 +40,7 @@ logging:
 ### Algorithm Configuration
 
 ```yaml
-algo: dpo # Options: dpo, ppo, grpo, gspo, dapo, dr-grpo, gbmpo, counterfactual-grpo, bolt
+algo: dpo # Options: dpo, ppo, grpo, gspo, dapo, dr-grpo
 ```
 
 ### Model Configuration

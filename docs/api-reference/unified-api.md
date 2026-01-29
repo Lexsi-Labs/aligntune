@@ -1,6 +1,6 @@
 # Unified RLHF API Documentation
 
-This document describes the unified RLHF training system that provides a consistent interface for training with PPO, DPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, and BOLT algorithms.
+This document describes the unified RLHF training system that provides a consistent interface for training with PPO, DPO, GRPO, GSPO, DAPO, and Dr. GRPO algorithms.
 
 ## Overview
 
@@ -81,9 +81,6 @@ class AlgorithmType(Enum):
  GSPO = "gspo" # Generalized Scoring Proximal Objective
  DAPO = "dapo" # Decouple Clip and Dynamic sAmpling Policy Optimization
  DRGRPO = "drgrpo" # Dr. GRPO (GRPO Done Right)
- GBMPO = "gbmpo" # Group-Based Mirror Policy Optimization
- COUNTERFACT_GRPO = "counterfact_grpo" # Counterfactual GRPO
- BOLT = "bolt" # Baseline-Optimized Learning Technique
 ```
 
 ### Model Configuration
