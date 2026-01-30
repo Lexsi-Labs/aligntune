@@ -739,15 +739,15 @@ class TRLSFTTrainer(SFTTrainerBase):
 
         # Calculate max_steps - use config value or calculate from epochs
         max_steps = self.config.train.max_steps
-        if max_steps is None:
-            # Calculate from epochs if max_steps not specified
-            epochs = getattr(self.config.train, 'epochs', 3) or 3
-            dataset_size = len(self.dataset) if hasattr(self, 'dataset') and self.dataset else 1000
-            batch_size = self.config.train.per_device_batch_size or 2
-            grad_accum = self.config.train.gradient_accumulation_steps or 4
-            max_steps = (dataset_size * epochs) // (batch_size * grad_accum)
-            max_steps = max(max_steps, 10)  # Minimum 10 steps
-            logger.info(f"Calculated max_steps={max_steps} from {epochs} epochs, {dataset_size} samples")
+        # if max_steps is None:
+        #     # Calculate from epochs if max_steps not specified
+        #     epochs = getattr(self.config.train, 'epochs', 3) or 3
+        #     dataset_size = len(self.dataset) if hasattr(self, 'dataset') and self.dataset else 1000
+        #     batch_size = self.config.train.per_device_batch_size or 2
+        #     grad_accum = self.config.train.gradient_accumulation_steps or 4
+        #     max_steps = (dataset_size * epochs) // (batch_size * grad_accum)
+        #     max_steps = max(max_steps, 10)  # Minimum 10 steps
+        #     logger.info(f"Calculated max_steps={max_steps} from {epochs} epochs, {dataset_size} samples")
 
         # Calculate warmup steps
         warmup_steps = getattr(self.config.train, 'warmup_steps', 0)
@@ -792,6 +792,7 @@ class TRLSFTTrainer(SFTTrainerBase):
             "eval_strategy": "no",
             "save_strategy": "steps",
             "load_best_model_at_end": False,
+            "num_train_epochs":getattr(self.config.train, 'epochs', 3) or 3,
             "report_to": [],
             "run_name": self.config.logging.run_name,
             "seed": 42,
