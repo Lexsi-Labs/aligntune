@@ -1,0 +1,29 @@
+task: bitext_insurance
+dataset_path: sohamb37lexsi/Bitext-insurance-llm-chatbot-training-dataset-splits
+dataset_name: null
+output_type: generate_until
+test_split: test
+training_split: train
+doc_to_text: "You are a helpful customer service assistant for an insurance company. Respond to customer inquiries professionally, courteously, and helpfully.\n\nCustomer inquiry: {{instruction}}\n\nAssistant response:"
+doc_to_target: "{{response}}"
+process_results: !function utils.process_results
+metric_list:
+  - metric: rouge1
+    aggregation: mean
+    higher_is_better: true
+  - metric: rouge2
+    aggregation: mean
+    higher_is_better: true
+  - metric: rougeL
+    aggregation: mean
+    higher_is_better: true
+  - metric: bleu
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  max_gen_toks: 512
+  do_sample: false
+num_fewshot: 0
+metadata:
+  version: 1.0
+  description: "Bitext insurance LLM chatbot training dataset evaluation"
