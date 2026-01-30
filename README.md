@@ -212,7 +212,7 @@ AlignTune is built upon the excellent work of the following projects:
 
 ## Support
 
-- **Documentation**: [docs.aligntune.io](https://docs.aligntune.io)
+- **Documentation**: [aligntune.lexsi.ai/](https://aligntune.lexsi.ai/)
 - **GitHub Issues**: [github.com/Lexsi-Labs/aligntune/issues](https://github.com/Lexsi-Labs/aligntune/issues)
 - **Discussions**: [github.com/Lexsi-Labs/aligntune/discussions](https://github.com/Lexsi-Labs/aligntune/discussions)
 - **Email**: [support@lexsi.ai](mailto:support@lexsi.ai)
