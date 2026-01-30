@@ -213,7 +213,7 @@ vocab.txt
 datasets/
 raw_data/
 processed_data/
-data/
+
 
 # Checkpoints and model outputs
 checkpoints/
