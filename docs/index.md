@@ -84,24 +84,32 @@ print(metrics)
 
 Interactive Colab notebooks demonstrating various AlignTune workflows:
 
-
 ### Supervised Fine-Tuning (SFT)
 
-| Backend | Model | Dataset | Link |
-|---------|-------|---------|------|
-| TRL | Gemma-7b | philschmid/dolly-15k-oai-style (messages format) | [Open in Colab](https://colab.research.google.com/drive/1XYwChep74fhHi_g_gk4DNIFddStGUrF_?usp=sharing) |
-| TRL | GemmaTX | TrialBench adverse event prediction | [Open in Drive](https://colab.research.google.com/drive/1GB2mpwfr3AO5N6LZkO8Fz9TXWjD5wuw1?usp=sharing) |
-| Unsloth | Qwen-2.5-0.5-I | gaming | [Open in Colab](https://colab.research.google.com/drive/1BsJa4I41pLJ6-1HCy6BFInxdFOwddEv7?usp=sharing) |
+| Backend| Model | Dataset | Link |
+| --- | --- | --- | --- |
+| Unsloth| **Qwen/Qwen2.5-0.5B-Instruct** | bebechien/MobileGameNPC | [Open in Colab]( https://colab.research.google.com/drive/11DrRbG30MUCegZTDXwR9nxEdvKaLfWCb%3Fusp%3Dsharing) |
+| TRL | **google/txgemma-2b-predict** | trialbench_adverse-event-rate-prediction | [Open in Colab](https://colab.research.google.com/drive/1oTI_0fc3x4u3fs5Q2ccFBc5g45q3ScWY%3Fusp%3Dsharing) |
+| Unsloth| **Qwen/Qwen2.5-0.5B-Instruct** | bebechien/MobileGameNP | [Open in Colab](https://colab.research.google.com/drive/15R3JOrzAUuMagCamDHsqe0wNyb44rw2j%3Fusp%3Dsharing) |
 
 ### Reinforcement Learning (RL)
 
-| Backend | Algorithm | Dataset | Link |
-|---------|-----------|---------|------|
-| TRL | DPO | hh-rlhf | [Open in Colab](https://colab.research.google.com/drive/1vLNVdGOkZhIBhKSqkL38IQQJ1TSwwK5g?usp=sharing) |
-| TRL | GRPO | GSM8K | [Open in Colab](https://colab.research.google.com/drive/1kQnYc0AQW3DSsjcCYrqaGJiVwLr8B48O?usp=sharing) |
-| TRL | PPO | openai_summarize_tldr | [Open in Colab](https://colab.research.google.com/drive/15WwkPYrz8YnR6wyQIqMb4kS7J-SrVArW?usp=sharing) |
-| Unsloth | DPO | distilabel-intel-orca-dpo-pairs | [Open in Colab](https://colab.research.google.com/drive/1ukUkn98IlIfym_e3NbEY0vzhha3izmRW?usp=sharing) |
-| Unsloth | GRPO | GSM8K | [Open in Colab](https://colab.research.google.com/drive/1x_PxjoIaFcZvjnlWKAA0nETGEMONlUoL?usp=sharing) |
+| Backend| Algorithm | Model | Dataset | Link |
+| --- | --- | --- | --- | --- |
+| Unsloth| **PPO** | Qwen/Qwen2.5-0.5B-Instruct | HuggingFaceH4/ultrachat_200k | [Open in Colab](https://colab.research.google.com/drive/1G4fdtO4DhBNwjOYhuaGmvIrBU_lc159H%3Fusp%3Dsharing) |
+| TRL | **PPO** | EleutherAI/pythia-1.4b | CarperAI/openai_summarize_tldr | [Open in Colab](https://colab.research.google.com/drive/1wlbSvQAJv8ZFM2qGD4XlUOKPzZHXstQo%3Fusp%3Dsharing) |
+| TRL | **GRPO** (Coding) | Qwen/Qwen3-4B | google-research-datasets/mbpp | [Open in Colab](https://colab.research.google.com/drive/13HYZ-EkLC3-6wxJG_1NyWXPEuN9bIeM4?usp=sharing) |
+| Unsloth| **GRPO** (Math) | meta-llama/Llama-3.2-3B-Instruct | openai/gsm8k | [Open in Colab](https://colab.research.google.com/drive/11tj2odJa7v55VvQkpOlm7_WBclqFdaVi%3Fusp%3Dsharing) |
+| TRL | **GRPO** | meta-llama/Llama-3.2-3B-Instruct | openai/gsm8k | [Open in Colab](https://colab.research.google.com/drive/14b2dt0_iSVL8Z_8mlOx--f-d_rDCqVOP?usp=sharing) |
+| Unsloth | **DRGRPO** | Qwen/Qwen2.5-3B-Instruct | yahma/alpaca-cleaned | [Open in Colab](https://colab.research.google.com/drive/1IzDtjONyL6CZ038faTTp8AvLfhzkqSpb%3Fusp%3Dsharing) |
+| TRL | **DRGRPO** | Qwen/Qwen2-0.5B-Instruct | AI-MO/NuminaMath-TIR | [Open in Colab](https://colab.research.google.com/drive/1KfrMzuGRPrZwyRuNTGep1ZL6C6h2aVjk?usp=sharing) |
+| Unsloth | **GSPO** | Qwen/Qwen3-1.7B | CyberNative/Code_Vulnerability_Security_DPO | [Open in Colab](https://colab.research.google.com/drive/120FjMEAZRXUoOMRsWHCn5tmpGfLTAY4g%3Fusp%3Dsharing) |
+| TRL | **GSPO** | meta-llama/Llama-3.2-3B-Instruct | HuggingFaceH4/ultrachat_200k | [Open in Colab](https://colab.research.google.com/drive/1vDP7ukBHWwSiD7KVSgSekCvk-x_MkWdC%3Fusp%3Dsharing) |
+| Unsloth| **DAPO** | microsoft/Phi-3.5-mini-instruct | HuggingFaceH4/ultrachat_200k | [Open in Colab](https://colab.research.google.com/drive/1gAa6EPc5345XRfog1nzQIFTmp_OJqNvk%3Fusp%3Dsharing) |
+|TRL | **DAPO** | meta-llama/Llama-3.2-3B-Instruct | google-research-datasets/mbpp | [Open in Colab](https://colab.research.google.com/drive/1aF3LxEMmLl0fCyA5yVBAkU_Rgsy3dsh5?usp=sharing) |
+| Unsloth| **DPO** | microsoft/phi-2 | argilla/distilabel-intel-orca-dpo-pairs | [Open in Colab](https://colab.research.google.com/drive/1aKdQzT7KGs0PEr7pO9rOXFkwQK6LzyRZ%23scrollTo%3DdOnIJIAMxP9J) |
+| TRL | **DPO** | google/gemma-2-2b-it | Anthropic/hh-rlhf | [Open in Colab](https://colab.research.google.com/drive/1WQhek61Z0v1zHFWT4mQwVX7n10ln-j3d%3Fusp%3Dsharing) |
+
 
 ---
 

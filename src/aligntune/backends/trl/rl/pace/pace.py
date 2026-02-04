@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class BoltConfig:
+class PaceConfig:
     """BOLT-specific configuration extracted from TrainingConfig."""
 
     # Curriculum
@@ -71,7 +71,7 @@ class BoltConfig:
     use_baseline_advantages: bool = False
 
 
-class BoltGRPOTrainer:
+class PaceGRPOTrainer:
     """
     Custom GRPO trainer that properly overrides advantage computation.
 
@@ -98,14 +98,14 @@ class BoltGRPOTrainer:
         """
         from trl import GRPOTrainer
 
-        class _BoltGRPOTrainer(GRPOTrainer):
+        class _PaceGRPOTrainer(GRPOTrainer):
             """GRPOTrainer with persistent baseline advantages."""
 
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
-                self._bolt_baseline = baseline
-                self._bolt_num_gen = num_generations
-                self._bolt_step_count = 0
+                self._pace_baseline = baseline
+                self._pace_num_gen = num_generations
+                self._pace_step_count = 0
                 self._last_rewards = None
                 self._last_prompts = None
 
@@ -138,23 +138,23 @@ class BoltGRPOTrainer:
                 TRL computes: A = r - mean(r_group)
                 We replace with: A = r - v̂(x)
                 """
-                self._bolt_step_count += 1
+                self._pace_step_count += 1
 
                 # Call parent to get everything computed (including TRL's wrong advantages)
                 output = super()._generate_and_score_completions(inputs)
 
                 # Skip if baseline advantages disabled or no stored data
-                if self._bolt_baseline is None:
+                if self._pace_baseline is None:
                     return output
 
                 if self._last_rewards is None or self._last_prompts is None:
-                    logger.warning(f"Step {self._bolt_step_count}: No stored rewards, using TRL advantages")
+                    logger.warning(f"Step {self._pace_step_count}: No stored rewards, using TRL advantages")
                     return output
 
                 # Extract stored data
                 rewards = self._last_rewards
                 prompts_text = self._last_prompts
-                num_gen = self._bolt_num_gen
+                num_gen = self._pace_num_gen
 
                 # Reshape rewards: (batch_size * num_gen,) -> (batch_size, num_gen)
                 batch_size = len(rewards) // num_gen
@@ -172,7 +172,7 @@ class BoltGRPOTrainer:
                 prompt_keys = prompt_keys[:batch_size]
 
                 # 1. PRE-UPDATE: Get baselines v̂(x) for each prompt (STORE OLD VALUES)
-                old_v_hats = {k: self._bolt_baseline.get_v_hat(k) for k in prompt_keys}
+                old_v_hats = {k: self._pace_baseline.get_v_hat(k) for k in prompt_keys}
                 baselines = torch.tensor(
                     [old_v_hats[k] for k in prompt_keys],
                     device=rewards.device,
@@ -197,32 +197,32 @@ class BoltGRPOTrainer:
                         mean_rewards_per_prompt.append(np.mean(group_rewards))
                         for reward in group_rewards:
                             # Estimate KL from performance shift
-                            kl = self._bolt_baseline.estimate_kl_from_performance_shift(
+                            kl = self._pace_baseline.estimate_kl_from_performance_shift(
                                 key, group_rewards
                             )
-                            self._bolt_baseline.update(key, reward, kl=kl)
+                            self._pace_baseline.update(key, reward, kl=kl)
 
                 # DETAILED STEP LOGGING (every step for first 10 steps, then every 10 steps)
-                verbose_logging = (self._bolt_step_count <= 10) or (self._bolt_step_count % 10 == 0)
+                verbose_logging = (self._pace_step_count <= 10) or (self._pace_step_count % 10 == 0)
                 if verbose_logging:
-                    self._bolt_baseline.print_step_update(
-                        step=self._bolt_step_count,
+                    self._pace_baseline.print_step_update(
+                        step=self._pace_step_count,
                         prompt_keys=prompt_keys,
                         old_v_hats=old_v_hats,
                         rewards=mean_rewards_per_prompt
                     )
 
                 # Summary logging every 50 steps
-                if self._bolt_step_count % 50 == 0:
-                    mean_baseline = np.mean([self._bolt_baseline.get_v_hat(k) for k in prompt_keys])
+                if self._pace_step_count % 50 == 0:
+                    mean_baseline = np.mean([self._pace_baseline.get_v_hat(k) for k in prompt_keys])
                     zero_adv = (advantages_normalized.abs() < 0.01).sum().item()
                     total = len(advantages_normalized)
 
-                    logger.info(f"BOLT Step {self._bolt_step_count}:")
+                    logger.info(f"BOLT Step {self._pace_step_count}:")
                     logger.info(f"  Baseline mean v̂: {mean_baseline:.3f}")
                     logger.info(f"  Advantage range: [{advantages_normalized.min().item():.3f}, {advantages_normalized.max().item():.3f}]")
                     logger.info(f"  Near-zero advantages: {zero_adv}/{total} ({100*zero_adv/total:.1f}%)")
-                    logger.info(f"  Tracked prompts: {len(self._bolt_baseline.tab)}")
+                    logger.info(f"  Tracked prompts: {len(self._pace_baseline.tab)}")
 
                 # 5. REPLACE TRL's advantages with ours
                 output["advantages"] = advantages_normalized
@@ -233,10 +233,10 @@ class BoltGRPOTrainer:
 
                 return output
 
-        return _BoltGRPOTrainer
+        return _PaceGRPOTrainer
 
 
-class TRLBoltTrainer(TRLGRPOTrainer):
+class TRLPaceTrainer(TRLGRPOTrainer):
     """
     BOLT: GRPO with curriculum sampling and persistent baselines.
 
@@ -257,7 +257,7 @@ class TRLBoltTrainer(TRLGRPOTrainer):
         # BOLT components
         self.baseline: Optional[UnifiedBaseline] = None
         self.curriculum_sampler: Optional[DynamicWeightedSampler] = None
-        self.bolt_config: Optional[BoltConfig] = None
+        self.pace_config: Optional[PaceConfig] = None
 
         # Dataset storage for curriculum
         self._base_dataset_list: Optional[List[Dict[str, Any]]] = None
@@ -277,14 +277,14 @@ class TRLBoltTrainer(TRLGRPOTrainer):
         except ImportError:
             return False
 
-    def _get_bolt_config(self) -> BoltConfig:
+    def _get_pace_config(self) -> PaceConfig:
         """Extract BOLT configuration from TrainingConfig."""
-        if self.bolt_config is not None:
-            return self.bolt_config
+        if self.pace_config is not None:
+            return self.pace_config
 
         train_cfg = self.config.train
 
-        self.bolt_config = BoltConfig(
+        self.pace_config = PaceConfig(
             # Curriculum
             curriculum_enabled=self._get_config_value(
                 train_cfg, "curriculum_enabled", default=False
@@ -319,20 +319,20 @@ class TRLBoltTrainer(TRLGRPOTrainer):
 
         logger.info("=" * 60)
         logger.info("BOLT Configuration:")
-        logger.info(f"  Curriculum enabled: {self.bolt_config.curriculum_enabled}")
-        logger.info(f"  Baseline enabled: {self.bolt_config.baseline_enabled}")
-        logger.info(f"  Use baseline advantages: {self.bolt_config.use_baseline_advantages}")
-        if self.bolt_config.curriculum_enabled:
-            logger.info(f"  Curriculum epsilon: {self.bolt_config.curriculum_epsilon}")
-            logger.info(f"  Curriculum update freq: {self.bolt_config.curriculum_update_freq}")
-        if self.bolt_config.baseline_enabled:
-            logger.info(f"  Baseline rho: [{self.bolt_config.baseline_rho_min}, {self.bolt_config.baseline_rho_max}]")
-            logger.info(f"  Baseline D_half: {self.bolt_config.baseline_D_half}")
-            if self.bolt_config.baseline_warm_start:
-                logger.info(f"  Baseline warm-start: {self.bolt_config.baseline_warm_start}")
+        logger.info(f"  Curriculum enabled: {self.pace_config.curriculum_enabled}")
+        logger.info(f"  Baseline enabled: {self.pace_config.baseline_enabled}")
+        logger.info(f"  Use baseline advantages: {self.pace_config.use_baseline_advantages}")
+        if self.pace_config.curriculum_enabled:
+            logger.info(f"  Curriculum epsilon: {self.pace_config.curriculum_epsilon}")
+            logger.info(f"  Curriculum update freq: {self.pace_config.curriculum_update_freq}")
+        if self.pace_config.baseline_enabled:
+            logger.info(f"  Baseline rho: [{self.pace_config.baseline_rho_min}, {self.pace_config.baseline_rho_max}]")
+            logger.info(f"  Baseline D_half: {self.pace_config.baseline_D_half}")
+            if self.pace_config.baseline_warm_start:
+                logger.info(f"  Baseline warm-start: {self.pace_config.baseline_warm_start}")
         logger.info("=" * 60)
 
-        return self.bolt_config
+        return self.pace_config
 
     def _combined_reward_function(self, completions: List[str], **kwargs) -> List[float]:
         """Combined reward function with DETAILED debug output for BOLT.
@@ -589,10 +589,10 @@ REQUIREMENTS:
                 logger.info("Enhancing code prompts with explicit format requirements...")
                 self._enhance_dataset_prompts()
 
-        bolt_cfg = self._get_bolt_config()
+        pace_cfg = self._get_pace_config()
 
         # Skip if neither curriculum nor baseline enabled
-        if not bolt_cfg.curriculum_enabled and not bolt_cfg.baseline_enabled and not bolt_cfg.use_baseline_advantages:
+        if not pace_cfg.curriculum_enabled and not pace_cfg.baseline_enabled and not pace_cfg.use_baseline_advantages:
             logger.info("BOLT features disabled, using standard GRPO")
             return
 
@@ -610,30 +610,30 @@ REQUIREMENTS:
         logger.info(f"Extracted {len(self._prompt_keys)} prompt keys")
 
         # Initialize baseline
-        if bolt_cfg.baseline_enabled or bolt_cfg.curriculum_enabled or bolt_cfg.use_baseline_advantages:
+        if pace_cfg.baseline_enabled or pace_cfg.curriculum_enabled or pace_cfg.use_baseline_advantages:
             logger.info("Initializing BOLT baseline...")
             self.baseline = UnifiedBaseline(
-                rho_min=bolt_cfg.baseline_rho_min,
-                rho_max=bolt_cfg.baseline_rho_max,
-                D_half=bolt_cfg.baseline_D_half,
-                epsilon=bolt_cfg.curriculum_epsilon,
+                rho_min=pace_cfg.baseline_rho_min,
+                rho_max=pace_cfg.baseline_rho_max,
+                D_half=pace_cfg.baseline_D_half,
+                epsilon=pace_cfg.curriculum_epsilon,
                 track_timeline=False,  # Disable for production
             )
 
             # Load warm-start if provided
-            if bolt_cfg.baseline_warm_start:
-                logger.info(f"Loading baseline warm-start from {bolt_cfg.baseline_warm_start}")
-                self.baseline.load(bolt_cfg.baseline_warm_start)
+            if pace_cfg.baseline_warm_start:
+                logger.info(f"Loading baseline warm-start from {pace_cfg.baseline_warm_start}")
+                self.baseline.load(pace_cfg.baseline_warm_start)
                 logger.info(f"Loaded {len(self.baseline.tab)} baseline entries")
 
         # Setup curriculum sampling
-        if bolt_cfg.curriculum_enabled and self.baseline is not None:
+        if pace_cfg.curriculum_enabled and self.baseline is not None:
             logger.info("Setting up curriculum sampling...")
             self.curriculum_sampler = DynamicWeightedSampler(
                 baseline=self.baseline,
                 dataset_size=len(self._base_dataset_list),
                 prompt_keys=self._prompt_keys,
-                epsilon=bolt_cfg.curriculum_epsilon,
+                epsilon=pace_cfg.curriculum_epsilon,
                 oversample=2.0,
             )
 
@@ -652,7 +652,7 @@ REQUIREMENTS:
         This configures the trainer but does not start training.
         Call train() to begin the training process.
         """
-        bolt_cfg = self._get_bolt_config()
+        pace_cfg = self._get_pace_config()
 
         # Get training parameters
         num_epochs = self._get_config_value(self.config.train, 'epochs', 'num_epochs', 'num_train_epochs', default=1)
@@ -674,7 +674,7 @@ REQUIREMENTS:
         precision_args = PrecisionHandler.get_training_args_precision(precision)
 
         gradient_checkpointing = self._get_config_value(self.config.model, 'gradient_checkpointing', default=False)
-        output_dir = self._get_config_value(self.config.logging, 'output_dir', default='./output/bolt')
+        output_dir = self._get_config_value(self.config.logging, 'output_dir', default='./output/pace')
         num_generations = self._get_config_value(self.config.train, 'num_generations', default=8)
         seed = self._get_config_value(self.config.train, 'seed', default=42)
 
@@ -833,10 +833,10 @@ REQUIREMENTS:
             save_only_model=save_only_model,
         )
 
-        # Create trainer - use custom BoltGRPOTrainer if baseline advantages enabled
-        if bolt_cfg.use_baseline_advantages and self.baseline is not None:
-            logger.info("Using BoltGRPOTrainer with baseline advantage computation")
-            TrainerClass = BoltGRPOTrainer.create_trainer_class(
+        # Create trainer - use custom PaceGRPOTrainer if baseline advantages enabled
+        if pace_cfg.use_baseline_advantages and self.baseline is not None:
+            logger.info("Using PaceGRPOTrainer with baseline advantage computation")
+            TrainerClass = PaceGRPOTrainer.create_trainer_class(
                 baseline=self.baseline,
                 num_generations=num_generations,
             )
@@ -856,14 +856,14 @@ REQUIREMENTS:
         )
 
         # Add curriculum callback if enabled
-        if bolt_cfg.curriculum_enabled and self.curriculum_sampler is not None and self.baseline is not None:
+        if pace_cfg.curriculum_enabled and self.curriculum_sampler is not None and self.baseline is not None:
             self.trainer.add_callback(CurriculumCallback(
                 baseline=self.baseline,
                 sampler=self.curriculum_sampler,
                 dataset=self.train_dataset,
-                update_freq=bolt_cfg.curriculum_update_freq,
+                update_freq=pace_cfg.curriculum_update_freq,
             ))
-            logger.info(f"Added CurriculumCallback (update every {bolt_cfg.curriculum_update_freq} steps)")
+            logger.info(f"Added CurriculumCallback (update every {pace_cfg.curriculum_update_freq} steps)")
 
         # Add baseline checkpoint callback to save baseline with every checkpoint
         if self.baseline is not None:
@@ -880,8 +880,8 @@ REQUIREMENTS:
         logger.info("BOLT Trainer Setup Complete")
         logger.info(f"Dataset size: {len(self.train_dataset)}")
         logger.info(f"Num reward functions: {len(self.reward_functions)}")
-        logger.info(f"Baseline advantages: {bolt_cfg.use_baseline_advantages}")
-        logger.info(f"Curriculum sampling: {bolt_cfg.curriculum_enabled}")
+        logger.info(f"Baseline advantages: {pace_cfg.use_baseline_advantages}")
+        logger.info(f"Curriculum sampling: {pace_cfg.curriculum_enabled}")
         logger.info("=" * 80)
 
 
@@ -915,7 +915,7 @@ REQUIREMENTS:
         # Save baseline
         baseline_path = None
         if self.baseline is not None:
-            baseline_path = Path(self.output_dir) / "bolt_baseline.pkl"
+            baseline_path = Path(self.output_dir) / "pace_baseline.pkl"
             self.baseline.save(str(baseline_path))
             logger.info(f"Saved BOLT baseline to {baseline_path}")
 
@@ -935,7 +935,7 @@ REQUIREMENTS:
         self.tokenizer.save_pretrained(self.output_dir)
 
         # Get BOLT config for results
-        bolt_cfg = self._get_bolt_config()
+        pace_cfg = self._get_pace_config()
 
         # Compile results
         results = {
@@ -946,10 +946,10 @@ REQUIREMENTS:
             "baseline_path": str(baseline_path) if baseline_path else None,
             "num_reward_functions": len(self.reward_functions),
             "num_datasets": 1,
-            "bolt_config": {
-                "curriculum_enabled": bolt_cfg.curriculum_enabled,
-                "baseline_enabled": bolt_cfg.baseline_enabled,
-                "use_baseline_advantages": bolt_cfg.use_baseline_advantages,
+            "pace_config": {
+                "curriculum_enabled": pace_cfg.curriculum_enabled,
+                "baseline_enabled": pace_cfg.baseline_enabled,
+                "use_baseline_advantages": pace_cfg.use_baseline_advantages,
             },
             "metrics": metrics,
         }

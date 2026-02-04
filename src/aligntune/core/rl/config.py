@@ -20,7 +20,7 @@ class AlgorithmType(Enum):
     GBMPO = "gbmpo"
     DRGRPO = "drgrpo"
     DAPO = "dapo"
-    BOLT = "bolt"  # Baseline-Optimized Learning Technique
+    PACE = "pace"  # Baseline-Optimized Learning Technique
     NMGRPO="nmgrpo"
     METAES="metaes"
 
