@@ -80,7 +80,7 @@ try:
     from ..backends.trl.rl.gbmpo.gbmpo import TRLGBMPOTrainer
     from ..backends.trl.rl.dr_grpo.drgrpo import TRLDRGRPOTrainer
     from ..backends.trl.rl.dapo.dapo import TRLDAPOTrainer
-    from ..backends.trl.rl.bolt.bolt import TRLBoltTrainer
+    from ..backends.trl.rl.pace.pace import TRLPaceTrainer
     from ..backends.trl.rl.neural_mirror_grpo.NMGrpo import TRLNeuralMirrorGRPOTrainer
     from ..backends.trl.rl.meta_es.meta_es_trainer import TRLMetaEsTrainer
     TRL_AVAILABLE = True
@@ -176,9 +176,9 @@ def _lazy_import_unsloth_trainer(algorithm: str, training_type: str):
         # GSPO is only supported by TRL, not Unsloth
         from ..backends.unsloth.rl.gspo.gspo import UnslothGSPOTrainer
         return UnslothGSPOTrainer
-    elif algorithm == "bolt":
-        from ..backends.unsloth.rl.bolt.bolt import UnslothBoltTrainer
-        return UnslothBoltTrainer
+    elif algorithm == "pace":
+        from ..backends.unsloth.rl.pace.pace import UnslothPaceTrainer
+        return UnslothPaceTrainer
     elif algorithm == "counterfact_grpo":
         from ..backends.unsloth.rl.counterfact_grpo.counterfact_grpo import UnslothCounterFactGRPOTrainer
         return UnslothCounterFactGRPOTrainer
@@ -217,7 +217,7 @@ class RLAlgorithm(Enum):
     GBMPO = "gbmpo"
     DRGRPO = "drgrpo"
     DAPO = "dapo"
-    BOLT = "bolt"  # Baseline-Optimized Learning Technique
+    PACE = "pace"  # Baseline-Optimized Learning Technique
     NMGRPO = "nmgrpo"
     METAES = "metaes"
 
@@ -515,7 +515,7 @@ def _register_backends():
         BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.GBMPO, TRLGBMPOTrainer)
         BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.DRGRPO, TRLDRGRPOTrainer)
         BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.DAPO, TRLDAPOTrainer)
-        BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.BOLT, TRLBoltTrainer)
+        BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.PACE, TRLPaceTrainer)
         BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.NMGRPO,  TRLNeuralMirrorGRPOTrainer)
         BackendFactory.register_backend(TrainingType.RL, BackendType.TRL, RLAlgorithm.METAES,  TRLMetaEsTrainer)
         logger.info("TRL backends registered")
@@ -567,12 +567,12 @@ def _register_backends():
     # GSPO is only supported by TRL, not Unsloth
     # No UnslothGSPOPlaceholder - GSPO backend registration skipped for Unsloth
 
-    class UnslothBoltPlaceholder:
+    class UnslothPacePlaceholder:
         @classmethod
         def is_available(cls):
             return _check_unsloth_available()
         def __new__(cls, config):
-            return _lazy_import_unsloth_trainer("bolt", "rl")(config)
+            return _lazy_import_unsloth_trainer("pace", "rl")(config)
 
     class UnslothCounterFactGRPOPlaceholder:
         @classmethod
@@ -609,7 +609,7 @@ def _register_backends():
     BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.GRPO, UnslothGRPOPlaceholder)
     BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.DRGRPO, UnslothDRGRPOPlaceholder)
     BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.DAPO, UnslothDAPOPlaceholder)
-    BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.BOLT, UnslothBoltPlaceholder)
+    BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.PACE, UnslothPacePlaceholder)
     BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.COUNTERFACT_GRPO, UnslothCounterFactGRPOPlaceholder)
     BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.GBMPO, UnslothGBMPOPlaceholder)
     BackendFactory.register_backend(TrainingType.RL, BackendType.UNSLOTH, RLAlgorithm.NMGRPO, UnslothNeuralMirrorGRPOPlaceholder)

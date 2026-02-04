@@ -24,19 +24,19 @@ from aligntune.backends.unsloth.rl.grpo.grpo import UnslothGRPOTrainer
 from aligntune.core.rl.config import UnifiedConfig
 
 # Reuse BOLT components from TRL backend
-from aligntune.backends.trl.rl.bolt.baseline import UnifiedBaseline, make_prompt_key
-from aligntune.backends.trl.rl.bolt.curriculum import (
+from aligntune.backends.trl.rl.pace.baseline import UnifiedBaseline, make_prompt_key
+from aligntune.backends.trl.rl.pace.curriculum import (
     DynamicWeightedSampler,
     DynamicallySampledDataset,
     CurriculumCallback,
 )
-from aligntune.backends.trl.rl.bolt.bolt import BoltConfig, BoltGRPOTrainer
+from aligntune.backends.trl.rl.pace.pace import PaceConfig, PaceGRPOTrainer
 from aligntune.core.precision_handler import PrecisionHandler
 
 logger = logging.getLogger(__name__)
 
 
-class UnslothBoltTrainer(UnslothGRPOTrainer):
+class UnslothPaceTrainer(UnslothGRPOTrainer):
     """
     BOLT with Unsloth acceleration (2-5x speedup).
 
@@ -47,7 +47,7 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
 
     Uses Unsloth's FastLanguageModel for optimized model loading.
 
-    IMPORTANT: Uses BoltGRPOTrainer.create_trainer_class() to properly override
+    IMPORTANT: Uses PaceGRPOTrainer.create_trainer_class() to properly override
     TRL's advantage computation. This works with Unsloth because it patches
     the GRPOTrainer class that we subclass.
     """
@@ -58,7 +58,7 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         # BOLT components
         self.baseline: Optional[UnifiedBaseline] = None
         self.curriculum_sampler: Optional[DynamicWeightedSampler] = None
-        self.bolt_config: Optional[BoltConfig] = None
+        self.pace_config: Optional[PaceConfig] = None
 
         # Dataset storage for curriculum
         self._base_dataset_list: Optional[List[Dict[str, Any]]] = None
@@ -79,14 +79,14 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         except ImportError:
             return False
 
-    def _get_bolt_config(self) -> BoltConfig:
+    def _get_pace_config(self) -> PaceConfig:
         """Extract BOLT configuration from TrainingConfig."""
-        if self.bolt_config is not None:
-            return self.bolt_config
+        if self.pace_config is not None:
+            return self.pace_config
 
         train_cfg = self.config.train
 
-        self.bolt_config = BoltConfig(
+        self.pace_config = PaceConfig(
             # Curriculum
             curriculum_enabled=self._get_config_value(
                 train_cfg, "curriculum_enabled", default=False
@@ -123,32 +123,32 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         logger.info("BOLT Configuration (Unsloth):")
         logger.info(
             f"  Curriculum enabled: {
-                self.bolt_config.curriculum_enabled}")
-        logger.info(f"  Baseline enabled: {self.bolt_config.baseline_enabled}")
+                self.pace_config.curriculum_enabled}")
+        logger.info(f"  Baseline enabled: {self.pace_config.baseline_enabled}")
         logger.info(
             f"  Use baseline advantages: {
-                self.bolt_config.use_baseline_advantages}")
-        if self.bolt_config.curriculum_enabled:
+                self.pace_config.use_baseline_advantages}")
+        if self.pace_config.curriculum_enabled:
             logger.info(
                 f"  Curriculum epsilon: {
-                    self.bolt_config.curriculum_epsilon}")
+                    self.pace_config.curriculum_epsilon}")
             logger.info(
                 f"  Curriculum update freq: {
-                    self.bolt_config.curriculum_update_freq}")
-        if self.bolt_config.baseline_enabled:
+                    self.pace_config.curriculum_update_freq}")
+        if self.pace_config.baseline_enabled:
             logger.info(
                 f"  Baseline rho: [{
-                    self.bolt_config.baseline_rho_min}, {
-                    self.bolt_config.baseline_rho_max}]")
+                    self.pace_config.baseline_rho_min}, {
+                    self.pace_config.baseline_rho_max}]")
             logger.info(
                 f"  Baseline D_half: {
-                    self.bolt_config.baseline_D_half}")
-            if self.bolt_config.baseline_warm_start:
+                    self.pace_config.baseline_D_half}")
+            if self.pace_config.baseline_warm_start:
                 logger.info(
-                    f"  Baseline warm-start: {self.bolt_config.baseline_warm_start}")
+                    f"  Baseline warm-start: {self.pace_config.baseline_warm_start}")
         logger.info("=" * 60)
 
-        return self.bolt_config
+        return self.pace_config
 
     def setup_model(self) -> None:
         """Setup Unsloth-optimized model and tokenizer."""
@@ -304,10 +304,10 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         # Call parent to load dataset
         super().setup_data()
 
-        bolt_cfg = self._get_bolt_config()
+        pace_cfg = self._get_pace_config()
 
         # Skip if neither curriculum nor baseline enabled
-        if not bolt_cfg.curriculum_enabled and not bolt_cfg.baseline_enabled and not bolt_cfg.use_baseline_advantages:
+        if not pace_cfg.curriculum_enabled and not pace_cfg.baseline_enabled and not pace_cfg.use_baseline_advantages:
             logger.info("BOLT features disabled, using standard Unsloth GRPO")
             return
 
@@ -334,32 +334,32 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         logger.info(f"Extracted {len(self._prompt_keys)} prompt keys")
 
         # Initialize baseline
-        if bolt_cfg.baseline_enabled or bolt_cfg.curriculum_enabled or bolt_cfg.use_baseline_advantages:
+        if pace_cfg.baseline_enabled or pace_cfg.curriculum_enabled or pace_cfg.use_baseline_advantages:
             logger.info("Initializing BOLT baseline...")
             self.baseline = UnifiedBaseline(
-                rho_min=bolt_cfg.baseline_rho_min,
-                rho_max=bolt_cfg.baseline_rho_max,
-                D_half=bolt_cfg.baseline_D_half,
-                epsilon=bolt_cfg.curriculum_epsilon,
+                rho_min=pace_cfg.baseline_rho_min,
+                rho_max=pace_cfg.baseline_rho_max,
+                D_half=pace_cfg.baseline_D_half,
+                epsilon=pace_cfg.curriculum_epsilon,
                 track_timeline=False,
             )
 
             # Load warm-start if provided
-            if bolt_cfg.baseline_warm_start:
+            if pace_cfg.baseline_warm_start:
                 logger.info(
-                    f"Loading baseline warm-start from {bolt_cfg.baseline_warm_start}")
-                self.baseline.load(bolt_cfg.baseline_warm_start)
+                    f"Loading baseline warm-start from {pace_cfg.baseline_warm_start}")
+                self.baseline.load(pace_cfg.baseline_warm_start)
                 logger.info(
                     f"Loaded {len(self.baseline.tab)} baseline entries")
 
         # Setup curriculum sampling
-        if bolt_cfg.curriculum_enabled and self.baseline is not None:
+        if pace_cfg.curriculum_enabled and self.baseline is not None:
             logger.info("Setting up curriculum sampling...")
             self.curriculum_sampler = DynamicWeightedSampler(
                 baseline=self.baseline,
                 dataset_size=len(self._base_dataset_list),
                 prompt_keys=self._prompt_keys,
-                epsilon=bolt_cfg.curriculum_epsilon,
+                epsilon=pace_cfg.curriculum_epsilon,
                 oversample=2.0,
             )
 
@@ -386,7 +386,7 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         This configures the trainer but does not start training.
         Call train() to begin the training process.
         """
-        bolt_cfg = self._get_bolt_config()
+        pace_cfg = self._get_pace_config()
 
         # Get training parameters
         num_epochs = self._get_config_value(
@@ -429,7 +429,7 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         output_dir = self._get_config_value(
             self.config.logging,
             'output_dir',
-            default='./output/bolt_unsloth')
+            default='./output/pace_unsloth')
         num_generations = self._get_config_value(
             self.config.train, 'num_generations', default=8)
         seed = self._get_config_value(self.config.train, 'seed', default=42)
@@ -537,12 +537,12 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         logger.info(f"Using model: {type(self.model).__name__}")
         # ====================================================
 
-        # Create trainer - use custom BoltGRPOTrainer if baseline advantages
+        # Create trainer - use custom PaceGRPOTrainer if baseline advantages
         # enabled
-        if bolt_cfg.use_baseline_advantages and self.baseline is not None:
+        if pace_cfg.use_baseline_advantages and self.baseline is not None:
             logger.info(
-                "Using BoltGRPOTrainer with baseline advantage computation (Unsloth)")
-            TrainerClass = BoltGRPOTrainer.create_trainer_class(
+                "Using PaceGRPOTrainer with baseline advantage computation (Unsloth)")
+            TrainerClass = PaceGRPOTrainer.create_trainer_class(
                 baseline=self.baseline,
                 num_generations=num_generations,
             )
@@ -562,16 +562,16 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         )
 
         # Add curriculum callback if enabled
-        if bolt_cfg.curriculum_enabled and self.curriculum_sampler is not None and self.baseline is not None:
+        if pace_cfg.curriculum_enabled and self.curriculum_sampler is not None and self.baseline is not None:
             self.trainer.add_callback(CurriculumCallback(
                 baseline=self.baseline,
                 sampler=self.curriculum_sampler,
                 dataset=dataset,
-                update_freq=bolt_cfg.curriculum_update_freq,
+                update_freq=pace_cfg.curriculum_update_freq,
             ))
             logger.info(
                 f"Added CurriculumCallback (update every {
-                    bolt_cfg.curriculum_update_freq} steps)")
+                    pace_cfg.curriculum_update_freq} steps)")
 
         # Store output_dir for use in train()
         self.output_dir = output_dir
@@ -580,8 +580,8 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         logger.info("BOLT Trainer Setup Complete (Unsloth)")
         logger.info(f"Dataset size: {len(dataset)}")
         logger.info(f"Num reward functions: {len(self.reward_functions)}")
-        logger.info(f"Baseline advantages: {bolt_cfg.use_baseline_advantages}")
-        logger.info(f"Curriculum sampling: {bolt_cfg.curriculum_enabled}")
+        logger.info(f"Baseline advantages: {pace_cfg.use_baseline_advantages}")
+        logger.info(f"Curriculum sampling: {pace_cfg.curriculum_enabled}")
         logger.info("=" * 80)
 
     def train(self) -> Dict[str, Any]:
@@ -597,7 +597,7 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         print(self.eval_dataset)
         self.setup_trainer()
 
-        bolt_cfg = self._get_bolt_config()
+        pace_cfg = self._get_pace_config()
 
         # Record training start
         start_time = time.time()
@@ -617,7 +617,7 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
         # Save baseline
         baseline_path = None
         if self.baseline is not None:
-            baseline_path = Path(self.output_dir) / "bolt_baseline.pkl"
+            baseline_path = Path(self.output_dir) / "pace_baseline.pkl"
             self.baseline.save(str(baseline_path))
             logger.info(f"Saved BOLT baseline to {baseline_path}")
 
@@ -652,10 +652,10 @@ class UnslothBoltTrainer(UnslothGRPOTrainer):
             "num_reward_functions": len(
                     self.reward_functions),
             "num_datasets": 1,
-            "bolt_config": {
-                "curriculum_enabled": bolt_cfg.curriculum_enabled,
-                "baseline_enabled": bolt_cfg.baseline_enabled,
-                "use_baseline_advantages": bolt_cfg.use_baseline_advantages,
+            "pace_config": {
+                "curriculum_enabled": pace_cfg.curriculum_enabled,
+                "baseline_enabled": pace_cfg.baseline_enabled,
+                "use_baseline_advantages": pace_cfg.use_baseline_advantages,
                 "backend": "unsloth",
             },
             "metrics": metrics,
