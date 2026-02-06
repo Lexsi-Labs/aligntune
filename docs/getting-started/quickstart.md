@@ -187,16 +187,18 @@ logging:
 Then train:
 
 ```python
-from aligntune.core.config_loader import ConfigLoader
+from aligntune.core.sft.config_loader import SFTConfigLoader
 from aligntune.core.backend_factory import create_sft_trainer
 
+
 # Load configuration
-config = ConfigLoader.load_from_yaml("config.yaml")
+config = SFTConfigLoader.load_from_yaml("config.yaml")
 
-# Create trainer
-trainer = create_sft_trainer(config)
 
-# Train
+# Create trainer from config
+trainer = create_sft_trainer(config=config)
+
+
 trainer.train()
 ```
 
