@@ -657,16 +657,18 @@ conda<span class="w"> </span>activate<span class="w"> </span>aligntune
 <span class="w"> </span><span class="nt">run_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_first_training&quot;</span>
 </code></pre></div>
 <p>Then train:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.config_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigLoader</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.sft.config_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFTConfigLoader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
 
+
 <span class="c1"># Load configuration</span>
-<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigLoader</span><span class="o">.</span><span class="n">load_from_yaml</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SFTConfigLoader</span><span class="o">.</span><span class="n">load_from_yaml</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
 
-<span class="c1"># Create trainer</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
-<span class="c1"># Train</span>
+<span class="c1"># Create trainer from config</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+
 <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="cli-quick-start">CLI Quick Start<a class="headerlink" href="#cli-quick-start" title="Permanent link">&para;</a></h2>
