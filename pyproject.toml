@@ -69,6 +69,7 @@ dependencies = [
     "accelerate>=0.24.0",
     "peft>=0.6.0",
     "bitsandbytes>=0.41.0",
+    "torch>=2.10.0",
     
     # Core Python dependencies
     "numpy>=1.21.0",
