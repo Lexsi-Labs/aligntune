@@ -17,9 +17,7 @@
 
 **Multi-Backend Architecture**: Choose between TRL (reliable, battle-tested) and Unsloth (faster) backends with intelligent auto-selection.
 
-**Complete RLHF Coverage**: 12+ RL algorithms including DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, and BOLT.
-
-**27+ Reward Functions**: Built-in reward functions for quality, safety, style, and task-specific metrics.
+**Complete RLHF Coverage**: 12+ RL algorithms including DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, and PACE.
 
 **Production-Ready**: No mock code, comprehensive error handling, extensive testing, and robust validation.
 
@@ -36,6 +34,7 @@ trainer = create_sft_trainer(
     dataset_name="tatsu-lab/alpaca",
     backend="trl",
     num_epochs=3,
+    max_steps = -1,
     batch_size=4,
     learning_rate=5e-5
 )
@@ -55,7 +54,7 @@ from aligntune.core.backend_factory import create_rl_trainer
 
 # Create and train DPO model
 trainer = create_rl_trainer(
-    model_name="microsoft/DialoGPT-small",
+    model_name="Qwen/Qwen3-0.6B",
     dataset_name="Anthropic/hh-rlhf",
     algorithm="dpo",
     backend="trl",
@@ -76,19 +75,16 @@ trainer.train()
 | **DPO** | Yes | Yes | Direct Preference Optimization |
 | **PPO** | Yes | Yes | Proximal Policy Optimization |
 | **GRPO** | Yes | Yes | Group Relative Policy Optimization |
-| **GSPO** | Yes | No | Group Sequential Policy Optimization (TRL only) |
+| **GSPO** | Yes | Yes | Group Sequential Policy Optimization  |
 | **DAPO** | Yes | Yes | Decouple Clip and Dynamic sAmpling Policy Optimization |
 | **Dr. GRPO** | Yes | Yes | GRPO Done Right (unbiased variant) |
 | **GBMPO** | Yes | No | Group-Based Mirror Policy Optimization |
 | **Counterfactual GRPO** | Yes | Yes | Counterfactual GRPO variant |
-| **BOLT** | Yes | Yes | Baseline-Optimized Learning Technique |
+| **PACE** | Yes | Yes | Baseline-Optimized Learning Technique |
 
 ## Installation
 
 ```bash
-# Install from PyPI
-pip install aligntune
-
 # Or install from source
 git clone https://github.com/Lexsi-Labs/aligntune.git
 cd aligntune
@@ -104,32 +100,37 @@ pip install -e .
 ## Demo Notebooks
 
 Interactive Colab notebooks demonstrating various AlignTune workflows:
+Here are the organized tables containing the Colab links, models, and datasets provided in your text.
 
 ### Supervised Fine-Tuning (SFT)
 
 | Backend| Model | Dataset | Link |
 | --- | --- | --- | --- |
-| Unsloth| **Qwen/Qwen2.5-0.5B-Instruct** | bebechien/MobileGameNPC | [Open in Colab]( https://colab.research.google.com/drive/11DrRbG30MUCegZTDXwR9nxEdvKaLfWCb%3Fusp%3Dsharing) |
-| TRL | **google/txgemma-2b-predict** | trialbench_adverse-event-rate-prediction | [Open in Colab](https://colab.research.google.com/drive/1oTI_0fc3x4u3fs5Q2ccFBc5g45q3ScWY%3Fusp%3Dsharing) |
-| Unsloth| **Qwen/Qwen2.5-0.5B-Instruct** | bebechien/MobileGameNP | [Open in Colab](https://colab.research.google.com/drive/15R3JOrzAUuMagCamDHsqe0wNyb44rw2j%3Fusp%3Dsharing) |
+| TRL | **Qwen/Qwen3-4B-Instruct-2507** | sohamb37lexsi/bitext-wealth-management-llm-chatbot-splits | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1okAnfMlkch-G5Dy2dmj_dfR07rtxmYoq?usp=sharing) |
+| TRL | **Qwen3-4B-Instruct** | sohamb37lexsi/bitext-retail-banking-llm-chatbot-splits | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1JnFvEWZ6PDqrDAyWznCdOA9oNn8aqN2v?usp=sharing) |
+| Unsloth| **Qwen/Qwen2.5-0.5B-Instruct** | bebechien/MobileGameNPC | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/15R3JOrzAUuMagCamDHsqe0wNyb44rw2j?usp=sharing) |
+| TRL | **google/txgemma-2b-predict** | trialbench_adverse-event-rate-prediction | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1r91SS7Lb5LjkjzWXp7uzkpR3vlWZ6gwD?usp=sharing) |
+| Unsloth| **Qwen/Qwen2.5-0.5B-Instruct** | bebechien/MobileGameNP |[![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)] (https://colab.research.google.com/drive/11DrRbG30MUCegZTDXwR9nxEdvKaLfWCb?usp=sharing) |
 
 ### Reinforcement Learning (RL)
 
 | Backend| Algorithm | Model | Dataset | Link |
 | --- | --- | --- | --- | --- |
-| Unsloth| **PPO** | Qwen/Qwen2.5-0.5B-Instruct | HuggingFaceH4/ultrachat_200k | [Open in Colab](https://colab.research.google.com/drive/1G4fdtO4DhBNwjOYhuaGmvIrBU_lc159H%3Fusp%3Dsharing) |
-| TRL | **PPO** | EleutherAI/pythia-1.4b | CarperAI/openai_summarize_tldr | [Open in Colab](https://colab.research.google.com/drive/1wlbSvQAJv8ZFM2qGD4XlUOKPzZHXstQo%3Fusp%3Dsharing) |
-| TRL | **GRPO** (Coding) | Qwen/Qwen3-4B | google-research-datasets/mbpp | [Open in Colab](https://colab.research.google.com/drive/13HYZ-EkLC3-6wxJG_1NyWXPEuN9bIeM4?usp=sharing) |
-| Unsloth| **GRPO** (Math) | meta-llama/Llama-3.2-3B-Instruct | openai/gsm8k | [Open in Colab](https://colab.research.google.com/drive/11tj2odJa7v55VvQkpOlm7_WBclqFdaVi%3Fusp%3Dsharing) |
-| TRL | **GRPO** | meta-llama/Llama-3.2-3B-Instruct | openai/gsm8k | [Open in Colab](https://colab.research.google.com/drive/14b2dt0_iSVL8Z_8mlOx--f-d_rDCqVOP?usp=sharing) |
-| Unsloth | **DRGRPO** | Qwen/Qwen2.5-3B-Instruct | yahma/alpaca-cleaned | [Open in Colab](https://colab.research.google.com/drive/1IzDtjONyL6CZ038faTTp8AvLfhzkqSpb%3Fusp%3Dsharing) |
-| TRL | **DRGRPO** | Qwen/Qwen2-0.5B-Instruct | AI-MO/NuminaMath-TIR | [Open in Colab](https://colab.research.google.com/drive/1KfrMzuGRPrZwyRuNTGep1ZL6C6h2aVjk?usp=sharing) |
-| Unsloth | **GSPO** | Qwen/Qwen3-1.7B | CyberNative/Code_Vulnerability_Security_DPO | [Open in Colab](https://colab.research.google.com/drive/120FjMEAZRXUoOMRsWHCn5tmpGfLTAY4g%3Fusp%3Dsharing) |
-| TRL | **GSPO** | meta-llama/Llama-3.2-3B-Instruct | HuggingFaceH4/ultrachat_200k | [Open in Colab](https://colab.research.google.com/drive/1vDP7ukBHWwSiD7KVSgSekCvk-x_MkWdC%3Fusp%3Dsharing) |
-| Unsloth| **DAPO** | microsoft/Phi-3.5-mini-instruct | HuggingFaceH4/ultrachat_200k | [Open in Colab](https://colab.research.google.com/drive/1gAa6EPc5345XRfog1nzQIFTmp_OJqNvk%3Fusp%3Dsharing) |
-|TRL | **DAPO** | meta-llama/Llama-3.2-3B-Instruct | google-research-datasets/mbpp | [Open in Colab](https://colab.research.google.com/drive/1aF3LxEMmLl0fCyA5yVBAkU_Rgsy3dsh5?usp=sharing) |
-| Unsloth| **DPO** | microsoft/phi-2 | argilla/distilabel-intel-orca-dpo-pairs | [Open in Colab](https://colab.research.google.com/drive/1aKdQzT7KGs0PEr7pO9rOXFkwQK6LzyRZ%23scrollTo%3DdOnIJIAMxP9J) |
-| TRL | **DPO** | google/gemma-2-2b-it | Anthropic/hh-rlhf | [Open in Colab](https://colab.research.google.com/drive/1WQhek61Z0v1zHFWT4mQwVX7n10ln-j3d%3Fusp%3Dsharing) |
+| Unsloth| **DPO** | microsoft/phi-2 | argilla/distilabel-intel-orca-dpo-pairs | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1aKdQzT7KGs0PEr7pO9rOXFkwQK6LzyRZ#scrollTo=dOnIJIAMxP9J) |
+| TRL | **DPO** | google/gemma-2-2b-it | Anthropic/hh-rlhf | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1WQhek61Z0v1zHFWT4mQwVX7n10ln-j3d?usp=sharing) |
+| TRL | **DPO** | sohamb37lexsi/wealth_management_Qwen3-4B-Instruct-2507 | sohamb37lexsi/bitext_wealth_management_preference_data | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1LR3KWcjQAFjSHf0MR9271ShchjPUVSpS?usp=sharing) |
+| Unsloth| **PPO** | Qwen/Qwen2.5-0.5B-Instruct | HuggingFaceH4/ultrachat_200k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1G4fdtO4DhBNwjOYhuaGmvIrBU_lc159H?usp=sharing) |
+| TRL | **PPO** | EleutherAI/pythia-1.4b | CarperAI/openai_summarize_tldr | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1wlbSvQAJv8ZFM2qGD4XlUOKPzZHXstQo?usp=sharing) |
+| TRL | **GRPO** (Coding) | Qwen/Qwen3-4B | google-research-datasets/mbpp | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/13HYZ-EkLC3-6wxJG_1NyWXPEuN9bIeM4?usp=sharing) |
+| Unsloth| **GRPO** (Math) | meta-llama/Llama-3.2-3B-Instruct | openai/gsm8k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/11tj2odJa7v55VvQkpOlm7_WBclqFdaVi?usp=sharing) |
+| TRL | **GRPO** | meta-llama/Llama-3.2-3B-Instruct | openai/gsm8k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/14b2dt0_iSVL8Z_8mlOx--f-d_rDCqVOP?usp=sharing) |
+| Unsloth | **DRGRPO** | Qwen/Qwen2.5-3B-Instruct | yahma/alpaca-cleaned | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1IzDtjONyL6CZ038faTTp8AvLfhzkqSpb?usp=sharing) |
+| TRL | **DRGRPO** | Qwen/Qwen2-0.5B-Instruct | AI-MO/NuminaMath-TIR | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1KfrMzuGRPrZwyRuNTGep1ZL6C6h2aVjk?usp=sharing) |
+| Unsloth | **GSPO** | Qwen/Qwen3-1.7B | CyberNative/Code_Vulnerability_Security_DPO | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/120FjMEAZRXUoOMRsWHCn5tmpGfLTAY4g?usp=sharing) |
+| TRL | **GSPO** | meta-llama/Llama-3.2-3B-Instruct | HuggingFaceH4/ultrachat_200k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1vDP7ukBHWwSiD7KVSgSekCvk-x_MkWdC?usp=sharing) |
+| Unsloth| **DAPO** | microsoft/Phi-3.5-mini-instruct | HuggingFaceH4/ultrachat_200k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1gAa6EPc5345XRfog1nzQIFTmp_OJqNvk?usp=sharing) |
+|TRL | **DAPO** | meta-llama/Llama-3.2-3B-Instruct | google-research-datasets/mbpp | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1aF3LxEMmLl0fCyA5yVBAkU_Rgsy3dsh5?usp=sharing) |
+
 
 
 ## Documentation
@@ -162,9 +163,9 @@ flowchart TD
     Unsloth --> Unsloth_Algos[Unsloth Algorithms]
 ```
 
-**TRL Backend:** SFT, DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, BOLT
+**TRL Backend:** SFT, DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, PACE
 
-**Unsloth Backend:** SFT, DPO, PPO, GRPO, DAPO, Dr. GRPO, Counterfactual GRPO, BOLT
+**Unsloth Backend:** SFT, DPO, PPO, GRPO, DAPO, Dr. GRPO, Counterfactual GRPO, PACE
 
 See [Architecture](docs/advanced/architecture.md) for details.
 
@@ -174,7 +175,8 @@ We welcome contributions! See our [Contributing Guide](docs/contributing/guide.m
 
 ## License
 
-This project is licensed under the **AlignTune Source Available License (ASAL) v1.0** - see the [LICENSE](LICENSE) file for details.
+This project is released under the MIT License. Please cite appropriately if used in academic or production projects.
+See the [LICENSE](LICENSE) file for details.
 
 **Key Points:**
 - **Free for Research & Learning**: Use, modify, and study for personal, academic, or research purposes
@@ -191,23 +193,23 @@ If you use AlignTune in your research, please cite:
 **BibTeX:**
 ```bibtex
 @software{alignTune2025,
-  title = {AlignTune: A Comprehensive Fine-Tuning Library for SFT and RL Training},
-  author = {Chawla, Chirag and Lyngkhoi, Zera and Seth, Pratinav and Avaiya, Utsav and Bhattacharjee, Soham and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar},
-  year = {2025},
-  note = {Equal contribution: Chirag Chawla, Zera Lyngkhoi, Pratinav Seth},
+  title        = {{AlignTune}: Modular Toolkit for Post-Training Alignment of Large Language Models},
+  author       = {Lyngkhoi, R E Zera Marveen and Chawla, Chirag and Seth, Pratinav and Avaiya, Utsav and Bhattacharjee, Soham and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar},
+  year         = {2025},
+  note         = {Equal contribution: R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth},
   organization = {Lexsi Labs},
-  url = {https://github.com/Lexsi-Labs/aligntune},
-  version = {0.0.0}
+  url          = {https://github.com/Lexsi-Labs/aligntune},
+  version      = {0.0.0}
 }
 ```
 
 **Plain Text:**
 ```
-Chawla, C., Lyngkhoi, Z., Seth, P., Avaiya, U., Bhattacharjee, S., Khandoga, M.,
-Yuan, R., & Sankarapu, V. K. (2025). AlignTune: A Comprehensive Fine-Tuning Library
-for SFT and RL Training. Lexsi Labs. https://github.com/Lexsi-Labs/aligntune
+Lyngkhoi, R. E. Z. M., Chawla, C., Seth, P., Avaiya, U., Bhattacharjee, S., Khandoga, M.,
+Yuan, R., & Sankarapu, V. K. (2025). AlignTune: Modular Toolkit for Post-Training Alignment
+of Large Language Models. Lexsi Labs. https://github.com/Lexsi-Labs/aligntune
 
-*Equal contribution: Chirag Chawla, Zera Lyngkhoi, Pratinav Seth
+*Equal contribution: R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth
 ```
 
 ## Acknowledgments
@@ -221,7 +223,7 @@ AlignTune is built upon the excellent work of the following projects:
 
 ## Support
 
-- **Documentation**: [docs.aligntune.io](https://docs.aligntune.io)
+- **Documentation**: [aligntune.lexsi.ai/](https://aligntune.lexsi.ai/)
 - **GitHub Issues**: [github.com/Lexsi-Labs/aligntune/issues](https://github.com/Lexsi-Labs/aligntune/issues)
 - **Discussions**: [github.com/Lexsi-Labs/aligntune/discussions](https://github.com/Lexsi-Labs/aligntune/discussions)
 - **Email**: [support@lexsi.ai](mailto:support@lexsi.ai)
