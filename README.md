@@ -75,7 +75,7 @@ trainer.train()
 | **DPO** | Yes | Yes | Direct Preference Optimization |
 | **PPO** | Yes | Yes | Proximal Policy Optimization |
 | **GRPO** | Yes | Yes | Group Relative Policy Optimization |
-| **GSPO** | Yes | Yes | Group Sequential Policy Optimization (TRL only) |
+| **GSPO** | Yes | Yes | Group Sequential Policy Optimization  |
 | **DAPO** | Yes | Yes | Decouple Clip and Dynamic sAmpling Policy Optimization |
 | **Dr. GRPO** | Yes | Yes | GRPO Done Right (unbiased variant) |
 | **GBMPO** | Yes | No | Group-Based Mirror Policy Optimization |
