@@ -9,6 +9,9 @@ on:
 jobs:
   github:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
