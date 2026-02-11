@@ -81,7 +81,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*PyPI URL:* https://pypi.org/project/aryaxai/${{ steps.release_notes.outputs.TAG_NAME }}"
+                    "text": "*PyPI URL:* https://pypi.org/project/aligntune"
                   }
                 }
               ]
