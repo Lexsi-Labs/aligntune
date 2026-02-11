@@ -75,4 +75,7 @@ class SFTTrainerFactory:
             lora_target_modules=getattr(config.model, 'target_modules', None),
             bf16=config.train.bf16,
             gradient_checkpointing=config.model.gradient_checkpointing,
+            # Pass seed
+            seed=config.train.seed,
+            data_seed=config.train.data_seed,
         )

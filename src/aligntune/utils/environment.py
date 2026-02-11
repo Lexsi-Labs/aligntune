@@ -2,7 +2,8 @@
 Environment validation and compatibility checking for AlignTune.
 
 This module provides comprehensive environment diagnostics for unsloth and dependencies,
-including PyTorch/CUDA compatibility, attention backends, and version validation.
+including PyTorch/CUDA compatibility, attention backends, version validation,
+and reproducibility utilities.
 """
 
 import logging
@@ -27,6 +28,36 @@ class EnvironmentInfo:
     flash_attention_available: bool = False
     xformers_available: bool = False
     trl_available: bool = False
+
+def set_seed(seed: int = 42) -> None:
+    """
+    Set seed for reproducibility across random, numpy, torch, and transformers.
+    
+    Args:
+        seed: Integer seed value.
+    """
+    import random
+    import numpy as np
+    import torch
+    
+    # Python random
+    random.seed(seed)
+    
+    # Numpy
+    np.random.seed(seed)
+    
+    # PyTorch
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    
+    # Transformers
+    try:
+        import transformers
+        transformers.set_seed(seed)
+    except ImportError:
+        pass
+        
+    logger.info(f"Global seed set to {seed}")
 
 def check_pytorch_cuda_compatibility() -> Dict[str, Any]:
     """Check PyTorch and CUDA compatibility."""
