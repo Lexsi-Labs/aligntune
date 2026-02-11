@@ -6,6 +6,7 @@ This module extends the original SFT config with:
 - Task-specific dataset field mappings
 - Enhanced validation
 - Task-aware defaults
+- Seed support for reproducibility
 """
 
 from dataclasses import dataclass, field
@@ -245,6 +246,11 @@ class TrainingConfig:
     gradient_checkpointing: bool = False # Added
     gradient_checkpointing_kwargs: Dict[str, Any] = field(default_factory=dict) # Added
     extra_params: Dict[str, Any] = field(default_factory=dict)
+
+    # Reproducibility
+    seed: int = 42
+    data_seed: Optional[int] = None
+
     
     def __post_init__(self):
         """Validate training configuration."""
@@ -511,7 +517,9 @@ def create_instruction_following_config(
             epochs=kwargs.get('epochs', 3),
             per_device_batch_size=kwargs.get('batch_size', 4),
             learning_rate=kwargs.get('learning_rate', 2e-4),
-            gradient_accumulation_steps=kwargs.get('gradient_accumulation_steps', 1)
+            gradient_accumulation_steps=kwargs.get('gradient_accumulation_steps', 1),
+            seed=kwargs.get('seed', 42),
+            data_seed=kwargs.get('data_seed')
         ),
         logging=LoggingConfig(
             output_dir=output_dir,

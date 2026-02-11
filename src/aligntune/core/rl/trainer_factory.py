@@ -57,6 +57,8 @@ class TrainerFactory:
             save_interval=config.train.save_interval,
             # Add reward model configuration
             reward_model_name=config.model.reward_model_name if hasattr(config.model, 'reward_model_name') else None,
+            # Pass seed
+            seed=config.train.seed,
         )
 
 def create_trainer_from_config(config: UnifiedConfig) -> Any:
