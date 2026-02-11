@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="docs/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
+  <img src="https://github.com/Lexsi-Labs/aligntune/blob/main/docs/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
 </p>
 
 <div align="center">
