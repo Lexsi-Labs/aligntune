@@ -81,7 +81,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*PyPI URL:* https://pypi.org/project/aligntune"
+                    "text": "*PyPI URL:* https://pypi.org/project/aligntune/${{ github.event.release.tag_name }}"
                   }
                 }
               ]
