@@ -1,0 +1,20 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  github:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Make script executable
+        run: chmod +x .github/scripts/release.py
+      - name: Create new release
+        run: .github/scripts/release.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
