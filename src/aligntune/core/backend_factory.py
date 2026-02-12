@@ -65,6 +65,7 @@ from .rl.config import (
 from .sft.config import SFTConfig, ModelConfig as SFTModelConfig, DatasetConfig as SFTDatasetConfig, TrainingConfig as SFTTrainingConfig, LoggingConfig as SFTLoggingConfig, EvaluationConfig as SFTEvaluationConfig
 from .rl.trainer_base import TrainerBase
 from ..utils.config_utils import parse_config_to_unified,  load_config
+from ..utils.environment import set_seed  # Import seed utility
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -640,6 +641,9 @@ def create_sft_trainer(
 ) -> TrainerBase:
     """Create SFT trainer with specified backend and parameters."""
 
+    # Set seed globally at the start of trainer creation
+    seed = kwargs.get('seed', 42)
+    set_seed(seed)
 
     if config is not None:
         if isinstance(config, (str, Path)):
@@ -658,6 +662,12 @@ def create_sft_trainer(
         model_name = model_name or kwargs.pop('model_name', None)
         dataset_name = dataset_name or kwargs.pop('dataset_name', None)
         backend = kwargs.pop('backend', backend)
+
+        # Update seed if it was in config but not kwargs
+        if 'seed' in kwargs:
+             seed = kwargs['seed']
+             set_seed(seed)
+
     # Validate required parameters
     if model_name is None:
         raise ValueError("model_name must be provided either as argument or in config")
@@ -769,7 +779,9 @@ def create_sft_trainer(
             use_flash_attention_2=kwargs.get('use_flash_attention_2'),
             gradient_checkpointing=kwargs.get('gradient_checkpointing', False),
             gradient_checkpointing_kwargs=kwargs.get('gradient_checkpointing_kwargs', {"use_reentrant": False}),
-            extra_params=kwargs, 
+            extra_params=kwargs,
+            seed=seed,
+            data_seed=kwargs.get('data_seed'),
         ),
         logging=SFTLoggingConfig(
             output_dir=output_dir,
@@ -860,6 +872,10 @@ def create_rl_trainer(
 ) -> TrainerBase:
     """Create RL trainer with specified algorithm and backend."""
 
+    # Set seed globally at the start of trainer creation
+    seed = kwargs.get('seed', 42)
+    set_seed(seed)
+
     # NEW: Load config if provided# Load and parse config if provided
     if config is not None:
         if isinstance(config, (str, Path)):
@@ -879,6 +895,11 @@ def create_rl_trainer(
         dataset_name = dataset_name or kwargs.pop('dataset_name', None)
         algorithm = algorithm or kwargs.pop('algorithm', None)
         backend = kwargs.pop('backend', backend)
+
+        # Update seed if it was in config
+        if 'seed' in kwargs:
+             seed = kwargs['seed']
+             set_seed(seed)
     
     # Validate required parameters
     if model_name is None:
@@ -1131,7 +1152,7 @@ def create_rl_trainer(
             save_strategy=kwargs.get('save_strategy', 'steps'),
             logging_steps=kwargs.get('logging_steps', 10),
             eval_steps=kwargs.get('eval_steps', 100),
-            seed=kwargs.get('seed', 42),
+            seed=seed, # did not use kwargs here because it was already replaced acc previosuly
             data_seed=kwargs.get('data_seed', 47),  # Match training_script.py
             mask_truncated_completions=kwargs.get('mask_truncated_completions', True),
             rollout_batch_size=kwargs.get('rollout_batch_size', 1),

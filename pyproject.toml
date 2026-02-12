@@ -5,19 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aligntune"
 version = "0.2.0"
-description = "AlignTune: Multi-backend alignment and fine-tuning library (formerly FinetuneHub). Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
+description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "AlignTune Source Available License (ASAL) v1.0"}
+requires-python = ">=3.12"
+license = { text = "MIT" }
 authors = [
-    {name = "Chirag Chawla", email = "chirag@lexsi.ai"},
-    {name = "Zera Lyngkhoi", email = "zera@lexsi.ai"},
-    {name = "Pratinav Seth", email = "pratinav@lexsi.ai"},
-    {name = "Utsav Avaiya", email = "utsav@lexsi.ai"},
-    {name = "Soham Bhattacharjee", email = "soham@lexsi.ai"},
-    {name = "Mykola Khandoga", email = "mykola@lexsi.ai"},
-    {name = "Rui Yuan", email = "rui@lexsi.ai"},
-    {name = "Vinay Kumar Sankarapu", email = "vinay@lexsi.ai"}
+    {name = "Zera Lyngkhoi", email = "zera.lyngkhoi@lexsi.ai"},
+    {name = "Chirag Chawla", email = "chirag.chawla@lexsi.ai"},
+    {name = "Pratinav Seth", email = "pratinav.seth@lexsi.ai"},
+    {name = "Utsav Avaiya", email = "utsav.avaiya@lexsi.ai"},
+    {name = "Soham Bhattacharjee", email = "soham.bhattacharjee@lexsi.ai"},
+    {name = "Mykola Khandoga", email = "mykola.khandoga@lexsi.ai"},
+    {name = "Rui Yuan", email = "rui.yuan@lexsi.ai"},
+    {name = "Vinay Kumar Sankarapu", email = "v.k@lexsi.ai"}
 ]
 keywords = [
     "alignment",
@@ -51,11 +51,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: Other/Proprietary License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -218,7 +213,7 @@ where = ["src"]
 # Black configuration
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -260,7 +255,7 @@ known_third_party = [
 
 # mypy configuration
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -334,7 +329,7 @@ exclude_lines = [
 
 # Ruff configuration (modern linter alternative to flake8)
 [tool.ruff]
-target-version = "py38"
+target-version = "py312"
 line-length = 100
 select = [
     "E",  # pycodestyle errors
