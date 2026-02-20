@@ -844,6 +844,103 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         print(f"  Success rate: {(n_positive / len(rewards)) * 100:.1f}%")
         print(f"{'='*60}\n")
     
+    def _run_evalplus_tests(
+        self,
+        code: str,
+        canonical_solution: str,
+        entry_point: str,
+        base_inputs: List,
+        timeout_seconds: int = 5
+    ) -> Tuple[bool, int, List[str]]:
+        """
+        Run evalplus-style tests by comparing outputs to canonical solution.
+        Returns: (execution_success, tests_passed, error_messages)
+        """
+        error_messages = []
+        passed = 0
+
+        # Block input() to prevent hanging
+        input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
+
+        # Create test script that compares generated vs canonical outputs
+        test_script = f'''
+import sys
+import traceback
+
+# Block input
+{input_blocker}
+
+# Canonical solution
+{canonical_solution}
+_canonical_func = {entry_point}
+
+# Generated solution
+{code}
+_generated_func = {entry_point}
+
+# Test inputs
+base_inputs = {repr(base_inputs)}
+
+# Run tests
+results = []
+for i, inp in enumerate(base_inputs):
+    try:
+        if isinstance(inp, (list, tuple)):
+            expected = _canonical_func(*inp)
+            actual = _generated_func(*inp)
+        else:
+            expected = _canonical_func(inp)
+            actual = _generated_func(inp)
+
+        if expected == actual:
+            results.append(f"PASS:{{i}}")
+        else:
+            results.append(f"FAIL:{{i}}:expected={{expected}},got={{actual}}")
+    except Exception as e:
+        results.append(f"ERROR:{{i}}:{{type(e).__name__}}:{{str(e)[:50]}}")
+
+for r in results:
+    print(r)
+'''
+
+        temp_file = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+                f.write(test_script)
+                temp_file = f.name
+
+            result = subprocess.run(
+                [sys.executable, temp_file],
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds
+            )
+
+            if result.returncode == 0:
+                for line in result.stdout.strip().split('\n'):
+                    if line.startswith('PASS:'):
+                        passed += 1
+                    elif line.startswith('FAIL:') or line.startswith('ERROR:'):
+                        error_messages.append(line)
+                return True, passed, error_messages
+            else:
+                error_messages.append(f"Execution error: {result.stderr[:200]}")
+                return False, 0, error_messages
+
+        except subprocess.TimeoutExpired:
+            error_messages.append("Code execution timed out")
+            return False, 0, error_messages
+        except Exception as e:
+            error_messages.append(f"Sandbox error: {str(e)}")
+            return False, 0, error_messages
+        finally:
+            if temp_file:
+                try:
+                    os.unlink(temp_file)
+                except:
+                    pass
+
+    
     def _compute_code_rewards(self, completions: List, **kwargs) -> List[float]:
         """Compute rewards for code generation (MBPP)."""
         prompts = kwargs.get("prompts", [""] * len(completions))
@@ -1196,64 +1293,6 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         enable_thinking = self._get_config_value(self.config.train, 'enable_thinking', default=False)
         gradient_accumulation_steps = self._get_config_value(self.config.train, 'gradient_accumulation_steps', default=32)
 
-        # Print all config parameters for visibility
-        print("\n" + "=" * 80)
-        print("COUNTERFACTUAL GRPO TRAINING CONFIGURATION")
-        print("=" * 80)
-        print(f"  Model:                    {self._get_config_value(self.config.model, 'name_or_path', 'model_name')}")
-        print(f"  Output dir:               {output_dir}")
-        print(f"  Run name:                 {run_name}")
-        print("-" * 80)
-        print("TRAINING PARAMS:")
-        print(f"  epochs:                   {num_epochs}")
-        print(f"  max_steps:                {max_steps}")
-        print(f"  per_device_batch_size:    {per_device_batch_size}")
-        print(f"  num_generations:          {num_generations}")
-        print(f"  gradient_accumulation:    {gradient_accumulation_steps}")
-        print(f"  learning_rate:            {learning_rate}")
-        print(f"  weight_decay:             {weight_decay}")
-        print(f"  warmup_steps:             {warmup_steps}")
-        print(f"  warmup_ratio:             {warmup_ratio}")
-        print(f"  max_grad_norm:            {max_grad_norm}")
-        print(f"  gradient_checkpointing:   {use_gradient_checkpointing}")
-        print("-" * 80)
-        print("GENERATION PARAMS:")
-        print(f"  max_prompt_length:        {max_prompt_length}")
-        print(f"  max_completion_length:    {max_completion_length}")
-        print(f"  mask_truncated:           {mask_truncated_completions}")
-        print(f"  enable_thinking:          {enable_thinking}")
-        print("-" * 80)
-        print("GRPO PARAMS:")
-        print(f"  loss_type:                {loss_type}")
-        print(f"  beta (KL coef):           {beta}")
-        print(f"  epsilon (clip range):     {epsilon}")
-        print(f"  scale_rewards:            {scale_rewards}")
-        print(f"  temperature:              {temperature}")
-        print(f"  top_p:                    {top_p}")
-        print(f"  max_grad_norm:            {max_grad_norm} (0.0=disabled)")
-        print("-" * 80)
-        print("COUNTERFACTUAL PARAMS:")
-        print(f"  weighting_mode:           {weighting_mode}")
-        if weighting_mode != "vanilla":
-            print(f"  boost_factor:             {boost_factor}")
-            print(f"  min_weight:               {min_weight}")
-            print(f"  max_spans:                {max_spans}")
-            print(f"  answer_weight:            {answer_weight}")
-            print(f"  gradient_conservation:    {enable_gradient_conservation}")
-        print(f"  weight_debug:             {weight_debug}")
-        print("-" * 80)
-        print("CHECKPOINTING:")
-        print(f"  save_steps:               {save_steps}")
-        print(f"  save_total_limit:         {save_total_limit}")
-        print(f"  save_strategy:            {save_strategy}")
-        print(f"  logging_steps:            {logging_steps}")
-        print(f"  eval_steps:               {eval_steps}")
-        print("-" * 80)
-        print("SEEDS:")
-        print(f"  seed:                     {seed}")
-        print(f"  data_seed:                {data_seed}")
-        print("=" * 80 + "\n")
-        import sys; sys.stdout.flush()
         
         # Generation parameters
         # num_generations = self._get_config_value(self.config.train, 'num_generations', default=None)
