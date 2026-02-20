@@ -1337,25 +1337,6 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             report_to=self.config.logging.loggers if self.config.logging.loggers else [],
         )
 
-#         grpo_config = GRPOConfig(
-#                     output_dir=output_dir,
-#                     num_train_epochs=num_epochs,
-#                     per_device_train_batch_size=per_device_batch_size,
-#                     num_generations = per_device_batch_size,
-#                     gradient_accumulation_steps=gradient_accumulation_steps,
-#                     learning_rate=learning_rate,
-#                     warmup_steps=warmup_steps,
-#                     logging_steps=10,
-#                     save_steps=100,
-#                     eval_steps=100,
-#                     weight_decay=weight_decay,
-#                     max_grad_norm=max_grad_norm,
-#                     remove_unused_columns=False,
-#                     fp16=precision == "fp16",
-#                     bf16=precision == "bf16",
-#                     beta=beta,
-#                     epsilon=epsilon,
-#                 )
 
 #       # Create Counterfactual GRPO trainer
         import os
