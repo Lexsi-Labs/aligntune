@@ -671,9 +671,10 @@ def compute_counterfactual_importance(
         # masked_score is MORE negative (worse) → drop should be POSITIVE (important)
         drop = baseline_score - masked_score  # Positive when masking hurts performance
 
-        # Assign the FULL drop to all tokens in span (not divided by length)
-        # This way, high-impact spans get high importance regardless of length
-        importance[s:e] += drop
+        # Assign drop normalized by span length
+        span_len = e - s
+        if span_len > 0:
+            importance[s:e] += drop / span_len
 
         if debug:
             text = ''.join(tokens[s:e])[:50]
@@ -1152,7 +1153,9 @@ def compute_counterfactual_importance_detailed(
                     masked_score += logp[t, next_token].item()
 
         drop = baseline_score - masked_score
-        importance[s:e] += drop
+        span_len = e - s
+        if span_len > 0:
+            importance[s:e] += drop / span_len
 
         # Determine span type
         span_text = ''.join(all_tokens[s:e])
@@ -1403,7 +1406,9 @@ def compute_batched_counterfactual_importance(
         for span_idx, (s, e) in enumerate(spans):
             if span_idx in masked_scores:
                 drop = baseline_score - masked_scores[span_idx]
-                importance[s:e] += drop
+                span_len = e - s
+                if span_len > 0:
+                    importance[s:e] += drop / span_len
 
         # Zero out prompt and post-reasoning
         importance[:prompt_len] = 0.0

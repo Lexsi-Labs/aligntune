@@ -5,13 +5,20 @@ This module provides a TRL backend for Counterfactual Group Relative Policy Opti
 integrating the custom CounterfactualGRPOTrainer with the same reward structure
 as the standard GRPO implementation.
 """
-
 import logging
 import time
 import yaml
 import math
+import ast
+import re
+import os
+import sys
+import subprocess
+import tempfile
+import textwrap
+import unicodedata
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List, Callable, Tuple
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
@@ -41,6 +48,208 @@ def apply_chat_template_safe(tokenizer, messages: list, tokenize: bool = False,
     )
 
 
+
+_ASCII_TRANS = {
+    0x2013: '-',   # en-dash
+    0x2014: '-',   # em-dash
+    0x2212: '-',   # minus sign
+    0x00D7: '*',   # multiplication sign
+    0x00B7: '*',   # middle dot
+    0x201C: '"',   # left double quotation
+    0x201D: '"',   # right double quotation
+    0x201E: '"',   # double low-9 quotation
+    0x2018: "'",   # left single quotation
+    0x2019: "'",   # right single quotation
+    0x00B2: '**2', # superscript 2
+    0x00B3: '**3', # superscript 3
+    0x00A0: ' ',   # non-breaking space
+    0x200B: '',    # zero-width space
+}
+
+
+def _ascii_only(s: str) -> str:
+    """Normalize to ASCII, replacing common Unicode chars."""
+    s = s.translate(_ASCII_TRANS)
+    s = unicodedata.normalize('NFKC', s)
+    return s.encode('ascii', 'ignore').decode('ascii')
+
+
+def _strip_markdown(code: str) -> str:
+    """Remove markdown code fences, headings, and prose lines."""
+    # First, try to extract code from markdown code blocks
+    code_block_match = re.search(r'```(?:python)?\s*\n(.*?)```', code, flags=re.S)
+    if code_block_match:
+        return code_block_match.group(1).strip()
+
+    # If no code block, try to extract just the function definitions
+    lines = code.splitlines()
+    keep = []
+    in_code = False
+    for ln in lines:
+        stripped = ln.lstrip()
+        # Start of code
+        if stripped.startswith(("def ", "class ", "import ", "from ", "@")):
+            in_code = True
+        # End of code (prose line after code)
+        if in_code and stripped and not stripped.startswith(("#", "def ", "class ", "import ", "from ", "@", "return", "if ", "elif ", "else:", "for ", "while ", "try:", "except", "finally:", "with ", "    ", "\t", ")", "]", "}", "pass", "raise", "yield", "break", "continue", "global", "nonlocal", "assert", "lambda")):
+            # Check if it looks like prose (contains common prose patterns)
+            if re.match(r'^[A-Z][a-z].*[.!?]', stripped) or stripped.startswith(("This ", "The ", "Here ", "Note", "Example")):
+                break  # Stop at prose
+        if in_code:
+            keep.append(ln)
+
+    return "\n".join(keep) if keep else code
+
+
+def _ensure_entrypoint(code: str, expected_name: str) -> str:
+    """Ensure the expected function name is defined."""
+    if re.search(rf"\bdef\s+{re.escape(expected_name)}\s*\(", code):
+        return code
+    # alias the first defined function to expected name
+    m = re.search(r"\bdef\s+([A-Za-z_]\w*)\s*\(", code)
+    if m:
+        actual = m.group(1)
+        return code + f"\n\n# alias for grader\n{expected_name} = {actual}\n"
+    # last resort: stub to avoid NameError (will likely fail tests but not crash)
+    return f"def {expected_name}(*args, **kwargs):\n    raise NotImplementedError\n\n" + code
+
+
+def _flexible_signature_shim(expected_name: str) -> str:
+    """Allow function to accept superfluous args that some tests pass."""
+    return f"""
+try:
+    _orig = {expected_name}
+    import inspect
+    def {expected_name}(*args, **kwargs):
+        sig = inspect.signature(_orig)
+        params = list(sig.parameters.values())
+        trimmed = args[:len(params)]
+        return _orig(*trimmed, **kwargs)
+except Exception:
+    pass
+"""
+
+
+def _prepare_code_for_exec(generated: str, expected_name: str) -> str:
+    """Sanitize and prepare generated code for execution."""
+    code = _strip_markdown(generated)
+    code = _ascii_only(code)
+    code = _ensure_entrypoint(code, expected_name)
+    code = code + "\n" + _flexible_signature_shim(expected_name)
+    # compile gate
+    try:
+        ast.parse(code)
+    except SyntaxError:
+        # fall back to just a stub to avoid poisoning reward with SyntaxError noise
+        code = f"def {expected_name}(*args, **kwargs):\n    raise SyntaxError('bad submission')\n"
+    return textwrap.dedent(code)
+
+
+def _extract_function_name_from_test(test_case) -> Optional[str]:
+    """Extract function name from test assertion."""
+    # Handle case where test_case is a list
+    if isinstance(test_case, list):
+        test_case = test_case[0] if test_case else ""
+    test_case = str(test_case)
+    match = re.search(r'(\w+)\s*\([^)]*\)', test_case)
+    if match:
+        return match.group(1)
+    return None
+
+
+def _run_code_in_sandbox(
+    code: str,
+    setup_code: str,
+    tests: List[str],
+    timeout_seconds: int = 5
+) -> Tuple[bool, int, List[str]]:
+    """
+    Run code in a subprocess sandbox with timeout.
+    Returns: (execution_success, tests_passed, error_messages)
+    """
+    error_messages = []
+
+    # Block input() to prevent hanging
+    input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
+
+    # Create the test script
+    test_script = f"""
+import sys
+import traceback
+
+# Block input
+{input_blocker}
+
+# Setup code
+{setup_code}
+
+# Generated code
+{code}
+
+# Test execution
+results = []
+for i, test_code in enumerate({repr(tests)}):
+    try:
+        exec(test_code)
+        results.append(f"PASS:{{i}}")
+    except Exception as e:
+        results.append(f"FAIL:{{i}}:{{type(e).__name__}}:{{str(e)}}")
+
+# Output results
+for result in results:
+    print(result)
+"""
+
+    temp_file = None
+    try:
+        # Write to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write(test_script)
+            temp_file = f.name
+
+        # Run in subprocess with timeout
+        result = subprocess.run(
+            [sys.executable, temp_file],
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds
+        )
+
+        # Parse output
+        tests_passed = 0
+        if result.returncode == 0:
+            for line in result.stdout.strip().split('\n'):
+                if line.startswith('PASS:'):
+                    tests_passed += 1
+                elif line.startswith('FAIL:'):
+                    parts = line.split(':', 3)
+                    if len(parts) >= 4:
+                        error_messages.append(f"Test {parts[1]}: {parts[2]} - {parts[3]}")
+            execution_success = True
+        else:
+            execution_success = False
+            if result.stderr:
+                error_messages.append(f"Execution error: {result.stderr[:200]}")
+
+        return execution_success, tests_passed, error_messages
+
+    except subprocess.TimeoutExpired:
+        error_messages.append("Code execution timed out (infinite loop)")
+        return False, 0, error_messages
+    except Exception as e:
+        error_messages.append(f"Sandbox error: {str(e)}")
+        return False, 0, error_messages
+    finally:
+        # Clean up temp file
+        if temp_file:
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
+
+
+
+
 # ============================================================================
 # COUNTERFACTUAL TRL TRAINER (mirrors TRLGRPOTrainer 1:1)
 # ============================================================================
@@ -58,6 +267,11 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         self.logging_manager = None
         self.evaluator = None
         self.dataset_dict = None
+
+
+        self.dataset_type: str = "math"
+        self.prompt_to_data: Dict[str, Dict] = {}
+        self.reward_step = 0
         
     @classmethod
     def is_available(cls) -> bool:
@@ -240,116 +454,20 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         enable_thinking = self._get_config_value(self.config.train, 'enable_thinking', default=False)
         
         # Check if this is a math dataset
-        is_math_dataset = any(math_name in dataset_name.lower() for math_name in ['gsm8k', 'math', 'metamath'])
-        
-        if is_math_dataset:
-            logger.info(f"Detected math dataset: {dataset_name}. Using custom format_for_grpo logic.")
-            
-            # Load raw dataset
-            from datasets import load_dataset
-            dataset = load_dataset(dataset_name, config_name, split=split)
-            
-            # Apply max_samples if specified
-            max_samples = self._get_config_value(dataset_config, 'max_samples', default=None)
-            if max_samples and len(dataset) > max_samples:
-                dataset = dataset.select(range(max_samples))
-                logger.info(f"Limited dataset to {max_samples} samples")
-            
-            # Apply the format_for_grpo function
-            def format_for_grpo(example):
-                """Format example for GRPO training."""
-                # Try to extract prompt from various column formats
-                prompt_text = None
-                if 'chosen' in example:
-                    text = example['chosen']
-                    if '\n\nAssistant:' in text:
-                        prompt_text = text.split('\n\nAssistant:')[0] + '\n\nAssistant:'
-                    else:
-                        prompt_text = text[:len(text)//2]
-                elif 'prompt' in example:
-                    prompt_text = example['prompt']
-                elif 'query' in example:
-                    prompt_text = example['query']
-                elif 'question' in example:
-                    prompt_text = example['question']
-                elif 'problem' in example:
-                    prompt_text = example['problem']
-                elif 'instruction' in example:
-                    prompt_text = example['instruction']
-                elif 'text' in example:
-                    prompt_text = example['text']
-                else:
-                    first_col = dataset.column_names[0]
-                    prompt_text = str(example[first_col])
-                
-                if not prompt_text or len(prompt_text.strip()) == 0:
-                    prompt_text = "Please provide a helpful response."
-                
-                # For math datasets, use simple prompt format without system prompt
-                if self.tokenizer and hasattr(self.tokenizer, 'apply_chat_template'):
-                    user_content = f"Solve this math problem step by step. Show your work and put your final numeric answer at the end.\n\nProblem:\n{prompt_text}"
-                    messages = [{"role": "user", "content": user_content}]
-                    prompt_text = apply_chat_template_safe(
-                        self.tokenizer, 
-                        messages, 
-                        enable_thinking=enable_thinking
-                    )
-                else:
-                    prompt_text = f"Solve this math problem step by step. Show your work and put your final numeric answer at the end.\n\nProblem:\n{prompt_text}\n\nAnswer:"
-                
-                # Extract gold answer - CRITICAL for reward computation!
-                answer_clean = ""
-                if 'answer' in example:
-                    answer_clean = self.parse_gsm8k_gold(str(example['answer']))
-                elif 'answer_clean' in example:
-                    answer_clean = str(example['answer_clean'])
-                elif 'solution' in example:
-                    answer_clean = extract_math_gold(str(example['solution']))
-                
-                return {
-                    "query": prompt_text,
-                    "prompt": prompt_text,
-                    "answer_clean": answer_clean,
-                }
-            
-            # Apply formatting
-            formatted_dataset = dataset.map(
-                format_for_grpo,
-                remove_columns=[col for col in dataset.column_names if col not in ['query', 'prompt', 'answer_clean']],
-                desc="Formatting math dataset for GRPO"
-            )
-            
-            # Filter empty prompts
-            formatted_dataset = formatted_dataset.filter(
-                lambda x: len(x['query'].strip()) > 0,
-                desc="Filtering empty prompts"
-            )
-            
-            # Shuffle dataset
-            data_seed = self._get_config_value(self.config.train, 'data_seed', default=47)
-            formatted_dataset = formatted_dataset.shuffle(seed=data_seed)
-            logger.info(f"Dataset shuffled with data_seed={data_seed}")
-            
-            # Split into train/eval (e.g., 90/10 split)
-            split_dataset = formatted_dataset.train_test_split(test_size=0.1, seed=data_seed)
-            self.train_dataset = split_dataset['train']
-            self.eval_dataset = split_dataset['test']
-            
-            # Build prompt→answer mapping
-            self.prompt_to_answer = {}
-            for item in formatted_dataset:
-                self.prompt_to_answer[item["prompt"]] = item.get("answer_clean", "0")
-            logger.info(f"Built prompt→answer mapping with {len(self.prompt_to_answer)} entries")
-            
-            logger.info(f"Math dataset loaded: {len(self.train_dataset)} train examples")
-            logger.info(f"Math dataset eval: {len(self.eval_dataset)} eval examples")
-            logger.info(f"Dataset columns: {self.train_dataset.column_names}")
-            
-            # Log sample
-            if len(self.train_dataset) > 0:
-                sample = self.train_dataset[0]
-                logger.info(f"Sample prompt (first 100 chars): {sample['query'][:100]}...")
-                logger.info(f"Sample answer_clean: {sample.get('answer_clean', 'N/A')}")
+        is_gsm8k = any(math_name in dataset_name.lower() for math_name in ['gsm8k'])
+
+
+        # Extract parameters
+
+         # ADD THIS BLOCK before the is_math_dataset check:
+        if "mbpp" in dataset_name.lower():
+            self.dataset_type = "code"
+            self._setup_mbpp_data(dataset_name, split, system_prompt)
+            return
+
+        elif "gsm8k" in dataset_name or "math" in dataset_name:
+            self.dataset_type = "math"
+            self._setup_math_data(dataset_name, split, system_prompt, ds_config=dataset_config)
         
         else:
             # Normal dataset - use DataManager
@@ -399,6 +517,178 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
                 logger.info(f"Dataset columns: {self.train_dataset.column_names}")          
 
     
+    
+    def _setup_math_data(self, ds_name: str, split: str, system_prompt: str, ds_config: str = None) -> None:
+        """Setup math dataset (GSM8K or similar)."""
+        from datasets import load_dataset
+
+        # GSM8K requires config="main" to be specified
+        if ds_config:
+            raw_dataset = load_dataset(ds_name, ds_config, split=split)
+        elif "gsm8k" in ds_name:
+            raw_dataset = load_dataset(ds_name, "main", split=split)
+        else:
+            raw_dataset = load_dataset(ds_name, split=split)
+
+        # Detect format
+        if "question" in raw_dataset.column_names:
+            question_col = "question"
+            answer_col = "answer"
+        else:
+            # Handle various dataset formats
+            question_col = "problem" if "problem" in raw_dataset.column_names else raw_dataset.column_names[0]
+            # Look for answer/solution column
+            if "answer" in raw_dataset.column_names:
+                answer_col = "answer"
+            elif "solution" in raw_dataset.column_names:
+                answer_col = "solution"
+            else:
+                answer_col = raw_dataset.column_names[1] if len(raw_dataset.column_names) > 1 else None
+
+        formatted_data = []
+        for item in raw_dataset:
+            question = item.get(question_col, "")
+            answer = item.get(answer_col, "") if answer_col else ""
+
+            # Extract gold answer for math
+            gold_answer = extract_math_gold(answer) if answer else None
+
+            # Format prompt
+            formatted_prompt = self._format_math_prompt(question, system_prompt)
+
+            # Store answer data
+            self.prompt_to_data[formatted_prompt] = {
+                "gold_answer": gold_answer,
+                "full_answer": answer
+            }
+
+            formatted_data.append({"prompt": formatted_prompt})
+
+        from datasets import Dataset
+        self.train_dataset = Dataset.from_list(formatted_data)
+
+    def _format_math_prompt(self, question: str, system_prompt: str) -> str:
+        """Format a math question as a prompt."""
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": question})
+
+        enable_thinking = self._get_config_value(self.config.train, "enable_thinking", False)
+        try:
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                enable_thinking=enable_thinking
+            )
+        except:
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+
+
+
+    
+    def _setup_mbpp_data(self, ds_name: str, split: str, system_prompt: str) -> None:
+        """Setup MBPP dataset for code training."""
+        from datasets import load_dataset
+
+        # Try to use evalplus MBPP+ if available
+        try:
+            from evalplus.data import get_mbpp_plus
+            mbpp_plus = get_mbpp_plus()
+            logger.info(f"Using evalplus MBPP+ with {len(mbpp_plus)} problems")
+
+            # Build dataset from evalplus format
+            formatted_data = []
+            for task_id, item in mbpp_plus.items():
+                prompt_text = item.get("prompt", "")
+                entry_point = item.get("entry_point", "")  # Function name from evalplus
+                base_inputs = item.get("base_input", [])
+                canonical_solution = item.get("canonical_solution", "")
+
+                # Build assertion-style tests from base_input for display
+                test_display = []
+                for inp in base_inputs[:3]:  # Show first 3
+                    test_display.append(f"{entry_point}({inp})")
+
+                # Format prompt with test examples
+                formatted_prompt = self._format_code_prompt(prompt_text, test_display, system_prompt)
+
+                # Store test data for reward computation
+                self.prompt_to_data[formatted_prompt] = {
+                    "task_id": task_id,
+                    "entry_point": entry_point,
+                    "base_inputs": base_inputs,
+                    "canonical_solution": canonical_solution,
+                    "expected_func": entry_point,  # Use entry_point directly
+                }
+
+                formatted_data.append({"prompt": formatted_prompt})
+
+            from datasets import Dataset
+            self.train_dataset = Dataset.from_list(formatted_data)
+
+        except ImportError:
+            logger.info("evalplus not available, using HuggingFace MBPP")
+            # Fallback to HuggingFace MBPP
+            raw_dataset = load_dataset("mbpp", split=split)
+
+            formatted_data = []
+            for idx, item in enumerate(raw_dataset):
+                prompt_text = item.get("text", "")
+                test_list = item.get("test_list", [])
+                setup_code = item.get("test_setup_code", "")
+
+                # Format prompt
+                formatted_prompt = self._format_code_prompt(prompt_text, test_list, system_prompt)
+
+                # Store test data
+                self.prompt_to_data[formatted_prompt] = {
+                    "idx": idx,
+                    "setup": setup_code or "",
+                    "tests": test_list or [],
+                    "expected_func": _extract_function_name_from_test(test_list[0]) if test_list else None
+                }
+
+                formatted_data.append({"prompt": formatted_prompt})
+
+            from datasets import Dataset
+            self.train_dataset = Dataset.from_list(formatted_data)
+
+    def _format_code_prompt(self, problem_text: str, test_list: List[str], system_prompt: str) -> str:
+        """Format a code problem as a prompt."""
+        # Build message
+        user_content = f"{problem_text}\n\nTest cases:\n"
+        for test in test_list[:3]:  # Show first 3 test cases
+            user_content += f"- {test}\n"
+        user_content += "\nWrite the Python function to solve this problem."
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_content})
+
+        # Apply chat template if available
+        enable_thinking = self._get_config_value(self.config.train, "enable_thinking", False)
+        try:
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                enable_thinking=enable_thinking
+            )
+        except:
+            # Fallback for tokenizers without enable_thinking
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+
     def setup_rewards(self) -> None:
         """Setup reward functions using the centralized registry system."""
         logger.info("Setting up reward functions for Counterfactual GRPO...")
@@ -519,134 +809,229 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         reward_summary = ", ".join([f"{rf['name']} ({rf['weight']:.2f})" for rf in self.reward_functions])
         logger.info(f"Reward functions: {reward_summary}")
     
-    def _combined_reward_function(self, completions: List[str], prompts: List[str] = None, **kwargs) -> List[float]:
-        """Outcome-based reward function matching training_script.py.
+    
+    def _combined_reward_function(self, completions: List, **kwargs) -> List[float]:
+        """Combined reward function that routes to appropriate reward based on dataset type."""
+        self.reward_step += 1
 
-        Args:
-            completions: List of generated completions
-            prompts: List of prompts (used to look up gold answers)
-            **kwargs: Additional arguments
-        """
-        import re
-        import math
-
-        # DEBUG: Verify function is being called
-        print(f"\n[DEBUG] _combined_reward_function called with {len(completions) if completions else 0} completions")
-        print(f"[DEBUG] prompts received: {len(prompts) if prompts else 'None'}")
-        print(f"[DEBUG] prompt_to_answer has {len(self.prompt_to_answer)} entries")
-        if prompts and len(prompts) > 0:
-            sample_prompt = prompts[0][:100] + "..." if len(prompts[0]) > 100 else prompts[0]
-            print(f"[DEBUG] Sample prompt from TRL: '{sample_prompt}'")
-            # Check if prompt exists in mapping
-            found = prompts[0] in self.prompt_to_answer
-            print(f"[DEBUG] Prompt found in mapping: {found}")
-            if not found and self.prompt_to_answer:
-                # Show first key from mapping for comparison
-                first_key = list(self.prompt_to_answer.keys())[0]
-                sample_key = first_key[:100] + "..." if len(first_key) > 100 else first_key
-                print(f"[DEBUG] Sample key from mapping: '{sample_key}'")
-
-        def parse_pred_number(text: str) -> str:
-            """Parse predicted number from model output."""
-            nums = re.findall(r"-?\d+(?:\.\d+)?", text.replace(",", ""))
-            candidate = nums[-1] if nums else ""
-            if re.fullmatch(r"-?\d+/\d+", candidate):
-                num, den = candidate.split("/")
-                try:
-                    return str(float(num) / float(den))
-                except:
-                    return candidate
-            return candidate
-
-        def numeric_equal(a: str, b: str, rtol=1e-4, atol=1e-8) -> bool:
-            """Check if two numeric strings are equal."""
-            try:
-                fa = float(a)
-                fb = float(b)
-                return math.isclose(fa, fb, rel_tol=rtol, abs_tol=atol)
-            except:
-                return a.strip() == b.strip()
-
-        # Detect dataset type for appropriate grading
-        dataset_name = ""
-        if hasattr(self.config, 'datasets') and self.config.datasets:
-            ds = self.config.datasets[0]
-            dataset_name = ds.get('name', '') if isinstance(ds, dict) else getattr(ds, 'name', '')
-        is_gsm8k = 'gsm8k' in dataset_name.lower()
-        is_math = 'math' in dataset_name.lower() and 'gsm' not in dataset_name.lower()
-
-        # Log grading mode once
-        if not hasattr(self, '_logged_grading_mode'):
-            grading_mode = "GSM8K (numeric)" if is_gsm8k else "MATH (symbolic)"
-            print(f"\n[REWARD] Using {grading_mode} grading for dataset: {dataset_name}")
-            self._logged_grading_mode = True
-
-        if not completions:
-            return []
-
-        # Get gold answers from prompt→answer mapping (CRITICAL!)
-        if prompts:
-            answers = [self.prompt_to_answer.get(p, "0") for p in prompts]
+        if self.dataset_type == "code":
+            rewards = self._compute_code_rewards(completions, **kwargs)
         else:
-            answers = list(self.prompt_to_answer.values())
+            rewards = self._compute_math_rewards(completions, **kwargs)
 
-        # Expand answers for multiple completions per prompt
-        factor = max(1, len(completions) // len(answers)) if answers else 1
-        expanded = [a for a in answers for _ in range(factor)][:len(completions)]
+        # Print reward summary
+        self._print_reward_summary(rewards)
+        return rewards
+    
+    def _print_reward_summary(self, rewards: List[float]) -> None:
+        """Print summary of reward distribution."""
+        if not rewards:
+            return
 
+        rewards_arr = np.array(rewards)
+        n_positive = np.sum(rewards_arr > 0)
+        n_zero = np.sum(rewards_arr == 0)
+        n_negative = np.sum(rewards_arr < 0)
+        n_perfect = np.sum(rewards_arr >= 1.0)
+
+        print(f"\n{'='*60}")
+        print(f"[Reward Step {self.reward_step}] Dataset: {self.dataset_type.upper()}")
+        print(f"{'='*60}")
+        print(f"  Batch size: {len(rewards)}")
+        print(f"  Reward stats: min={rewards_arr.min():.3f}, max={rewards_arr.max():.3f}, "
+              f"mean={rewards_arr.mean():.3f}, std={rewards_arr.std():.3f}")
+        print(f"  Distribution: +ve={n_positive}, zero={n_zero}, -ve={n_negative}, perfect={n_perfect}")
+        print(f"  Success rate: {(n_positive / len(rewards)) * 100:.1f}%")
+        print(f"{'='*60}\n")
+    
+    def _compute_code_rewards(self, completions: List, **kwargs) -> List[float]:
+        """Compute rewards for code generation (MBPP)."""
+        prompts = kwargs.get("prompts", [""] * len(completions))
         rewards = []
-        correct_count = 0
-        debug_examples = []  # Collect examples for debug output
 
-        for i, (comp, gold) in enumerate(zip(completions, expanded)):
-            # Handle different completion formats
-            if isinstance(comp, str):
-                text = comp
-            elif isinstance(comp, list) and len(comp) > 0 and isinstance(comp[0], dict):
-                text = comp[0].get("content", str(comp))
+        # Track statistics
+        stats = {
+            "no_tests": 0,
+            "no_func": 0,
+            "timeout": 0,
+            "exec_fail": 0,
+            "zero_pass": 0,
+            "partial_pass": 0,
+            "full_pass": 0,
+        }
+
+        print(f"\n[Code Rewards] Processing {len(completions)} completions...")
+
+        for i, completion in enumerate(completions):
+            # Extract completion text
+            if isinstance(completion, dict) and "content" in completion:
+                completion_code = completion["content"]
+            elif isinstance(completion, list) and len(completion) > 0:
+                if isinstance(completion[0], dict):
+                    completion_code = completion[0].get("content", str(completion))
+                else:
+                    completion_code = str(completion[0])
             else:
-                text = str(comp)
+                completion_code = str(completion)
 
-            # Parse predicted answer and compare - use dataset-appropriate grading
-            if is_gsm8k:
-                # GSM8K: Simple numeric comparison (fast)
-                pred = parse_pred_number(text)
-                is_correct = numeric_equal(pred, gold)
+            # Get test data for this prompt
+            prompt = prompts[i] if i < len(prompts) else ""
+            test_data = self.prompt_to_data.get(prompt, {})
+
+            # Get expected function name and test inputs
+            expected_func = test_data.get("expected_func") or test_data.get("entry_point")
+            base_inputs = test_data.get("base_inputs", [])
+            canonical_solution = test_data.get("canonical_solution", "")
+
+            # Fallback for HF MBPP format
+            if not base_inputs:
+                tests = test_data.get("tests", [])
+                if tests:
+                    # Use old assertion-based testing
+                    if not expected_func:
+                        expected_func = _extract_function_name_from_test(tests[0])
+                else:
+                    rewards.append(-0.10)
+                    stats["no_tests"] += 1
+                    if i < 3:
+                        print(f"  [{i}] No tests found -> reward=-0.10")
+                    continue
+
+            if not expected_func:
+                rewards.append(-0.10)
+                stats["no_func"] += 1
+                if i < 3:
+                    print(f"  [{i}] Cannot extract function name -> reward=-0.10")
+                continue
+
+            # Sanitize and prepare code
+            sanitized_code = _prepare_code_for_exec(completion_code, expected_func)
+
+            # Execute with evalplus-style testing (compare outputs)
+            if base_inputs and canonical_solution:
+                execution_success, passed, error_messages = self._run_evalplus_tests(
+                    code=sanitized_code,
+                    canonical_solution=canonical_solution,
+                    entry_point=expected_func,
+                    base_inputs=base_inputs,
+                    timeout_seconds=5
+                )
             else:
-                # MATH: Robust symbolic grading (handles LaTeX, tuples, fractions)
-                pred = extract_math_answer(text)
-                is_correct = grade_math_answer(pred, gold)
-            reward = 1.0 if is_correct else 0.0
-            rewards.append(reward)
+                # Fallback to assertion-based testing
+                execution_success, passed, error_messages = _run_code_in_sandbox(
+                    code=sanitized_code,
+                    setup_code=test_data.get("setup", ""),
+                    tests=test_data.get("tests", []),
+                    timeout_seconds=5
+                )
 
-            if is_correct:
-                correct_count += 1
+            # Compute reward (use base_inputs or tests depending on format)
+            total_tests = len(base_inputs) if base_inputs else len(test_data.get("tests", [1]))
+            if total_tests > 0:
+                base_reward = float(passed) / total_tests
+            else:
+                base_reward = 0.0
 
-            # Collect first 3 examples for debug output
-            if i < 3:
-                debug_examples.append({
-                    'gold': gold,
-                    'pred': pred,
-                    'reward': reward,
-                    'text_end': text[-80:] if len(text) > 80 else text
-                })
+            # Apply penalties and track stats
+            if not execution_success:
+                timeout_crash = any("timed out" in msg for msg in error_messages)
+                if timeout_crash:
+                    base_reward = -0.25
+                    stats["timeout"] += 1
+                    if i < 3:
+                        print(f"  [{i}] func={expected_func} TIMEOUT -> reward=-0.25")
+                else:
+                    base_reward = -0.15
+                    stats["exec_fail"] += 1
+                    if i < 3:
+                        print(f"  [{i}] func={expected_func} EXEC_FAIL -> reward=-0.15")
+            elif passed == 0:
+                base_reward -= 0.10
+                stats["zero_pass"] += 1
+                if i < 3:
+                    print(f"  [{i}] func={expected_func} 0/{total_tests} tests -> reward={base_reward:.2f}")
+            elif passed == total_tests:
+                stats["full_pass"] += 1
+                if i < 3:
+                    print(f"  [{i}] func={expected_func} {passed}/{total_tests} tests -> reward={base_reward:.2f} (PASS)")
+            else:
+                stats["partial_pass"] += 1
+                if i < 3:
+                    print(f"  [{i}] func={expected_func} {passed}/{total_tests} tests -> reward={base_reward:.2f}")
 
-        # Log accuracy
-        if not hasattr(self, '_reward_step'):
-            self._reward_step = 0
-        self._reward_step += 1
+            rewards.append(base_reward)
 
-        accuracy = correct_count / len(rewards) if rewards else 0.0
-        print(f"\n🎯 Outcome Reward (step {self._reward_step}): {accuracy:.2%} ({correct_count}/{len(rewards)})")
-        print("   Sample gold/pred/reward:")
-        for j, ex in enumerate(debug_examples):
-            status = "✓" if ex['reward'] > 0 else "✗"
-            print(f"   [{j}] gold='{ex['gold']}' pred='{ex['pred']}' reward={ex['reward']:.1f} {status}")
-            print(f"       ...{ex['text_end']}")
-        print()
-        import sys; sys.stdout.flush()
+        # Print code-specific stats
+        print(f"\n[Code Stats] no_tests={stats['no_tests']}, no_func={stats['no_func']}, "
+              f"timeout={stats['timeout']}, exec_fail={stats['exec_fail']}")
+        print(f"[Code Stats] zero_pass={stats['zero_pass']}, partial={stats['partial_pass']}, "
+              f"full_pass={stats['full_pass']}")
 
         return rewards
+
+    def _compute_math_rewards(self, completions: List, **kwargs) -> List[float]:
+        """Compute rewards for math reasoning (GSM8K)."""
+        prompts = kwargs.get("prompts", [""] * len(completions))
+        rewards = []
+
+        # Track statistics
+        n_correct = 0
+        n_incorrect = 0
+        n_no_gold = 0
+        n_no_pred = 0
+
+        print(f"\n[Math Rewards] Processing {len(completions)} completions...")
+
+        for i, completion in enumerate(completions):
+            # Extract completion text
+            if isinstance(completion, dict) and "content" in completion:
+                completion_text = completion["content"]
+            elif isinstance(completion, list) and len(completion) > 0:
+                if isinstance(completion[0], dict):
+                    completion_text = completion[0].get("content", str(completion))
+                else:
+                    completion_text = str(completion[0])
+            else:
+                completion_text = str(completion)
+
+            # Get gold answer
+            prompt = prompts[i] if i < len(prompts) else ""
+            data = self.prompt_to_data.get(prompt, {})
+            gold_answer = data.get("gold_answer")
+
+            if gold_answer is None:
+                rewards.append(0.0)
+                n_no_gold += 1
+                if i < 3:
+                    print(f"  [{i}] No gold answer -> reward=0.0")
+                continue
+
+            # Extract predicted answer and grade
+            predicted_answer = extract_math_answer(completion_text)
+            is_correct = grade_math_answer(predicted_answer, gold_answer)
+
+            if predicted_answer is None:
+                n_no_pred += 1
+
+            if is_correct:
+                rewards.append(1.0)
+                n_correct += 1
+                if i < 3:
+                    print(f"  [{i}] gold={gold_answer}, pred={predicted_answer} -> CORRECT (reward=1.0)")
+            else:
+                rewards.append(0.0)
+                n_incorrect += 1
+                if i < 3:
+                    print(f"  [{i}] gold={gold_answer}, pred={predicted_answer} -> WRONG (reward=0.0)")
+
+        # Print math-specific stats
+        print(f"\n[Math Stats] correct={n_correct}, incorrect={n_incorrect}, "
+              f"no_gold={n_no_gold}, no_pred={n_no_pred}")
+        print(f"[Math Stats] Accuracy: {(n_correct / len(completions)) * 100:.1f}%")
+
+        return rewards
+
+
     
     def train_step(self, batch: Dict[str, Any]) -> Dict[str, float]:
         """Execute a single training step."""
