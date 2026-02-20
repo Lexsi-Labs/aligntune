@@ -467,7 +467,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
 
         elif "gsm8k" in dataset_name or "math" in dataset_name:
             self.dataset_type = "math"
-            self._setup_math_data(dataset_name, split, system_prompt, ds_config=dataset_config)
+            self._setup_math_data(dataset_name, split, system_prompt, ds_config= config_name)
         
         else:
             # Normal dataset - use DataManager
