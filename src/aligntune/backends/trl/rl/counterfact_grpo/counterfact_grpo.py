@@ -1306,74 +1306,97 @@ for r in results:
         print(num_generations)
 
         # TRL requires num_train_epochs to be a number (not None)
-        effective_epochs = num_epochs if num_epochs is not None else 1
-        effective_max_steps = max_steps if max_steps is not None else -1
+
+        # grpo_config = GRPOConfig(
+        #     output_dir=output_dir,
+        #     run_name=run_name,  # For wandb/logging
+        #     num_train_epochs=effective_epochs,
+        #     max_steps=effective_max_steps,
+        #     per_device_train_batch_size=per_device_batch_size,
+        #     num_generations=num_generations,
+        #     gradient_accumulation_steps=gradient_accumulation_steps,
+        #     max_completion_length=max_completion_length,
+        #     max_prompt_length=max_prompt_length,
+
+        #     # Learning rate & optimizer
+        #     learning_rate=learning_rate,
+        #     optim=optimizer_name,
+        #     optim_args=optim_args_str,
+        #     weight_decay=optimizer_config['optimizer_kwargs'].get('weight_decay', weight_decay),
+
+        #     # Scheduler
+        #     lr_scheduler_type=scheduler_name,
+        #     warmup_steps=warmup_steps,
+        #     warmup_ratio=warmup_ratio,
+
+        #     # Gradient clipping
+        #     max_grad_norm=max_grad_norm,
+
+        #     # Logging & checkpointing
+        #     logging_steps=logging_steps,
+        #     logging_strategy=logging_strategy,  # ADD THIS
+        #     save_steps=save_steps,  # CHANGE from hardcoded 100
+        #     save_strategy=save_strategy,
+        #     save_total_limit=save_total_limit,
+
+        #     # Evaluation
+        #     eval_steps=eval_steps,  # CHANGE from hardcoded 100
+        #     eval_strategy=eval_strategy,  # ADD THIS
+
+        #     # Best model loading
+        #     load_best_model_at_end=load_best_model_at_end,  # ADD THIS
+        #     metric_for_best_model=metric_for_best_model,  # ADD THIS
+        #     greater_is_better=greater_is_better,  # ADD THIS
+
+        #     # Precision
+        #     remove_unused_columns=False,
+        #     fp16=precision == "fp16",
+        #     bf16=precision == "bf16",
+
+        #     # Gradient checkpointing (critical for VRAM!)
+        #     gradient_checkpointing=use_gradient_checkpointing,
+
+        #     # GRPO specific
+        #     loss_type=loss_type,
+        #     beta=beta,
+        #     epsilon=epsilon,
+        #     scale_rewards=scale_rewards,
+        #     temperature=temperature,
+        #     top_p=top_p,
+        #     mask_truncated_completions=mask_truncated_completions,  # CRITICAL: was missing, TRL default=False
+        #     reward_weights=reward_weights,  # Was missing
+
+        #     # Seeds
+        #     seed=seed,
+        #     data_seed=data_seed,
+
+        #     # Reporting
+        #     report_to=self.config.logging.loggers if self.config.logging.loggers else [],
+        # )
 
         grpo_config = GRPOConfig(
-            output_dir=output_dir,
-            run_name=run_name,  # For wandb/logging
-            num_train_epochs=effective_epochs,
-            max_steps=effective_max_steps,
+            output_dir=self._get_config_value(self.config.logging, 'output_dir', default='./output'),
+            run_name=self._get_config_value(self.config.logging, 'run_name', default='counterfact_grpo'),
             per_device_train_batch_size=per_device_batch_size,
-            num_generations=num_generations,
             gradient_accumulation_steps=gradient_accumulation_steps,
-            max_completion_length=max_completion_length,
-            max_prompt_length=max_prompt_length,
-
-            # Learning rate & optimizer
+            num_generations=num_generations,
+            max_steps=max_steps,
             learning_rate=learning_rate,
-            optim=optimizer_name,
-            optim_args=optim_args_str,
-            weight_decay=optimizer_config['optimizer_kwargs'].get('weight_decay', weight_decay),
-
-            # Scheduler
-            lr_scheduler_type=scheduler_name,
-            warmup_steps=warmup_steps,
-            warmup_ratio=warmup_ratio,
-
-            # Gradient clipping
-            max_grad_norm=max_grad_norm,
-
-            # Logging & checkpointing
-            logging_steps=logging_steps,
-            logging_strategy=logging_strategy,  # ADD THIS
-            save_steps=save_steps,  # CHANGE from hardcoded 100
+            max_prompt_length=max_prompt_length,
+            max_completion_length=max_completion_length,
+            temperature=temperature,
+            top_p=top_p,
+            beta=beta,
+            save_steps=save_steps,
             save_strategy=save_strategy,
             save_total_limit=save_total_limit,
-
-            # Evaluation
-            eval_steps=eval_steps,  # CHANGE from hardcoded 100
-            eval_strategy=eval_strategy,  # ADD THIS
-
-            # Best model loading
-            load_best_model_at_end=load_best_model_at_end,  # ADD THIS
-            metric_for_best_model=metric_for_best_model,  # ADD THIS
-            greater_is_better=greater_is_better,  # ADD THIS
-
-            # Precision
-            remove_unused_columns=False,
+            logging_steps=logging_steps,
+            warmup_ratio=warmup_ratio,
+            seed=seed,
+            report_to=self.config.logging.loggers if self.config.logging.loggers else [],
             fp16=precision == "fp16",
             bf16=precision == "bf16",
 
-            # Gradient checkpointing (critical for VRAM!)
-            gradient_checkpointing=use_gradient_checkpointing,
-
-            # GRPO specific
-            loss_type=loss_type,
-            beta=beta,
-            epsilon=epsilon,
-            scale_rewards=scale_rewards,
-            temperature=temperature,
-            top_p=top_p,
-            mask_truncated_completions=mask_truncated_completions,  # CRITICAL: was missing, TRL default=False
-            reward_weights=reward_weights,  # Was missing
-
-            # Seeds
-            seed=seed,
-            data_seed=data_seed,
-
-            # Reporting
-            report_to=self.config.logging.loggers if self.config.logging.loggers else [],
         )
 
 
