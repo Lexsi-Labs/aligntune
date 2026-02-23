@@ -34,9 +34,9 @@ try:
     from aligntune.core.rl.config import UnifiedConfig
     from aligntune.rewards.registry import RewardRegistry
     from aligntune.rewards.core import RewardConfig, RewardType
-    FINETUNEHUB_AVAILABLE = True
+    aligntune_AVAILABLE = True
 except ImportError:
-    FINETUNEHUB_AVAILABLE = False
+    aligntune_AVAILABLE = False
     TrainerBase = object
     UnifiedConfig = dict
 
@@ -598,7 +598,7 @@ class UnslothGBMPOTrainer(TrainerBase):
                 "min_length": 20, "max_length": 200}}]
 
         # Load rewards from registry if available
-        if FINETUNEHUB_AVAILABLE:
+        if aligntune_AVAILABLE:
             self._load_rewards_from_registry(rewards_config)
         else:
             self._create_simple_reward_function()

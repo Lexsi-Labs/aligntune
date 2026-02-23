@@ -228,7 +228,7 @@ def print_diagnostic_report(report: Optional[Dict[str, Any]] = None) -> None:
         report = generate_diagnostic_report()
     
     print("\n" + "="*60)
-    print("FINETUNEHUB ENVIRONMENT DIAGNOSTICS")
+    print("ALIGNTUNE ENVIRONMENT DIAGNOSTICS")
     print("="*60)
     
     # System Information

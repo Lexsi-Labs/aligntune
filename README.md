@@ -224,6 +224,7 @@ AlignTune is built upon the excellent work of the following projects:
 - **GitHub Issues**: [github.com/Lexsi-Labs/aligntune/issues](https://github.com/Lexsi-Labs/aligntune/issues)
 - **Discussions**: [github.com/Lexsi-Labs/aligntune/discussions](https://github.com/Lexsi-Labs/aligntune/discussions)
 - **Email**: [hello@lexsi.ai](mailto:hello@lexsi.ai)
+- **Discord**: [Discord Lexsi Labs](https://discord.gg/ckVbEJGW) 
 
 ---
 

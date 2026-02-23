@@ -88,9 +88,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-01-18
 
 ### Changed (Major)
-- **Renamed library from `finetunehub` to `aligntune`**
-  - Package directory: `src/finetunehub/` → `src/aligntune/`
-  - All imports updated: `from finetunehub.*` → `from aligntune.*`
+- **Renamed library from `aligntune` to `aligntune`**
+  - Package directory: `src/aligntune/` → `src/aligntune/`
+  - All imports updated: `from aligntune.*` → `from aligntune.*`
   - CLI commands: `aligntune` (primary), `at` (short alias)
   - Entry points and pyproject.toml fully updated
   - All documentation, examples, and tests migrated
@@ -124,26 +124,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed (Code Cleanup)
 - **Deleted unused/backup directories and files** (Total: ~7,500 lines removed):
-  - `src/finetunehub/eval_old/` - Old evaluation framework (7 files, 2,913 lines)
-  - `src/finetunehub/backends/trl/rl/ppo/ppo_old.py` - Old PPO implementation (1,437 lines)
-  - `src/finetunehub/backends/trl/rl/grpo/grpo_old.py` - Old GRPO implementation (1,264 lines)
-  - `src/finetunehub/backends/unsloth/rl/ppo/ppo_old.py` - Old Unsloth PPO (1,833 lines)
-  - `src/finetunehub/cli_commands/` - Unused CLI modules
-  - `src/finetunehub/cli/unified-old.py` - Old CLI backup
-  - `src/finetunehub/rl/` and `src/finetunehub/sft/` - Backward compatibility wrappers
-  - `src/finetunehub/scripts/` - Directory removed (contents moved)
-- **Removed old `finetunehub` package directory** - Fully replaced by `aligntune`
+  - `src/aligntune/eval_old/` - Old evaluation framework (7 files, 2,913 lines)
+  - `src/aligntune/backends/trl/rl/ppo/ppo_old.py` - Old PPO implementation (1,437 lines)
+  - `src/aligntune/backends/trl/rl/grpo/grpo_old.py` - Old GRPO implementation (1,264 lines)
+  - `src/aligntune/backends/unsloth/rl/ppo/ppo_old.py` - Old Unsloth PPO (1,833 lines)
+  - `src/aligntune/cli_commands/` - Unused CLI modules
+  - `src/aligntune/cli/unified-old.py` - Old CLI backup
+  - `src/aligntune/rl/` and `src/aligntune/sft/` - Backward compatibility wrappers
+  - `src/aligntune/scripts/` - Directory removed (contents moved)
+- **Removed old `aligntune` package directory** - Fully replaced by `aligntune`
 
 ### Changed
 - **Reorganized BOLT utilities**:
-  - Moved `precompute_baseline.py` from `src/finetunehub/scripts/` → `examples/bolt_training/`
+  - Moved `precompute_baseline.py` from `src/aligntune/scripts/` → `examples/bolt_training/`
   - Rationale: Co-locate BOLT-specific utilities with BOLT examples for better discoverability
 
 ### Breaking Changes
-- **Library renamed**: All imports must change from `finetunehub` to `aligntune`
-  - `from finetunehub.core.rl import *` → `from aligntune.core.rl import *`
-  - `from finetunehub.eval import *` → `from aligntune.eval import *`
-  - CLI: `finetunehub train` → `aligntune train`
+- **Library renamed**: All imports must change from `aligntune` to `aligntune`
+  - `from aligntune.core.rl import *` → `from aligntune.core.rl import *`
+  - `from aligntune.eval import *` → `from aligntune.eval import *`
+  - CLI: `aligntune train` → `aligntune train`
 - **Removed backward compatibility wrappers**: The deprecated import paths have been removed
   - All examples and documentation have been updated to use the new paths
   - All test files have been migrated to the new import structure

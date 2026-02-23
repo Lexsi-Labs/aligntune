@@ -1328,7 +1328,7 @@ def list_backends() -> Dict[str, list]:
     
     # Print availability status
     print("\n" + "="*60)
-    print("FINETUNEHUB - BACKEND AVAILABILITY")
+    print("ALIGNTUNE - BACKEND AVAILABILITY")
     print("="*60)
     for backend_name, info in backends.items():
         print(f"{backend_name:10s}: {info['status']}")

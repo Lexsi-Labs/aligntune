@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified Training CLI for FineTuneHub
+Unified Training CLI for aligntune
 Supports: SFT, DPO, PPO, GRPO, Classification
 
 Usage Examples:
@@ -50,7 +50,7 @@ def disable_unsloth_for_algo(algo: str) -> bool:
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Unified Training CLI for FineTuneHub",
+        description="Unified Training CLI for aligntune",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__
     )

@@ -6,7 +6,7 @@
 
 ```bash
 git clone https://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@github.com/Lexsi-Labs/aligntune.git
-cd Finetunehub
+cd aligntune
 git checkout -b 28_merge origin/28_merge
 pip install -e .
 ```
@@ -446,20 +446,20 @@ print(f"Training completed: {results}")
 
 ### Trainer Location
 ```
-Finetunehub/src/aligntune/backends/trl/rl/neural_mirror_grpo/
+aligntune/src/aligntune/backends/trl/rl/neural_mirror_grpo/
 ├── NMGrpo.py              # TRL interface wrapper
 └── neural_mirror_grpo.py  # Core Neural Mirror GRPO trainer (external dependency)
 ```
 
 ### Configuration Location
 ```
-Finetunehub/src/aligntune/core/rl/config.py  # RL configuration classes
-Finetunehub/src/aligntune/core/backend_factory.py  # Backend registration
+aligntune/src/aligntune/core/rl/config.py  # RL configuration classes
+aligntune/src/aligntune/core/backend_factory.py  # Backend registration
 ```
 
 ### Reward Functions Location
 ```
-Finetunehub/src/aligntune/rewards/
+aligntune/src/aligntune/rewards/
 ├── core.py       # All reward function implementations
 └── registry.py   # Reward function registration
 ```

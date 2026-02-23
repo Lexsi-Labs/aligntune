@@ -2,7 +2,7 @@
 Classification Trainer - FINAL COMPLETE VERSION
 
 Copy this to:
-/teamspace/studios/this_studio/Finetunehub/src/aligntune/backends/trl/sft/Classification_trainer.py
+/teamspace/studios/this_studio/aligntune/src/aligntune/backends/trl/sft/Classification_trainer.py
 """
 
 import torch
