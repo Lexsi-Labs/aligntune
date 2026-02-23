@@ -601,6 +601,6 @@ trainer = create_rl_trainer(
 
 ## Additional Resources
 
-- [FinetuneHub Documentation](#)
+- [aligntune Documentation](#)
 - [Backend Comparison Guide](#)
 - [Algorithm Selection Guide](#)

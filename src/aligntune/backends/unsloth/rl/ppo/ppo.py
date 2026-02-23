@@ -39,7 +39,7 @@ def patched_get_reward(model, query_responses, pad_token_id, context_length):
     from trl.trainer.utils import first_true_indices
     import torch
     
-    DEBUG_MODE = os.environ.get("FINETUNEHUB_DEBUG", "0") == "1"
+    DEBUG_MODE = os.environ.get("aligntune_DEBUG", "0") == "1"
     trainer_instance = GLOBAL_UNSLOTH_TRAINER_REF
     
     if DEBUG_MODE:

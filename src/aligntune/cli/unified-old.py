@@ -59,8 +59,8 @@ except ImportError:
     DIAGNOSE_AVAILABLE = False
 
 app = typer.Typer(
-    name="finetunehub",
-    help="FinetuneHub: A comprehensive fine-tuning library for SFT and RL training",
+    name="aligntune",
+    help="aligntune: A comprehensive fine-tuning library for SFT and RL training",
     no_args_is_help=True,
 )
 
@@ -314,13 +314,13 @@ def train(
     Examples:
     
     # Using YAML config
-    finetunehub train --config configs/dpo_simple.yaml
+    aligntune train --config configs/dpo_simple.yaml
     
     # Using CLI only
-    finetunehub train --model microsoft/DialoGPT-small --dataset Anthropic/hh-rlhf --type dpo
+    aligntune train --model microsoft/DialoGPT-small --dataset Anthropic/hh-rlhf --type dpo
     
     # Mixing YAML and CLI (CLI overrides)
-    finetunehub train --config configs/dpo_simple.yaml --batch-size 8 --lr 1e-4
+    aligntune train --config configs/dpo_simple.yaml --batch-size 8 --lr 1e-4
     """
     
     # Initialize config
@@ -722,7 +722,7 @@ def validate_config(
 #         False, "--8bit", help="Load model in 8-bit quantization"
 #     ),
 # ):
-#     """Train a model using FinetuneHub with the specified configuration."""
+#     """Train a model using aligntune with the specified configuration."""
 
 #     # Set up logging
 #     logging.basicConfig(level=getattr(logging, log_level.upper()))
@@ -828,7 +828,7 @@ def list_backends_cmd():
     try:
         backends = list_backends()
         
-        typer.echo("Available FinetuneHub Backends:")
+        typer.echo("Available aligntune Backends:")
         typer.echo("=" * 50)
         
         for backend_name, capabilities in backends.items():
@@ -905,7 +905,7 @@ def validate(
 def info(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed diagnostics")
 ):
-    """Show FinetuneHub information and system status."""
+    """Show aligntune information and system status."""
     
     try:
         from .. import (
@@ -916,7 +916,7 @@ def info(
             UNSLOTH_ERROR_INFO,
         )
         
-        typer.echo("FinetuneHub Information")
+        typer.echo("aligntune Information")
         typer.echo("=" * 30)
         typer.echo(f"Version: {__version__}")
         typer.echo(f"Author: {__author__}")
@@ -1019,8 +1019,8 @@ def validate(
     Validate a training configuration file.
 
     Examples:
-        finetunehub validate config.yaml
-        finetunehub validate config.yaml --type sft
+        aligntune validate config.yaml
+        aligntune validate config.yaml --type sft
     """
     from ..utils.validation import validate_config, ConfigValidator
     from ..utils.diagnostics import generate_training_report

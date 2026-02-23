@@ -565,7 +565,7 @@ def print_available_trainers():
     """Print all available trainers."""
     trainers = get_available_trainers()
     print("\n" + "="*60)
-    print("FINETUNEHUB - AVAILABLE TRAINERS")
+    print("ALIGNTUNE - AVAILABLE TRAINERS")
     print("="*60)
     for trainer, available in trainers.items():
         status = "✓ Available" if available else "✗ Not Available"

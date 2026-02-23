@@ -32,7 +32,7 @@ def print_result(req_name: str, passed: bool, notes: str = ""):
 
 def main():
     print("================================================================")
-    print("      FINETUNEHUB DATA REQUIREMENTS VERIFICATION MATRIX         ")
+    print("      ALIGNTUNE DATA REQUIREMENTS VERIFICATION MATRIX         ")
     print("================================================================\n")
     
     setup_env()
