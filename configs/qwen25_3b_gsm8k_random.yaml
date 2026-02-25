@@ -1,0 +1,69 @@
+algo: counterfact_grpo
+
+model:
+  name_or_path: "Qwen/Qwen2.5-3B-Instruct"
+  precision: bf16
+  gradient_checkpointing: true
+  max_seq_length: 1024
+  use_peft: true
+  lora_r: 32
+  lora_alpha: 32
+  lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  lora_dropout: 0.1
+
+datasets:
+  - name: "openai/gsm8k"
+    split: "train"
+    system_prompt: "You are a careful math tutor. Solve step by step and provide the final numeric answer."
+
+rewards:
+  - type: counterfactual_math
+    weight: 1.0
+    params: {}
+
+train:
+  epochs: 1
+  max_steps: 500
+  per_device_batch_size: 16
+  gradient_accumulation_steps: 4
+  num_generations: 8
+  learning_rate: 2.5e-5
+  max_prompt_length: 256
+  max_completion_length: 768
+  enable_thinking: false
+  loss_type: dapo
+  beta: 0.005
+  epsilon: 0.2
+  scale_rewards: group
+  temperature: 0.6
+  top_p: 0.95
+  max_grad_norm: 0.0
+
+  method_name: counterfactual_no_conservation
+  boost_factor: 4.0
+  min_weight: 0.5
+  answer_weight: 1.5
+  max_spans: 10
+  enable_gradient_conservation: false
+  weight_debug: true
+
+  weighting_mode: random
+
+  save_steps: 25
+  save_total_limit: 100
+  logging_steps: 10
+  use_gradient_checkpointing: true
+
+  seed: 42
+  data_seed: 47
+
+logging:
+  output_dir: "output/qwen25_3b_gsm8k_random"
+  run_name: "qwen25_3b_gsm8k_random"
+  loggers: ["wandb"]
+  wandb_project: "counterfact-grpo"
+
+distributed:
+  backend: single
+
+chat_template: auto

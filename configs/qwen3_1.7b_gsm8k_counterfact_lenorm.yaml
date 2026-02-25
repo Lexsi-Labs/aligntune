@@ -1,0 +1,77 @@
+algo: counterfact_grpo
+
+model:
+  name_or_path: "Qwen/Qwen3-1.7B"
+  precision: bf16
+  quantization:
+    load_in_4bit: false
+  gradient_checkpointing: true
+  max_seq_length: 1024
+  use_peft: true
+  lora_r: 32
+  lora_alpha: 32
+  lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  lora_dropout: 0.1
+
+datasets:
+  - name: "openai/gsm8k"
+    config_name: "main"
+    split: "train"
+    system_prompt: "You are a careful math tutor. Solve step by step and provide the final numeric answer."
+
+rewards:
+  - type: counterfactual_math
+    weight: 1.0
+    params: {}
+
+train:
+  epochs: 1
+  max_steps: 200
+  per_device_batch_size: 8
+  gradient_accumulation_steps: 4
+  num_generations: 8
+  learning_rate: 1.5e-5
+  max_prompt_length: 256
+  max_completion_length: 768
+  enable_thinking: false
+  loss_type: dapo
+  beta: 0.01
+  scale_rewards: group
+  temperature: 0.6
+  top_p: 0.95
+  max_grad_norm: 1.0
+
+  # Counterfactual GRPO parameters
+  weighting_mode: counterfactual
+  boost_factor: 2.0
+  min_weight: 0.5
+  answer_weight: 1.5
+  max_spans: 10
+  enable_gradient_conservation: true
+  weight_debug: true
+
+  # Checkpointing
+  save_steps: 200
+  save_total_limit: 3
+  logging_steps: 10
+
+  use_gradient_checkpointing: true
+
+  # Seeds
+  seed: 42
+  data_seed: 47
+
+logging:
+  output_dir: "output/qwen3_counterfact_grpo_200_lenorm"
+  run_name: "qwen3_counterfact_grpo_200_lenorm"
+  loggers: ["tensorboard"]
+  logging_steps: 1
+
+distributed:
+  backend: single
+
+caching:
+  root: "cache"
+  enabled: true
+
+chat_template: auto

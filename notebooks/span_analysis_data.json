@@ -1,0 +1,9616 @@
+[
+  {
+    "benchmark": "FinReason",
+    "gold": "800.0",
+    "response_preview": "Let's carefully analyze the provided data and solve the question step by step. The question is incomplete, but based on the data and the context, it appears the question is asking for **the net pension expense** for XYZ NY for the year 2018.\n\n---\n\n### **Given Data:**\n\n| Item | Value |\n|------|-------|\n| Current service costs | 470 |\n| Past service costs | 0 |\n| Employer contributions | 1,200 |\n| Benefit obligation at beginning of year | 45,000 |\n| Benefit obligation at end of year | 48,395 |\n| P",
+    "prompt_len": 260,
+    "total_len": 728,
+    "spans": [
+      {
+        "start": 315,
+        "end": 321,
+        "text": "### **Given Data:**",
+        "weight": 1.7225,
+        "length": 6,
+        "type": "formatting"
+      },
+      {
+        "start": 538,
+        "end": 576,
+        "text": "$$\n\\text{Net Pension Expense} = 350 + 3,100 - 1,200 = 2,250\n$$",
+        "weight": 1.132,
+        "length": 38,
+        "type": "reasoning"
+      },
+      {
+        "start": 490,
+        "end": 500,
+        "text": "The **net pension expense** is calculated as:",
+        "weight": 1.113,
+        "length": 10,
+        "type": "reasoning"
+      },
+      {
+        "start": 275,
+        "end": 314,
+        "text": "The question is incomplete, but based on the data and the context, it appears the question is asking for **the net pensi",
+        "weight": 1.1122,
+        "length": 39,
+        "type": "reasoning"
+      },
+      {
+        "start": 459,
+        "end": 474,
+        "text": "5% |\n| Expected rate of return on plan assets | 8.",
+        "weight": 1.0969,
+        "length": 15,
+        "type": "reasoning"
+      },
+      {
+        "start": 260,
+        "end": 275,
+        "text": "Let's carefully analyze the provided data and solve the question step by step.",
+        "weight": 1.0835,
+        "length": 15,
+        "type": "reasoning"
+      },
+      {
+        "start": 577,
+        "end": 591,
+        "text": "### **Step 2: Verify with Another Method (Optional)**",
+        "weight": 1.0748,
+        "length": 14,
+        "type": "formatting"
+      },
+      {
+        "start": 478,
+        "end": 490,
+        "text": "### **Step 1: Calculate the Net Pension Expense**",
+        "weight": 1.0497,
+        "length": 12,
+        "type": "formatting"
+      },
+      {
+        "start": 500,
+        "end": 538,
+        "text": "$$\n\\text{Net Pension Expense} = \\text{Actuarial Loss} + \\text{Actual Return on Plan Assets} - \\text{Employer Contributio",
+        "weight": 1.0484,
+        "length": 38,
+        "type": "reasoning"
+      }
+    ],
+    "token_weights": [
+      {
+        "token": "Let",
+        "weight": 1.0835
+      },
+      {
+        "token": "'s",
+        "weight": 1.0835
+      },
+      {
+        "token": " carefully",
+        "weight": 1.0835
+      },
+      {
+        "token": " analyze",
+        "weight": 1.0835
+      },
+      {
+        "token": " the",
+        "weight": 1.0835
+      },
+      {
+        "token": " provided",
+        "weight": 1.0835
+      },
+      {
+        "token": " data",
+        "weight": 1.0835
+      },
+      {
+        "token": " and",
+        "weight": 1.0835
+      },
+      {
+        "token": " solve",
+        "weight": 1.0835
+      },
+      {
+        "token": " the",
+        "weight": 1.0835
+      },
+      {
+        "token": " question",
+        "weight": 1.0835
+      },
+      {
+        "token": " step",
+        "weight": 1.0835
+      },
+      {
+        "token": " by",
+        "weight": 1.0835
+      },
+      {
+        "token": " step",
+        "weight": 1.0835
+      },
+      {
+        "token": ".",
+        "weight": 1.0835
+      },
+      {
+        "token": " The",
+        "weight": 1.1122
+      },
+      {
+        "token": " question",
+        "weight": 1.1122
+      },
+      {
+        "token": " is",
+        "weight": 1.1122
+      },
+      {
+        "token": " incomplete",
+        "weight": 1.1122
+      },
+      {
+        "token": ",",
+        "weight": 1.1122
+      },
+      {
+        "token": " but",
+        "weight": 1.1122
+      },
+      {
+        "token": " based",
+        "weight": 1.1122
+      },
+      {
+        "token": " on",
+        "weight": 1.1122
+      },
+      {
+        "token": " the",
+        "weight": 1.1122
+      },
+      {
+        "token": " data",
+        "weight": 1.1122
+      },
+      {
+        "token": " and",
+        "weight": 1.1122
+      },
+      {
+        "token": " the",
+        "weight": 1.1122
+      },
+      {
+        "token": " context",
+        "weight": 1.1122
+      },
+      {
+        "token": ",",
+        "weight": 1.1122
+      },
+      {
+        "token": " it",
+        "weight": 1.1122
+      },
+      {
+        "token": " appears",
+        "weight": 1.1122
+      },
+      {
+        "token": " the",
+        "weight": 1.1122
+      },
+      {
+        "token": " question",
+        "weight": 1.1122
+      },
+      {
+        "token": " is",
+        "weight": 1.1122
+      },
+      {
+        "token": " asking",
+        "weight": 1.1122
+      },
+      {
+        "token": " for",
+        "weight": 1.1122
+      },
+      {
+        "token": " **",
+        "weight": 1.1122
+      },
+      {
+        "token": "the",
+        "weight": 1.1122
+      },
+      {
+        "token": " net",
+        "weight": 1.1122
+      },
+      {
+        "token": " pension",
+        "weight": 1.1122
+      },
+      {
+        "token": " expense",
+        "weight": 1.1122
+      },
+      {
+        "token": "**",
+        "weight": 1.1122
+      },
+      {
+        "token": " for",
+        "weight": 1.1122
+      },
+      {
+        "token": " XYZ",
+        "weight": 1.1122
+      },
+      {
+        "token": " NY",
+        "weight": 1.1122
+      },
+      {
+        "token": " for",
+        "weight": 1.1122
+      },
+      {
+        "token": " the",
+        "weight": 1.1122
+      },
+      {
+        "token": " year",
+        "weight": 1.1122
+      },
+      {
+        "token": " ",
+        "weight": 1.1122
+      },
+      {
+        "token": "2",
+        "weight": 1.1122
+      },
+      {
+        "token": "0",
+        "weight": 1.1122
+      },
+      {
+        "token": "1",
+        "weight": 1.1122
+      },
+      {
+        "token": "8",
+        "weight": 1.1122
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.1122
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.335
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "Given",
+        "weight": 2.0
+      },
+      {
+        "token": " Data",
+        "weight": 2.0
+      },
+      {
+        "token": ":",
+        "weight": 2.0
+      },
+      {
+        "token": "**\n\n",
+        "weight": 2.0
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Item",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " Value",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": "------",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": "-------",
+        "weight": 1.075
+      },
+      {
+        "token": "|\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Current",
+        "weight": 1.075
+      },
+      {
+        "token": " service",
+        "weight": 1.075
+      },
+      {
+        "token": " costs",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "7",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Past",
+        "weight": 1.075
+      },
+      {
+        "token": " service",
+        "weight": 1.075
+      },
+      {
+        "token": " costs",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Employer",
+        "weight": 1.075
+      },
+      {
+        "token": " contributions",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Benefit",
+        "weight": 1.075
+      },
+      {
+        "token": " obligation",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " beginning",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " year",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Benefit",
+        "weight": 1.075
+      },
+      {
+        "token": " obligation",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " end",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " year",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "8",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "9",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Plan",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " beginning",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " year",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "8",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Plan",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " end",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " year",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Act",
+        "weight": 1.075
+      },
+      {
+        "token": "uar",
+        "weight": 1.075
+      },
+      {
+        "token": "ial",
+        "weight": 1.075
+      },
+      {
+        "token": " loss",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Actual",
+        "weight": 1.075
+      },
+      {
+        "token": " return",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " plan",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|",
+        "weight": 1.075
+      },
+      {
+        "token": " Discount",
+        "weight": 1.075
+      },
+      {
+        "token": " rate",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " plan",
+        "weight": 1.075
+      },
+      {
+        "token": " liabilities",
+        "weight": 1.075
+      },
+      {
+        "token": " |",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "7",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.0969
+      },
+      {
+        "token": "%",
+        "weight": 1.0969
+      },
+      {
+        "token": " |\n",
+        "weight": 1.0969
+      },
+      {
+        "token": "|",
+        "weight": 1.0969
+      },
+      {
+        "token": " Expected",
+        "weight": 1.0969
+      },
+      {
+        "token": " rate",
+        "weight": 1.0969
+      },
+      {
+        "token": " of",
+        "weight": 1.0969
+      },
+      {
+        "token": " return",
+        "weight": 1.0969
+      },
+      {
+        "token": " on",
+        "weight": 1.0969
+      },
+      {
+        "token": " plan",
+        "weight": 1.0969
+      },
+      {
+        "token": " assets",
+        "weight": 1.0969
+      },
+      {
+        "token": " |",
+        "weight": 1.0969
+      },
+      {
+        "token": " ",
+        "weight": 1.0969
+      },
+      {
+        "token": "8",
+        "weight": 1.0969
+      },
+      {
+        "token": ".",
+        "weight": 1.0969
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "%",
+        "weight": 1.075
+      },
+      {
+        "token": " |\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2473
+      },
+      {
+        "token": " **",
+        "weight": 1.1227
+      },
+      {
+        "token": "Step",
+        "weight": 1.1227
+      },
+      {
+        "token": " ",
+        "weight": 1.1227
+      },
+      {
+        "token": "1",
+        "weight": 1.1227
+      },
+      {
+        "token": ":",
+        "weight": 1.1227
+      },
+      {
+        "token": " Calculate",
+        "weight": 1.1227
+      },
+      {
+        "token": " the",
+        "weight": 1.1227
+      },
+      {
+        "token": " Net",
+        "weight": 1.1227
+      },
+      {
+        "token": " Pension",
+        "weight": 1.1227
+      },
+      {
+        "token": " Expense",
+        "weight": 1.1227
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.1227
+      },
+      {
+        "token": "The",
+        "weight": 1.113
+      },
+      {
+        "token": " **",
+        "weight": 1.113
+      },
+      {
+        "token": "net",
+        "weight": 1.113
+      },
+      {
+        "token": " pension",
+        "weight": 1.113
+      },
+      {
+        "token": " expense",
+        "weight": 1.113
+      },
+      {
+        "token": "**",
+        "weight": 1.113
+      },
+      {
+        "token": " is",
+        "weight": 1.113
+      },
+      {
+        "token": " calculated",
+        "weight": 1.113
+      },
+      {
+        "token": " as",
+        "weight": 1.113
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.113
+      },
+      {
+        "token": "$$",
+        "weight": 1.0931
+      },
+      {
+        "token": "\n",
+        "weight": 1.0931
+      },
+      {
+        "token": "\\",
+        "weight": 1.0931
+      },
+      {
+        "token": "text",
+        "weight": 1.0931
+      },
+      {
+        "token": "{",
+        "weight": 1.0931
+      },
+      {
+        "token": "Net",
+        "weight": 1.0931
+      },
+      {
+        "token": " Pension",
+        "weight": 1.0931
+      },
+      {
+        "token": " Expense",
+        "weight": 1.0931
+      },
+      {
+        "token": "}",
+        "weight": 1.0931
+      },
+      {
+        "token": " =",
+        "weight": 0.2443
+      },
+      {
+        "token": " \\",
+        "weight": 1.0931
+      },
+      {
+        "token": "text",
+        "weight": 1.0931
+      },
+      {
+        "token": "{",
+        "weight": 1.0931
+      },
+      {
+        "token": "Act",
+        "weight": 1.0931
+      },
+      {
+        "token": "uar",
+        "weight": 1.0931
+      },
+      {
+        "token": "ial",
+        "weight": 1.0931
+      },
+      {
+        "token": " Loss",
+        "weight": 1.0931
+      },
+      {
+        "token": "}",
+        "weight": 1.0931
+      },
+      {
+        "token": " +",
+        "weight": 1.0931
+      },
+      {
+        "token": " \\",
+        "weight": 1.0931
+      },
+      {
+        "token": "text",
+        "weight": 1.0931
+      },
+      {
+        "token": "{",
+        "weight": 1.0931
+      },
+      {
+        "token": "Actual",
+        "weight": 1.0931
+      },
+      {
+        "token": " Return",
+        "weight": 1.0931
+      },
+      {
+        "token": " on",
+        "weight": 1.0931
+      },
+      {
+        "token": " Plan",
+        "weight": 1.0931
+      },
+      {
+        "token": " Assets",
+        "weight": 1.0931
+      },
+      {
+        "token": "}",
+        "weight": 1.0931
+      },
+      {
+        "token": " -",
+        "weight": 0.2443
+      },
+      {
+        "token": " \\",
+        "weight": 1.0931
+      },
+      {
+        "token": "text",
+        "weight": 1.0931
+      },
+      {
+        "token": "{",
+        "weight": 1.0931
+      },
+      {
+        "token": "Employ",
+        "weight": 1.0931
+      },
+      {
+        "token": "er",
+        "weight": 1.0931
+      },
+      {
+        "token": " Contributions",
+        "weight": 1.0931
+      },
+      {
+        "token": "}\n",
+        "weight": 1.0931
+      },
+      {
+        "token": "$$",
+        "weight": 1.0931
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.0931
+      },
+      {
+        "token": "$$",
+        "weight": 1.2072
+      },
+      {
+        "token": "\n",
+        "weight": 1.2072
+      },
+      {
+        "token": "\\",
+        "weight": 1.2072
+      },
+      {
+        "token": "text",
+        "weight": 1.2072
+      },
+      {
+        "token": "{",
+        "weight": 1.2072
+      },
+      {
+        "token": "Net",
+        "weight": 1.2072
+      },
+      {
+        "token": " Pension",
+        "weight": 1.2072
+      },
+      {
+        "token": " Expense",
+        "weight": 1.2072
+      },
+      {
+        "token": "}",
+        "weight": 1.2072
+      },
+      {
+        "token": " =",
+        "weight": 0.2557
+      },
+      {
+        "token": " ",
+        "weight": 1.2072
+      },
+      {
+        "token": "3",
+        "weight": 1.2072
+      },
+      {
+        "token": "5",
+        "weight": 1.2072
+      },
+      {
+        "token": "0",
+        "weight": 1.2072
+      },
+      {
+        "token": " +",
+        "weight": 1.2072
+      },
+      {
+        "token": " ",
+        "weight": 1.2072
+      },
+      {
+        "token": "3",
+        "weight": 1.2072
+      },
+      {
+        "token": ",",
+        "weight": 1.2072
+      },
+      {
+        "token": "1",
+        "weight": 1.2072
+      },
+      {
+        "token": "0",
+        "weight": 1.2072
+      },
+      {
+        "token": "0",
+        "weight": 1.2072
+      },
+      {
+        "token": " -",
+        "weight": 0.2557
+      },
+      {
+        "token": " ",
+        "weight": 1.2072
+      },
+      {
+        "token": "1",
+        "weight": 1.2072
+      },
+      {
+        "token": ",",
+        "weight": 1.2072
+      },
+      {
+        "token": "2",
+        "weight": 1.2072
+      },
+      {
+        "token": "0",
+        "weight": 1.2072
+      },
+      {
+        "token": "0",
+        "weight": 1.2072
+      },
+      {
+        "token": " =",
+        "weight": 0.2557
+      },
+      {
+        "token": " ",
+        "weight": 1.2072
+      },
+      {
+        "token": "2",
+        "weight": 1.2072
+      },
+      {
+        "token": ",",
+        "weight": 1.2072
+      },
+      {
+        "token": "2",
+        "weight": 1.2072
+      },
+      {
+        "token": "5",
+        "weight": 1.2072
+      },
+      {
+        "token": "0",
+        "weight": 1.2072
+      },
+      {
+        "token": "\n",
+        "weight": 1.2072
+      },
+      {
+        "token": "$$",
+        "weight": 1.2072
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.2072
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2488
+      },
+      {
+        "token": " **",
+        "weight": 1.1383
+      },
+      {
+        "token": "Step",
+        "weight": 1.1383
+      },
+      {
+        "token": " ",
+        "weight": 1.1383
+      },
+      {
+        "token": "2",
+        "weight": 1.1383
+      },
+      {
+        "token": ":",
+        "weight": 1.1383
+      },
+      {
+        "token": " Verify",
+        "weight": 1.1383
+      },
+      {
+        "token": " with",
+        "weight": 1.1383
+      },
+      {
+        "token": " Another",
+        "weight": 1.1383
+      },
+      {
+        "token": " Method",
+        "weight": 1.1383
+      },
+      {
+        "token": " (",
+        "weight": 1.1383
+      },
+      {
+        "token": "Optional",
+        "weight": 1.1383
+      },
+      {
+        "token": ")**",
+        "weight": 1.1383
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.1383
+      },
+      {
+        "token": "We",
+        "weight": 1.075
+      },
+      {
+        "token": " can",
+        "weight": 1.075
+      },
+      {
+        "token": " also",
+        "weight": 1.075
+      },
+      {
+        "token": " calculate",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "P",
+        "weight": 1.075
+      },
+      {
+        "token": "ension",
+        "weight": 1.075
+      },
+      {
+        "token": " Expense",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " using",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " following",
+        "weight": 1.075
+      },
+      {
+        "token": " formula",
+        "weight": 1.075
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "P",
+        "weight": 1.075
+      },
+      {
+        "token": "ension",
+        "weight": 1.075
+      },
+      {
+        "token": " Expense",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Benef",
+        "weight": 1.075
+      },
+      {
+        "token": "it",
+        "weight": 1.075
+      },
+      {
+        "token": " Obl",
+        "weight": 1.075
+      },
+      {
+        "token": "igation",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " End",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " Year",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Benef",
+        "weight": 1.075
+      },
+      {
+        "token": "it",
+        "weight": 1.075
+      },
+      {
+        "token": " Obl",
+        "weight": 1.075
+      },
+      {
+        "token": "igation",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " Beginning",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " Year",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " +",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Act",
+        "weight": 1.075
+      },
+      {
+        "token": "uar",
+        "weight": 1.075
+      },
+      {
+        "token": "ial",
+        "weight": 1.075
+      },
+      {
+        "token": " Loss",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Actual",
+        "weight": 1.075
+      },
+      {
+        "token": " Return",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " Plan",
+        "weight": 1.075
+      },
+      {
+        "token": " Assets",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "P",
+        "weight": 1.075
+      },
+      {
+        "token": "ension",
+        "weight": 1.075
+      },
+      {
+        "token": " Expense",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "8",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "9",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " +",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Final",
+        "weight": 1.5
+      },
+      {
+        "token": " Answer",
+        "weight": 1.5
+      },
+      {
+        "token": ":",
+        "weight": 1.5
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "\n",
+        "weight": 1.5
+      },
+      {
+        "token": "\\",
+        "weight": 1.5
+      },
+      {
+        "token": "boxed",
+        "weight": 1.5
+      },
+      {
+        "token": "{",
+        "weight": 1.5
+      },
+      {
+        "token": "2",
+        "weight": 1.5
+      },
+      {
+        "token": "2",
+        "weight": 1.5
+      },
+      {
+        "token": "5",
+        "weight": 1.5
+      },
+      {
+        "token": "0",
+        "weight": 1.5
+      },
+      {
+        "token": "}\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "<|im_end|>",
+        "weight": 1.0
+      }
+    ],
+    "weight_stats": {
+      "mean": 1.0821,
+      "std": 0.2137,
+      "min": 0.2425,
+      "max": 2.0
+    }
+  },
+  {
+    "benchmark": "FinReason",
+    "gold": "100",
+    "response_preview": "We are given the following:\n\n- **Growth rate of income (g)** = 5% per annum = 0.05  \n- **Discount rate (r)** = 15% per annum = 0.15  \n- **Next payout (D\u2081)** = $10  \n- The investment generates **forever** growing income, so it is a **perpetuity with growth**.\n\n---\n\n### Step 1: Use the formula for the value of a growing perpetuity\n\nThe formula for the present value (PV) of a growing perpetuity is:\n\n$$\nPV = \\frac{D_1}{r - g}\n$$\n\nWhere:\n- $ D_1 $ = next dividend (or income) = $10  \n- $ r $ = discoun",
+    "prompt_len": 98,
+    "total_len": 351,
+    "spans": [
+      {
+        "start": 98,
+        "end": 104,
+        "text": "We are given the following:",
+        "weight": 1.9077,
+        "length": 6,
+        "type": "reasoning"
+      },
+      {
+        "start": 145,
+        "end": 184,
+        "text": "15  \n- **Next payout (D\u2081)** = $10  \n- The investment generates **forever** growing income, so it is a **perpetuity with ",
+        "weight": 1.8719,
+        "length": 39,
+        "type": "data_extraction"
+      },
+      {
+        "start": 218,
+        "end": 235,
+        "text": "$$\nPV = \\frac{D_1}{r - g}\n$$",
+        "weight": 1.5794,
+        "length": 17,
+        "type": "reasoning"
+      },
+      {
+        "start": 202,
+        "end": 218,
+        "text": "The formula for the present value (PV) of a growing perpetuity is:",
+        "weight": 1.4432,
+        "length": 16,
+        "type": "reasoning"
+      },
+      {
+        "start": 185,
+        "end": 202,
+        "text": "### Step 1: Use the formula for the value of a growing perpetuity",
+        "weight": 1.2541,
+        "length": 17,
+        "type": "formatting"
+      },
+      {
+        "start": 124,
+        "end": 145,
+        "text": "05  \n- **Discount rate (r)** = 15% per annum = 0.",
+        "weight": 1.2039,
+        "length": 21,
+        "type": "reasoning"
+      },
+      {
+        "start": 284,
+        "end": 294,
+        "text": "### Step 2: Plug in the values",
+        "weight": 1.131,
+        "length": 10,
+        "type": "formatting"
+      },
+      {
+        "start": 235,
+        "end": 266,
+        "text": "Where:\n- $ D_1 $ = next dividend (or income) = $10  \n- $ r $ = discount rate = 0.",
+        "weight": 1.1302,
+        "length": 31,
+        "type": "data_extraction"
+      },
+      {
+        "start": 104,
+        "end": 124,
+        "text": "- **Growth rate of income (g)** = 5% per annum = 0.",
+        "weight": 1.1051,
+        "length": 20,
+        "type": "reasoning"
+      },
+      {
+        "start": 266,
+        "end": 280,
+        "text": "15  \n- $ g $ = growth rate = 0.",
+        "weight": 0.8966,
+        "length": 14,
+        "type": "reasoning"
+      }
+    ],
+    "token_weights": [
+      {
+        "token": "We",
+        "weight": 1.9077
+      },
+      {
+        "token": " are",
+        "weight": 1.9077
+      },
+      {
+        "token": " given",
+        "weight": 1.9077
+      },
+      {
+        "token": " the",
+        "weight": 1.9077
+      },
+      {
+        "token": " following",
+        "weight": 1.9077
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.9077
+      },
+      {
+        "token": "-",
+        "weight": 0.2604
+      },
+      {
+        "token": " **",
+        "weight": 1.2542
+      },
+      {
+        "token": "G",
+        "weight": 1.2542
+      },
+      {
+        "token": "rowth",
+        "weight": 1.2542
+      },
+      {
+        "token": " rate",
+        "weight": 1.2542
+      },
+      {
+        "token": " of",
+        "weight": 1.2542
+      },
+      {
+        "token": " income",
+        "weight": 1.2542
+      },
+      {
+        "token": " (",
+        "weight": 1.2542
+      },
+      {
+        "token": "g",
+        "weight": 1.2542
+      },
+      {
+        "token": ")**",
+        "weight": 1.2542
+      },
+      {
+        "token": " =",
+        "weight": 0.2604
+      },
+      {
+        "token": " ",
+        "weight": 1.2542
+      },
+      {
+        "token": "5",
+        "weight": 1.2542
+      },
+      {
+        "token": "%",
+        "weight": 1.2542
+      },
+      {
+        "token": " per",
+        "weight": 1.2542
+      },
+      {
+        "token": " annum",
+        "weight": 1.2542
+      },
+      {
+        "token": " =",
+        "weight": 0.2604
+      },
+      {
+        "token": " ",
+        "weight": 1.2542
+      },
+      {
+        "token": "0",
+        "weight": 1.2542
+      },
+      {
+        "token": ".",
+        "weight": 1.2542
+      },
+      {
+        "token": "0",
+        "weight": 1.3594
+      },
+      {
+        "token": "5",
+        "weight": 1.3594
+      },
+      {
+        "token": "  \n",
+        "weight": 1.3594
+      },
+      {
+        "token": "-",
+        "weight": 0.2709
+      },
+      {
+        "token": " **",
+        "weight": 1.3594
+      },
+      {
+        "token": "Discount",
+        "weight": 1.3594
+      },
+      {
+        "token": " rate",
+        "weight": 1.3594
+      },
+      {
+        "token": " (",
+        "weight": 1.3594
+      },
+      {
+        "token": "r",
+        "weight": 1.3594
+      },
+      {
+        "token": ")**",
+        "weight": 1.3594
+      },
+      {
+        "token": " =",
+        "weight": 0.2709
+      },
+      {
+        "token": " ",
+        "weight": 1.3594
+      },
+      {
+        "token": "1",
+        "weight": 1.3594
+      },
+      {
+        "token": "5",
+        "weight": 1.3594
+      },
+      {
+        "token": "%",
+        "weight": 1.3594
+      },
+      {
+        "token": " per",
+        "weight": 1.3594
+      },
+      {
+        "token": " annum",
+        "weight": 1.3594
+      },
+      {
+        "token": " =",
+        "weight": 0.2709
+      },
+      {
+        "token": " ",
+        "weight": 1.3594
+      },
+      {
+        "token": "0",
+        "weight": 1.3594
+      },
+      {
+        "token": ".",
+        "weight": 1.3594
+      },
+      {
+        "token": "1",
+        "weight": 2.0
+      },
+      {
+        "token": "5",
+        "weight": 2.0
+      },
+      {
+        "token": "  \n",
+        "weight": 2.0
+      },
+      {
+        "token": "-",
+        "weight": 0.335
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "Next",
+        "weight": 2.0
+      },
+      {
+        "token": " payout",
+        "weight": 2.0
+      },
+      {
+        "token": " (",
+        "weight": 2.0
+      },
+      {
+        "token": "D",
+        "weight": 2.0
+      },
+      {
+        "token": "\u2081",
+        "weight": 2.0
+      },
+      {
+        "token": ")**",
+        "weight": 2.0
+      },
+      {
+        "token": " =",
+        "weight": 0.335
+      },
+      {
+        "token": " $",
+        "weight": 2.0
+      },
+      {
+        "token": "1",
+        "weight": 2.0
+      },
+      {
+        "token": "0",
+        "weight": 2.0
+      },
+      {
+        "token": "  \n",
+        "weight": 2.0
+      },
+      {
+        "token": "-",
+        "weight": 0.335
+      },
+      {
+        "token": " The",
+        "weight": 2.0
+      },
+      {
+        "token": " investment",
+        "weight": 2.0
+      },
+      {
+        "token": " generates",
+        "weight": 2.0
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "fore",
+        "weight": 2.0
+      },
+      {
+        "token": "ver",
+        "weight": 2.0
+      },
+      {
+        "token": "**",
+        "weight": 2.0
+      },
+      {
+        "token": " growing",
+        "weight": 2.0
+      },
+      {
+        "token": " income",
+        "weight": 2.0
+      },
+      {
+        "token": ",",
+        "weight": 2.0
+      },
+      {
+        "token": " so",
+        "weight": 2.0
+      },
+      {
+        "token": " it",
+        "weight": 2.0
+      },
+      {
+        "token": " is",
+        "weight": 2.0
+      },
+      {
+        "token": " a",
+        "weight": 2.0
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "per",
+        "weight": 2.0
+      },
+      {
+        "token": "pet",
+        "weight": 2.0
+      },
+      {
+        "token": "uity",
+        "weight": 2.0
+      },
+      {
+        "token": " with",
+        "weight": 2.0
+      },
+      {
+        "token": " growth",
+        "weight": 2.0
+      },
+      {
+        "token": "**",
+        "weight": 2.0
+      },
+      {
+        "token": ".\n\n",
+        "weight": 2.0
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2646
+      },
+      {
+        "token": "###",
+        "weight": 0.2666
+      },
+      {
+        "token": " Step",
+        "weight": 1.3158
+      },
+      {
+        "token": " ",
+        "weight": 1.3158
+      },
+      {
+        "token": "1",
+        "weight": 1.3158
+      },
+      {
+        "token": ":",
+        "weight": 1.3158
+      },
+      {
+        "token": " Use",
+        "weight": 1.3158
+      },
+      {
+        "token": " the",
+        "weight": 1.3158
+      },
+      {
+        "token": " formula",
+        "weight": 1.3158
+      },
+      {
+        "token": " for",
+        "weight": 1.3158
+      },
+      {
+        "token": " the",
+        "weight": 1.3158
+      },
+      {
+        "token": " value",
+        "weight": 1.3158
+      },
+      {
+        "token": " of",
+        "weight": 1.3158
+      },
+      {
+        "token": " a",
+        "weight": 1.3158
+      },
+      {
+        "token": " growing",
+        "weight": 1.3158
+      },
+      {
+        "token": " perpet",
+        "weight": 1.3158
+      },
+      {
+        "token": "uity",
+        "weight": 1.3158
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.3158
+      },
+      {
+        "token": "The",
+        "weight": 1.4432
+      },
+      {
+        "token": " formula",
+        "weight": 1.4432
+      },
+      {
+        "token": " for",
+        "weight": 1.4432
+      },
+      {
+        "token": " the",
+        "weight": 1.4432
+      },
+      {
+        "token": " present",
+        "weight": 1.4432
+      },
+      {
+        "token": " value",
+        "weight": 1.4432
+      },
+      {
+        "token": " (",
+        "weight": 1.4432
+      },
+      {
+        "token": "PV",
+        "weight": 1.4432
+      },
+      {
+        "token": ")",
+        "weight": 1.4432
+      },
+      {
+        "token": " of",
+        "weight": 1.4432
+      },
+      {
+        "token": " a",
+        "weight": 1.4432
+      },
+      {
+        "token": " growing",
+        "weight": 1.4432
+      },
+      {
+        "token": " perpet",
+        "weight": 1.4432
+      },
+      {
+        "token": "uity",
+        "weight": 1.4432
+      },
+      {
+        "token": " is",
+        "weight": 1.4432
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.4432
+      },
+      {
+        "token": "$$",
+        "weight": 1.7487
+      },
+      {
+        "token": "\n",
+        "weight": 1.7487
+      },
+      {
+        "token": "PV",
+        "weight": 1.7487
+      },
+      {
+        "token": " =",
+        "weight": 0.3099
+      },
+      {
+        "token": " \\",
+        "weight": 1.7487
+      },
+      {
+        "token": "frac",
+        "weight": 1.7487
+      },
+      {
+        "token": "{",
+        "weight": 1.7487
+      },
+      {
+        "token": "D",
+        "weight": 1.7487
+      },
+      {
+        "token": "_",
+        "weight": 1.7487
+      },
+      {
+        "token": "1",
+        "weight": 1.7487
+      },
+      {
+        "token": "}{",
+        "weight": 1.7487
+      },
+      {
+        "token": "r",
+        "weight": 1.7487
+      },
+      {
+        "token": " -",
+        "weight": 0.3099
+      },
+      {
+        "token": " g",
+        "weight": 1.7487
+      },
+      {
+        "token": "}\n",
+        "weight": 1.7487
+      },
+      {
+        "token": "$$",
+        "weight": 1.7487
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.7487
+      },
+      {
+        "token": "Where",
+        "weight": 1.337
+      },
+      {
+        "token": ":\n",
+        "weight": 1.337
+      },
+      {
+        "token": "-",
+        "weight": 0.2687
+      },
+      {
+        "token": " $",
+        "weight": 1.337
+      },
+      {
+        "token": " D",
+        "weight": 1.337
+      },
+      {
+        "token": "_",
+        "weight": 1.337
+      },
+      {
+        "token": "1",
+        "weight": 1.337
+      },
+      {
+        "token": " $",
+        "weight": 1.337
+      },
+      {
+        "token": " =",
+        "weight": 0.2687
+      },
+      {
+        "token": " next",
+        "weight": 1.337
+      },
+      {
+        "token": " dividend",
+        "weight": 1.337
+      },
+      {
+        "token": " (",
+        "weight": 1.337
+      },
+      {
+        "token": "or",
+        "weight": 1.337
+      },
+      {
+        "token": " income",
+        "weight": 1.337
+      },
+      {
+        "token": ")",
+        "weight": 1.337
+      },
+      {
+        "token": " =",
+        "weight": 0.2687
+      },
+      {
+        "token": " $",
+        "weight": 1.337
+      },
+      {
+        "token": "1",
+        "weight": 1.337
+      },
+      {
+        "token": "0",
+        "weight": 1.337
+      },
+      {
+        "token": "  \n",
+        "weight": 1.337
+      },
+      {
+        "token": "-",
+        "weight": 0.2687
+      },
+      {
+        "token": " $",
+        "weight": 1.337
+      },
+      {
+        "token": " r",
+        "weight": 1.337
+      },
+      {
+        "token": " $",
+        "weight": 1.337
+      },
+      {
+        "token": " =",
+        "weight": 0.2687
+      },
+      {
+        "token": " discount",
+        "weight": 1.337
+      },
+      {
+        "token": " rate",
+        "weight": 1.337
+      },
+      {
+        "token": " =",
+        "weight": 0.2687
+      },
+      {
+        "token": " ",
+        "weight": 1.337
+      },
+      {
+        "token": "0",
+        "weight": 1.337
+      },
+      {
+        "token": ".",
+        "weight": 1.337
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": " g",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " growth",
+        "weight": 1.075
+      },
+      {
+        "token": " rate",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "5",
+        "weight": 1.2961
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.2961
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2646
+      },
+      {
+        "token": "###",
+        "weight": 0.2578
+      },
+      {
+        "token": " Step",
+        "weight": 1.2281
+      },
+      {
+        "token": " ",
+        "weight": 1.2281
+      },
+      {
+        "token": "2",
+        "weight": 1.2281
+      },
+      {
+        "token": ":",
+        "weight": 1.2281
+      },
+      {
+        "token": " Plug",
+        "weight": 1.2281
+      },
+      {
+        "token": " in",
+        "weight": 1.2281
+      },
+      {
+        "token": " the",
+        "weight": 1.2281
+      },
+      {
+        "token": " values",
+        "weight": 1.2281
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.2281
+      },
+      {
+        "token": "$$",
+        "weight": 1.2961
+      },
+      {
+        "token": "\n",
+        "weight": 1.2961
+      },
+      {
+        "token": "PV",
+        "weight": 1.2961
+      },
+      {
+        "token": " =",
+        "weight": 0.2646
+      },
+      {
+        "token": " \\",
+        "weight": 1.2961
+      },
+      {
+        "token": "frac",
+        "weight": 1.2961
+      },
+      {
+        "token": "{",
+        "weight": 1.2961
+      },
+      {
+        "token": "1",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "}{",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": ".",
+        "weight": 1.2961
+      },
+      {
+        "token": "1",
+        "weight": 1.2961
+      },
+      {
+        "token": "5",
+        "weight": 1.2961
+      },
+      {
+        "token": " -",
+        "weight": 0.2646
+      },
+      {
+        "token": " ",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": ".",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "5",
+        "weight": 1.2961
+      },
+      {
+        "token": "}",
+        "weight": 1.2961
+      },
+      {
+        "token": " =",
+        "weight": 0.2646
+      },
+      {
+        "token": " \\",
+        "weight": 1.2961
+      },
+      {
+        "token": "frac",
+        "weight": 1.2961
+      },
+      {
+        "token": "{",
+        "weight": 1.2961
+      },
+      {
+        "token": "1",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "}{",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": ".",
+        "weight": 1.2961
+      },
+      {
+        "token": "1",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "}",
+        "weight": 1.2961
+      },
+      {
+        "token": " =",
+        "weight": 0.2646
+      },
+      {
+        "token": " ",
+        "weight": 1.2961
+      },
+      {
+        "token": "1",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "0",
+        "weight": 1.2961
+      },
+      {
+        "token": "\n",
+        "weight": 1.2961
+      },
+      {
+        "token": "$$",
+        "weight": 1.2961
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.2961
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2646
+      },
+      {
+        "token": "###",
+        "weight": 0.2646
+      },
+      {
+        "token": " Final",
+        "weight": 0.15
+      },
+      {
+        "token": " Answer",
+        "weight": 0.15
+      },
+      {
+        "token": ":\n\n",
+        "weight": 0.15
+      },
+      {
+        "token": "$$",
+        "weight": 0.15
+      },
+      {
+        "token": "\n",
+        "weight": 0.15
+      },
+      {
+        "token": "\\",
+        "weight": 0.15
+      },
+      {
+        "token": "boxed",
+        "weight": 0.15
+      },
+      {
+        "token": "{",
+        "weight": 0.15
+      },
+      {
+        "token": "1",
+        "weight": 0.15
+      },
+      {
+        "token": "0",
+        "weight": 0.15
+      },
+      {
+        "token": "0",
+        "weight": 0.15
+      },
+      {
+        "token": "}\n",
+        "weight": 0.15
+      },
+      {
+        "token": "$$",
+        "weight": 0.15
+      },
+      {
+        "token": "<|im_end|>",
+        "weight": 1.0
+      }
+    ],
+    "weight_stats": {
+      "mean": 1.2605,
+      "std": 0.5352,
+      "min": 0.15,
+      "max": 2.0
+    }
+  },
+  {
+    "benchmark": "FinReason",
+    "gold": "5.367",
+    "response_preview": "To analyze the **impairments, net loss on sale of long-lived assets, and restructuring and merger related expense** for **American Tower Corporation and subsidiaries** for the year **2014**, we need to extract the relevant financial data from the provided text.\n\n---\n\n### **Key Information from the Text:**\n\n> \"During the years ended December 31, 2005, 2004, and 2003, the company recorded impairments and net loss on sale of long-lived assets (primarily related to its rental and management segment)",
+    "prompt_len": 229,
+    "total_len": 618,
+    "spans": [
+      {
+        "start": 399,
+        "end": 408,
+        "text": "### **Step-by-Step Analysis:**",
+        "weight": 1.63,
+        "length": 9,
+        "type": "formatting"
+      },
+      {
+        "start": 353,
+        "end": 360,
+        "text": "1 million, $22.",
+        "weight": 1.5509,
+        "length": 7,
+        "type": "data_extraction"
+      },
+      {
+        "start": 462,
+        "end": 481,
+        "text": "- It does **not** provide the value for **2014** directly.",
+        "weight": 1.4201,
+        "length": 19,
+        "type": "reasoning"
+      },
+      {
+        "start": 373,
+        "end": 398,
+        "text": "This is the **only data** provided about impairments and related expenses for the **year 2014**.",
+        "weight": 1.3673,
+        "length": 25,
+        "type": "reasoning"
+      },
+      {
+        "start": 360,
+        "end": 368,
+        "text": "3 million, and $28.",
+        "weight": 1.3271,
+        "length": 8,
+        "type": "data_extraction"
+      },
+      {
+        "start": 368,
+        "end": 373,
+        "text": "3 million, respectively.\"",
+        "weight": 1.2045,
+        "length": 5,
+        "type": "reasoning"
+      },
+      {
+        "start": 284,
+        "end": 293,
+        "text": "### **Key Information from the Text:**",
+        "weight": 1.0149,
+        "length": 9,
+        "type": "formatting"
+      }
+    ],
+    "token_weights": [
+      {
+        "token": "To",
+        "weight": 1.075
+      },
+      {
+        "token": " analyze",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "imp",
+        "weight": 1.075
+      },
+      {
+        "token": "air",
+        "weight": 1.075
+      },
+      {
+        "token": "ments",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " net",
+        "weight": 1.075
+      },
+      {
+        "token": " loss",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " sale",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " long",
+        "weight": 1.075
+      },
+      {
+        "token": "-lived",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " restructuring",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " merger",
+        "weight": 1.075
+      },
+      {
+        "token": " related",
+        "weight": 1.075
+      },
+      {
+        "token": " expense",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "American",
+        "weight": 1.075
+      },
+      {
+        "token": " Tower",
+        "weight": 1.075
+      },
+      {
+        "token": " Corporation",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " subsidiaries",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " year",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "**,",
+        "weight": 1.075
+      },
+      {
+        "token": " we",
+        "weight": 1.075
+      },
+      {
+        "token": " need",
+        "weight": 1.075
+      },
+      {
+        "token": " to",
+        "weight": 1.075
+      },
+      {
+        "token": " extract",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " relevant",
+        "weight": 1.075
+      },
+      {
+        "token": " financial",
+        "weight": 1.075
+      },
+      {
+        "token": " data",
+        "weight": 1.075
+      },
+      {
+        "token": " from",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " provided",
+        "weight": 1.075
+      },
+      {
+        "token": " text",
+        "weight": 1.075
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2461
+      },
+      {
+        "token": " **",
+        "weight": 1.111
+      },
+      {
+        "token": "Key",
+        "weight": 1.111
+      },
+      {
+        "token": " Information",
+        "weight": 1.111
+      },
+      {
+        "token": " from",
+        "weight": 1.111
+      },
+      {
+        "token": " the",
+        "weight": 1.111
+      },
+      {
+        "token": " Text",
+        "weight": 1.111
+      },
+      {
+        "token": ":",
+        "weight": 1.111
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.111
+      },
+      {
+        "token": ">",
+        "weight": 1.075
+      },
+      {
+        "token": " \"",
+        "weight": 1.075
+      },
+      {
+        "token": "During",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " years",
+        "weight": 1.075
+      },
+      {
+        "token": " ended",
+        "weight": 1.075
+      },
+      {
+        "token": " December",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " company",
+        "weight": 1.075
+      },
+      {
+        "token": " recorded",
+        "weight": 1.075
+      },
+      {
+        "token": " impair",
+        "weight": 1.075
+      },
+      {
+        "token": "ments",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " net",
+        "weight": 1.075
+      },
+      {
+        "token": " loss",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " sale",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " long",
+        "weight": 1.075
+      },
+      {
+        "token": "-lived",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": " (",
+        "weight": 1.075
+      },
+      {
+        "token": "prim",
+        "weight": 1.075
+      },
+      {
+        "token": "arily",
+        "weight": 1.075
+      },
+      {
+        "token": " related",
+        "weight": 1.075
+      },
+      {
+        "token": " to",
+        "weight": 1.075
+      },
+      {
+        "token": " its",
+        "weight": 1.075
+      },
+      {
+        "token": " rental",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " management",
+        "weight": 1.075
+      },
+      {
+        "token": " segment",
+        "weight": 1.075
+      },
+      {
+        "token": ")",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "9",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.5509
+      },
+      {
+        "token": " million",
+        "weight": 1.5509
+      },
+      {
+        "token": ",",
+        "weight": 1.5509
+      },
+      {
+        "token": " $",
+        "weight": 1.5509
+      },
+      {
+        "token": "2",
+        "weight": 1.5509
+      },
+      {
+        "token": "2",
+        "weight": 1.5509
+      },
+      {
+        "token": ".",
+        "weight": 1.5509
+      },
+      {
+        "token": "3",
+        "weight": 1.3271
+      },
+      {
+        "token": " million",
+        "weight": 1.3271
+      },
+      {
+        "token": ",",
+        "weight": 1.3271
+      },
+      {
+        "token": " and",
+        "weight": 1.3271
+      },
+      {
+        "token": " $",
+        "weight": 1.3271
+      },
+      {
+        "token": "2",
+        "weight": 1.3271
+      },
+      {
+        "token": "8",
+        "weight": 1.3271
+      },
+      {
+        "token": ".",
+        "weight": 1.3271
+      },
+      {
+        "token": "3",
+        "weight": 1.2045
+      },
+      {
+        "token": " million",
+        "weight": 1.2045
+      },
+      {
+        "token": ",",
+        "weight": 1.2045
+      },
+      {
+        "token": " respectively",
+        "weight": 1.2045
+      },
+      {
+        "token": ".\"\n\n",
+        "weight": 1.2045
+      },
+      {
+        "token": "This",
+        "weight": 1.3673
+      },
+      {
+        "token": " is",
+        "weight": 1.3673
+      },
+      {
+        "token": " the",
+        "weight": 1.3673
+      },
+      {
+        "token": " **",
+        "weight": 1.3673
+      },
+      {
+        "token": "only",
+        "weight": 1.3673
+      },
+      {
+        "token": " data",
+        "weight": 1.3673
+      },
+      {
+        "token": "**",
+        "weight": 1.3673
+      },
+      {
+        "token": " provided",
+        "weight": 1.3673
+      },
+      {
+        "token": " about",
+        "weight": 1.3673
+      },
+      {
+        "token": " impair",
+        "weight": 1.3673
+      },
+      {
+        "token": "ments",
+        "weight": 1.3673
+      },
+      {
+        "token": " and",
+        "weight": 1.3673
+      },
+      {
+        "token": " related",
+        "weight": 1.3673
+      },
+      {
+        "token": " expenses",
+        "weight": 1.3673
+      },
+      {
+        "token": " for",
+        "weight": 1.3673
+      },
+      {
+        "token": " the",
+        "weight": 1.3673
+      },
+      {
+        "token": " **",
+        "weight": 1.3673
+      },
+      {
+        "token": "year",
+        "weight": 1.3673
+      },
+      {
+        "token": " ",
+        "weight": 1.3673
+      },
+      {
+        "token": "2",
+        "weight": 1.3673
+      },
+      {
+        "token": "0",
+        "weight": 1.3673
+      },
+      {
+        "token": "1",
+        "weight": 1.3673
+      },
+      {
+        "token": "4",
+        "weight": 1.3673
+      },
+      {
+        "token": "**",
+        "weight": 1.3673
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.3673
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.335
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "Step",
+        "weight": 2.0
+      },
+      {
+        "token": "-by",
+        "weight": 2.0
+      },
+      {
+        "token": "-",
+        "weight": 0.335
+      },
+      {
+        "token": "Step",
+        "weight": 2.0
+      },
+      {
+        "token": " Analysis",
+        "weight": 2.0
+      },
+      {
+        "token": ":",
+        "weight": 2.0
+      },
+      {
+        "token": "**\n\n",
+        "weight": 2.0
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Ident",
+        "weight": 1.075
+      },
+      {
+        "token": "ify",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " relevant",
+        "weight": 1.075
+      },
+      {
+        "token": " figure",
+        "weight": 1.075
+      },
+      {
+        "token": ":",
+        "weight": 1.075
+      },
+      {
+        "token": "**\n",
+        "weight": 1.075
+      },
+      {
+        "token": "  ",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " The",
+        "weight": 1.075
+      },
+      {
+        "token": " text",
+        "weight": 1.075
+      },
+      {
+        "token": " explicitly",
+        "weight": 1.075
+      },
+      {
+        "token": " states",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "imp",
+        "weight": 1.075
+      },
+      {
+        "token": "air",
+        "weight": 1.075
+      },
+      {
+        "token": "ments",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " net",
+        "weight": 1.075
+      },
+      {
+        "token": " loss",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " sale",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " long",
+        "weight": 1.075
+      },
+      {
+        "token": "-lived",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " years",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": ".\n",
+        "weight": 1.075
+      },
+      {
+        "token": "  ",
+        "weight": 1.4832
+      },
+      {
+        "token": " -",
+        "weight": 0.2833
+      },
+      {
+        "token": " It",
+        "weight": 1.4832
+      },
+      {
+        "token": " does",
+        "weight": 1.4832
+      },
+      {
+        "token": " **",
+        "weight": 1.4832
+      },
+      {
+        "token": "not",
+        "weight": 1.4832
+      },
+      {
+        "token": "**",
+        "weight": 1.4832
+      },
+      {
+        "token": " provide",
+        "weight": 1.4832
+      },
+      {
+        "token": " the",
+        "weight": 1.4832
+      },
+      {
+        "token": " value",
+        "weight": 1.4832
+      },
+      {
+        "token": " for",
+        "weight": 1.4832
+      },
+      {
+        "token": " **",
+        "weight": 1.4832
+      },
+      {
+        "token": "2",
+        "weight": 1.4832
+      },
+      {
+        "token": "0",
+        "weight": 1.4832
+      },
+      {
+        "token": "1",
+        "weight": 1.4832
+      },
+      {
+        "token": "4",
+        "weight": 1.4832
+      },
+      {
+        "token": "**",
+        "weight": 1.4832
+      },
+      {
+        "token": " directly",
+        "weight": 1.4832
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.4832
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "D",
+        "weight": 1.075
+      },
+      {
+        "token": "etermine",
+        "weight": 1.075
+      },
+      {
+        "token": " if",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " value",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": " is",
+        "weight": 1.075
+      },
+      {
+        "token": " missing",
+        "weight": 1.075
+      },
+      {
+        "token": ":",
+        "weight": 1.075
+      },
+      {
+        "token": "**\n",
+        "weight": 1.075
+      },
+      {
+        "token": "  ",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " The",
+        "weight": 1.075
+      },
+      {
+        "token": " text",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "does",
+        "weight": 1.075
+      },
+      {
+        "token": " not",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " mention",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " value",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " in",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " provided",
+        "weight": 1.075
+      },
+      {
+        "token": " paragraph",
+        "weight": 1.075
+      },
+      {
+        "token": ".\n",
+        "weight": 1.075
+      },
+      {
+        "token": "  ",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " The",
+        "weight": 1.075
+      },
+      {
+        "token": " only",
+        "weight": 1.075
+      },
+      {
+        "token": " figure",
+        "weight": 1.075
+      },
+      {
+        "token": " given",
+        "weight": 1.075
+      },
+      {
+        "token": " is",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Conclusion",
+        "weight": 1.075
+      },
+      {
+        "token": ":",
+        "weight": 1.075
+      },
+      {
+        "token": "**\n",
+        "weight": 1.075
+      },
+      {
+        "token": "  ",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " There",
+        "weight": 1.075
+      },
+      {
+        "token": " is",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "no",
+        "weight": 1.075
+      },
+      {
+        "token": " numerical",
+        "weight": 1.075
+      },
+      {
+        "token": " value",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " provided",
+        "weight": 1.075
+      },
+      {
+        "token": " for",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " impairment",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " net",
+        "weight": 1.075
+      },
+      {
+        "token": " loss",
+        "weight": 1.075
+      },
+      {
+        "token": " on",
+        "weight": 1.075
+      },
+      {
+        "token": " sale",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " long",
+        "weight": 1.075
+      },
+      {
+        "token": "-lived",
+        "weight": 1.075
+      },
+      {
+        "token": " assets",
+        "weight": 1.075
+      },
+      {
+        "token": ",",
+        "weight": 1.075
+      },
+      {
+        "token": " or",
+        "weight": 1.075
+      },
+      {
+        "token": " restructuring",
+        "weight": 1.075
+      },
+      {
+        "token": " and",
+        "weight": 1.075
+      },
+      {
+        "token": " merger",
+        "weight": 1.075
+      },
+      {
+        "token": " related",
+        "weight": 1.075
+      },
+      {
+        "token": " expense",
+        "weight": 1.075
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Final",
+        "weight": 1.5
+      },
+      {
+        "token": " Answer",
+        "weight": 1.5
+      },
+      {
+        "token": ":",
+        "weight": 1.5
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "\n",
+        "weight": 1.5
+      },
+      {
+        "token": "\\",
+        "weight": 1.5
+      },
+      {
+        "token": "boxed",
+        "weight": 1.5
+      },
+      {
+        "token": "{\\",
+        "weight": 1.5
+      },
+      {
+        "token": "text",
+        "weight": 1.5
+      },
+      {
+        "token": "{",
+        "weight": 1.5
+      },
+      {
+        "token": "No",
+        "weight": 1.5
+      },
+      {
+        "token": " data",
+        "weight": 1.5
+      },
+      {
+        "token": " provided",
+        "weight": 1.5
+      },
+      {
+        "token": " for",
+        "weight": 1.5
+      },
+      {
+        "token": " ",
+        "weight": 1.5
+      },
+      {
+        "token": "2",
+        "weight": 1.5
+      },
+      {
+        "token": "0",
+        "weight": 1.5
+      },
+      {
+        "token": "1",
+        "weight": 1.5
+      },
+      {
+        "token": "4",
+        "weight": 1.5
+      },
+      {
+        "token": "}}\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "<|im_end|>",
+        "weight": 1.0
+      }
+    ],
+    "weight_stats": {
+      "mean": 1.1442,
+      "std": 0.2452,
+      "min": 0.2425,
+      "max": 2.0
+    }
+  },
+  {
+    "benchmark": "FinReason",
+    "gold": "-0.5",
+    "response_preview": "We are given the demand function for bottled water:\n\n$$\nQ_{\\text{bw}} = 30 - 2P_b\n$$\n\nWe are also told that the **cost of bottled water** is **$5** (this is the **price** of bottled water, $ P_b = 5 $).\n\nWe are asked to find the **price elasticity of demand** at this price.\n\n---\n\n### Step 1: Find the quantity demanded at $ P_b = 5 $\n\nSubstitute $ P_b = 5 $ into the demand function:\n\n$$\nQ_{\\text{bw}} = 30 - 2(5) = 30 - 10 = 20\n$$\n\nSo, the quantity demanded is $ Q_{\\text{bw}} = 20 $.\n\n---\n\n### Ste",
+    "prompt_len": 116,
+    "total_len": 531,
+    "spans": [
+      {
+        "start": 299,
+        "end": 311,
+        "text": "The price elasticity of demand (PED) is given by:",
+        "weight": 2.0,
+        "length": 12,
+        "type": "reasoning"
+      },
+      {
+        "start": 286,
+        "end": 299,
+        "text": "### Step 2: Use the price elasticity of demand formula",
+        "weight": 1.8161,
+        "length": 13,
+        "type": "formatting"
+      },
+      {
+        "start": 265,
+        "end": 285,
+        "text": "So, the quantity demanded is $ Q_{\\text{bw}} = 20 $.",
+        "weight": 1.5968,
+        "length": 20,
+        "type": "reasoning"
+      },
+      {
+        "start": 116,
+        "end": 126,
+        "text": "We are given the demand function for bottled water:",
+        "weight": 1.508,
+        "length": 10,
+        "type": "reasoning"
+      },
+      {
+        "start": 147,
+        "end": 183,
+        "text": "We are also told that the **cost of bottled water** is **$5** (this is the **price** of bottled water, $ P_b = 5 $).",
+        "weight": 1.4527,
+        "length": 36,
+        "type": "data_extraction"
+      },
+      {
+        "start": 217,
+        "end": 231,
+        "text": "Substitute $ P_b = 5 $ into the demand function:",
+        "weight": 1.4063,
+        "length": 14,
+        "type": "reasoning"
+      },
+      {
+        "start": 252,
+        "end": 262,
+        "text": "30 - 10 = 20",
+        "weight": 1.2736,
+        "length": 10,
+        "type": "arithmetic"
+      },
+      {
+        "start": 200,
+        "end": 217,
+        "text": "### Step 1: Find the quantity demanded at $ P_b = 5 $",
+        "weight": 1.2297,
+        "length": 17,
+        "type": "formatting"
+      },
+      {
+        "start": 183,
+        "end": 199,
+        "text": "We are asked to find the **price elasticity of demand** at this price.",
+        "weight": 1.2236,
+        "length": 16,
+        "type": "reasoning"
+      },
+      {
+        "start": 126,
+        "end": 147,
+        "text": "$$\nQ_{\\text{bw}} = 30 - 2P_b\n$$",
+        "weight": 1.1612,
+        "length": 21,
+        "type": "reasoning"
+      }
+    ],
+    "token_weights": [
+      {
+        "token": "We",
+        "weight": 1.508
+      },
+      {
+        "token": " are",
+        "weight": 1.508
+      },
+      {
+        "token": " given",
+        "weight": 1.508
+      },
+      {
+        "token": " the",
+        "weight": 1.508
+      },
+      {
+        "token": " demand",
+        "weight": 1.508
+      },
+      {
+        "token": " function",
+        "weight": 1.508
+      },
+      {
+        "token": " for",
+        "weight": 1.508
+      },
+      {
+        "token": " bottled",
+        "weight": 1.508
+      },
+      {
+        "token": " water",
+        "weight": 1.508
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.508
+      },
+      {
+        "token": "$$",
+        "weight": 1.256
+      },
+      {
+        "token": "\n",
+        "weight": 1.256
+      },
+      {
+        "token": "Q",
+        "weight": 1.256
+      },
+      {
+        "token": "_{",
+        "weight": 1.256
+      },
+      {
+        "token": "\\",
+        "weight": 1.256
+      },
+      {
+        "token": "text",
+        "weight": 1.256
+      },
+      {
+        "token": "{",
+        "weight": 1.256
+      },
+      {
+        "token": "bw",
+        "weight": 1.256
+      },
+      {
+        "token": "}}",
+        "weight": 1.256
+      },
+      {
+        "token": " =",
+        "weight": 0.2606
+      },
+      {
+        "token": " ",
+        "weight": 1.256
+      },
+      {
+        "token": "3",
+        "weight": 1.256
+      },
+      {
+        "token": "0",
+        "weight": 1.256
+      },
+      {
+        "token": " -",
+        "weight": 0.2606
+      },
+      {
+        "token": " ",
+        "weight": 1.256
+      },
+      {
+        "token": "2",
+        "weight": 1.256
+      },
+      {
+        "token": "P",
+        "weight": 1.256
+      },
+      {
+        "token": "_b",
+        "weight": 1.256
+      },
+      {
+        "token": "\n",
+        "weight": 1.256
+      },
+      {
+        "token": "$$",
+        "weight": 1.256
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.256
+      },
+      {
+        "token": "We",
+        "weight": 1.4861
+      },
+      {
+        "token": " are",
+        "weight": 1.4861
+      },
+      {
+        "token": " also",
+        "weight": 1.4861
+      },
+      {
+        "token": " told",
+        "weight": 1.4861
+      },
+      {
+        "token": " that",
+        "weight": 1.4861
+      },
+      {
+        "token": " the",
+        "weight": 1.4861
+      },
+      {
+        "token": " **",
+        "weight": 1.4861
+      },
+      {
+        "token": "cost",
+        "weight": 1.4861
+      },
+      {
+        "token": " of",
+        "weight": 1.4861
+      },
+      {
+        "token": " bottled",
+        "weight": 1.4861
+      },
+      {
+        "token": " water",
+        "weight": 1.4861
+      },
+      {
+        "token": "**",
+        "weight": 1.4861
+      },
+      {
+        "token": " is",
+        "weight": 1.4861
+      },
+      {
+        "token": " **",
+        "weight": 1.4861
+      },
+      {
+        "token": "$",
+        "weight": 1.4861
+      },
+      {
+        "token": "5",
+        "weight": 1.4861
+      },
+      {
+        "token": "**",
+        "weight": 1.4861
+      },
+      {
+        "token": " (",
+        "weight": 1.4861
+      },
+      {
+        "token": "this",
+        "weight": 1.4861
+      },
+      {
+        "token": " is",
+        "weight": 1.4861
+      },
+      {
+        "token": " the",
+        "weight": 1.4861
+      },
+      {
+        "token": " **",
+        "weight": 1.4861
+      },
+      {
+        "token": "price",
+        "weight": 1.4861
+      },
+      {
+        "token": "**",
+        "weight": 1.4861
+      },
+      {
+        "token": " of",
+        "weight": 1.4861
+      },
+      {
+        "token": " bottled",
+        "weight": 1.4861
+      },
+      {
+        "token": " water",
+        "weight": 1.4861
+      },
+      {
+        "token": ",",
+        "weight": 1.4861
+      },
+      {
+        "token": " $",
+        "weight": 1.4861
+      },
+      {
+        "token": " P",
+        "weight": 1.4861
+      },
+      {
+        "token": "_b",
+        "weight": 1.4861
+      },
+      {
+        "token": " =",
+        "weight": 0.2836
+      },
+      {
+        "token": " ",
+        "weight": 1.4861
+      },
+      {
+        "token": "5",
+        "weight": 1.4861
+      },
+      {
+        "token": " $",
+        "weight": 1.4861
+      },
+      {
+        "token": ").\n\n",
+        "weight": 1.4861
+      },
+      {
+        "token": "We",
+        "weight": 1.2236
+      },
+      {
+        "token": " are",
+        "weight": 1.2236
+      },
+      {
+        "token": " asked",
+        "weight": 1.2236
+      },
+      {
+        "token": " to",
+        "weight": 1.2236
+      },
+      {
+        "token": " find",
+        "weight": 1.2236
+      },
+      {
+        "token": " the",
+        "weight": 1.2236
+      },
+      {
+        "token": " **",
+        "weight": 1.2236
+      },
+      {
+        "token": "price",
+        "weight": 1.2236
+      },
+      {
+        "token": " elasticity",
+        "weight": 1.2236
+      },
+      {
+        "token": " of",
+        "weight": 1.2236
+      },
+      {
+        "token": " demand",
+        "weight": 1.2236
+      },
+      {
+        "token": "**",
+        "weight": 1.2236
+      },
+      {
+        "token": " at",
+        "weight": 1.2236
+      },
+      {
+        "token": " this",
+        "weight": 1.2236
+      },
+      {
+        "token": " price",
+        "weight": 1.2236
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.2236
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2708
+      },
+      {
+        "token": " Step",
+        "weight": 1.3576
+      },
+      {
+        "token": " ",
+        "weight": 1.3576
+      },
+      {
+        "token": "1",
+        "weight": 1.3576
+      },
+      {
+        "token": ":",
+        "weight": 1.3576
+      },
+      {
+        "token": " Find",
+        "weight": 1.3576
+      },
+      {
+        "token": " the",
+        "weight": 1.3576
+      },
+      {
+        "token": " quantity",
+        "weight": 1.3576
+      },
+      {
+        "token": " demanded",
+        "weight": 1.3576
+      },
+      {
+        "token": " at",
+        "weight": 1.3576
+      },
+      {
+        "token": " $",
+        "weight": 1.3576
+      },
+      {
+        "token": " P",
+        "weight": 1.3576
+      },
+      {
+        "token": "_b",
+        "weight": 1.3576
+      },
+      {
+        "token": " =",
+        "weight": 0.2708
+      },
+      {
+        "token": " ",
+        "weight": 1.3576
+      },
+      {
+        "token": "5",
+        "weight": 1.3576
+      },
+      {
+        "token": " $\n\n",
+        "weight": 1.3576
+      },
+      {
+        "token": "Sub",
+        "weight": 1.4926
+      },
+      {
+        "token": "stitute",
+        "weight": 1.4926
+      },
+      {
+        "token": " $",
+        "weight": 1.4926
+      },
+      {
+        "token": " P",
+        "weight": 1.4926
+      },
+      {
+        "token": "_b",
+        "weight": 1.4926
+      },
+      {
+        "token": " =",
+        "weight": 0.2843
+      },
+      {
+        "token": " ",
+        "weight": 1.4926
+      },
+      {
+        "token": "5",
+        "weight": 1.4926
+      },
+      {
+        "token": " $",
+        "weight": 1.4926
+      },
+      {
+        "token": " into",
+        "weight": 1.4926
+      },
+      {
+        "token": " the",
+        "weight": 1.4926
+      },
+      {
+        "token": " demand",
+        "weight": 1.4926
+      },
+      {
+        "token": " function",
+        "weight": 1.4926
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.4926
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "Q",
+        "weight": 1.075
+      },
+      {
+        "token": "_{",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "bw",
+        "weight": 1.075
+      },
+      {
+        "token": "}}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "(",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ")",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.5203
+      },
+      {
+        "token": "0",
+        "weight": 1.5203
+      },
+      {
+        "token": " -",
+        "weight": 0.287
+      },
+      {
+        "token": " ",
+        "weight": 1.5203
+      },
+      {
+        "token": "1",
+        "weight": 1.5203
+      },
+      {
+        "token": "0",
+        "weight": 1.5203
+      },
+      {
+        "token": " =",
+        "weight": 0.287
+      },
+      {
+        "token": " ",
+        "weight": 1.5203
+      },
+      {
+        "token": "2",
+        "weight": 1.5203
+      },
+      {
+        "token": "0",
+        "weight": 1.5203
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "So",
+        "weight": 1.6649
+      },
+      {
+        "token": ",",
+        "weight": 1.6649
+      },
+      {
+        "token": " the",
+        "weight": 1.6649
+      },
+      {
+        "token": " quantity",
+        "weight": 1.6649
+      },
+      {
+        "token": " demanded",
+        "weight": 1.6649
+      },
+      {
+        "token": " is",
+        "weight": 1.6649
+      },
+      {
+        "token": " $",
+        "weight": 1.6649
+      },
+      {
+        "token": " Q",
+        "weight": 1.6649
+      },
+      {
+        "token": "_{",
+        "weight": 1.6649
+      },
+      {
+        "token": "\\",
+        "weight": 1.6649
+      },
+      {
+        "token": "text",
+        "weight": 1.6649
+      },
+      {
+        "token": "{",
+        "weight": 1.6649
+      },
+      {
+        "token": "bw",
+        "weight": 1.6649
+      },
+      {
+        "token": "}}",
+        "weight": 1.6649
+      },
+      {
+        "token": " =",
+        "weight": 0.3015
+      },
+      {
+        "token": " ",
+        "weight": 1.6649
+      },
+      {
+        "token": "2",
+        "weight": 1.6649
+      },
+      {
+        "token": "0",
+        "weight": 1.6649
+      },
+      {
+        "token": " $",
+        "weight": 1.6649
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.6649
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.329
+      },
+      {
+        "token": " Step",
+        "weight": 1.94
+      },
+      {
+        "token": " ",
+        "weight": 1.94
+      },
+      {
+        "token": "2",
+        "weight": 1.94
+      },
+      {
+        "token": ":",
+        "weight": 1.94
+      },
+      {
+        "token": " Use",
+        "weight": 1.94
+      },
+      {
+        "token": " the",
+        "weight": 1.94
+      },
+      {
+        "token": " price",
+        "weight": 1.94
+      },
+      {
+        "token": " elasticity",
+        "weight": 1.94
+      },
+      {
+        "token": " of",
+        "weight": 1.94
+      },
+      {
+        "token": " demand",
+        "weight": 1.94
+      },
+      {
+        "token": " formula",
+        "weight": 1.94
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.94
+      },
+      {
+        "token": "The",
+        "weight": 2.0
+      },
+      {
+        "token": " price",
+        "weight": 2.0
+      },
+      {
+        "token": " elasticity",
+        "weight": 2.0
+      },
+      {
+        "token": " of",
+        "weight": 2.0
+      },
+      {
+        "token": " demand",
+        "weight": 2.0
+      },
+      {
+        "token": " (",
+        "weight": 2.0
+      },
+      {
+        "token": "PED",
+        "weight": 2.0
+      },
+      {
+        "token": ")",
+        "weight": 2.0
+      },
+      {
+        "token": " is",
+        "weight": 2.0
+      },
+      {
+        "token": " given",
+        "weight": 2.0
+      },
+      {
+        "token": " by",
+        "weight": 2.0
+      },
+      {
+        "token": ":\n\n",
+        "weight": 2.0
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "PED",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "frac",
+        "weight": 1.075
+      },
+      {
+        "token": "{\\",
+        "weight": 1.075
+      },
+      {
+        "token": "%\\",
+        "weight": 1.075
+      },
+      {
+        "token": "Delta",
+        "weight": 1.075
+      },
+      {
+        "token": " Q",
+        "weight": 1.075
+      },
+      {
+        "token": "_{",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "bw",
+        "weight": 1.075
+      },
+      {
+        "token": "}}",
+        "weight": 1.075
+      },
+      {
+        "token": "}{",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "%\\",
+        "weight": 1.075
+      },
+      {
+        "token": "Delta",
+        "weight": 1.075
+      },
+      {
+        "token": " P",
+        "weight": 1.075
+      },
+      {
+        "token": "_b",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "We",
+        "weight": 1.075
+      },
+      {
+        "token": " use",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "point",
+        "weight": 1.075
+      },
+      {
+        "token": " elasticity",
+        "weight": 1.075
+      },
+      {
+        "token": "**",
+        "weight": 1.075
+      },
+      {
+        "token": " formula",
+        "weight": 1.075
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "PED",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "frac",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "d",
+        "weight": 1.075
+      },
+      {
+        "token": "Q",
+        "weight": 1.075
+      },
+      {
+        "token": "_{",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "bw",
+        "weight": 1.075
+      },
+      {
+        "token": "}}",
+        "weight": 1.075
+      },
+      {
+        "token": "}{",
+        "weight": 1.075
+      },
+      {
+        "token": "d",
+        "weight": 1.075
+      },
+      {
+        "token": "P",
+        "weight": 1.075
+      },
+      {
+        "token": "_b",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "cdot",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "frac",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "P",
+        "weight": 1.075
+      },
+      {
+        "token": "_b",
+        "weight": 1.075
+      },
+      {
+        "token": "}{",
+        "weight": 1.075
+      },
+      {
+        "token": "Q",
+        "weight": 1.075
+      },
+      {
+        "token": "_{",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "bw",
+        "weight": 1.075
+      },
+      {
+        "token": "}}",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " Step",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": ":",
+        "weight": 1.075
+      },
+      {
+        "token": " Compute",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " derivative",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " demand",
+        "weight": 1.075
+      },
+      {
+        "token": " function",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "frac",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "d",
+        "weight": 1.075
+      },
+      {
+        "token": "Q",
+        "weight": 1.075
+      },
+      {
+        "token": "_{",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "bw",
+        "weight": 1.075
+      },
+      {
+        "token": "}}",
+        "weight": 1.075
+      },
+      {
+        "token": "}{",
+        "weight": 1.075
+      },
+      {
+        "token": "d",
+        "weight": 1.075
+      },
+      {
+        "token": "P",
+        "weight": 1.075
+      },
+      {
+        "token": "_b",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " Step",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": ":",
+        "weight": 1.075
+      },
+      {
+        "token": " Plug",
+        "weight": 1.075
+      },
+      {
+        "token": " into",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " elasticity",
+        "weight": 1.075
+      },
+      {
+        "token": " formula",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "PED",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "cdot",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "frac",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "}{",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "cdot",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " Step",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ":",
+        "weight": 1.075
+      },
+      {
+        "token": " Take",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " absolute",
+        "weight": 1.075
+      },
+      {
+        "token": " value",
+        "weight": 1.075
+      },
+      {
+        "token": " (",
+        "weight": 1.075
+      },
+      {
+        "token": "since",
+        "weight": 1.075
+      },
+      {
+        "token": " elasticity",
+        "weight": 1.075
+      },
+      {
+        "token": " is",
+        "weight": 1.075
+      },
+      {
+        "token": " usually",
+        "weight": 1.075
+      },
+      {
+        "token": " reported",
+        "weight": 1.075
+      },
+      {
+        "token": " as",
+        "weight": 1.075
+      },
+      {
+        "token": " a",
+        "weight": 1.075
+      },
+      {
+        "token": " positive",
+        "weight": 1.075
+      },
+      {
+        "token": " number",
+        "weight": 1.075
+      },
+      {
+        "token": ")\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "|\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "PED",
+        "weight": 1.075
+      },
+      {
+        "token": "}|",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " Final",
+        "weight": 0.15
+      },
+      {
+        "token": " Answer",
+        "weight": 0.15
+      },
+      {
+        "token": ":\n\n",
+        "weight": 0.15
+      },
+      {
+        "token": "$$",
+        "weight": 0.15
+      },
+      {
+        "token": "\n",
+        "weight": 0.15
+      },
+      {
+        "token": "\\",
+        "weight": 0.15
+      },
+      {
+        "token": "boxed",
+        "weight": 0.15
+      },
+      {
+        "token": "{",
+        "weight": 0.15
+      },
+      {
+        "token": "0",
+        "weight": 0.15
+      },
+      {
+        "token": ".",
+        "weight": 0.15
+      },
+      {
+        "token": "5",
+        "weight": 0.15
+      },
+      {
+        "token": "}\n",
+        "weight": 0.15
+      },
+      {
+        "token": "$$",
+        "weight": 0.15
+      },
+      {
+        "token": "<|im_end|>",
+        "weight": 1.0
+      }
+    ],
+    "weight_stats": {
+      "mean": 1.1484,
+      "std": 0.415,
+      "min": 0.15,
+      "max": 2.0
+    }
+  },
+  {
+    "benchmark": "FinReason",
+    "gold": "1312.5",
+    "response_preview": "To calculate the **accrued interest** on a corporate bond, we use the **30/360 day-count convention**, which assumes each month has 30 days and each year has 360 days.\n\n---\n\n### **Given:**\n- **Principal (P)** = $100,000  \n- **Annual interest rate (r)** = 5.25% = 0.0525  \n- **Time (t)** = 90 days  \n- **Day-count convention** = 30/360\n\n---\n\n### **Step 1: Calculate the daily interest rate**\n\n$$\n\\text{Daily interest rate} = \\frac{0.0525}{360}\n$$\n\n$$\n\\text{Daily interest rate} = 0.0001458333\n$$\n\n---\n",
+    "prompt_len": 144,
+    "total_len": 493,
+    "spans": [
+      {
+        "start": 265,
+        "end": 277,
+        "text": "### **Step 1: Calculate the daily interest rate**",
+        "weight": 1.8613,
+        "length": 12,
+        "type": "formatting"
+      },
+      {
+        "start": 144,
+        "end": 191,
+        "text": "To calculate the **accrued interest** on a corporate bond, we use the **30/360 day-count convention**, which assumes eac",
+        "weight": 1.8423,
+        "length": 47,
+        "type": "reasoning"
+      },
+      {
+        "start": 330,
+        "end": 341,
+        "text": "### **Step 2: Calculate the accrued interest**",
+        "weight": 1.835,
+        "length": 11,
+        "type": "formatting"
+      },
+      {
+        "start": 316,
+        "end": 329,
+        "text": "0001458333\n$$",
+        "weight": 1.7822,
+        "length": 13,
+        "type": "reasoning"
+      },
+      {
+        "start": 232,
+        "end": 264,
+        "text": "0525  \n- **Time (t)** = 90 days  \n- **Day-count convention** = 30/360",
+        "weight": 1.5375,
+        "length": 32,
+        "type": "reasoning"
+      },
+      {
+        "start": 277,
+        "end": 292,
+        "text": "$$\n\\text{Daily interest rate} = \\frac{0.",
+        "weight": 1.4862,
+        "length": 15,
+        "type": "reasoning"
+      },
+      {
+        "start": 192,
+        "end": 225,
+        "text": "### **Given:**\n- **Principal (P)** = $100,000  \n- **Annual interest rate (r)** = 5.",
+        "weight": 1.4626,
+        "length": 33,
+        "type": "data_extraction"
+      },
+      {
+        "start": 303,
+        "end": 316,
+        "text": "$$\n\\text{Daily interest rate} = 0.",
+        "weight": 1.3699,
+        "length": 13,
+        "type": "reasoning"
+      },
+      {
+        "start": 292,
+        "end": 303,
+        "text": "0525}{360}\n$$",
+        "weight": 1.3677,
+        "length": 11,
+        "type": "reasoning"
+      },
+      {
+        "start": 225,
+        "end": 232,
+        "text": "25% = 0.",
+        "weight": 0.9561,
+        "length": 7,
+        "type": "reasoning"
+      }
+    ],
+    "token_weights": [
+      {
+        "token": "To",
+        "weight": 1.8423
+      },
+      {
+        "token": " calculate",
+        "weight": 1.8423
+      },
+      {
+        "token": " the",
+        "weight": 1.8423
+      },
+      {
+        "token": " **",
+        "weight": 1.8423
+      },
+      {
+        "token": "acc",
+        "weight": 1.8423
+      },
+      {
+        "token": "ru",
+        "weight": 1.8423
+      },
+      {
+        "token": "ed",
+        "weight": 1.8423
+      },
+      {
+        "token": " interest",
+        "weight": 1.8423
+      },
+      {
+        "token": "**",
+        "weight": 1.8423
+      },
+      {
+        "token": " on",
+        "weight": 1.8423
+      },
+      {
+        "token": " a",
+        "weight": 1.8423
+      },
+      {
+        "token": " corporate",
+        "weight": 1.8423
+      },
+      {
+        "token": " bond",
+        "weight": 1.8423
+      },
+      {
+        "token": ",",
+        "weight": 1.8423
+      },
+      {
+        "token": " we",
+        "weight": 1.8423
+      },
+      {
+        "token": " use",
+        "weight": 1.8423
+      },
+      {
+        "token": " the",
+        "weight": 1.8423
+      },
+      {
+        "token": " **",
+        "weight": 1.8423
+      },
+      {
+        "token": "3",
+        "weight": 1.8423
+      },
+      {
+        "token": "0",
+        "weight": 1.8423
+      },
+      {
+        "token": "/",
+        "weight": 1.8423
+      },
+      {
+        "token": "3",
+        "weight": 1.8423
+      },
+      {
+        "token": "6",
+        "weight": 1.8423
+      },
+      {
+        "token": "0",
+        "weight": 1.8423
+      },
+      {
+        "token": " day",
+        "weight": 1.8423
+      },
+      {
+        "token": "-count",
+        "weight": 1.8423
+      },
+      {
+        "token": " convention",
+        "weight": 1.8423
+      },
+      {
+        "token": "**,",
+        "weight": 1.8423
+      },
+      {
+        "token": " which",
+        "weight": 1.8423
+      },
+      {
+        "token": " assumes",
+        "weight": 1.8423
+      },
+      {
+        "token": " each",
+        "weight": 1.8423
+      },
+      {
+        "token": " month",
+        "weight": 1.8423
+      },
+      {
+        "token": " has",
+        "weight": 1.8423
+      },
+      {
+        "token": " ",
+        "weight": 1.8423
+      },
+      {
+        "token": "3",
+        "weight": 1.8423
+      },
+      {
+        "token": "0",
+        "weight": 1.8423
+      },
+      {
+        "token": " days",
+        "weight": 1.8423
+      },
+      {
+        "token": " and",
+        "weight": 1.8423
+      },
+      {
+        "token": " each",
+        "weight": 1.8423
+      },
+      {
+        "token": " year",
+        "weight": 1.8423
+      },
+      {
+        "token": " has",
+        "weight": 1.8423
+      },
+      {
+        "token": " ",
+        "weight": 1.8423
+      },
+      {
+        "token": "3",
+        "weight": 1.8423
+      },
+      {
+        "token": "6",
+        "weight": 1.8423
+      },
+      {
+        "token": "0",
+        "weight": 1.8423
+      },
+      {
+        "token": " days",
+        "weight": 1.8423
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.8423
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2985
+      },
+      {
+        "token": "###",
+        "weight": 0.302
+      },
+      {
+        "token": " **",
+        "weight": 1.6699
+      },
+      {
+        "token": "Given",
+        "weight": 1.6699
+      },
+      {
+        "token": ":",
+        "weight": 1.6699
+      },
+      {
+        "token": "**\n",
+        "weight": 1.6699
+      },
+      {
+        "token": "-",
+        "weight": 0.302
+      },
+      {
+        "token": " **",
+        "weight": 1.6699
+      },
+      {
+        "token": "Principal",
+        "weight": 1.6699
+      },
+      {
+        "token": " (",
+        "weight": 1.6699
+      },
+      {
+        "token": "P",
+        "weight": 1.6699
+      },
+      {
+        "token": ")**",
+        "weight": 1.6699
+      },
+      {
+        "token": " =",
+        "weight": 0.302
+      },
+      {
+        "token": " $",
+        "weight": 1.6699
+      },
+      {
+        "token": "1",
+        "weight": 1.6699
+      },
+      {
+        "token": "0",
+        "weight": 1.6699
+      },
+      {
+        "token": "0",
+        "weight": 1.6699
+      },
+      {
+        "token": ",",
+        "weight": 1.6699
+      },
+      {
+        "token": "0",
+        "weight": 1.6699
+      },
+      {
+        "token": "0",
+        "weight": 1.6699
+      },
+      {
+        "token": "0",
+        "weight": 1.6699
+      },
+      {
+        "token": "  \n",
+        "weight": 1.6699
+      },
+      {
+        "token": "-",
+        "weight": 0.302
+      },
+      {
+        "token": " **",
+        "weight": 1.6699
+      },
+      {
+        "token": "Annual",
+        "weight": 1.6699
+      },
+      {
+        "token": " interest",
+        "weight": 1.6699
+      },
+      {
+        "token": " rate",
+        "weight": 1.6699
+      },
+      {
+        "token": " (",
+        "weight": 1.6699
+      },
+      {
+        "token": "r",
+        "weight": 1.6699
+      },
+      {
+        "token": ")**",
+        "weight": 1.6699
+      },
+      {
+        "token": " =",
+        "weight": 0.302
+      },
+      {
+        "token": " ",
+        "weight": 1.6699
+      },
+      {
+        "token": "5",
+        "weight": 1.6699
+      },
+      {
+        "token": ".",
+        "weight": 1.6699
+      },
+      {
+        "token": "2",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "%",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": ".",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.7134
+      },
+      {
+        "token": "5",
+        "weight": 1.7134
+      },
+      {
+        "token": "2",
+        "weight": 1.7134
+      },
+      {
+        "token": "5",
+        "weight": 1.7134
+      },
+      {
+        "token": "  \n",
+        "weight": 1.7134
+      },
+      {
+        "token": "-",
+        "weight": 0.3063
+      },
+      {
+        "token": " **",
+        "weight": 1.7134
+      },
+      {
+        "token": "Time",
+        "weight": 1.7134
+      },
+      {
+        "token": " (",
+        "weight": 1.7134
+      },
+      {
+        "token": "t",
+        "weight": 1.7134
+      },
+      {
+        "token": ")**",
+        "weight": 1.7134
+      },
+      {
+        "token": " =",
+        "weight": 0.3063
+      },
+      {
+        "token": " ",
+        "weight": 1.7134
+      },
+      {
+        "token": "9",
+        "weight": 1.7134
+      },
+      {
+        "token": "0",
+        "weight": 1.7134
+      },
+      {
+        "token": " days",
+        "weight": 1.7134
+      },
+      {
+        "token": "  \n",
+        "weight": 1.7134
+      },
+      {
+        "token": "-",
+        "weight": 0.3063
+      },
+      {
+        "token": " **",
+        "weight": 1.7134
+      },
+      {
+        "token": "Day",
+        "weight": 1.7134
+      },
+      {
+        "token": "-count",
+        "weight": 1.7134
+      },
+      {
+        "token": " convention",
+        "weight": 1.7134
+      },
+      {
+        "token": "**",
+        "weight": 1.7134
+      },
+      {
+        "token": " =",
+        "weight": 0.3063
+      },
+      {
+        "token": " ",
+        "weight": 1.7134
+      },
+      {
+        "token": "3",
+        "weight": 1.7134
+      },
+      {
+        "token": "0",
+        "weight": 1.7134
+      },
+      {
+        "token": "/",
+        "weight": 1.7134
+      },
+      {
+        "token": "3",
+        "weight": 1.7134
+      },
+      {
+        "token": "6",
+        "weight": 1.7134
+      },
+      {
+        "token": "0",
+        "weight": 1.7134
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.7134
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2985
+      },
+      {
+        "token": "###",
+        "weight": 0.335
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "Step",
+        "weight": 2.0
+      },
+      {
+        "token": " ",
+        "weight": 2.0
+      },
+      {
+        "token": "1",
+        "weight": 2.0
+      },
+      {
+        "token": ":",
+        "weight": 2.0
+      },
+      {
+        "token": " Calculate",
+        "weight": 2.0
+      },
+      {
+        "token": " the",
+        "weight": 2.0
+      },
+      {
+        "token": " daily",
+        "weight": 2.0
+      },
+      {
+        "token": " interest",
+        "weight": 2.0
+      },
+      {
+        "token": " rate",
+        "weight": 2.0
+      },
+      {
+        "token": "**\n\n",
+        "weight": 2.0
+      },
+      {
+        "token": "$$",
+        "weight": 1.5715
+      },
+      {
+        "token": "\n",
+        "weight": 1.5715
+      },
+      {
+        "token": "\\",
+        "weight": 1.5715
+      },
+      {
+        "token": "text",
+        "weight": 1.5715
+      },
+      {
+        "token": "{",
+        "weight": 1.5715
+      },
+      {
+        "token": "Daily",
+        "weight": 1.5715
+      },
+      {
+        "token": " interest",
+        "weight": 1.5715
+      },
+      {
+        "token": " rate",
+        "weight": 1.5715
+      },
+      {
+        "token": "}",
+        "weight": 1.5715
+      },
+      {
+        "token": " =",
+        "weight": 0.2921
+      },
+      {
+        "token": " \\",
+        "weight": 1.5715
+      },
+      {
+        "token": "frac",
+        "weight": 1.5715
+      },
+      {
+        "token": "{",
+        "weight": 1.5715
+      },
+      {
+        "token": "0",
+        "weight": 1.5715
+      },
+      {
+        "token": ".",
+        "weight": 1.5715
+      },
+      {
+        "token": "0",
+        "weight": 1.3677
+      },
+      {
+        "token": "5",
+        "weight": 1.3677
+      },
+      {
+        "token": "2",
+        "weight": 1.3677
+      },
+      {
+        "token": "5",
+        "weight": 1.3677
+      },
+      {
+        "token": "}{",
+        "weight": 1.3677
+      },
+      {
+        "token": "3",
+        "weight": 1.3677
+      },
+      {
+        "token": "6",
+        "weight": 1.3677
+      },
+      {
+        "token": "0",
+        "weight": 1.3677
+      },
+      {
+        "token": "}\n",
+        "weight": 1.3677
+      },
+      {
+        "token": "$$",
+        "weight": 1.3677
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.3677
+      },
+      {
+        "token": "$$",
+        "weight": 1.4606
+      },
+      {
+        "token": "\n",
+        "weight": 1.4606
+      },
+      {
+        "token": "\\",
+        "weight": 1.4606
+      },
+      {
+        "token": "text",
+        "weight": 1.4606
+      },
+      {
+        "token": "{",
+        "weight": 1.4606
+      },
+      {
+        "token": "Daily",
+        "weight": 1.4606
+      },
+      {
+        "token": " interest",
+        "weight": 1.4606
+      },
+      {
+        "token": " rate",
+        "weight": 1.4606
+      },
+      {
+        "token": "}",
+        "weight": 1.4606
+      },
+      {
+        "token": " =",
+        "weight": 0.2811
+      },
+      {
+        "token": " ",
+        "weight": 1.4606
+      },
+      {
+        "token": "0",
+        "weight": 1.4606
+      },
+      {
+        "token": ".",
+        "weight": 1.4606
+      },
+      {
+        "token": "0",
+        "weight": 1.7822
+      },
+      {
+        "token": "0",
+        "weight": 1.7822
+      },
+      {
+        "token": "0",
+        "weight": 1.7822
+      },
+      {
+        "token": "1",
+        "weight": 1.7822
+      },
+      {
+        "token": "4",
+        "weight": 1.7822
+      },
+      {
+        "token": "5",
+        "weight": 1.7822
+      },
+      {
+        "token": "8",
+        "weight": 1.7822
+      },
+      {
+        "token": "3",
+        "weight": 1.7822
+      },
+      {
+        "token": "3",
+        "weight": 1.7822
+      },
+      {
+        "token": "3",
+        "weight": 1.7822
+      },
+      {
+        "token": "\n",
+        "weight": 1.7822
+      },
+      {
+        "token": "$$",
+        "weight": 1.7822
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.7822
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2985
+      },
+      {
+        "token": "###",
+        "weight": 0.3335
+      },
+      {
+        "token": " **",
+        "weight": 1.9852
+      },
+      {
+        "token": "Step",
+        "weight": 1.9852
+      },
+      {
+        "token": " ",
+        "weight": 1.9852
+      },
+      {
+        "token": "2",
+        "weight": 1.9852
+      },
+      {
+        "token": ":",
+        "weight": 1.9852
+      },
+      {
+        "token": " Calculate",
+        "weight": 1.9852
+      },
+      {
+        "token": " the",
+        "weight": 1.9852
+      },
+      {
+        "token": " accrued",
+        "weight": 1.9852
+      },
+      {
+        "token": " interest",
+        "weight": 1.9852
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.9852
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "\\",
+        "weight": 1.6348
+      },
+      {
+        "token": "text",
+        "weight": 1.6348
+      },
+      {
+        "token": "{",
+        "weight": 1.6348
+      },
+      {
+        "token": "Acc",
+        "weight": 1.6348
+      },
+      {
+        "token": "ru",
+        "weight": 1.6348
+      },
+      {
+        "token": "ed",
+        "weight": 1.6348
+      },
+      {
+        "token": " interest",
+        "weight": 1.6348
+      },
+      {
+        "token": "}",
+        "weight": 1.6348
+      },
+      {
+        "token": " =",
+        "weight": 0.2985
+      },
+      {
+        "token": " P",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "times",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "text",
+        "weight": 1.6348
+      },
+      {
+        "token": "{",
+        "weight": 1.6348
+      },
+      {
+        "token": "Daily",
+        "weight": 1.6348
+      },
+      {
+        "token": " interest",
+        "weight": 1.6348
+      },
+      {
+        "token": " rate",
+        "weight": 1.6348
+      },
+      {
+        "token": "}",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "times",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "text",
+        "weight": 1.6348
+      },
+      {
+        "token": "{",
+        "weight": 1.6348
+      },
+      {
+        "token": "Number",
+        "weight": 1.6348
+      },
+      {
+        "token": " of",
+        "weight": 1.6348
+      },
+      {
+        "token": " days",
+        "weight": 1.6348
+      },
+      {
+        "token": "}\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "\\",
+        "weight": 1.6348
+      },
+      {
+        "token": "text",
+        "weight": 1.6348
+      },
+      {
+        "token": "{",
+        "weight": 1.6348
+      },
+      {
+        "token": "Acc",
+        "weight": 1.6348
+      },
+      {
+        "token": "ru",
+        "weight": 1.6348
+      },
+      {
+        "token": "ed",
+        "weight": 1.6348
+      },
+      {
+        "token": " interest",
+        "weight": 1.6348
+      },
+      {
+        "token": "}",
+        "weight": 1.6348
+      },
+      {
+        "token": " =",
+        "weight": 0.2985
+      },
+      {
+        "token": " ",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": ",",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "times",
+        "weight": 1.6348
+      },
+      {
+        "token": " ",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": ".",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": "4",
+        "weight": 1.6348
+      },
+      {
+        "token": "5",
+        "weight": 1.6348
+      },
+      {
+        "token": "8",
+        "weight": 1.6348
+      },
+      {
+        "token": "3",
+        "weight": 1.6348
+      },
+      {
+        "token": "3",
+        "weight": 1.6348
+      },
+      {
+        "token": "3",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "times",
+        "weight": 1.6348
+      },
+      {
+        "token": " ",
+        "weight": 1.6348
+      },
+      {
+        "token": "9",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "\\",
+        "weight": 1.6348
+      },
+      {
+        "token": "text",
+        "weight": 1.6348
+      },
+      {
+        "token": "{",
+        "weight": 1.6348
+      },
+      {
+        "token": "Acc",
+        "weight": 1.6348
+      },
+      {
+        "token": "ru",
+        "weight": 1.6348
+      },
+      {
+        "token": "ed",
+        "weight": 1.6348
+      },
+      {
+        "token": " interest",
+        "weight": 1.6348
+      },
+      {
+        "token": "}",
+        "weight": 1.6348
+      },
+      {
+        "token": " =",
+        "weight": 0.2985
+      },
+      {
+        "token": " ",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": ",",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": " \\",
+        "weight": 1.6348
+      },
+      {
+        "token": "times",
+        "weight": 1.6348
+      },
+      {
+        "token": " ",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": ".",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": "3",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": "2",
+        "weight": 1.6348
+      },
+      {
+        "token": "5",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "\\",
+        "weight": 1.6348
+      },
+      {
+        "token": "text",
+        "weight": 1.6348
+      },
+      {
+        "token": "{",
+        "weight": 1.6348
+      },
+      {
+        "token": "Acc",
+        "weight": 1.6348
+      },
+      {
+        "token": "ru",
+        "weight": 1.6348
+      },
+      {
+        "token": "ed",
+        "weight": 1.6348
+      },
+      {
+        "token": " interest",
+        "weight": 1.6348
+      },
+      {
+        "token": "}",
+        "weight": 1.6348
+      },
+      {
+        "token": " =",
+        "weight": 0.2985
+      },
+      {
+        "token": " ",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": ",",
+        "weight": 1.6348
+      },
+      {
+        "token": "3",
+        "weight": 1.6348
+      },
+      {
+        "token": "1",
+        "weight": 1.6348
+      },
+      {
+        "token": "2",
+        "weight": 1.6348
+      },
+      {
+        "token": ".",
+        "weight": 1.6348
+      },
+      {
+        "token": "5",
+        "weight": 1.6348
+      },
+      {
+        "token": "0",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "$$",
+        "weight": 1.6348
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.6348
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2985
+      },
+      {
+        "token": "###",
+        "weight": 0.2985
+      },
+      {
+        "token": " **",
+        "weight": 1.6348
+      },
+      {
+        "token": "Final",
+        "weight": 1.5
+      },
+      {
+        "token": " Answer",
+        "weight": 1.5
+      },
+      {
+        "token": ":",
+        "weight": 1.5
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "\n",
+        "weight": 1.5
+      },
+      {
+        "token": "\\",
+        "weight": 1.5
+      },
+      {
+        "token": "boxed",
+        "weight": 1.5
+      },
+      {
+        "token": "{",
+        "weight": 1.5
+      },
+      {
+        "token": "1",
+        "weight": 1.5
+      },
+      {
+        "token": "3",
+        "weight": 1.5
+      },
+      {
+        "token": "1",
+        "weight": 1.5
+      },
+      {
+        "token": "2",
+        "weight": 1.5
+      },
+      {
+        "token": ".",
+        "weight": 1.5
+      },
+      {
+        "token": "5",
+        "weight": 1.5
+      },
+      {
+        "token": "0",
+        "weight": 1.5
+      },
+      {
+        "token": "}\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "<|im_end|>",
+        "weight": 1.0
+      }
+    ],
+    "weight_stats": {
+      "mean": 1.5756,
+      "std": 0.3738,
+      "min": 0.2425,
+      "max": 2.0
+    }
+  },
+  {
+    "benchmark": "FinReason",
+    "gold": "0",
+    "response_preview": "To calculate Jane's **total profit or loss** from her put option strategy, we need to consider the **stock price at expiration**, the **strike price**, and the **premium paid**.\n\n---\n\n### **Step 1: Understand the Put Option Contract**\n\n- **Number of shares**: 100  \n- **Stock price at expiration**: $45  \n- **Strike price**: $48  \n- **Premium paid per share**: $3  \n- **Total premium paid**: $3 \u00d7 100 = **$300**\n\n---\n\n### **Step 2: Determine the Profit or Loss from the Put Option**\n\nA **put option**",
+    "prompt_len": 175,
+    "total_len": 569,
+    "spans": [
+      {
+        "start": 454,
+        "end": 465,
+        "text": "### **Step 3: Subtract the Premium Paid**",
+        "weight": 1.8486,
+        "length": 11,
+        "type": "formatting"
+      },
+      {
+        "start": 478,
+        "end": 488,
+        "text": "So, her **net profit** is:",
+        "weight": 1.8476,
+        "length": 10,
+        "type": "reasoning"
+      },
+      {
+        "start": 465,
+        "end": 478,
+        "text": "Jane paid **$300** for the put option.",
+        "weight": 1.7983,
+        "length": 13,
+        "type": "data_extraction"
+      },
+      {
+        "start": 215,
+        "end": 227,
+        "text": "### **Step 1: Understand the Put Option Contract**",
+        "weight": 1.5992,
+        "length": 12,
+        "type": "formatting"
+      },
+      {
+        "start": 324,
+        "end": 348,
+        "text": "If the stock price at expiration is **below the strike price**, the put option is **in the money**.",
+        "weight": 1.2195,
+        "length": 24,
+        "type": "reasoning"
+      },
+      {
+        "start": 305,
+        "end": 324,
+        "text": "A **put option** gives the holder the right to sell the stock at the strike price.",
+        "weight": 1.1487,
+        "length": 19,
+        "type": "reasoning"
+      },
+      {
+        "start": 289,
+        "end": 305,
+        "text": "### **Step 2: Determine the Profit or Loss from the Put Option**",
+        "weight": 1.1297,
+        "length": 16,
+        "type": "formatting"
+      },
+      {
+        "start": 175,
+        "end": 214,
+        "text": "To calculate Jane's **total profit or loss** from her put option strategy, we need to consider the **stock price at expi",
+        "weight": 1.1106,
+        "length": 39,
+        "type": "reasoning"
+      },
+      {
+        "start": 488,
+        "end": 538,
+        "text": "$$\n\\text{Net Profit} = \\text{Profit from put} - \\text{Premium paid}\n$$\n$$\n= 300 - 300 = \\boxed{0}\n$$\n\n---\n\n### \ufffd\ufffd **",
+        "weight": 0.9399,
+        "length": 50,
+        "type": "arithmetic"
+      }
+    ],
+    "token_weights": [
+      {
+        "token": "To",
+        "weight": 1.1106
+      },
+      {
+        "token": " calculate",
+        "weight": 1.1106
+      },
+      {
+        "token": " Jane",
+        "weight": 1.1106
+      },
+      {
+        "token": "'s",
+        "weight": 1.1106
+      },
+      {
+        "token": " **",
+        "weight": 1.1106
+      },
+      {
+        "token": "total",
+        "weight": 1.1106
+      },
+      {
+        "token": " profit",
+        "weight": 1.1106
+      },
+      {
+        "token": " or",
+        "weight": 1.1106
+      },
+      {
+        "token": " loss",
+        "weight": 1.1106
+      },
+      {
+        "token": "**",
+        "weight": 1.1106
+      },
+      {
+        "token": " from",
+        "weight": 1.1106
+      },
+      {
+        "token": " her",
+        "weight": 1.1106
+      },
+      {
+        "token": " put",
+        "weight": 1.1106
+      },
+      {
+        "token": " option",
+        "weight": 1.1106
+      },
+      {
+        "token": " strategy",
+        "weight": 1.1106
+      },
+      {
+        "token": ",",
+        "weight": 1.1106
+      },
+      {
+        "token": " we",
+        "weight": 1.1106
+      },
+      {
+        "token": " need",
+        "weight": 1.1106
+      },
+      {
+        "token": " to",
+        "weight": 1.1106
+      },
+      {
+        "token": " consider",
+        "weight": 1.1106
+      },
+      {
+        "token": " the",
+        "weight": 1.1106
+      },
+      {
+        "token": " **",
+        "weight": 1.1106
+      },
+      {
+        "token": "stock",
+        "weight": 1.1106
+      },
+      {
+        "token": " price",
+        "weight": 1.1106
+      },
+      {
+        "token": " at",
+        "weight": 1.1106
+      },
+      {
+        "token": " expiration",
+        "weight": 1.1106
+      },
+      {
+        "token": "**,",
+        "weight": 1.1106
+      },
+      {
+        "token": " the",
+        "weight": 1.1106
+      },
+      {
+        "token": " **",
+        "weight": 1.1106
+      },
+      {
+        "token": "strike",
+        "weight": 1.1106
+      },
+      {
+        "token": " price",
+        "weight": 1.1106
+      },
+      {
+        "token": "**,",
+        "weight": 1.1106
+      },
+      {
+        "token": " and",
+        "weight": 1.1106
+      },
+      {
+        "token": " the",
+        "weight": 1.1106
+      },
+      {
+        "token": " **",
+        "weight": 1.1106
+      },
+      {
+        "token": "premium",
+        "weight": 1.1106
+      },
+      {
+        "token": " paid",
+        "weight": 1.1106
+      },
+      {
+        "token": "**",
+        "weight": 1.1106
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.1106
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.3067
+      },
+      {
+        "token": " **",
+        "weight": 1.7167
+      },
+      {
+        "token": "Step",
+        "weight": 1.7167
+      },
+      {
+        "token": " ",
+        "weight": 1.7167
+      },
+      {
+        "token": "1",
+        "weight": 1.7167
+      },
+      {
+        "token": ":",
+        "weight": 1.7167
+      },
+      {
+        "token": " Understand",
+        "weight": 1.7167
+      },
+      {
+        "token": " the",
+        "weight": 1.7167
+      },
+      {
+        "token": " Put",
+        "weight": 1.7167
+      },
+      {
+        "token": " Option",
+        "weight": 1.7167
+      },
+      {
+        "token": " Contract",
+        "weight": 1.7167
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.7167
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Number",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " shares",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Stock",
+        "weight": 1.075
+      },
+      {
+        "token": " price",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " expiration",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Strike",
+        "weight": 1.075
+      },
+      {
+        "token": " price",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "8",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Premium",
+        "weight": 1.075
+      },
+      {
+        "token": " paid",
+        "weight": 1.075
+      },
+      {
+        "token": " per",
+        "weight": 1.075
+      },
+      {
+        "token": " share",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Total",
+        "weight": 1.075
+      },
+      {
+        "token": " premium",
+        "weight": 1.075
+      },
+      {
+        "token": " paid",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": " \u00d7",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "$",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2538
+      },
+      {
+        "token": " **",
+        "weight": 1.188
+      },
+      {
+        "token": "Step",
+        "weight": 1.188
+      },
+      {
+        "token": " ",
+        "weight": 1.188
+      },
+      {
+        "token": "2",
+        "weight": 1.188
+      },
+      {
+        "token": ":",
+        "weight": 1.188
+      },
+      {
+        "token": " Determine",
+        "weight": 1.188
+      },
+      {
+        "token": " the",
+        "weight": 1.188
+      },
+      {
+        "token": " Profit",
+        "weight": 1.188
+      },
+      {
+        "token": " or",
+        "weight": 1.188
+      },
+      {
+        "token": " Loss",
+        "weight": 1.188
+      },
+      {
+        "token": " from",
+        "weight": 1.188
+      },
+      {
+        "token": " the",
+        "weight": 1.188
+      },
+      {
+        "token": " Put",
+        "weight": 1.188
+      },
+      {
+        "token": " Option",
+        "weight": 1.188
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.188
+      },
+      {
+        "token": "A",
+        "weight": 1.1487
+      },
+      {
+        "token": " **",
+        "weight": 1.1487
+      },
+      {
+        "token": "put",
+        "weight": 1.1487
+      },
+      {
+        "token": " option",
+        "weight": 1.1487
+      },
+      {
+        "token": "**",
+        "weight": 1.1487
+      },
+      {
+        "token": " gives",
+        "weight": 1.1487
+      },
+      {
+        "token": " the",
+        "weight": 1.1487
+      },
+      {
+        "token": " holder",
+        "weight": 1.1487
+      },
+      {
+        "token": " the",
+        "weight": 1.1487
+      },
+      {
+        "token": " right",
+        "weight": 1.1487
+      },
+      {
+        "token": " to",
+        "weight": 1.1487
+      },
+      {
+        "token": " sell",
+        "weight": 1.1487
+      },
+      {
+        "token": " the",
+        "weight": 1.1487
+      },
+      {
+        "token": " stock",
+        "weight": 1.1487
+      },
+      {
+        "token": " at",
+        "weight": 1.1487
+      },
+      {
+        "token": " the",
+        "weight": 1.1487
+      },
+      {
+        "token": " strike",
+        "weight": 1.1487
+      },
+      {
+        "token": " price",
+        "weight": 1.1487
+      },
+      {
+        "token": ".",
+        "weight": 1.1487
+      },
+      {
+        "token": "  \n",
+        "weight": 1.2195
+      },
+      {
+        "token": "If",
+        "weight": 1.2195
+      },
+      {
+        "token": " the",
+        "weight": 1.2195
+      },
+      {
+        "token": " stock",
+        "weight": 1.2195
+      },
+      {
+        "token": " price",
+        "weight": 1.2195
+      },
+      {
+        "token": " at",
+        "weight": 1.2195
+      },
+      {
+        "token": " expiration",
+        "weight": 1.2195
+      },
+      {
+        "token": " is",
+        "weight": 1.2195
+      },
+      {
+        "token": " **",
+        "weight": 1.2195
+      },
+      {
+        "token": "below",
+        "weight": 1.2195
+      },
+      {
+        "token": " the",
+        "weight": 1.2195
+      },
+      {
+        "token": " strike",
+        "weight": 1.2195
+      },
+      {
+        "token": " price",
+        "weight": 1.2195
+      },
+      {
+        "token": "**,",
+        "weight": 1.2195
+      },
+      {
+        "token": " the",
+        "weight": 1.2195
+      },
+      {
+        "token": " put",
+        "weight": 1.2195
+      },
+      {
+        "token": " option",
+        "weight": 1.2195
+      },
+      {
+        "token": " is",
+        "weight": 1.2195
+      },
+      {
+        "token": " **",
+        "weight": 1.2195
+      },
+      {
+        "token": "in",
+        "weight": 1.2195
+      },
+      {
+        "token": " the",
+        "weight": 1.2195
+      },
+      {
+        "token": " money",
+        "weight": 1.2195
+      },
+      {
+        "token": "**",
+        "weight": 1.2195
+      },
+      {
+        "token": ".\n\n",
+        "weight": 1.2195
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Stock",
+        "weight": 1.075
+      },
+      {
+        "token": " price",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " expiration",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Strike",
+        "weight": 1.075
+      },
+      {
+        "token": " price",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "8",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": "-",
+        "weight": 0.2425
+      },
+      {
+        "token": " **",
+        "weight": 1.075
+      },
+      {
+        "token": "Profit",
+        "weight": 1.075
+      },
+      {
+        "token": " from",
+        "weight": 1.075
+      },
+      {
+        "token": " the",
+        "weight": 1.075
+      },
+      {
+        "token": " put",
+        "weight": 1.075
+      },
+      {
+        "token": " option",
+        "weight": 1.075
+      },
+      {
+        "token": "**:",
+        "weight": 1.075
+      },
+      {
+        "token": "  \n",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "$\n",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Profit",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " (\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Strike",
+        "weight": 1.075
+      },
+      {
+        "token": " price",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Stock",
+        "weight": 1.075
+      },
+      {
+        "token": " price",
+        "weight": 1.075
+      },
+      {
+        "token": " at",
+        "weight": 1.075
+      },
+      {
+        "token": " expiration",
+        "weight": 1.075
+      },
+      {
+        "token": "})",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "times",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Number",
+        "weight": 1.075
+      },
+      {
+        "token": " of",
+        "weight": 1.075
+      },
+      {
+        "token": " shares",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "$\n",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": " $",
+        "weight": 1.075
+      },
+      {
+        "token": "$\n",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " (",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "8",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "4",
+        "weight": 1.075
+      },
+      {
+        "token": "5",
+        "weight": 1.075
+      },
+      {
+        "token": ")",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "times",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "times",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "1",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "boxed",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": " $$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.335
+      },
+      {
+        "token": " **",
+        "weight": 2.0
+      },
+      {
+        "token": "Step",
+        "weight": 2.0
+      },
+      {
+        "token": " ",
+        "weight": 2.0
+      },
+      {
+        "token": "3",
+        "weight": 2.0
+      },
+      {
+        "token": ":",
+        "weight": 2.0
+      },
+      {
+        "token": " Subtract",
+        "weight": 2.0
+      },
+      {
+        "token": " the",
+        "weight": 2.0
+      },
+      {
+        "token": " Premium",
+        "weight": 2.0
+      },
+      {
+        "token": " Paid",
+        "weight": 2.0
+      },
+      {
+        "token": "**\n\n",
+        "weight": 2.0
+      },
+      {
+        "token": "Jane",
+        "weight": 1.7983
+      },
+      {
+        "token": " paid",
+        "weight": 1.7983
+      },
+      {
+        "token": " **",
+        "weight": 1.7983
+      },
+      {
+        "token": "$",
+        "weight": 1.7983
+      },
+      {
+        "token": "3",
+        "weight": 1.7983
+      },
+      {
+        "token": "0",
+        "weight": 1.7983
+      },
+      {
+        "token": "0",
+        "weight": 1.7983
+      },
+      {
+        "token": "**",
+        "weight": 1.7983
+      },
+      {
+        "token": " for",
+        "weight": 1.7983
+      },
+      {
+        "token": " the",
+        "weight": 1.7983
+      },
+      {
+        "token": " put",
+        "weight": 1.7983
+      },
+      {
+        "token": " option",
+        "weight": 1.7983
+      },
+      {
+        "token": ".",
+        "weight": 1.7983
+      },
+      {
+        "token": "  \n",
+        "weight": 1.8476
+      },
+      {
+        "token": "So",
+        "weight": 1.8476
+      },
+      {
+        "token": ",",
+        "weight": 1.8476
+      },
+      {
+        "token": " her",
+        "weight": 1.8476
+      },
+      {
+        "token": " **",
+        "weight": 1.8476
+      },
+      {
+        "token": "net",
+        "weight": 1.8476
+      },
+      {
+        "token": " profit",
+        "weight": 1.8476
+      },
+      {
+        "token": "**",
+        "weight": 1.8476
+      },
+      {
+        "token": " is",
+        "weight": 1.8476
+      },
+      {
+        "token": ":\n\n",
+        "weight": 1.8476
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "\\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Net",
+        "weight": 1.075
+      },
+      {
+        "token": " Profit",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Profit",
+        "weight": 1.075
+      },
+      {
+        "token": " from",
+        "weight": 1.075
+      },
+      {
+        "token": " put",
+        "weight": 1.075
+      },
+      {
+        "token": "}",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "text",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "Premium",
+        "weight": 1.075
+      },
+      {
+        "token": " paid",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n",
+        "weight": 1.075
+      },
+      {
+        "token": "=",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " -",
+        "weight": 0.2425
+      },
+      {
+        "token": " ",
+        "weight": 1.075
+      },
+      {
+        "token": "3",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": " =",
+        "weight": 0.2425
+      },
+      {
+        "token": " \\",
+        "weight": 1.075
+      },
+      {
+        "token": "boxed",
+        "weight": 1.075
+      },
+      {
+        "token": "{",
+        "weight": 1.075
+      },
+      {
+        "token": "0",
+        "weight": 1.075
+      },
+      {
+        "token": "}\n",
+        "weight": 1.075
+      },
+      {
+        "token": "$$",
+        "weight": 1.075
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.075
+      },
+      {
+        "token": "---\n\n",
+        "weight": 0.2425
+      },
+      {
+        "token": "###",
+        "weight": 0.2425
+      },
+      {
+        "token": " \ufffd",
+        "weight": 1.075
+      },
+      {
+        "token": "\ufffd",
+        "weight": 1.075
+      },
+      {
+        "token": " **",
+        "weight": 0.15
+      },
+      {
+        "token": "Final",
+        "weight": 1.5
+      },
+      {
+        "token": " Answer",
+        "weight": 1.5
+      },
+      {
+        "token": ":",
+        "weight": 1.5
+      },
+      {
+        "token": "**\n\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "\n",
+        "weight": 1.5
+      },
+      {
+        "token": "\\",
+        "weight": 1.5
+      },
+      {
+        "token": "boxed",
+        "weight": 1.5
+      },
+      {
+        "token": "{",
+        "weight": 1.5
+      },
+      {
+        "token": "0",
+        "weight": 1.5
+      },
+      {
+        "token": "}\n",
+        "weight": 1.5
+      },
+      {
+        "token": "$$",
+        "weight": 1.5
+      },
+      {
+        "token": "\n\n",
+        "weight": 1.5
+      },
+      {
+        "token": "Jane",
+        "weight": 1.5
+      },
+      {
+        "token": "'s",
+        "weight": 1.5
+      },
+      {
+        "token": " total",
+        "weight": 1.5
+      },
+      {
+        "token": " profit",
+        "weight": 1.5
+      },
+      {
+        "token": " or",
+        "weight": 1.5
+      },
+      {
+        "token": " loss",
+        "weight": 1.5
+      },
+      {
+        "token": " from",
+        "weight": 1.5
+      },
+      {
+        "token": " this",
+        "weight": 1.5
+      },
+      {
+        "token": " put",
+        "weight": 1.5
+      },
+      {
+        "token": " option",
+        "weight": 1.5
+      },
+      {
+        "token": " strategy",
+        "weight": 1.5
+      },
+      {
+        "token": " is",
+        "weight": 1.5
+      },
+      {
+        "token": " **",
+        "weight": 1.5
+      },
+      {
+        "token": "$",
+        "weight": 1.5
+      },
+      {
+        "token": "0",
+        "weight": 1.5
+      },
+      {
+        "token": "**",
+        "weight": 1.5
+      },
+      {
+        "token": ".",
+        "weight": 1.5
+      },
+      {
+        "token": "<|im_end|>",
+        "weight": 1.0
+      }
+    ],
+    "weight_stats": {
+      "mean": 1.1511,
+      "std": 0.3556,
+      "min": 0.15,
+      "max": 2.0
+    }
+  }
+]

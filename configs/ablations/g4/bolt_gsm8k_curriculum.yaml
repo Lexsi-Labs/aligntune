@@ -1,0 +1,64 @@
+algo: bolt
+
+model:
+  name_or_path: "Qwen/Qwen3-1.7B"
+  precision: bf16
+  gradient_checkpointing: true
+  max_seq_length: 1152
+  use_peft: true
+  lora_r: 32
+  lora_alpha: 32
+  lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  lora_dropout: 0.1
+
+datasets:
+  - name: "openai/gsm8k"
+    split: "train"
+    max_samples: 500
+    system_prompt: "You are a careful math tutor. Solve step by step and provide the final numeric answer after ####."
+
+rewards:
+  - type: math
+    weight: 1.0
+    params: {}
+
+train:
+  max_steps: 400
+  beta: 0.005
+  enable_thinking: false
+  per_device_batch_size: 16
+  gradient_accumulation_steps: 2
+  num_generations: 4
+  learning_rate: 2.5e-5
+  max_prompt_length: 384
+  max_completion_length: 768
+  temperature: 0.6
+  top_p: 0.95
+  max_grad_norm: 0.0
+
+  baseline_enabled: true
+  use_baseline_advantages: false
+  baseline_warm_start: "gsm8k_baseline_qwen3_1.7b.json"
+  baseline_rho_min: 0.875
+  baseline_rho_max: 0.96
+  baseline_D_half: 0.5
+
+  curriculum_enabled: true
+  curriculum_epsilon: 0.05
+  curriculum_update_freq: 10
+
+  save_steps: 25
+  save_total_limit: 0
+  logging_steps: 10
+  seed: 42
+  data_seed: 47
+
+logging:
+  output_dir: "/datasets/second-disk/ablations/bolt_gsm8k_g4_curriculum"
+  run_name: "bolt_gsm8k_g4_curriculum"
+  loggers: ["wandb"]
+
+distributed:
+  backend: single
+
+chat_template: auto

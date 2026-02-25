@@ -1,0 +1,56 @@
+recipe:
+  name: "gemma-instruct-finetome"
+  description: "Fine-tune Gemma 2 2B on FineTome for high-quality instruction following"
+  model: "google/gemma-2-2b-it"
+  dataset: "mlabonne/FineTome-100k"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "unsloth"
+  tags: ["gemma", "instruction-tuning", "efficient", "quality"]
+  requires_auth: true
+  estimated_time: "1-2 hours"
+  estimated_memory: "12GB VRAM"
+
+config:
+  algo: sft
+  
+  model:
+    name_or_path: "google/gemma-2-2b-it"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  
+  datasets:
+    - name: "mlabonne/FineTome-100k"
+      split: "train"
+      max_samples: 50000
+      column_mapping:
+        text: "conversations"
+  
+  train:
+    epochs: 1
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 2e-4
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+    eval_steps: 500
+  
+  logging:
+    output_dir: "./output/gemma-finetome-sft"
+    run_name: "gemma-instruction-finetome"
+    loggers: []
+  
+  distributed:
+    backend: "single"
+  
+  chat_template: "auto"

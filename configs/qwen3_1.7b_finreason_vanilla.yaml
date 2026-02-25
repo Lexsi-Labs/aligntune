@@ -1,0 +1,73 @@
+algo: counterfact_grpo
+backend: trl
+
+model:
+  name_or_path: "Qwen/Qwen3-1.7B"
+  precision: bf16
+  quantization:
+    load_in_4bit: false
+  gradient_checkpointing: true
+  max_seq_length: 2048
+  use_peft: true
+  lora_r: 32
+  lora_alpha: 32
+  lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  lora_dropout: 0.1
+
+datasets:
+  - name: "data/finance_reasoning_medium"
+    split: "train"
+    max_samples: 496
+    system_prompt: "You are a careful financial analyst. Solve step by step and provide the final numeric answer."
+
+rewards:
+  - type: counterfactual_math
+    weight: 1.0
+    params: {}
+
+train:
+  epochs: 1
+  max_steps: 200
+  per_device_batch_size: 4
+  gradient_accumulation_steps: 2
+  num_generations: 8
+  learning_rate: 1.5e-5
+  max_prompt_length: 1024
+  max_completion_length: 768
+  enable_thinking: false
+  loss_type: dapo
+  beta: 0.01
+  scale_rewards: group
+  temperature: 0.6
+  top_p: 0.95
+  max_grad_norm: 1.0
+
+  # Vanilla GRPO - uniform weighting (no counterfactual)
+  weighting_mode: uniform
+  weight_debug: true
+
+  # Checkpointing
+  save_steps: 200
+  save_total_limit: 3
+  logging_steps: 10
+
+  use_gradient_checkpointing: true
+
+  # Seeds (same as counterfactual for fair comparison)
+  seed: 42
+  data_seed: 47
+
+logging:
+  output_dir: "output/qwen3_vanilla_finreason"
+  run_name: "qwen3_vanilla_finreason"
+  loggers: ["tensorboard"]
+  logging_steps: 1
+
+distributed:
+  backend: single
+
+caching:
+  root: "cache"
+  enabled: true
+
+chat_template: auto

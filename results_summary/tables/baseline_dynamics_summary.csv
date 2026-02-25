@@ -1,0 +1,11 @@
+Generation,Condition,Initial v_hat,Final v_hat,v_hat Change,Final Batch Reward
+G2,baseline_only,0.6389,0.7435,+0.1046,0.7449
+G2,curriculum_only,0.6393,0.7240,+0.0847,0.7369
+G2,full,0.6400,0.7506,+0.1106,0.7570
+G4,baseline_only,0.6387,0.7623,+0.1236,0.7631
+G4,curriculum_only,0.6379,0.7450,+0.1071,0.7593
+G4,full,0.6386,0.7553,+0.1167,0.7619
+G16,vanilla,0.6814,0.7481,+0.0667,0.7601
+G16,baseline_only,0.6387,0.7482,+0.1096,0.7546
+G16,curriculum_only,0.6415,0.7346,+0.0931,0.7359
+G16,full,0.6402,0.7455,+0.1053,0.7720

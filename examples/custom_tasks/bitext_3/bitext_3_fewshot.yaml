@@ -1,0 +1,43 @@
+# Bitext retail banking, 2-shot with fixed exemplars (reproducible).
+# Same as bitext_2 but num_fewshot: 2 and fewshot_config.samples from utils.list_fewshot_samples.
+task: bitext_3_fewshot
+dataset_path: sohamb37lexsi/Bitext-wealth-management-llm-chatbot-training-dataset
+dataset_name: null
+output_type: generate_until
+test_split: test
+num_fewshot: 2
+fewshot_config:
+  sampler: first_n
+  samples: !function utils.list_fewshot_samples
+target_delimiter: "\n"
+fewshot_delimiter: "\n\n"
+doc_to_text: !function utils.doc_to_text
+doc_to_target: !function utils.doc_to_target
+process_results: !function utils.process_results
+generation_kwargs:
+  do_sample: false
+  temperature: 0.0
+  max_gen_toks: 512
+  until:
+    - "<|im_end|>"
+metric_list:
+  - metric: bleu
+    aggregation: nanmean
+    higher_is_better: true
+  - metric: rouge1
+    aggregation: nanmean
+    higher_is_better: true
+  - metric: rouge2
+    aggregation: nanmean
+    higher_is_better: true
+  - metric: rougeL
+    aggregation: nanmean
+    higher_is_better: true
+  - metric: chrf
+    aggregation: nanmean
+    higher_is_better: true
+  - metric: bert_score
+    aggregation: nanmean
+    higher_is_better: true
+metadata:
+  version: 1.0
