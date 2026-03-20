@@ -83,7 +83,7 @@ dependencies = [
     
     # Reinforcement Learning
     "trl==0.23.0",
-    "trl[vllm]",
+    "vllm==0.11",
     
     # Unsloth acceleration
     "unsloth==2025.11.1",

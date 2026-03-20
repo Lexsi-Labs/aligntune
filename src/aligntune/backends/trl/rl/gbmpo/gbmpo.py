@@ -891,6 +891,7 @@ class TRLGBMPOTrainer(TrainerBase):
             warmup_steps=warmup_steps,
             max_grad_norm=max_grad_norm,
             seed=seed,
+            max_steps=max_steps,      
 
             # Optimizer and scheduler
             optim=optimizer_name,
