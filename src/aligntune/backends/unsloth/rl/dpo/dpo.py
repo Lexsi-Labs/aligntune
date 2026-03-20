@@ -399,7 +399,7 @@ class UnslothDPOTrainer(TrainerBase):
                 self.config.train, 'load_best_model_at_end', default=True)
 
             # Adjust eval strategy based on eval_dataset availability
-           if not self.eval_dataset:
+            if not self.eval_dataset:
 
                 eval_strategy = 'no'
                 eval_steps = None
