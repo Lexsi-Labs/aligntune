@@ -685,6 +685,7 @@ class TRLDAPOTrainer(TrainerBase):
             save_total_limit=save_total_limit,
             load_best_model_at_end=load_best_model_at_end,
             metric_for_best_model=metric_for_best_model,
+            max_steps = self._get_config_value(self.config.train, "max_steps", 500),
 
             # Other parameters
             loss_type="dapo",

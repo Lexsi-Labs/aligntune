@@ -680,6 +680,7 @@ class TRLDRGRPOTrainer(TrainerBase):
             max_grad_norm=max_grad_norm,
             remove_unused_columns=False,
             seed=seed,
+            max_steps = self._get_config_value(self.config.train, "max_steps", 500),
             
             # Generation parameters
             num_generations=num_generations,
