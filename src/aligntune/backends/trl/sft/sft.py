@@ -738,7 +738,7 @@ class TRLSFTTrainer(SFTTrainerBase):
         )
 
         # Calculate max_steps - use config value or calculate from epochs
-        max_steps = self.config.train.max_steps
+        max_steps = self.config.train.max_steps if self.config.train.max_steps is not None else 100
         # if max_steps is None:
         #     # Calculate from epochs if max_steps not specified
         #     epochs = getattr(self.config.train, 'epochs', 3) or 3

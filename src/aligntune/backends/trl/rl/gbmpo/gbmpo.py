@@ -743,13 +743,7 @@ class TRLGBMPOTrainer(TrainerBase):
         )
 
         # Calculate max_steps for scheduler
-        max_steps = self._get_config_value(self.config.train, 'max_steps')
-        if max_steps is None and self.train_dataset:
-            dataset_size = len(self.train_dataset)
-            effective_batch_size = per_device_batch_size * gradient_accumulation_steps
-            max_steps = int(num_epochs * dataset_size / effective_batch_size)
-        else:
-            max_steps = max_steps or 1000
+        max_steps = self._get_config_value(self.config.train, 'max_steps', default=-1)
 
         # Get scheduler config
         warmup_steps = self._get_config_value(
