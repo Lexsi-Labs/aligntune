@@ -625,9 +625,7 @@ class TRLDRGRPOTrainer(TrainerBase):
 
 
         # Use eval_dataset-aware defaults
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
 

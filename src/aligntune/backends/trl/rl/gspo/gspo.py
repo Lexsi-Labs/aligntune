@@ -615,11 +615,10 @@ class TRLGSPOTrainer(TrainerBase):
             precision)
 
         # Use eval_dataset-aware defaults
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
+            
         if self.config.train.max_steps is None or self.config.train.max_steps <= 0:
             # Calculate max_steps from dataset size
             steps_per_epoch = len(self.train_dataset) // (

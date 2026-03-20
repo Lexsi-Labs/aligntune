@@ -642,10 +642,7 @@ class TRLDAPOTrainer(TrainerBase):
         num_generations = self._get_config_value(
             self.config.train, 'num_generations', default=per_device_batch_size)
 
-        # Use eval_dataset-aware defaults
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
 
