@@ -453,12 +453,10 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         top_k = self._get_config_value(self.config.train, 'top_k', default=50)
         eval_strategy = self._get_config_value(
             self.config.train, 'eval_strategy', default='epoch')
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
-            print(eval_strategy)
 
         logger.info("=" * 80)
         logger.info("BOLT Training Configuration (Unsloth)")

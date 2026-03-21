@@ -1396,7 +1396,8 @@ for r in results:
             report_to=self.config.logging.loggers if self.config.logging.loggers else [],
             fp16=precision == "fp16",
             bf16=precision == "bf16",
-
+            eval_strategy=eval_strategy,
+            eval_steps=eval_steps,
         )
 
 

@@ -714,9 +714,7 @@ REQUIREMENTS:
         save_only_model = self._get_config_value(self.config.train, 'save_only_model', default=False)
 
         # Use eval_dataset-aware defaults
-        if self.eval_dataset != None:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
 
