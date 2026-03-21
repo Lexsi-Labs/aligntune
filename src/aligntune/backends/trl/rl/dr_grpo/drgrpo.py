@@ -625,9 +625,7 @@ class TRLDRGRPOTrainer(TrainerBase):
 
 
         # Use eval_dataset-aware defaults
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
 
@@ -682,6 +680,7 @@ class TRLDRGRPOTrainer(TrainerBase):
             max_grad_norm=max_grad_norm,
             remove_unused_columns=False,
             seed=seed,
+            max_steps = self._get_config_value(self.config.train, "max_steps", 500),
             
             # Generation parameters
             num_generations=num_generations,

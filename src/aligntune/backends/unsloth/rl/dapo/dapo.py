@@ -682,11 +682,10 @@ class UnslothDAPOTrainer(TrainerBase):
                 self.config.train, 'load_best_model_at_end', default=False)
 
             # Adjust eval strategy based on eval_dataset availability
-            if self.eval_dataset:
-                eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-            else:
+            if not self.eval_dataset:
                 eval_strategy = 'no'
                 eval_steps = None
+
 
             # Logging parameters
             logging_steps = self._get_config_value(

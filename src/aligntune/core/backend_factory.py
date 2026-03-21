@@ -70,6 +70,15 @@ from ..utils.environment import set_seed  # Import seed utility
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 # Import backend trainers conditionally to avoid import errors
+
+try:
+    import vllm.sampling_params as _vsp
+    if not hasattr(_vsp, 'GuidedDecodingParams') and hasattr(_vsp, 'StructuredOutputsParams'):
+        _vsp.GuidedDecodingParams = _vsp.StructuredOutputsParams
+except Exception:
+    pass
+
+
 try:
     from ..backends.trl.sft.sft import TRLSFTTrainer
     from ..backends.trl.rl.dpo.dpo import TRLDPOTrainer

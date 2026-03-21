@@ -618,9 +618,7 @@ class UnslothGRPOTrainer(TrainerBase):
                 self.config.train, 'load_best_model_at_end', default=False)
 
             # Adjust eval strategy based on eval_dataset availability
-            if self.eval_dataset:
-                eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-            else:
+            if not self.eval_dataset:
                 eval_strategy = 'no'
                 eval_steps = None
 
@@ -678,7 +676,10 @@ class UnslothGRPOTrainer(TrainerBase):
             epsilon = self._get_config_value(
                 self.config.train, 'epsilon', 'cliprange', default=cliprange)
             loss_type = self._get_config_value(
-                self.config.train, 'loss_type', default='sigmoid')
+                self.config.train, 'loss_type', default='grpo')
+            
+            if loss_type == "sigmoid":
+                loss_type = "grpo"
             scale_rewards = self._get_config_value(
                 self.config.train, 'scale_rewards', default='group')
             mask_truncated_completions = self._get_config_value(
