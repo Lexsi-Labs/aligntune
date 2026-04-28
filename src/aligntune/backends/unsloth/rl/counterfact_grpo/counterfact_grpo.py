@@ -601,6 +601,10 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             logging_steps = self._get_config_value(
                 self.config.train, 'logging_steps', default=10)
 
+
+            eval_steps = self._get_config_value(self.config.train, 'eval_steps', default=100)
+            eval_strategy = self._get_config_value(self.config.train, 'eval_strategy', default='steps')
+
             # Sequence lengths
             max_prompt_length = self._get_config_value(
                 self.config.train, 'max_prompt_length', default=256)
