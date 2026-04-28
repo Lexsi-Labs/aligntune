@@ -297,7 +297,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             precision = precision.value
         # Ensure 'auto' defaults to 'bf16' for better memory efficiency
         if precision == 'auto':
-            precision = 'bf16'
+            precision = 'fp16'
         device_map = self._get_config_value(self.config.model, 'device_map', default='auto')
         load_in_4bit = self._get_config_value(self.config.model, 'load_in_4bit', default=False)
         load_in_8bit = self._get_config_value(self.config.model, 'load_in_8bit', default=False)
