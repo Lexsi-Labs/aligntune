@@ -745,8 +745,8 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 # vLLM for fast generation
                 use_vllm=use_vllm,
                 vllm_gpu_memory_utilization=vllm_gpu_memory_utilization,
-                eval_steps = self._get_config_value(self.config.train, 'eval_steps', default=100)
-                eval_strategy = self._get_config_value(self.config.train, 'eval_strategy', default='steps')
+                eval_strategy=eval_strategy,
+                eval_steps=eval_steps,
                 # Reporting
                 report_to=self.config.logging.loggers if hasattr(
                     self.config.logging, 'loggers') and self.config.logging.loggers else [],
