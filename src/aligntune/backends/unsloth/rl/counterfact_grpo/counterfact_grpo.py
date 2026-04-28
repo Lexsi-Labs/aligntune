@@ -80,7 +80,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             from unsloth import FastLanguageModel
             from trl import GRPOConfig
             # Check CounterfactualGRPOTrainer is available
-            from aligntune.backends.trl.rl.counterfact_grpo.custom_trainer import CounterfactualGRPOTrainer
+            from .custom_trainer import CounterfactualGRPOTrainer
             return True
         except ImportError:
             return False
@@ -553,7 +553,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             from trl import GRPOConfig
             # Import the SAME CounterfactualGRPOTrainer from TRL backend
             # (faithful implementation!)
-            from aligntune.backends.trl.rl.counterfact_grpo.custom_trainer import CounterfactualGRPOTrainer
+            from .custom_trainer import CounterfactualGRPOTrainer
 
             logger.info(
                 "Setting up CounterfactualGRPOTrainer with Unsloth model")
