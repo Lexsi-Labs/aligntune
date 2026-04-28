@@ -701,6 +701,13 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             # Ensure 'auto' defaults to 'bf16' for better memory efficiency
             if precision == 'auto':
                 precision = 'bf16'
+            
+            if not hasattr(self, 'eval_dataset'):
+                self.eval_dataset = None
+
+            if not self.eval_dataset:
+                eval_strategy = 'no'
+                eval_steps = None 
             # Create GRPO configuration
             grpo_config = GRPOConfig(
                 output_dir=output_dir,
@@ -770,6 +777,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 model=self.unsloth_model,  # Unsloth's optimized model!
                 args=grpo_config,
                 train_dataset=self.train_dataset,
+                eval_dataset=self.eval_dataset,
                 processing_class=self.tokenizer,
                 reward_funcs=[reward_wrapper],
                 # Counterfactual params (passed to CounterfactualGRPOTrainer)

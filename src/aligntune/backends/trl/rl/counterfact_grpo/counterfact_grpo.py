@@ -1293,7 +1293,12 @@ for r in results:
         enable_thinking = self._get_config_value(self.config.train, 'enable_thinking', default=False)
         gradient_accumulation_steps = self._get_config_value(self.config.train, 'gradient_accumulation_steps', default=32)
 
-        
+        if not hasattr(self, 'eval_dataset'):
+            self.eval_dataset = None
+
+        if not self.eval_dataset:
+            eval_strategy = 'no'
+            eval_steps = None         
         # Generation parameters
         # num_generations = self._get_config_value(self.config.train, 'num_generations', default=None)
 
@@ -1429,6 +1434,7 @@ for r in results:
                 model=self.model,
                 args=grpo_config,
                 train_dataset=self.train_dataset,
+                eval_dataset=self.eval_dataset,
                 processing_class=self.tokenizer,
                 reward_funcs=[reward_wrapper],  # Must be a list, passes prompts!
                 boost_factor=boost_factor,
@@ -1452,6 +1458,7 @@ for r in results:
                     model=self.model,
                     args=grpo_config,
                     train_dataset=self.train_dataset,
+                    eval_dataset=self.eval_dataset,
                     processing_class=self.tokenizer,
                     reward_funcs=[reward_wrapper],  # Must be a list, passes prompts!
                     boost_factor=boost_factor,
@@ -1481,6 +1488,7 @@ for r in results:
                     answer_weight=answer_weight,
                     weighting_mode=weighting_mode,
                     enable_gradient_conservation=enable_gradient_conservation,
+                    eval_dataset=self.eval_dataset,
                     # Extra verbose for paper examples
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
