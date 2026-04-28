@@ -704,7 +704,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 precision = precision.value
             # Ensure 'auto' defaults to 'bf16' for better memory efficiency
             if precision == 'auto':
-                precision = 'bf16'
+                precision = 'fp16'
             
             if not hasattr(self, 'eval_dataset'):
                 self.eval_dataset = None
