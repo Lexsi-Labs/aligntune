@@ -80,7 +80,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             from unsloth import FastLanguageModel
             from trl import GRPOConfig
             # Check CounterfactualGRPOTrainer is available
-            from aligntune.backends.trl.rl.counterfact_grpo.custom_trainer import CounterfactualGRPOTrainer
+            from .custom_trainer import CounterfactualGRPOTrainer
             return True
         except ImportError:
             return False
@@ -553,7 +553,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             from trl import GRPOConfig
             # Import the SAME CounterfactualGRPOTrainer from TRL backend
             # (faithful implementation!)
-            from aligntune.backends.trl.rl.counterfact_grpo.custom_trainer import CounterfactualGRPOTrainer
+            from .custom_trainer import CounterfactualGRPOTrainer
 
             logger.info(
                 "Setting up CounterfactualGRPOTrainer with Unsloth model")
@@ -600,6 +600,10 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 self.config.train, 'save_total_limit', default=None)
             logging_steps = self._get_config_value(
                 self.config.train, 'logging_steps', default=10)
+
+
+            eval_steps = self._get_config_value(self.config.train, 'eval_steps', default=100)
+            eval_strategy = self._get_config_value(self.config.train, 'eval_strategy', default='steps')
 
             # Sequence lengths
             max_prompt_length = self._get_config_value(
@@ -701,6 +705,13 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             # Ensure 'auto' defaults to 'bf16' for better memory efficiency
             if precision == 'auto':
                 precision = 'bf16'
+            
+            if not hasattr(self, 'eval_dataset'):
+                self.eval_dataset = None
+
+            if not self.eval_dataset:
+                eval_strategy = 'no'
+                eval_steps = None 
             # Create GRPO configuration
             grpo_config = GRPOConfig(
                 output_dir=output_dir,
@@ -738,8 +749,8 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 # vLLM for fast generation
                 use_vllm=use_vllm,
                 vllm_gpu_memory_utilization=vllm_gpu_memory_utilization,
-                eval_steps = self._get_config_value(self.config.train, 'eval_steps', default=100)
-                eval_strategy = self._get_config_value(self.config.train, 'eval_strategy', default='steps')
+                eval_strategy=eval_strategy,
+                eval_steps=eval_steps,
                 # Reporting
                 report_to=self.config.logging.loggers if hasattr(
                     self.config.logging, 'loggers') and self.config.logging.loggers else [],
@@ -770,6 +781,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 model=self.unsloth_model,  # Unsloth's optimized model!
                 args=grpo_config,
                 train_dataset=self.train_dataset,
+                eval_dataset=self.eval_dataset,
                 processing_class=self.tokenizer,
                 reward_funcs=[reward_wrapper],
                 # Counterfactual params (passed to CounterfactualGRPOTrainer)
