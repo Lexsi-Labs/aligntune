@@ -320,6 +320,11 @@ class LoggingConfig:
     
     def __post_init__(self):
         """Validate logging configuration."""
+        valid_loggers = {"azure_ml", "clearml", "codecarbon", "comet_ml", "dagshub", "dvclive", "flyte", "mlflow", "neptune", "tensorboard", "wandb", "all", "none"}
+        for logger in self.loggers:
+            if logger not in valid_loggers:
+                raise ValueError(f"Invalid logger: {logger}. Must be one of {valid_loggers}")
+
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         if self.log_level.upper() not in valid_levels:
             raise ValueError(f"Invalid log level: {self.log_level}. Must be one of {valid_levels}")

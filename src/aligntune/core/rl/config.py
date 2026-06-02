@@ -657,7 +657,7 @@ class LoggingConfig:
     
     def __post_init__(self):
         """Validate logging configuration."""
-        valid_loggers = {"tensorboard", "wandb"}
+        valid_loggers = {"azure_ml", "clearml", "codecarbon", "comet_ml", "dagshub", "dvclive", "flyte", "mlflow", "neptune", "tensorboard", "wandb", "all", "none"}
         for logger in self.loggers:
             if logger not in valid_loggers:
                 raise ValueError(f"Invalid logger: {logger}. Must be one of {valid_loggers}")

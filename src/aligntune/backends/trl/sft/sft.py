@@ -793,7 +793,7 @@ class TRLSFTTrainer(SFTTrainerBase):
             "save_strategy": "steps",
             "load_best_model_at_end": False,
             "num_train_epochs":getattr(self.config.train, 'epochs', 3) or 3,
-            "report_to": [],
+            "report_to": self.config.logging.loggers if hasattr(self.config, 'logging') and self.config.logging.loggers else [],
             "run_name": self.config.logging.run_name,
             "seed": 42,
             **precision_args,

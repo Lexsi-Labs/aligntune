@@ -478,6 +478,8 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         # Setup GRPO config
         from trl import GRPOConfig
 
+        report_to = self.config.logging.loggers if self.config.logging.loggers else []
+
         grpo_config = GRPOConfig(
             output_dir=output_dir,
             num_train_epochs=num_epochs,
@@ -507,6 +509,7 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
             epsilon=epsilon,
             # Precision (unified handling)
             **precision_args,
+            report_to=report_to,
         )
 
         # ============ FIX: Better dataset retrieval ============

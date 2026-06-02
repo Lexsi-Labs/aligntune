@@ -1891,7 +1891,7 @@ class UnslothPPOTrainer(TrainerBase):
             # Logging configuration with defaults
             output_dir = getattr(self.config.logging, 'output_dir', './output/ppo')
             run_name = getattr(self.config.logging, 'run_name', None) or 'ppo_experiment'
-            report_to = getattr(self.config.logging, 'loggers', 'none')
+            report_to = self.config.logging.loggers if self.config.logging.loggers else []
             
             # Training parameters from config with defaults
             num_epochs = getattr(self.config.train, 'epochs', None) or 1

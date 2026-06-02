@@ -910,7 +910,7 @@ class UnslothSFTTrainer(SFTTrainerBase):
                 lr_scheduler_type="cosine",
                 **precision_args,  
                 dataloader_pin_memory=False,
-                report_to="none" if not hasattr(self.config, 'logging') else "tensorboard"
+                report_to=self.config.logging.loggers if self.config.logging.loggers else []
             )
             
             # Get max_seq_length

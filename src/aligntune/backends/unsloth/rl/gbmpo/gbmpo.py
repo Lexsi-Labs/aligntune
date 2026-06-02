@@ -955,7 +955,7 @@ class UnslothGBMPOTrainer(TrainerBase):
             learning_rate=learning_rate,
             warmup_steps=warmup_steps,
             max_steps=max_steps,
-            report_to = self.config.logging.loggers if self.config.logging.loggers else [],
+            report_to = self.config.logging.loggers if self.config.logging.loggers else []
 
             # Optimizer and scheduler
             optim=optimizer_name,

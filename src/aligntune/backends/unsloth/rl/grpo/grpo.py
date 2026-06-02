@@ -630,15 +630,7 @@ class UnslothGRPOTrainer(TrainerBase):
             save_total_limit = self._get_config_value(
                 self.config.train, 'save_total_limit', default=None)
 
-            # Report to
-            report_to = self._get_config_value(
-                self.config.logging, 'report_to', default='none')
-            if isinstance(self.config.logging, dict):
-                loggers = self.config.logging.get('loggers', [])
-            else:
-                loggers = getattr(self.config.logging, 'loggers', [])
-            if loggers and report_to == 'none':
-                report_to = loggers
+            report_to = self.config.logging.loggers if self.config.logging.loggers else []
 
             # Run name
             run_name = self._get_config_value(

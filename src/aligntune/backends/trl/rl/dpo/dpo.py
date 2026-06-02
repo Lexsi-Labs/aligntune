@@ -470,7 +470,7 @@ class TRLDPOTrainer(TrainerBase):
             # Logging parameters
             logging_steps = self._get_config_value(self.config.train, 'logging_steps', default=10)
             logging_strategy = self._get_config_value(self.config.train, 'logging_strategy', default='steps')
-            report_to = self._get_config_value(self.config.logging, 'report_to', default=None)
+            report_to = self.config.logging.loggers if self.config.logging.loggers else []
 
             # Use eval_dataset-aware defaults
             if not self.eval_dataset:
@@ -529,7 +529,7 @@ class TRLDPOTrainer(TrainerBase):
                 precompute_ref_log_probs=getattr(self.config.train, 'precompute_ref_log_probs', False),
                 
                 # Logging configuration
-                report_to=report_to if report_to else (self.config.logging.loggers if self.config.logging.loggers else []),
+                report_to=report_to,
             )
 
             
