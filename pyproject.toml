@@ -105,6 +105,8 @@ dependencies = [
     # Device management (Linux/Windows only)
     "nvitop>=1.1.0; platform_system!='Darwin'",
     "nvidia-ml-py>=11.495.46; platform_system!='Darwin'",
+    "trackio",
+    "mlflow",
 ]
 
 [project.optional-dependencies]
