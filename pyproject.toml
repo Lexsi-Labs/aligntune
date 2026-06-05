@@ -7,7 +7,7 @@ name = "aligntune"
 version = "0.1.10"
 description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
     {name = "Zera Lyngkhoi", email = "zera.lyngkhoi@lexsi.ai"},
