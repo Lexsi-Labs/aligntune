@@ -736,6 +736,13 @@ def create_sft_trainer(
             dataset_text_field=kwargs.get('dataset_text_field', 'text'),
             text_column=kwargs.get('text_column', kwargs.get('dataset_text_field', 'text')),  # For classification tasks
             label_column=kwargs.get('label_column', 'label'),  # For classification tasks
+            instruction_column=kwargs.get('instruction_column', 'instruction'),
+            response_column=kwargs.get('response_column', 'response'),
+            input_column=kwargs.get('input_column', 'input'),
+            context_column=kwargs.get('context_column', 'context'),
+            messages_column=kwargs.get('messages_column', 'messages'),
+            tokens_column=kwargs.get('tokens_column', 'tokens'),
+            tags_column=kwargs.get('tags_column', 'ner_tags'),
             # eos_token=kwargs.get('eos_token'),
             pad_token=kwargs.get('pad_token'),
             chat_template=kwargs.get('chat_template'),
