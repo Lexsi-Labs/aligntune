@@ -1894,9 +1894,12 @@ class UnslothPPOTrainer(TrainerBase):
             report_to = self.config.logging.loggers if self.config.logging.loggers else []
             
             # Training parameters from config with defaults
-            num_epochs = getattr(self.config.train, 'epochs', None) or 1
+            _raw_epochs = getattr(self.config.train, 'epochs', None)
+            _user_set_epochs = _raw_epochs is not None
+            num_epochs = _raw_epochs if _user_set_epochs else 1
             batch_size = getattr(self.config.train, 'per_device_batch_size', 1)
             grad_accum = getattr(self.config.train, 'gradient_accumulation_steps', 32)
+            max_steps = getattr(self.config.train, 'max_steps', None)
             lr = getattr(self.config.train, 'learning_rate', 1e-6)
             kl_coef = getattr(self.config.train, 'kl_coef', 0.05)
             cliprange = getattr(self.config.train, 'cliprange', 0.2)
@@ -1930,8 +1933,21 @@ class UnslothPPOTrainer(TrainerBase):
             bf16 = precision_str in ['bf16', 'auto']
             fp16 = precision_str == 'fp16'
             
-            # Calculate total episodes
-            total_episodes = len(self.train_dataset) * num_epochs
+            # Calculate total episodes.
+            # TRL PPOTrainer uses total_episodes (→ num_total_batches) to drive the
+            # training loop, not TrainingArguments.max_steps.
+            #   max_steps > 0  → total_episodes = max_steps × effective_batch (no dataset needed)
+            #   epochs set     → total_episodes = dataset_len × epochs
+            # max_steps takes priority (standard HF convention).
+            if max_steps is not None and max_steps > 0:
+                effective_batch = batch_size * grad_accum
+                total_episodes = max_steps * effective_batch
+                logger.info(
+                    f"TRL PPO: max_steps={max_steps} → total_episodes={total_episodes} "
+                    f"(batch_size={batch_size}, grad_accum={grad_accum})"
+                )
+            else:
+                total_episodes = len(self.train_dataset) * num_epochs
             
             # Create PPOConfig
             ppo_config = PPOConfig(

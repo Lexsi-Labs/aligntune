@@ -817,12 +817,15 @@ class TRLPPOTrainer(TrainerBase):
         precision_args = PrecisionHandler.get_training_args_precision(precision)
 
         # Get training parameters
-        num_epochs = self._get_config_value(
+        # Use default=None so we can detect whether the user explicitly set epochs
+        _raw_epochs = self._get_config_value(
             self.config.train,
             'epochs',
             'num_epochs',
             'num_train_epochs',
-            default=1)
+            default=None)
+        _user_set_epochs = _raw_epochs is not None
+        num_epochs = _raw_epochs if _user_set_epochs else 1
         learning_rate = self._get_config_value(
             self.config.train, 'learning_rate', 'lr', default=1e-6)
         per_device_batch_size = self._get_config_value(
@@ -866,10 +869,27 @@ class TRLPPOTrainer(TrainerBase):
             self.config.train, 'missing_eos_penalty', default=1.0)
 
         # Evaluation and checkpointing
-        max_steps = self._get_config_value(
-            self.config.train, 'max_steps', default=1000)
+        _raw_max_steps = self._get_config_value(
+            self.config.train, 'max_steps', default=None)
+        max_steps = _raw_max_steps if _raw_max_steps is not None else -1
+
+        # TRL PPOTrainer drives training via total_episodes → num_total_batches,
+        # NOT via TrainingArguments.max_steps.  Set total_episodes directly so the
+        # training length is exact and independent of dataset size:
+        #   max_steps > 0  → total_episodes = max_steps × effective_batch (no dataset needed)
+        #   epochs set     → total_episodes = None, TRL computes from num_train_epochs × dataset_len
+        # max_steps takes priority over epochs (standard HF convention).
+        total_episodes = None
+        if max_steps > 0:
+            effective_batch = per_device_batch_size * gradient_accumulation_steps
+            total_episodes = max_steps * effective_batch
+            logger.info(
+                f"TRL PPO: max_steps={max_steps} → total_episodes={total_episodes} "
+                f"(effective_batch={effective_batch})"
+            )
+            max_steps = -1  # Disable; training is driven via total_episodes
         eval_strategy = self._get_config_value(
-            self.config.train, 'eval_strategy', default='steps')
+            self.config.train, 'eval_strategy', default='no')
         eval_steps = self._get_config_value(
             self.config.train, 'eval_steps', default=100)
         save_steps = self._get_config_value(
@@ -928,10 +948,13 @@ class TRLPPOTrainer(TrainerBase):
             stop_token=stop_token,
             missing_eos_penalty=missing_eos_penalty,
 
-            # Evaluation
+            # Episodes / steps — pass total_episodes when computed from max_steps so
+            # TRL PPO uses it directly (total_episodes=None means TRL computes it
+            # from num_train_epochs × dataset_len at trainer init time).
+            total_episodes=total_episodes,
             max_steps=max_steps,
-            eval_strategy=eval_strategy if self.eval_dataset else "no",
-            eval_steps=eval_steps if self.eval_dataset else None,
+            eval_strategy=eval_strategy,
+            eval_steps=eval_steps,
 
             # Checkpointing
             save_strategy=save_strategy,
