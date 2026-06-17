@@ -1024,6 +1024,18 @@ class TRLPPOTrainer(TrainerBase):
             peft_config=peft_config,
         )
 
+        # TRL PPO calls self.log() on every step, ignoring logging_steps.
+        # Patch the instance's log() to gate on logging_steps like standard HF trainers do.
+        _logging_steps = logging_steps
+        _original_log = self.trainer.log.__func__
+
+        def _gated_log(inner_self, logs, start_time=None):
+            if inner_self.state.global_step % _logging_steps == 0:
+                _original_log(inner_self, logs, start_time)
+
+        import types
+        self.trainer.log = types.MethodType(_gated_log, self.trainer)
+
         logger.info("PPO trainer setup completed successfully!")
 
     def train(self) -> Dict[str, Any]:

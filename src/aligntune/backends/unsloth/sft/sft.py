@@ -878,39 +878,73 @@ class UnslothSFTTrainer(SFTTrainerBase):
     def setup_trainer(self) -> None:
         """Setup TRL SFTTrainer with task-aware configuration."""
         try:
-            from trl import SFTTrainer, SFTConfig, ModelConfig
-            
+            from trl import SFTTrainer, SFTConfig
+            from aligntune.core.optimization import get_optimizer_for_config, get_scheduler_for_config
+
             logger.info(f"Setting up TRL SFTTrainer for task: {self.task_type.value}")
-            
+
             # Get training parameters
-            num_epochs = getattr(self.config, 'num_epochs', None) or \
-                        getattr(self.config.train, 'epochs', 3) if hasattr(self.config, 'train') else 3
-            batch_size = getattr(self.config, 'batch_size', None) or \
-                        getattr(self.config.train, 'per_device_batch_size', 2) if hasattr(self.config, 'train') else 2
-            grad_accum = getattr(self.config.train, 'gradient_accumulation_steps', 1) if hasattr(self.config, 'train') else 1
-            lr = getattr(self.config.train, 'learning_rate', 2e-4) if hasattr(self.config, 'train') else 2e-4
-            save_steps = getattr(self.config.train, 'save_interval', 500) if hasattr(self.config, 'train') else 500
-            output_dir = getattr(self.config.logging, 'output_dir', './output') if hasattr(self.config, 'logging') else './output'
+            num_epochs = getattr(self.config.train, 'epochs', 3) or 3
+            batch_size = getattr(self.config.train, 'per_device_batch_size', 2) or 2
+            grad_accum = getattr(self.config.train, 'gradient_accumulation_steps', 1) or 1
+            lr = getattr(self.config.train, 'learning_rate', 2e-4) or 2e-4
+            weight_decay = getattr(self.config.train, 'weight_decay', 0.01) or 0.01
+            save_steps = getattr(self.config.train, 'save_interval', 500) or 500
+            eval_steps = getattr(self.config.train, 'eval_interval', 500) or 500
+            output_dir = getattr(self.config.logging, 'output_dir', './output')
+            run_name = getattr(self.config.logging, 'run_name', None)
+            logging_steps = getattr(self.config.logging, 'log_interval', 10)
+
+            # Optimizer and scheduler
+            optimizer_name = getattr(self.config.train, 'optimizer', 'adamw_torch')
+            scheduler_name = getattr(self.config.train, 'lr_scheduler', 'cosine')
+
+            # max_steps: use config value or -1 (epoch-based training)
+            max_steps = self.config.train.max_steps if self.config.train.max_steps is not None else -1
+
+            # Warmup steps
+            warmup_steps = getattr(self.config.train, 'warmup_steps', 0)
+            if hasattr(self.config.train, 'warmup_ratio') and self.config.train.warmup_ratio:
+                if max_steps > 0:
+                    warmup_steps = int(max_steps * self.config.train.warmup_ratio)
+
+            # Scheduler kwargs (exclude steps already set by TrainingArguments)
+            scheduler_config = get_scheduler_for_config(scheduler_name, max(max_steps, 0), warmup_steps)
+            filtered_scheduler_kwargs = {
+                k: v for k, v in scheduler_config['lr_scheduler_kwargs'].items()
+                if k not in ['num_training_steps', 'num_warmup_steps']
+            }
+
             # === UNIFIED PRECISION HANDLING ===
             precision = PrecisionHandler.get_precision_from_config(self.config, default="auto")
             precision_args = PrecisionHandler.get_training_args_precision(precision)
 
-                # Create SFT configuration
-            
             # Create SFT configuration
             self.training_config = SFTConfig(
                 output_dir=output_dir,
+                max_steps=max_steps,
                 num_train_epochs=num_epochs,
                 per_device_train_batch_size=batch_size,
                 gradient_accumulation_steps=grad_accum,
                 learning_rate=lr,
-                logging_steps=10,
+                weight_decay=weight_decay,
+                warmup_steps=warmup_steps,
+                logging_steps=logging_steps,
                 save_steps=save_steps,
-                warmup_ratio=0.1,
-                lr_scheduler_type="cosine",
-                **precision_args,  
+                eval_steps=eval_steps,
+                eval_strategy="no",
+                save_strategy="steps",
+                load_best_model_at_end=False,
+                run_name=run_name,
+                report_to=self.config.logging.loggers if self.config.logging.loggers else [],
+                seed=42,
+                dataloader_num_workers=0,
                 dataloader_pin_memory=False,
-                report_to=self.config.logging.loggers if self.config.logging.loggers else []
+                remove_unused_columns=False,
+                optim=optimizer_name,
+                lr_scheduler_type=scheduler_name,
+                lr_scheduler_kwargs=filtered_scheduler_kwargs,
+                **precision_args,
             )
             
             # Get max_seq_length
