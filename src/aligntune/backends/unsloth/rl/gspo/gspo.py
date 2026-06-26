@@ -649,8 +649,6 @@ class UnslothGSPOTrainer(TrainerBase):
                 self.config.train, 'kl_coef', 'beta', default=0.1)
 
             # Adjust save strategy to save on epoch if eval_dataset exists
-            if self.eval_dataset:
-                save_strategy = "epoch"
 
             # Create GRPO configuration (GSPO approximation)
             grpo_config = GRPOConfig(
