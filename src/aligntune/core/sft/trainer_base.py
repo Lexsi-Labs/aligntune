@@ -236,11 +236,11 @@ class SFTTrainerBase(ABC):
     #     return eval_metrics
     def evaluate(
         self,
-        eval_dataset=None,
+        eval_dataset: Optional[Any] = None,
         metric_key_prefix: str = "eval",
         use_custom_evaluator: bool = False,
         metrics: Optional[List] = None,
-        **kwargs
+        **kwargs: Any,
     ) -> Dict[str, float]:
         """Run evaluation and return metrics.
         
@@ -281,10 +281,10 @@ class SFTTrainerBase(ABC):
         
         return eval_metrics
     def _evaluate_with_custom(
-        self, 
-        eval_dataset, 
+        self,
+        eval_dataset: Optional[Any],
         metrics: Optional[List],
-        **kwargs
+        **kwargs: Any,
     ) -> Dict[str, float]:
         """Evaluate using BaseEvaluator (SFT only - no RL metrics)."""
         
@@ -311,8 +311,8 @@ class SFTTrainerBase(ABC):
 
     def _evaluate_native(
         self,
-        eval_dataset=None,
-        **kwargs
+        eval_dataset: Optional[Any] = None,
+        **kwargs: Any,
     ) -> Dict[str, float]:
         """Use SFTEvaluator (native evaluation)."""
         dataset = eval_dataset or self.eval_dataset or self.dataset
@@ -410,7 +410,7 @@ class SFTTrainerBase(ABC):
         private: bool = False,
         token: Optional[str] = None,
         commit_message: str = "Upload fine-tuned model",
-        **kwargs
+        **kwargs: Any,
     ) -> str:
         """Push model to HuggingFace Hub.
         
@@ -477,7 +477,7 @@ class SFTTrainerBase(ABC):
         temperature: float = 1.0,
         top_p: float = 0.9,
         do_sample: bool = True,
-        **kwargs
+        **kwargs: Any,
     ) -> Union[str, List[str]]:
         """Generate predictions from trained model.
         

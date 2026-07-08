@@ -1,25 +1,27 @@
 # AlignTune Documentation Dependencies
-# 
+#
 # Install with: pip install -r requirements-docs.txt
-# 
+#
 # These dependencies are only needed for building documentation.
 # They are not required for using AlignTune.
+# Versions pinned to match tested pip list for reproducible builds.
 
 # MkDocs core and theme
-mkdocs>=1.5.0
-mkdocs-cinder>=1.2.0
+mkdocs==1.6.1
+mkdocs-cinder==1.2.0
 
 # MkDocs plugins
-mkdocs-jupyter>=0.24.0
-mkdocstrings[python]>=0.24.0
-mkdocs-mermaid2-plugin>=1.2.0
+mkdocs-jupyter==0.25.1
+mkdocstrings[python]==1.0.2
+mkdocs-mermaid2-plugin==1.2.3
+griffe==1.15.0
 
 # Markdown extensions (used by mkdocs-cinder)
-pymdown-extensions>=10.0.0
+pymdown-extensions==10.20.1
 
 # Code highlighting
-pygments>=2.15.0
+pygments==2.19.2
 
 # Jupyter notebook support (for notebook examples in docs)
-jupyter>=1.0.0
-ipykernel>=6.25.0
+jupyter==1.1.1
+ipykernel==6.26.0

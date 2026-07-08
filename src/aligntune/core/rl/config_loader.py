@@ -101,9 +101,10 @@ class ConfigLoader:
     def parse_dataset_spec(spec: str) -> DatasetConfig:
         """
         Parse dataset specification string.
-        
-        Format: name[:split][#percent=N|max=N][?map.key=value]
-        Example: "Anthropic/hh-rlhf:train#percent=25?map.prompt=prompt"
+
+        Format: name[:split] with optional limit (percent=N or max=N) and
+        optional query [?map.key=value]. Example:
+        "Anthropic/hh-rlhf:train" with percent=25 and map.prompt=prompt.
         """
         if not spec or not isinstance(spec, str):
             raise ValueError("Dataset specification must be a non-empty string")
