@@ -1,0 +1,86 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Clean build artefacts
+        run: rm -rf dist build ./*.egg-info
+
+      - name: Install dependencies and run tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install .
+          pip install pytest
+        continue-on-error: false
+
+      - name: Run tests
+        run:  pytest tests/
+        continue-on-error: true
+
+      - name: Build package
+        run: python3 -m pip install --upgrade build && python3 -m build
+
+      - name: Check version is non-dev
+        run: |
+          python -m pip install setuptools_scm
+          python - << 'PY'
+          from setuptools_scm import get_version
+          v = get_version()
+          print("Computed version:", v)
+          if ".dev" in v:
+              raise SystemExit(f"Refusing to publish dev version: {v}")
+          PY
+
+      - name: Publish package to PyPI
+        if: success()
+        run: |
+          python -m pip install --upgrade twine
+          python -m pip install -U packaging
+          python -m twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Send release notes to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: "aligntune-release"
+          payload: |
+            {
+              "text": "AlignTune SDK release",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Version:* ${{ github.event.release.tag_name }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*PyPI URL:* https://pypi.org/project/aligntune/${{ github.event.release.tag_name }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

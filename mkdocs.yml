@@ -85,6 +85,7 @@ nav:
     - RL Examples: examples/rl.md
     - Advanced Examples: examples/advanced.md
     - Notebooks: notebooks/index.md
+    - Lexsi SDK Notebooks: notebooks/lexsi-sdk.md
   - Project:
     - CLI Reference: cli-reference.md
     - CLI Commands: cli/commands.md

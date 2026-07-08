@@ -1,10 +1,10 @@
 
 <p align="center">
-  <img src="docs/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
+  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/docs/assets/banner_aligntune.png" alt="AlignTune Banner" width="1000px"/>
 </p>
 
 <div align="center">
-  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg"/></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.12+-blue.svg"/></a>
   <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg"/></a>
   <a href="https://badge.fury.io/py/aligntune"><img src="https://badge.fury.io/py/aligntune.svg"/></a>
 </div>
@@ -93,7 +93,7 @@ pip install -e .
 
 ### Requirements
 
-- Python 3.8+
+- Python 3.12+
 - PyTorch 2.0+
 - CUDA-compatible GPU (recommended for faster training)
 
@@ -130,9 +130,6 @@ Here are the organized tables containing the Colab links, models, and datasets p
 | TRL | **GSPO** | meta-llama/Llama-3.2-3B-Instruct | HuggingFaceH4/ultrachat_200k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1vDP7ukBHWwSiD7KVSgSekCvk-x_MkWdC?usp=sharing) |
 | Unsloth| **DAPO** | microsoft/Phi-3.5-mini-instruct | HuggingFaceH4/ultrachat_200k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1gAa6EPc5345XRfog1nzQIFTmp_OJqNvk?usp=sharing) |
 |TRL | **DAPO** | meta-llama/Llama-3.2-3B-Instruct | google-research-datasets/mbpp | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1aF3LxEMmLl0fCyA5yVBAkU_Rgsy3dsh5?usp=sharing) |
-
-
-
 ## Documentation
 
 - **[Getting Started](docs/getting-started/installation.md)**: Installation, setup, and basic usage
@@ -226,8 +223,22 @@ AlignTune is built upon the excellent work of the following projects:
 - **Documentation**: [aligntune.lexsi.ai/](https://aligntune.lexsi.ai/)
 - **GitHub Issues**: [github.com/Lexsi-Labs/aligntune/issues](https://github.com/Lexsi-Labs/aligntune/issues)
 - **Discussions**: [github.com/Lexsi-Labs/aligntune/discussions](https://github.com/Lexsi-Labs/aligntune/discussions)
-- **Email**: [support@lexsi.ai](mailto:support@lexsi.ai)
+- **Email**: [hello@lexsi.ai](mailto:hello@lexsi.ai)
+- **Discord**: [Discord Lexsi Labs](https://discord.gg/ckVbEJGW) 
 
 ---
 
 **Get started with AlignTune and accelerate your LLM fine-tuning workflows today!**
+
+## Contact
+
+<div align="center">
+  <a href="https://lexsi.ai/">
+    <img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/lexsilogowhite.png" width="300">
+  </a>
+  <br>
+  <a href="https://lexsi.ai/">https://www.lexsi.ai</a>
+  <br><br>
+  Paris 🇫🇷 · Mumbai 🇮🇳 · London 🇬🇧 
+  <br><br>
+</div>

@@ -34,9 +34,9 @@ try:
     from aligntune.core.rl.config import UnifiedConfig
     from aligntune.rewards.registry import RewardRegistry
     from aligntune.rewards.core import RewardConfig, RewardType
-    FINETUNEHUB_AVAILABLE = True
+    aligntune_AVAILABLE = True
 except ImportError:
-    FINETUNEHUB_AVAILABLE = False
+    aligntune_AVAILABLE = False
     TrainerBase = object
     UnifiedConfig = dict
 
@@ -469,7 +469,7 @@ class TRLGBMPOTrainer(TrainerBase):
                 "min_length": 20, "max_length": 200}}]
 
         # Load rewards from registry if available
-        if FINETUNEHUB_AVAILABLE:
+        if aligntune_AVAILABLE:
             self._load_rewards_from_registry(rewards_config)
         else:
             self._create_simple_reward_function()
@@ -743,13 +743,7 @@ class TRLGBMPOTrainer(TrainerBase):
         )
 
         # Calculate max_steps for scheduler
-        max_steps = self._get_config_value(self.config.train, 'max_steps')
-        if max_steps is None and self.train_dataset:
-            dataset_size = len(self.train_dataset)
-            effective_batch_size = per_device_batch_size * gradient_accumulation_steps
-            max_steps = int(num_epochs * dataset_size / effective_batch_size)
-        else:
-            max_steps = max_steps or 1000
+        max_steps = self._get_config_value(self.config.train, 'max_steps', default=-1)
 
         # Get scheduler config
         warmup_steps = self._get_config_value(
@@ -852,9 +846,7 @@ class TRLGBMPOTrainer(TrainerBase):
             self.config.train, 'max_grad_norm', default=1.0)
 
         # Use eval_dataset-aware defaults
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
 
@@ -899,6 +891,7 @@ class TRLGBMPOTrainer(TrainerBase):
             warmup_steps=warmup_steps,
             max_grad_norm=max_grad_norm,
             seed=seed,
+            max_steps=max_steps,      
 
             # Optimizer and scheduler
             optim=optimizer_name,

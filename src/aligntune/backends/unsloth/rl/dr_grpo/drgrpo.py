@@ -583,9 +583,7 @@ class UnslothDRGRPOTrainer(TrainerBase):
                 self.config.train, 'load_best_model_at_end', default=False)
 
             # Adjust eval strategy based on eval_dataset availability
-            if self.eval_dataset:
-                eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-            else:
+            if not self.eval_dataset:
                 eval_strategy = 'no'
                 eval_steps = None
 
@@ -702,7 +700,8 @@ class UnslothDRGRPOTrainer(TrainerBase):
                 num_generations=num_generations,
                 temperature=temperature,
                 top_p=top_p,
-                loss_type=loss_type,
+                # loss_type=loss_type,
+                loss_type="dr_grpo",
                 beta=beta,
                 epsilon=epsilon,
                 scale_rewards=scale_rewards,

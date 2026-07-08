@@ -685,9 +685,7 @@ class TRLGRPOTrainer(TrainerBase):
             self.config.train, 'logging_strategy', default='steps')
         report_to = self.config.logging.loggers if self.config.logging.loggers else []
         # Use eval_dataset-aware defaults
-        if self.eval_dataset:
-            eval_strategy = eval_strategy if eval_strategy != 'no' else 'epoch'
-        else:
+        if not self.eval_dataset:
             eval_strategy = 'no'
             eval_steps = None
 

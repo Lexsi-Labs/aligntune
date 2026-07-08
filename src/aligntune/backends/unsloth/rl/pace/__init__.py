@@ -6,7 +6,7 @@ Provides faster training over TRL variant using Unsloth's FastLanguageModel.
 """
 
 try:
-    from .bolt import UnslothBoltTrainer
+    from .pace import UnslothBoltTrainer
     BOLT_AVAILABLE = True
 except ImportError:
     BOLT_AVAILABLE = False

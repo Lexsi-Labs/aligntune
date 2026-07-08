@@ -1,3 +1,3 @@
 """
-Finetunehub CLI scripts and utilities.
+aligntune CLI scripts and utilities.
 """
