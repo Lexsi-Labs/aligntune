@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aligntune"
-version = "0.1.10"
+version = "0.1.16"
 description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -15,6 +15,7 @@ authors = [
     {name = "Pratinav Seth", email = "pratinav.seth@lexsi.ai"},
     {name = "Utsav Avaiya", email = "utsav.avaiya@lexsi.ai"},
     {name = "Soham Bhattacharjee", email = "soham.bhattacharjee@lexsi.ai"},
+    {name = "Bhavya Goyal", email = "bhavya.goyal@lexsi.ai"},
     {name = "Mykola Khandoga", email = "mykola.khandoga@lexsi.ai"},
     {name = "Rui Yuan", email = "rui.yuan@lexsi.ai"},
     {name = "Vinay Kumar Sankarapu", email = "v.k@lexsi.ai"}
