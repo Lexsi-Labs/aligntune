@@ -112,6 +112,18 @@ Interactive Colab notebooks demonstrating various AlignTune workflows:
 | Unsloth| **DAPO** | microsoft/Phi-3.5-mini-instruct | HuggingFaceH4/ultrachat_200k | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1gAa6EPc5345XRfog1nzQIFTmp_OJqNvk?usp=sharing) |
 |TRL | **DAPO** | meta-llama/Llama-3.2-3B-Instruct | google-research-datasets/mbpp | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1aF3LxEMmLl0fCyA5yVBAkU_Rgsy3dsh5?usp=sharing) |
 
+### Lexsi SDK Notebooks
+
+End-to-end workflows built with the Lexsi SDK. See [all Lexsi SDK notebooks →](notebooks/lexsi-sdk.md)
+
+| Notebook | Link |
+| --- | --- |
+| Create Workspace & Project | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1_o3ccmDYfjM3piYpRWDdvLD5P4FCaAbJ#scrollTo=pxYu182ch5Gf) |
+| Multilingual Chatbot | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1HjLZQ-OFZaFYpMlvYFNH5FvmllYjz4zc#scrollTo=44ab6f3b) |
+| Harper-Valley Speech Corpus | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Rb_hGjfvW1Yw5EaL-6Adr8oJeKxp8ckK) |
+| Retail Banking | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1Nv6-fFzr4Kg8UWN7JPx2HNlF9FUHRRAz) |
+| Wealth Management | [![Open In Colab](https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1samF2n-64eDKNIm-RGF9t8pbPrJczp7D?usp=sharing) |
+
 ---
 
 ## Explore the Documentation
