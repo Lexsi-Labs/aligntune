@@ -146,10 +146,15 @@ train:
 ```
 
 ```python
-from aligntune.core.rl.config_loader import ConfigLoader
+from aligntune.core.sft.config_loader import SFTConfigLoader
+from aligntune.core.backend_factory import create_sft_trainer
 
-config = ConfigLoader.load_from_yaml("config.yaml")
-trainer = create_sft_trainer(**config)
+
+# Load configuration
+config = SFTConfigLoader.load_from_yaml("config.yaml")
+
+# Create trainer from config
+trainer = create_sft_trainer(config=config)
 ```
 
 ### 3. CLI
