@@ -21,12 +21,18 @@ Unsloth provides faster training with memory optimizations, but requires specifi
 
 ## Currently Pinned Versions
 
-`requirements.txt` pins `trl==1.7.1` together with `unsloth==2026.7.2` / `unsloth_zoo==2026.7.2`. Unsloth's own package metadata still declares `trl<=0.24.0` as a dependency ceiling, so a plain `pip install -r requirements.txt` will fail dependency resolution. Install Unsloth with `--no-deps` first:
-```bash
-pip install --no-deps unsloth==2026.7.2 unsloth_zoo==2026.7.2
-pip install -r requirements.txt
-```
-This combination is verified working for: model loading, LoRA patching, and DPO/ORPO/GRPO(+ all GRPO-family variants)/PPO/Online-DPO/SDFT training (see [Algorithm-Specific Findings](#algorithm-specific-findings-trl-171-unsloth-202672) below for a narrower ORPO/Unsloth issue found and fixed).
+`unsloth` and `unsloth_zoo` (`2026.7.2`) are **vendored inside the AlignTune
+package** (`third_party/unsloth/`, `third_party/unsloth_zoo/`) and built into the
+same wheel - `pip install aligntune` (or `pip install -e .`) is all you need, and
+you should **not** `pip install unsloth` separately.
+
+They run against `trl==1.7.1` (AlignTune's pin). Upstream Unsloth's own package
+metadata still declares `trl<=0.24.0` as a ceiling, which is why it is vendored
+rather than resolved by pip - in practice `2026.7.2` works correctly against
+`trl==1.7.1`: verified for model loading, LoRA patching, and DPO/ORPO/GRPO
+(+ all GRPO-family variants)/PPO/Online-DPO/SDFT training (see
+[Algorithm-Specific Findings](#algorithm-specific-findings-trl-171-unsloth-202672)
+below for a narrower ORPO/Unsloth issue found and fixed).
 
 **Note on SDFT**: if `privileged_context` ends up empty for your dataset (training completes at `global_step=0` with no error), your dataset likely has no context-like column for the automatic alias scan to match. Set `privileged_context_column` explicitly to the column that holds the context.
 

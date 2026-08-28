@@ -5,7 +5,7 @@ recipe:
   task: "router_optimization"
   algorithm: "evolution_strategies"
   backend: "es"
-  tags: ["moa", "mixture-of-experts", "evolution-strategies", "gradient-free", "router-optimization", "v3.4-es-backend"]
+  tags: ["moa", "mixture-of-adapters", "evolution-strategies", "gradient-free", "router-optimization", "v3.4-es-backend"]
   requires_auth: true
   estimated_time: "2-3 hours"
   estimated_memory: "16GB VRAM"

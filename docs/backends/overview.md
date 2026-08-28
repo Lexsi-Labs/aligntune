@@ -54,8 +54,6 @@ completions = backend.generate(["What is 12 * 7?"], max_new_tokens=64, temperatu
 backend.cleanup()
 ```
 
-> **Note:** `aligntune.backends.moe` (MoE expert-discovery, router-loss, and per-expert-quantization code) exists in the tree but is **not yet wired into the Backend Factory or CLI**, treat it as an internal work-in-progress, not a supported/selectable backend.
-
 ---
 
 ## Automatic Backend Selection

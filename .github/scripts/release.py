@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+import os
 import subprocess
 
-default_version = "0.1.0"
+default_version = "0.1.10"
 
 def get_last_version() -> str:
     """Return the version number of the last release."""
@@ -28,17 +29,27 @@ def bump_patch_number(version_number: str) -> str:
     return f"{major}.{minor}.{int(patch) + 1}"
 
 
-def create_new_patch_release():
-    """Create a new patch release on GitHub."""
-    try:
-        last_version_number = get_last_version()
-    except subprocess.CalledProcessError as err: 
-        # The project doesn't have any releases yet.
-        new_version_number = default_version
-        print(err)
-        print(f'taking default version: {new_version_number}')
+def create_new_release():
+    """Create a new release on GitHub.
+
+    If RELEASE_VERSION is set (from the workflow's `version` input), use it
+    verbatim. Otherwise fall back to auto-bumping the patch of the last
+    release, or `default_version` if there are none yet.
+    """
+    explicit = os.environ.get("RELEASE_VERSION", "").strip()
+    if explicit:
+        new_version_number = explicit
+        print(f"using explicit version: {new_version_number}")
     else:
-        new_version_number = bump_patch_number(last_version_number)
+        try:
+            last_version_number = get_last_version()
+        except subprocess.CalledProcessError as err:
+            # The project doesn't have any releases yet.
+            new_version_number = default_version
+            print(err)
+            print(f'taking default version: {new_version_number}')
+        else:
+            new_version_number = bump_patch_number(last_version_number)
 
     subprocess.run(
         ["gh", "release", "create", "--generate-notes", f"{new_version_number}"],
@@ -47,4 +58,4 @@ def create_new_patch_release():
 
 
 if __name__ == "__main__":
-    create_new_patch_release()
+    create_new_release()

@@ -58,8 +58,6 @@ For developers and researchers, here is the direct mapping of features to the Al
 | **ES Rollout** | `aligntune.core.rollout/` | `HFRolloutBackend` / `VLLMRolloutBackend`: pluggable generation engines for Evolution Strategies. |
 | **CLI** | `aligntune.cli.unified` | 12 command groups: `train`, `recipes`, `validate`, `diagnose`, `advise`, `merge`, `aligner`, `export`, `verify-export`, `adapters`, `compose`, `indic-eval`. |
 
-> Note: `aligntune.backends.moe` (MoE expert-discovery/router-loss/per-expert-quantization code) exists in the tree but is **not yet wired into the Backend Factory or CLI**, treat it as an internal work-in-progress, not a supported feature.
-
 ## Quick Start
 
 ### Supervised Fine-Tuning (SFT)
@@ -146,38 +144,35 @@ See the [Algorithm Zoo](docs/algorithms/overview.md) for the full comparison tab
 ## Installation
 
 ```bash
-# Or install from source
-git clone https://github.com/Lexsi-Labs/aligntune.git
-cd aligntune
-pip install -e .
+pip install aligntune
 ```
 
-Or with `uv`:
+Or from source:
 
 ```bash
-pip install uv
-uv pip install -e .
+git clone https://github.com/Lexsi-Labs/aligntune.git
+cd aligntune
+pip install -e .          # or:  uv pip install -e .
 ```
 
-CuratorKIT (data curation: schema gating, cleaning, dedup), `mergekit`
-(model merging, notebooks 35-42), and Unsloth (`unsloth`/`unsloth_zoo`) are
-all already included in `dependencies` and install automatically with the
-single `pip install -e .` / `uv pip install -e .` above - no separate step
-needed.
+Either command pulls every runtime dependency (CuratorKIT for data curation,
+plus the full ML stack) from `pyproject.toml` - no extra steps.
 
-`mergekit` is vendored *as part of the `aligntune` package itself* (under
-`third_party/mergekit`, built into the same wheel/editable install rather
-than installed as a second distribution) with two small patches for
-compatibility with this project's transformers/pydantic versions (see
-`third_party/mergekit/PATCH_NOTES.md`).
+`mergekit`, `unsloth`, `unsloth_zoo`, and `tokenizer-extension` are **vendored
+inside the `aligntune` package itself** (under `third_party/`, built into the
+same wheel rather than installed as separate distributions), so there is no
+second install command and no `--no-deps` dance:
 
-`unsloth` and `unsloth_zoo` are vendored the same way (under
-`third_party/unsloth` and `third_party/unsloth_zoo`): Unsloth's published
-metadata caps `transformers<=5.5.0` and `trl<=0.24.0`, while this project
-pins `transformers==5.14.1` and `trl==1.7.1`; vendoring sidesteps that cap
-the same way `--no-deps` did previously, but without needing a second
-install command. See `third_party/unsloth/PATCH_NOTES.md` and
-`third_party/unsloth_zoo/PATCH_NOTES.md` for the patches applied.
+- `mergekit` (model merging) - two small patches for this project's
+  transformers/pydantic versions; see `third_party/mergekit/PATCH_NOTES.md`.
+- `unsloth` / `unsloth_zoo` - Unsloth's published metadata caps
+  `transformers<=5.5.0` and `trl<=0.24.0` while this project pins
+  `transformers==5.14.1` and `trl==1.7.1`; vendoring sidesteps that cap. See
+  `third_party/unsloth/PATCH_NOTES.md` and
+  `third_party/unsloth_zoo/PATCH_NOTES.md`.
+- `tokenizer-extension` (Indic/multilingual vocabulary extension) - vendored
+  verbatim; it is not published on PyPI. See
+  `third_party/tokenizer-extension/PATCH_NOTES.md`.
 
 ### Requirements
 

@@ -453,13 +453,6 @@ class TrainingConfig:
     seed: Optional[int] = 42
     data_seed: Optional[int] = 47  # Match training_script.py for fair comparison
 
-    # MoE (Mixture of Experts) training parameters
-    moe_enabled: bool = False  # Enable MoE-specific losses
-    z_loss_weight: float = 0.01  # Weight for Z-loss (router stability)
-    lb_loss_weight: float = 0.01  # Weight for load-balance loss
-    entropy_loss_weight: float = 0.0  # Weight for entropy loss
-    expert_capacity_multiplier: float = 1.25  # Capacity = num_experts * multiplier
-
     # Meta-ES specific
     meta_iterations: int = 15
     patience: int = 5

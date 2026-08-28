@@ -6,7 +6,7 @@ recipe:
   task: "instruction_following"
   algorithm: "sft"
   backend: "trl"
-  tags: ["llama", "moa", "mixture-of-experts", "sparse-adaptation", "v3.3-advanced-parameterization"]
+  tags: ["llama", "moa", "mixture-of-adapters", "sparse-adaptation", "v3.3-advanced-parameterization"]
   requires_auth: true
   estimated_time: "4-5 hours"
   estimated_memory: "22GB VRAM"

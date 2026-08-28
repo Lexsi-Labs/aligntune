@@ -1,74 +1,14 @@
-# AlignTune - Complete Dependencies
-torch>=2.7.1
-transformers>=4.35.0
-datasets>=2.14.0
-accelerate>=0.24.0
-peft>=0.6.0
-bitsandbytes>=0.41.0
-torchao>=0.16.0
-
-# Core Python dependencies
-numpy>=1.21.0
-pyyaml>=6.0
-huggingface-hub>=0.17.0
-tqdm>=4.64.0
-psutil>=5.9.0
-
-# Data processing
-pandas>=1.3.0
-scikit-learn>=1.0.0
-
-# Document loaders
-pypdf>=4.0.0
-python-docx>=0.8.11
-markdown>=3.5.0
-
-# Utilities
-click>=8.0.0
-rich>=12.0.0
-typer>=0.7.0
-
-# Reinforcement Learning
-trl==1.7.1
-vllm
-
-# Unsloth acceleration
+# AlignTune dependencies are declared in pyproject.toml (PEP 621) - that is the
+# single source of truth. This file just installs the package (and, with it,
+# every runtime dependency) from a local checkout.
 #
-# IMPORTANT: unsloth's own package metadata still declares "trl<=0.24.0" as of
-# unsloth==2026.7.2 (its latest release at time of writing), so a plain
-# `pip install -r requirements.txt` / `uv pip install -r requirements.txt`
-# will fail dependency resolution with a conflict against the trl==1.7.1 pin
-# above. In practice unsloth==2026.7.2 + unsloth_zoo==2026.7.2 work correctly
-# against trl==1.7.1 (verified: model loading, LoRA patching, and DPO/ORPO/
-# SimPO/GRPO/Online-DPO/GOLD/SDFT training all pass) - the upstream trl<=0.24.0
-# cap is just stale/conservative. Install these two with --no-deps to skip the
-# resolver conflict, e.g.:
-#   pip install --no-deps unsloth==2026.7.2 unsloth_zoo==2026.7.2
-# then install the rest of this file normally.
-unsloth==2026.7.2
-unsloth_zoo==2026.7.2
+#   pip install -r requirements.txt      # editable install from this checkout
+#
+# Or, without cloning:
+#
+#   pip install aligntune                # from PyPI
+#
+# unsloth / unsloth_zoo / mergekit / tokenizer-extension are vendored inside the
+# package (see third_party/ and setup.py) - do NOT pip install them separately.
 
-# Logging and monitoring
-wandb>=0.15.0
-tensorboard>=2.12.0
-matplotlib>=3.5.0
-seaborn>=0.11.0
-xformers
-
-# Evaluation metrics
-evaluate>=0.4.0
-rouge-score>=0.1.2
-sacrebleu>=2.3.0
-lm-eval>=0.4.0
-nltk>=3.8.0
-# Optional evaluation metrics (for enhanced SFT evaluation - install separately if needed)
-bert-score>=0.3.13  # For BERTScore metrics
-sentence-transformers>=2.2.0  # For semantic similarity metrics
-codebleu>=0.1.0  # For CodeBLEU metrics (code generation tasks)
-
-# Device management (Linux/Windows only)
-nvitop>=1.1.0; platform_system!='Darwin'
-nvidia-ml-py>=11.495.46; platform_system!='Darwin'
-
-# Optional: accurate hardware-level carbon tracking (install separately if needed)
-# codecarbon>=2.3.0  # Falls back to static estimates when not installed
+-e .

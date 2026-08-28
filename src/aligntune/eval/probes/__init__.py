@@ -46,34 +46,18 @@ def load_reward_hacking_probes() -> List[Dict[str, Any]]:
     return _load_jsonl(reward_hacking_path)
 
 
-def load_routing_safety_probes() -> List[Dict[str, Any]]:
-    """
-    Load routing safety probes for MoE alignment auditing.
-
-    These probes are designed to test whether the router makes different
-    decisions for semantically similar safe vs unsafe prompts, enabling
-    detection of routing-based safety failures.
-    """
-    routing_safety_path = Path(__file__).parent.parent.parent / "recipes" / "probe_sets" / "routing_safety.jsonl"
-    if not routing_safety_path.exists():
-        logger.debug(f"routing_safety_probes not found at {routing_safety_path}")
-        return []
-    return _load_jsonl(routing_safety_path)
-
-
 def load_all_probe_sets() -> Dict[str, List[Dict[str, Any]]]:
     """
     Load all available probe sets.
 
     Returns:
-        Dict with keys: "refusal", "sycophancy", "verbosity", "reward_hacking", "routing_safety"
+        Dict with keys: "refusal", "sycophancy", "verbosity", "reward_hacking"
     """
     return {
         "refusal": load_refusal_probes(),
         "sycophancy": load_sycophancy_probes(),
         "verbosity": load_verbosity_probes(),
         "reward_hacking": load_reward_hacking_probes(),
-        "routing_safety": load_routing_safety_probes(),
     }
 
 
