@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mergekit"
+description = "Tools for merging pre-trained large language models"
+readme = "README.md"
+license = { text = "LGPL-3.0-only" }
+version = "0.1.4"
+authors = [{ name = "Charles Goddard", email = "chargoddard@gmail.com" }]
+requires-python = ">=3.10"
+dependencies = [
+    # Original upstream pins were exact/compatible-release (tqdm==4.67.1,
+    # click==8.2.1, safetensors~=0.5.2, accelerate~=1.6.0, pydantic~=2.10.6,
+    # immutables==0.21) and fought AlignTune's own transformers/torch/pydantic
+    # versions, downgrading the whole project on install. Loosened to lower
+    # bounds since the two real incompatibilities that motivated those pins
+    # are fixed directly in mergekit/graph.py and
+    # mergekit/architecture/base.py instead -- see PATCH_NOTES.md.
+    "torch>=2.0.0",
+    "tqdm>=4.67.1",
+    "click>=8.2.1",
+    "safetensors>=0.5.2",
+    "accelerate>=1.6.0",
+    "pydantic>=2.10.6",
+    "immutables>=0.21",
+    "transformers>=4.45.2",
+    "tokenizers>=0.20.1",
+    "huggingface_hub",
+    "peft",
+    "typing-extensions",
+    "sentencepiece",
+    "protobuf",
+    "scipy",
+    "datasets",
+]
+
+[project.optional-dependencies]
+dev = ["black~=25.1.0", "isort~=6.0.1", "pre-commit~=4.2.0"]
+test = ["pytest~=8.4.0"]
+evolve = ["ray", "cma", "lm_eval", "wandb"]
+vllm = ["vllm==0.7.2", "lm_eval[vllm]"]
+
+[project.urls]
+repository = "https://github.com/cg123/mergekit"
+
+
+[project.scripts]
+mergekit-yaml = "mergekit.scripts.run_yaml:main"
+mergekit-legacy = "mergekit.scripts.legacy:main"
+mergekit-layershuffle = "mergekit.scripts.layershuffle:main"
+bakllama = "mergekit.scripts.bakllama:main"
+mergekit-moe = "mergekit.scripts.moe:main"
+mergekit-tokensurgeon = "mergekit.scripts.tokensurgeon:main"
+mergekit-extract-lora = "mergekit.scripts.extract_lora:main"
+mergekit-evolve = "mergekit.scripts.evolve:main"
+mergekit-pytorch = "mergekit.scripts.merge_raw_pytorch:main"
+mergekit-multi = "mergekit.scripts.multimerge:main"
+
+[tool.setuptools]
+packages = [
+    "mergekit",
+    "mergekit.io",
+    "mergekit.merge_methods",
+    "mergekit.moe",
+    "mergekit.scripts",
+    "mergekit.evo",
+    "mergekit.tokenizer",
+    "mergekit.tokensurgeon",
+    "mergekit.architecture",
+    "mergekit._data",
+    "mergekit._data.architectures",
+    "mergekit._data.chat_templates",
+]
+include-package-data = true
+package-data = { "mergekit._data.architectures" = [
+    "*.json",
+], "mergekit._data.chat_templates" = [
+    "*.jinja",
+] }
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+filterwarnings = [
+    "ignore::pydantic.PydanticDeprecatedSince20:huggingface_hub.*:",
+    "ignore::FutureWarning:huggingface_hub.*:",
+    "ignore:Attempting Automatic Merge:UserWarning",
+    "ignore:No architecture config available:UserWarning",
+]
+testpaths = ["tests"]
+
+[dependency-groups]
+test = ["pytest~=8.4.0"]
+dev = ["black~=25.1.0", "isort~=6.0.1", "pre-commit~=4.2.0"]

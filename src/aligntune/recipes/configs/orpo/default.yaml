@@ -1,0 +1,60 @@
+recipe:
+  name: "default-orpo"
+  description: "Default recipe for ORPO (Odds Ratio Preference Optimization) training"
+  model: "gpt2"
+  dataset: "imdb"
+  task: "preference_learning"
+  algorithm: "orpo"
+  backend: "trl"
+  tags: ["orpo", "preference", "alignment"]
+  requires_auth: false
+  estimated_time: "1-2 hours"
+  estimated_memory: "16GB VRAM"
+
+config:
+  algo: orpo
+
+  model:
+    name_or_path: "gpt2"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 512
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["c_attn"]
+
+  datasets:
+    - name: "imdb"
+      split: "train"
+      max_samples: 1000
+      field_mappings:
+        prompt: "prompt"
+        chosen: "chosen"
+        rejected: "rejected"
+
+  train:
+    epochs: 1
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 2
+    learning_rate: 5e-5
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    max_prompt_length: 256
+    max_length: 512
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 100
+
+  logging:
+    output_dir: "./output/orpo-default"
+    run_name: "orpo-default-run"
+    loggers: []
+
+  distributed:
+    backend: "single"
+
+  chat_template: "auto"

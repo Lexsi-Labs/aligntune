@@ -1,0 +1,80 @@
+recipe:
+  name: "moa-router-evolution-strategies"
+  description: "Optimize Mixture of Adapters (MoA) router weights using Evolution Strategies (ES) for gradient-free parameter search"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  task: "router_optimization"
+  algorithm: "evolution_strategies"
+  backend: "es"
+  tags: ["moa", "mixture-of-experts", "evolution-strategies", "gradient-free", "router-optimization", "v3.4-es-backend"]
+  requires_auth: true
+  estimated_time: "2-3 hours"
+  estimated_memory: "16GB VRAM"
+
+config:
+  algo: es
+
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    precision: "bf16"
+    gradient_checkpointing: false
+    use_peft: true
+    lora_variant: "moa"
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+    # MoA-specific configuration
+    moa_num_experts: 4        # Number of LoRA experts per layer
+    moa_top_k: 2              # Select top-2 experts per token
+    moa_router_temp: 1.0      # Temperature for router softmax
+    moa_router_use_mlp: false # Use linear gate for routing
+
+    # No backprop needed - ES is gradient-free
+    trust_remote_code: true
+
+  # Evolution Strategies Configuration
+  evolution_strategies:
+    pop_size: 16              # Population size for evolutionary search
+    sigma: 0.005              # Perturbation noise standard deviation
+    learning_rate: 0.01       # Parameter update learning rate
+    num_generations: 100      # Number of generations to evolve
+    update_method: "rank"     # "rank" (default) or "elite" for fitness-based updates
+    seed: 42                  # Random seed for reproducibility
+
+  # Reward function configuration
+  reward:
+    fn: "routing_efficiency"  # Stub name for routing efficiency metric
+    # In practice, this would be implemented as:
+    # - Measure expert utilization balance
+    # - Penalize expert collapse
+    # - Optimize routing diversity
+    # - Consider computational efficiency
+    metric: "load_balance_loss"  # Which metric to optimize
+
+  # Dataset for evaluation (optional, for validating solutions)
+  datasets:
+    - name: "Open-Orca/SlimOrca"
+      split: "validation"
+      max_samples: 1000
+
+  # Logging and checkpointing
+  logging:
+    output_dir: "./output/moa-router-es-optimization"
+    run_name: "moa-router-evolution-strategies"
+    loggers: []
+    report_to: "none"
+    save_generations: 10      # Save population every N generations
+
+  distributed:
+    backend: "single"  # ES is designed for single-machine operation
+
+  chat_template: "llama3"
+
+# Notes on ES for Router Optimization:
+# - No gradient computation required
+# - Population-based search explores parameter space
+# - Rank-based updates use fitness-weighted averaging
+# - Efficient for discrete/constrained optimization problems
+# - Seed-based sampling for memory efficiency
+# - Reproducible results with fixed seed

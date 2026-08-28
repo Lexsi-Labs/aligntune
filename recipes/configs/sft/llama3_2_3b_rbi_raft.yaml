@@ -1,0 +1,156 @@
+# Llama-3.2-3B with RAFT (Retrieval Augmented Fine-Tuning) for RBI Compliance
+# ~3B params, enhanced with retrieval-augmented training on RBI corpus
+# Learns to cite golden documents instead of hallucinating compliance information
+# Zero-shot document grounding for regulatory Q&A with source attribution
+
+backend: trl
+training_type: raft
+
+model:
+  model_name_or_path: meta-llama/Llama-3.2-3b
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: meta-llama/Llama-3.2-3b
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided RBI RAFT dataset (with golden_docs, distractor_docs)
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+
+training:
+  output_dir: ./outputs/llama3_2_3b_rbi_raft
+  overwrite_output_dir: true
+
+  # Learning rate (slightly lower for RAFT due to retrieval complexity)
+  learning_rate: 1.5e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 150
+  warmup_ratio: 0.08
+
+  # Batch sizes for 3B model
+  per_device_train_batch_size: 6
+  gradient_accumulation_steps: 2
+
+  # Extended training for retrieval-augmented learning
+  num_train_epochs: 4
+  max_steps: -1
+
+  # Optimizer
+  optim: adamw_torch
+  weight_decay: 0.01
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 500
+  per_device_eval_batch_size: 6
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 500
+  save_total_limit: 3
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 2
+
+  # Generation parameters
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# LoRA for 3B model
+peft:
+  peft_type: lora
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# 8-bit quantization
+quantization:
+  load_in_8bit: true
+  load_in_4bit: false
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# RAFT-Specific Configuration
+raft:
+  max_golden_docs: 3
+  max_distractor_docs: 5
+  doc_context_template: "[DOC {idx}] {title}: {text}"
+
+  # Citation-aware training
+  use_citation_loss: true
+  citation_loss_weight: 0.1
+
+  # Document ranking loss (optional)
+  use_doc_ranking_loss: false
+  doc_ranking_loss_weight: 0.2
+
+  # Citation quality tracking
+  track_citation_quality: true
+  include_doc_ids_in_output: false
+
+# Task Configuration
+task:
+  task_type: instruction_following
+
+# Notes:
+# - RAFT training teaches document grounding: uses retrieved documents as context
+# - Golden documents: relevant RBI circulars (facts the model should learn from)
+# - Distractor documents: irrelevant RBI circulars (model learns to ignore)
+# - Reduces hallucination by forcing factual grounding in provided sources
+# - Inference: 100-180ms per token (includes document retrieval latency)
+# - VRAM requirement: ~10GB (with 8-bit quantization + retrieval overhead)
+#
+# RAFT Dataset Structure:
+#   {
+#     "question": "What is the current repo rate?",
+#     "answer": "The repo rate is 6.5%.",
+#     "golden_docs": [
+#       {"title": "RBI Monetary Policy", "text": "...repo rate 6.5%..."}
+#     ],
+#     "distractor_docs": [
+#       {"title": "Historical Rates", "text": "...older information..."}
+#     ]
+#   }
+#
+# Recommended training:
+# 1. Extract RBI circular corpus
+# 2. Create QA pairs from circulars
+# 3. Use BM25 to find golden docs (high lexical overlap with answer)
+# 4. Sample distractors (hard negatives from corpus)
+# 5. Train with RAFT loss to maximize citation quality
+#
+# Benefits over standard SFT:
+# - Explicit grounding prevents compliance hallucination
+# - Transparent source attribution (auditable for regulators)
+# - Better generalization to new RBI circulars at inference time

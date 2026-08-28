@@ -1,0 +1,66 @@
+recipe:
+  name: "deepseek-humaneval-grpo"
+  description: "Train DeepSeek Coder on HumanEval for code generation using GRPO"
+  model: "deepseek-ai/deepseek-coder-1.3b-instruct"
+  dataset: "openai/humaneval"
+  task: "code_generation"
+  algorithm: "grpo"
+  backend: "trl"
+  tags: ["deepseek", "grpo", "code", "evaluation"]
+  requires_auth: false
+  estimated_time: "1-2 hours"
+  estimated_memory: "12GB VRAM"
+
+config:
+  algo: grpo
+  model:
+    name_or_path: "deepseek-ai/deepseek-coder-1.3b-instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 32
+    lora_alpha: 64
+    lora_dropout: 0.1
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  datasets:
+    - name: "openai/humaneval"
+      split: "test"
+      column_mapping:
+        text: "prompt"
+  rewards:
+    - type: "code_correctness"
+      weight: 0.5
+      params: {}
+    - type: "code_quality"
+      weight: 0.3
+      params: {}
+    - type: "code_execution"
+      weight: 0.2
+      params: {}
+  train:
+    epochs: 1
+    max_steps: 500
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 2
+    learning_rate: 0.00001
+    warmup_steps: 25
+    max_grad_norm: 1.0
+    beta: 0.01
+    num_generations: 8
+    max_prompt_length: 512
+    max_completion_length: 1536
+    temperature: 0.6
+    top_p: 0.95
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 250
+  logging:
+    output_dir: "./output/deepseek-humaneval-grpo"
+    run_name: "deepseek-code-grpo"
+    loggers: []
+  distributed:
+    backend: "single"
+  chat_template: "auto"

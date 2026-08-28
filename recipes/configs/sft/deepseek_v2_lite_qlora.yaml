@@ -1,0 +1,94 @@
+recipe:
+  name: "deepseek-v2-lite-qlora-moe"
+  description: "Fine-tune DeepSeek-V2-Lite MoE with per-expert quantization and expert parallelism"
+  model: "deepseek-ai/deepseek-moe-16b-base"
+  dataset: "Open-Orca/SlimOrca"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "trl"
+  tags:
+    - "deepseek-v2"
+    - "moe"
+    - "expert-parallel"
+    - "per-expert-quantization"
+    - "q-lora"
+    - "v3.5-expert-parallelism"
+  requires_auth: true
+  estimated_time: "3-4 hours"
+  estimated_memory: "18GB VRAM per GPU"
+  multi_gpu_recommended: true
+
+config:
+  algo: sft
+
+  model:
+    name_or_path: "deepseek-ai/deepseek-moe-16b-base"
+    precision: "bf16"
+    gradient_checkpointing: true
+    use_peft: true
+    peft_type: "lora"
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+    dora_enabled: false
+    rslora_enabled: false
+    trust_remote_code: true
+
+    # Per-expert quantization configuration
+    # Critical experts (0, 1) use 8-bit precision for stability
+    # Other experts use 4-bit for memory efficiency
+    expert_quantization:
+      enabled: true
+      critical_experts: [0, 1]  # First 2 experts use 8-bit
+      critical_bitwidth: 8
+      default_bitwidth: 4
+      quantize_router: false      # Keep router in fp16
+      quantize_gate: false        # Keep gating network in fp16
+
+    # Expert parallelism configuration
+    expert_parallelism:
+      enabled: true
+      num_expert_groups: 4        # Shard across 4 GPUs
+      fsdp2_enabled: true
+      cpu_offload: false
+      memory_efficient: true
+
+  datasets:
+    - name: "Open-Orca/SlimOrca"
+      split: "train"
+      max_samples: 50000
+      column_mapping:
+        text: "conversations"
+
+  train:
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 4
+    learning_rate: 1.5e-4
+    warmup_steps: 100
+    max_grad_norm: 1.0
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+    eval_steps: 500
+    seed: 42
+    max_seq_length: 4096
+
+  logging:
+    output_dir: "./output/deepseek-v2-lite-qlora-moe"
+    run_name: "deepseek-v2-lite-expert-parallel"
+    loggers: []
+    report_to: "none"
+
+  distributed:
+    backend: "fsdp"
+    fsdp_config:
+      sharded_model: true
+      expert_sharding: true
+      cpu_offload: false
+      memory_efficient: true
+      gradient_checkpointing: true
+
+  chat_template: "deepseek"

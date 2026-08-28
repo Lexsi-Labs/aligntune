@@ -1,0 +1,93 @@
+algo: grpo
+
+model:
+  name_or_path: "meta-llama/Llama-3.2-3B-Instruct"
+  backend: trl
+  precision: bf16
+  quantization:
+    load_in_4bit: false
+  gradient_checkpointing: true
+  max_seq_length: 1024
+  use_peft: true
+  lora_r: 32
+  lora_alpha: 32
+  lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  lora_dropout: 0.1
+
+datasets:
+  - name: "openai/gsm8k"
+    config_name: "main"
+    split: "train"
+    max_samples: 1000
+    system_prompt: "You are a helpful math tutor. Solve the problem step by step and provide the final numeric answer."
+    column_mapping:
+      question: "prompt"
+      answer: "response"
+
+rewards:
+  - type: math_correctness
+    weight: 1.0
+    params: {}
+
+train:
+  epochs: 1
+  max_steps: 500
+  per_device_batch_size: 8
+  gradient_accumulation_steps: 4
+  num_generations: 8
+  learning_rate: 1.5e-5
+  max_prompt_length: 256
+  max_completion_length: 768
+  
+  # GRPO parameters
+  loss_type: grpo
+  beta: 0.01
+  scale_rewards: group
+  temperature: 0.6
+  top_p: 0.95
+  max_grad_norm: 1.0
+  num_generations: 4
+  
+  # Checkpointing
+  save_steps: 100
+  save_total_limit: 3
+  
+  # Seeds
+  seed: 42
+  data_seed: 42
+  logging_steps: 10
+
+# Evaluation configuration
+evaluation:
+  enabled: true
+  eval_steps: 100
+  eval_dataset:
+    name: "openai/gsm8k"
+    config: "main"
+    split: "test"
+    max_samples: 100
+    column_mapping:
+      question: "prompt"
+      answer: "response"
+  metrics:
+    - type: math_correctness
+      name: "accuracy"
+  generation_config:
+    temperature: 0.1
+    top_p: 0.95
+    max_new_tokens: 512
+    do_sample: true
+
+logging:
+  output_dir: "output"
+  run_name: "grpo_gsm8k_trl"
+  loggers: ["tensorboard"]
+
+distributed:
+  backend: single
+
+caching:
+  root: "cache"
+  enabled: true
+
+chat_template: auto

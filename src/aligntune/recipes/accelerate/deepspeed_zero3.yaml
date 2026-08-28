@@ -1,0 +1,36 @@
+# AlignTune preset: DeepSpeed ZeRO Stage 3 with CPU offload
+#
+# Usage:
+#   Add to your training recipe YAML:
+#     train:
+#       accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero3.yaml
+#
+#   Or pass via CLI:
+#     aligntune train --config my_recipe.yaml --accelerate-config src/aligntune/recipes/accelerate/deepspeed_zero3.yaml
+#
+# ZeRO Stage 3 shards optimizer states, gradients, AND model parameters.
+# Combined with CPU offload this allows training very large models on limited GPU VRAM.
+# Throughput is lower than ZeRO-2 — use when the model does not fit in GPU memory.
+
+compute_environment: LOCAL_MACHINE
+distributed_type: DEEPSPEED
+deepspeed_config:
+  deepspeed_multinode_launcher: standard
+  gradient_accumulation_steps: 1
+  gradient_clipping: 1.0
+  offload_optimizer_device: cpu        # offload optimizer state to host RAM
+  offload_param_device: cpu            # offload model parameters to host RAM
+  zero3_init_flag: true                # initialize params on CPU (required for ZeRO-3)
+  zero3_save_16bit_model: true         # save fp16 consolidated model at end
+  zero_stage: 3
+downcast_bf16: "no"
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 1                       # update to number of GPUs
+rdzv_backend: static
+same_network: true
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false

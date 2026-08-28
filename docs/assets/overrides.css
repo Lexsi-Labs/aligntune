@@ -1,0 +1,70 @@
+/* Small backend-support chips used on the Algorithms overview page's card grid.
+   Semantic per-backend colors, independent of the site's primary/accent palette. */
+
+.chip-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.chip {
+    display: inline-block;
+    font-family: var(--md-code-font, monospace);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.chip-trl {
+    background-color: #2f6690;
+}
+
+.chip-unsloth {
+    background-color: #2f7a54;
+}
+
+.chip-es {
+    background-color: #6e4e9e;
+}
+
+.chip-broken {
+    background-color: transparent;
+    color: #a8433d;
+    border: 1px solid #a8433d;
+}
+
+[data-md-color-scheme="slate"] .chip-trl {
+    background-color: #3f7fac;
+}
+
+[data-md-color-scheme="slate"] .chip-unsloth {
+    background-color: #3f9469;
+}
+
+[data-md-color-scheme="slate"] .chip-es {
+    background-color: #8266b3;
+}
+
+[data-md-color-scheme="slate"] .chip-broken {
+    color: #e0837d;
+    border-color: #e0837d;
+}
+
+/* Tighten the algorithm-family section labels above each card grid */
+.algo-family-label {
+    font-family: var(--md-code-font, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--md-default-fg-color--light);
+    margin: 1.6rem 0 0.6rem;
+}
+
+.algo-family-label:first-of-type {
+    margin-top: 0.8rem;
+}

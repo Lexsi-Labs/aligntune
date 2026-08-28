@@ -1,0 +1,51 @@
+# Evaluation Config for Quantization Regression Testing
+#
+# This config defines what metrics to compute when verifying quantized artifacts.
+# It's passed to run_eval() for both baseline and variant artifacts.
+#
+# Usage:
+#   aligntune verify-export run ./checkpoint \
+#     -a artifact_spec \
+#     --probe-set probes.json \
+#     --eval-config src/aligntune/recipes/configs/verify_export/llama3_quant_eval.yaml
+
+# ===== Model Configuration =====
+# Note: model_path is overridden by verify-export CLI for each artifact
+model_path: ./placeholder-will-be-overridden
+output_dir: ./eval_results
+
+# ===== Task & Metric Configuration =====
+task_type: math
+metrics:
+  - accuracy
+  - pass_at_k
+k_list: [1, 5]  # Compute pass@1 and pass@5
+
+# ===== Dataset Configuration =====
+# For quick testing on subset
+max_samples: 100  # Reduce for faster iteration; use ~500 for full test
+batch_size: 8
+
+# ===== Generation Parameters =====
+max_length: 2048
+max_new_tokens: 512
+temperature: 0.7
+top_p: 0.95
+top_k: 40
+
+# ===== Device & Precision =====
+device: cuda
+precision: bf16  # Use bfloat16 for efficiency
+
+# ===== Quantization & Backend =====
+# For GGUF files, set use_vllm: true
+use_vllm: false
+# If using vLLM for GGUF:
+#   use_vllm: true
+#   gpu_memory_utilization: 0.9
+
+# ===== Optional: Advanced Settings =====
+seed: 42
+num_samples: 1
+print_sample_mode: first
+num_print_samples: 3

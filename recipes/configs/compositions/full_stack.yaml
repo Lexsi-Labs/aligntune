@@ -1,0 +1,55 @@
+name: "full_stack"
+description: "Complete training pipeline: SFT → MoA → ES → DPO → audit"
+
+metadata:
+  version: "3.4"
+  estimated_total_time: "20-24 hours"
+  model_family: "meta-llama/Meta-Llama-3-8B"
+  recommended_vram: "24GB+"
+  tags: ["advanced", "multi-stage", "production"]
+
+stages:
+  - name: "sft"
+    algo: "sft"
+    config_path: "recipes/configs/sft/llama3_supervised.yaml"
+    description: "Stage 1: Supervised Fine-Tuning with base LoRA"
+
+  - name: "moa"
+    algo: "sft"
+    config_path: "recipes/configs/sft/llama3_moa_4experts.yaml"
+    init_from: "sft"
+    description: "Stage 2: Mixture of Adapters - sparse expert training"
+    target_params:
+      train:
+        epochs: 2
+        learning_rate: 1e-4
+
+  - name: "es"
+    algo: "ppo"
+    config_path: "recipes/configs/rl/llama3_es.yaml"
+    init_from: "moa"
+    description: "Stage 3: Expert Sampling - diverse exploration"
+    target_params:
+      train:
+        max_steps: 5000
+        learning_rate: 5e-5
+
+  - name: "dpo"
+    algo: "dpo"
+    config_path: "recipes/configs/rl/llama3_dpo.yaml"
+    init_from: "es"
+    description: "Stage 4: Direct Preference Optimization"
+    target_params:
+      train:
+        epochs: 3
+        learning_rate: 2e-5
+
+  - name: "audit"
+    algo: "sft"
+    config_path: "recipes/configs/sft/llama3_audit.yaml"
+    init_from: "dpo"
+    description: "Stage 5: Audit and validation - light fine-tuning for alignment"
+    target_params:
+      train:
+        epochs: 1
+        learning_rate: 5e-5

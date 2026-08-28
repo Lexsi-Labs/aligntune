@@ -1,0 +1,133 @@
+# Phi-3.5-Mini for KYC Information Extraction
+# ~3.8B params, optimized for structured KYC document extraction
+# Trained on extracting customer information, identity verification, beneficial ownership
+# Outputs JSON-structured KYC data from unstructured documents
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: microsoft/Phi-3.5-mini-instruct
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: microsoft/Phi-3.5-mini-instruct
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided KYC extraction dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    instruction_column: instruction
+    response_column: response
+    context_column: context
+
+training:
+  output_dir: ./outputs/phi3_5_mini_kyc_extraction
+  overwrite_output_dir: true
+
+  # Learning rate for structured extraction task
+  learning_rate: 2.0e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 100
+  warmup_ratio: 0.07
+
+  # Batch sizes for 3.8B model
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 2
+
+  # Standard training
+  num_train_epochs: 3
+  max_steps: -1
+
+  # Optimizer
+  optim: adamw_torch
+  weight_decay: 0.01
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 400
+  per_device_eval_batch_size: 8
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 400
+  save_total_limit: 2
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 2
+
+  # Generation parameters (shorter for structured output)
+  max_new_tokens: 256
+  temperature: 0.3  # Lower temperature for consistent extraction
+  top_p: 0.9
+
+# LoRA for Phi-3.5-mini
+peft:
+  peft_type: lora
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# 8-bit quantization for 3.8B model
+quantization:
+  load_in_8bit: true
+  load_in_4bit: false
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# KYC Extraction Task Configuration
+task:
+  task_type: instruction_following
+  instruction_column: instruction
+  response_column: response
+  context_column: context
+
+# Notes:
+# - Phi-3.5-mini is well-optimized for instruction-following
+# - KYC extraction: customer name, ID type, ID number, address, beneficial owner
+# - Trains on BFSI KYC documents, identity verification forms, bank onboarding docs
+# - Outputs JSON format: {"name": "...", "id_type": "...", "id_number": "...", ...}
+# - Inference: 60-100ms per token on edge GPUs
+# - VRAM requirement: ~8GB (with 8-bit quantization)
+#
+# Recommended datasets:
+# - Anonymized KYC forms (name, DOB, address extraction)
+# - Aadhaar/PAN verification document OCR outputs
+# - Bank account opening forms with structured field extraction
+# - Customer beneficial ownership declaration documents
+#
+# Training examples format:
+#   Instruction: "Extract KYC information from the document: <document_text>"
+#   Response: "{\"name\": \"John Doe\", \"id_type\": \"PAN\", \"id_number\": \"AAAPK1234A\", ...}"
+#
+# Fine-tuning improvements:
+# - Lower temperature (0.3) for consistent structured output
+# - Validate JSON output format post-generation
+# - Include schema in system prompt for guided generation
+# - Test extraction accuracy on held-out KYC documents

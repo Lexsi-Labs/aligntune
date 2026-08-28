@@ -1,0 +1,87 @@
+recipe:
+  name: "llama3-online-dpo-iterative"
+  description: "Fine-tune LLaMA 3 using Online Iterative DPO for continuous policy improvement"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "openai/gsm8k"
+  task: "online_preference_optimization"
+  algorithm: "online_dpo"
+  backend: "trl"
+  tags: ["llama", "online-dpo", "iterative", "distribution-shift"]
+  requires_auth: false
+  estimated_time: "4-6 hours"
+  estimated_memory: "24GB VRAM"
+
+config:
+  algo: online_dpo
+
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+  # Prompts dataset for iterative sampling
+  prompts_dataset:
+    name: "openai/gsm8k"
+    config_name: "main"
+    split: "train"
+    max_samples: 100  # Sample from first 100 prompts for iterations
+    type: "prompts"
+
+  # Optional: Initial preference pairs dataset (not used in pure online DPO)
+  datasets:
+    - name: "openai/gsm8k"
+      split: "train"
+      max_samples: 100
+      field_mappings:
+        prompt: "question"
+        chosen: "answer"
+        rejected: "question"
+
+  # Reward model(s) for ranking responses
+  rewards:
+    - type: "reward_model"
+      model_name: "OpenAssistant/reward-model-deberta-v3-large"
+      device: "cuda"
+      cache_predictions: true
+      weight: 1.0
+
+  train:
+    # Online DPO specific hyperparameters
+    num_iterations: 2                      # Number of outer iterations
+    num_responses_per_prompt: 4            # Responses to sample per prompt per iteration
+    dpo_steps_per_iteration: 100           # DPO training steps per iteration
+    top_k: 1                               # Top-k responses to use as chosen
+    bottom_k: 1                            # Bottom-k responses to use as rejected
+    ensemble_mode: "mean"                  # How to aggregate multiple reward models
+
+    # DPO training hyperparameters
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 8
+    learning_rate: 5e-5
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.1                              # DPO temperature
+    max_prompt_length: 512
+    max_length: 2048
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+
+  logging:
+    output_dir: "./output/llama3-online-dpo"
+    run_name: "llama3-online-dpo-iterative"
+    loggers: []
+
+  distributed:
+    backend: "single"
+
+  chat_template: "llama3"

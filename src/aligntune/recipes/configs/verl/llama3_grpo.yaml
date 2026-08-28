@@ -1,0 +1,89 @@
+recipe:
+  name: "llama3-grpo-verl-hybridflow"
+  description: "High-throughput RLHF with veRL GRPO via HybridFlow (group-relative advantage)"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "Anthropic/hh-rlhf"
+  task: "rlhf"
+  algorithm: "grpo"
+  backend: "verl"
+  tags: ["llama", "grpo", "verl", "hybridflow", "group-relative", "high-throughput"]
+  requires_auth: true
+  estimated_time: "1.5-2 hours"
+  estimated_memory: "32GB VRAM (with HybridFlow co-location)"
+  note: "veRL GRPO: group-relative advantages + HybridFlow = 2-3x throughput"
+
+config:
+  algo: grpo
+
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    backend: "verl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 1024
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+  datasets:
+    - name: "Anthropic/hh-rlhf"
+      split: "train"
+      max_samples: 20000
+      column_mapping:
+        text: "chosen"
+
+  rewards:
+    - type: "helpfulness"
+      weight: 0.5
+      params: {}
+    - type: "safety"
+      weight: 0.3
+      params: {}
+    - type: "harmlessness"
+      weight: 0.2
+      params: {}
+
+  train:
+    epochs: 1
+    max_steps: 2000
+    per_device_batch_size: 8
+    gradient_accumulation_steps: 2
+    learning_rate: 1e-5
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    num_generations: 16
+    max_prompt_length: 512
+    max_completion_length: 512
+    temperature: 0.7
+    top_p: 0.9
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+
+    # GRPO-specific: group ranking
+    # Each prompt gets multiple completions, advantages computed relative to group
+    grpo_alpha: 0.1                  # Advantage clipping
+    grpo_beta: 0.1                   # Loss scaling
+
+    # veRL-specific configuration for HybridFlow
+    verl_micro_batch_size: 4          # Micro batch size for gradient accumulation
+    verl_rollout_n: 8                 # Completions per prompt (GRPO needs groups for ranking)
+    verl_n_gpus_per_node: 8          # GPUs per node (A100/H100)
+    verl_nnodes: 1                    # Number of nodes (set > 1 for multi-node)
+    verl_fsdp_config:
+      sharding_strategy: "FULL_SHARD"  # FSDP strategy
+      cpu_offload: false
+      backward_prefetch: "BACKWARD_PRE"
+
+  logging:
+    output_dir: "./output/llama3-grpo-verl"
+    run_name: "llama3-grpo-verl-hybridflow"
+    loggers: []
+
+  distributed:
+    backend: "single"
+
+  chat_template: "llama3"

@@ -1,0 +1,77 @@
+recipe:
+  name: "llama3-1-8b-128k-longcontext"
+  description: >
+    Fine-tune Meta-Llama-3.1-8B-Instruct for 128k long-context understanding
+    using dynamic NTK-aware RoPE scaling with flash-attention-2 and long-context
+    packing.  Llama 3.1 ships with a 128k context window natively; this recipe
+    enables supervised fine-tuning that exploits the full window.
+  model: "meta-llama/Meta-Llama-3.1-8B-Instruct"
+  dataset:
+    - "longalpaca"
+    - "books3_chunks"
+    - "arxiv_chunks"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "trl"
+  tags:
+    - "llama3"
+    - "llama3.1"
+    - "long-context"
+    - "128k"
+    - "dynamic-rope"
+    - "flash-attention-2"
+    - "v3.9-long-context"
+  requires_auth: true   # Meta-Llama gated model — HF_TOKEN required
+  estimated_time: "5-8 hours"
+  estimated_memory: "40GB VRAM with packing + bf16"
+  multi_gpu_recommended: true
+
+config:
+  algo: sft
+
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3.1-8B-Instruct"
+    precision: "bf16"
+    gradient_checkpointing: true
+    attn_implementation: "flash_attention_2"
+    trust_remote_code: false
+
+    # ── Long-context RoPE extension ──────────────────────────────────────────
+    # Dynamic (NTK-aware) scaling adjusts the RoPE base frequency at inference
+    # time based on actual sequence length.  It requires no retraining to
+    # extend the context; fine-tuning improves quality at long ranges.
+    target_context_length: 131072          # 128k tokens  (128 * 1024)
+    rope_scaling_type: "dynamic"           # Options: linear | dynamic | yarn | ntk
+    rope_scaling_factor: 4.0              # 32k base → 128k target  (4× extension)
+
+    # ── Sequence packing ─────────────────────────────────────────────────────
+    long_context_packing: true
+
+  datasets:
+    - name: "longalpaca"
+      split: "train"
+    - name: "books3_chunks"
+      split: "train"
+    - name: "arxiv_chunks"
+      split: "train"
+
+  train:
+    epochs: 1
+    per_device_batch_size: 1
+    gradient_accumulation_steps: 8
+    learning_rate: 2.0e-5
+    warmup_ratio: 0.03
+    max_grad_norm: 1.0
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 200
+    eval_steps: 200
+    seed: 42
+    max_seq_length: 131072
+
+  logging:
+    output_dir: "./output/llama3-1-8b-128k-longcontext"
+    run_name: "llama3-1-8b-dynamic-128k"
+    loggers: []
+    report_to: "none"

@@ -1,0 +1,123 @@
+# Hindi-specific SFT with Airavata teaching style
+# For: meta-llama/Llama-3-8b or similar foundation models
+# Optimized for Hindi instruction following and cultural grounding
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: meta-llama/Llama-3-8b
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: meta-llama/Llama-3-8b
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided Hindi instruction dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  # Hindi-specific preprocessing
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    remove_columns: []
+    chat_template: null
+
+training:
+  output_dir: ./outputs/llama3_hindi_airavata
+  overwrite_output_dir: true
+
+  # Learning hyperparameters - tuned for Hindi instruction data
+  learning_rate: 2.0e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 100
+  warmup_ratio: 0.1
+
+  # Batch size - adjust based on available VRAM
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 2
+
+  # Training duration
+  num_train_epochs: 3
+  max_steps: -1
+
+  # Optimizer
+  optim: paged_adamw_8bit
+  weight_decay: 0.01
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 500
+  per_device_eval_batch_size: 8
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 500
+  save_total_limit: 3
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 4
+
+  # Generation parameters for evaluation
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# QLoRA quantization for efficient training
+peft:
+  peft_type: lora
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# Quantization for memory efficiency
+quantization:
+  load_in_8bit: true
+  load_in_4bit: false
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# Hindi-specific training notes
+# Airavata teaching style:
+#   - Emphasis on cultural context and examples
+#   - Encourage critical thinking in Hindi
+#   - Appropriate formality levels (tu/aap distinction)
+#   - Regional variations and dialects awareness
+#
+# Recommended dataset structure:
+#   - Instruction: Hindi instruction/query
+#   - Context: Optional background information
+#   - Response: High-quality Hindi response
+#   - Language: Set to 'hindi' or 'hi'
+#
+# For better results:
+#   1. Curate diverse Hindi instruction data
+#   2. Include examples from different domains
+#   3. Test on Hindi-specific benchmarks (MILU-Hi)
+#   4. Use alignment probes in Hindi (refusal_hi, sycophancy_hi, verbosity_hi)

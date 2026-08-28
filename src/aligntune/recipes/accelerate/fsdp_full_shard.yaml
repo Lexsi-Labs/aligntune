@@ -1,0 +1,36 @@
+# AlignTune preset: FSDP Full Sharding
+#
+# Usage:
+#   Add to your training recipe YAML:
+#     train:
+#       accelerate_config_path: src/aligntune/recipes/accelerate/fsdp_full_shard.yaml
+#
+#   Or pass via CLI:
+#     aligntune train --config my_recipe.yaml --accelerate-config src/aligntune/recipes/accelerate/fsdp_full_shard.yaml
+#
+# FULL_SHARD is the PyTorch-native equivalent of DeepSpeed ZeRO-3.
+# All model parameters, gradients, and optimizer states are sharded across GPUs.
+# Best for single-node multi-GPU training with PyTorch >= 2.0.
+
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+fsdp_config:
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  fsdp_backward_prefetch_policy: BACKWARD_PRE
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_forward_prefetch: false
+  fsdp_offload_params: false           # set to true for CPU offload
+  fsdp_sharding_strategy: FULL_SHARD
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+  fsdp_sync_module_states: true
+  fsdp_use_orig_params: true
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 1                       # update to number of GPUs
+rdzv_backend: static
+same_network: true
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false

@@ -1,0 +1,188 @@
+# Doc-to-LoRA Document Personalization Configuration (v3.3 Advanced Parameterization)
+#
+# This configuration enables generating LoRA adapters from extended task documents.
+# Unlike text2lora_meta_training.yaml which uses short embeddings, this recipe
+# processes long documents by chunking, embedding chunks, and pooling for better
+# context capture.
+#
+# Workflow:
+# 1. Load trained Text-to-LoRA hypernetwork checkpoint
+# 2. Process document: chunk → embed chunks → pool embeddings
+# 3. Feed pooled embedding to hypernetwork
+# 4. Generate LoRA weights optimized for document-described task
+# 5. Apply to base model at inference time
+#
+# Key differences from text2lora_meta_training.yaml:
+# - Accepts full document input (not just embedding)
+# - Handles overlapping chunks for context preservation
+# - Weighted attention pooling for relevance-aware combination
+# - Suitable for detailed task specifications
+
+# ============================================================================
+# HYPERNETWORK CHECKPOINT
+# ============================================================================
+hypernet_checkpoint:
+  # Path to trained TextToLoRAHypernet checkpoint
+  path: "./checkpoints/text2lora/best_hypernet.pt"
+
+  # Hypernetwork configuration (must match checkpoint)
+  config:
+    hidden_dim: 768
+    lora_r: 16
+    num_target_modules: 5
+    mlp_hidden: 512
+    embedding_model_name: "all-MiniLM-L6-v2"
+    lora_init_std: 0.02
+
+# ============================================================================
+# DOCUMENT-TO-LORA CONFIGURATION
+# ============================================================================
+doc2lora:
+  # Chunk size in characters for splitting documents
+  # Smaller values: more fine-grained chunks, higher noise
+  # Larger values: coarser chunks, potentially lost detail
+  chunk_size: 512
+
+  # Maximum number of chunks to process per document
+  # Excess chunks are dropped; documents shorter than chunk_size use 1 chunk
+  num_chunks: 3
+
+  # Pooling strategy for combining chunk embeddings:
+  # - "mean": Simple average of chunk embeddings (lightweight, deterministic)
+  # - "weighted": Attention-based pooling (learnable, context-aware)
+  pooling_strategy: "weighted"
+
+  # Device for computation
+  device: "cpu"
+
+# ============================================================================
+# BASE MODEL CONFIGURATION
+# ============================================================================
+base_model:
+  # Model to apply generated LoRA adapters to
+  model_name: "meta-llama/Llama-2-7b"
+
+  # Modules targeted by generated LoRA pairs
+  # Must have num_target_modules entries
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "up_proj"
+
+  # Freeze base model weights (LoRA only)
+  freeze_base: true
+
+# ============================================================================
+# INFERENCE CONFIGURATION
+# ============================================================================
+inference:
+  # Scaling factor for LoRA contribution (alpha/r in LoRA computation)
+  lora_scaling: 1.0
+
+  # Maximum sequence length for document input
+  max_document_length: 4096
+
+  # Device for inference
+  device: "cpu"
+
+# ============================================================================
+# EXAMPLE USAGE
+# ============================================================================
+#
+# Use case: Fine-tune on a specific domain with detailed task description
+#
+# Example document:
+# """
+# Task: Medical Question-Answering System
+#
+# Objective: Fine-tune language model to answer medical questions accurately.
+#
+# Context: We need a QA system that can:
+# - Parse medical questions from patients
+# - Retrieve relevant medical knowledge
+# - Generate accurate, safe answers
+# - Cite sources from medical databases
+#
+# Training Data:
+# - 10,000 medical Q&A pairs from PubMed
+# - Domain-specific terminology glossary
+# - Safety guidelines for medical advice
+#
+# Evaluation Metrics:
+# - BLEU score against reference answers
+# - Medical accuracy (expert review)
+# - Response safety score
+# - Latency < 1 second per question
+# """
+#
+# Usage:
+# ```python
+# from aligntune.core.adapters.text2lora import TextToLoRAHypernet, DocToLoRA
+# import torch
+# import yaml
+#
+# # Load config
+# with open("recipes/configs/meta/text2lora_doc_personalization.yaml") as f:
+#     config = yaml.safe_load(f)
+#
+# # Load hypernet from checkpoint
+# hypernet_config = config["hypernet_checkpoint"]["config"]
+# hypernet = TextToLoRAHypernet(**hypernet_config)
+# checkpoint = torch.load(config["hypernet_checkpoint"]["path"])
+# hypernet.load_state_dict(checkpoint["hypernet"])
+#
+# # Create DocToLoRA wrapper
+# doc2lora = DocToLoRA(
+#     hypernet,
+#     chunk_size=config["doc2lora"]["chunk_size"],
+#     num_chunks=config["doc2lora"]["num_chunks"],
+#     pooling_strategy=config["doc2lora"]["pooling_strategy"],
+#     device=config["doc2lora"]["device"],
+# )
+#
+# # Read task document
+# with open("task_document.txt") as f:
+#     task_doc = f.read()
+#
+# # Generate LoRA weights from document
+# lora_weights = doc2lora(task_doc)  # List[Dict[str, Tensor]]
+#
+# # Apply to base model
+# from peft import get_peft_model
+# model = load_model(config["base_model"]["model_name"])
+#
+# # Convert generated LoRA to PEFT format and apply
+# model = apply_generated_lora(model, lora_weights, config["base_model"])
+#
+# # Use model for inference on medical QA task
+# response = model("What are the symptoms of diabetes?")
+# ```
+
+# ============================================================================
+# COMPARISON: Text-to-LoRA vs Doc-to-LoRA
+# ============================================================================
+#
+# Text-to-LoRA (meta_training):
+# ✓ Fast: Direct embedding → LoRA generation
+# ✓ Lightweight: Single forward pass
+# ✗ Limited context: Word-level embedding only (~100 tokens)
+# ✗ Task description must be concise
+#
+# Doc-to-LoRA (doc_personalization):
+# ✓ Rich context: Processes full document (512 chars × 3 chunks)
+# ✓ Structured input: Supports detailed specifications
+# ✓ Flexible: Handles variable-length documents
+# ✗ Slower: Chunking + embedding + pooling overhead
+# ✗ Higher memory: Multiple chunk embeddings
+#
+# Choose Doc-to-LoRA when:
+# - Task requires detailed specification (>500 words)
+# - Document contains multiple contexts/examples
+# - High accuracy is prioritized over latency
+#
+# Choose Text-to-LoRA when:
+# - Task is concise (<100 words)
+# - Real-time generation needed
+# - Inference latency critical

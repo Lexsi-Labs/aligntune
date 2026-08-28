@@ -1,0 +1,52 @@
+# Accelerate configuration for expert parallelism in Mixture-of-Experts models
+# This preset enables FSDP2-based expert sharding and per-expert quantization
+
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+downcast_bf16: "no"
+machine_rank: 0
+main_training_function: main
+mixed_precision: "bf16"
+num_machines: 1
+num_processes: 4
+rdzv_backend: c10d
+same_network: true
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
+
+# FSDP2-specific configuration for expert parallelism
+fsdp_config:
+  # Expert sharding: partition experts across devices
+  sharded_model: true
+
+  # Enable expert parallelism strategy
+  expert_sharding: true
+
+  # CPU offload disabled for expert parallelism (keep on GPU)
+  cpu_offload: false
+
+  # Memory efficient sharding
+  memory_efficient: true
+
+  # Sharding strategy: FULL_SHARD for expert parallelism
+  sharding_strategy: FULL_SHARD
+
+  # Gradient checkpointing for memory efficiency
+  gradient_checkpointing: true
+
+  # Communication backend for multi-GPU
+  backend: nccl
+
+  # Limit all-reduce operations
+  limit_all_gathers: true
+
+  # Use async gradient synchronization
+  use_orig_params: true
+
+# Advanced FSDP options
+fsdp_sync_module_states: true
+fsdp_forward_prefetch: true
+fsdp_backward_prefetch: "BACKWARD_PRE"
+fsdp_offload_params: false

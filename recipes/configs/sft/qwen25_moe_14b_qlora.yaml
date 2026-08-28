@@ -1,0 +1,103 @@
+recipe:
+  name: "qwen25-moe-14b-qlora-expert-parallel"
+  description: "Fine-tune Qwen2.5-MoE-14B with expert parallelism and per-expert quantization"
+  model: "Qwen/Qwen2.5-MoE-14B"
+  dataset: "Open-Orca/SlimOrca"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "trl"
+  tags:
+    - "qwen"
+    - "qwen2.5"
+    - "moe"
+    - "expert-parallel"
+    - "per-expert-quantization"
+    - "q-lora"
+    - "v3.5-expert-parallelism"
+  requires_auth: false
+  estimated_time: "4-5 hours"
+  estimated_memory: "20GB VRAM per GPU"
+  multi_gpu_recommended: true
+
+config:
+  algo: sft
+
+  model:
+    name_or_path: "Qwen/Qwen2.5-MoE-14B"
+    precision: "bf16"
+    gradient_checkpointing: true
+    use_peft: true
+    peft_type: "lora"
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules:
+      - "q_proj"
+      - "k_proj"
+      - "v_proj"
+      - "o_proj"
+      - "gate_proj"
+      - "up_proj"
+      - "down_proj"
+    dora_enabled: false
+    rslora_enabled: false
+    trust_remote_code: true
+
+    # Per-expert quantization configuration
+    # Critical experts for knowledge storage use 8-bit precision
+    # Other experts use 4-bit for memory efficiency
+    expert_quantization:
+      enabled: true
+      critical_experts: [0, 1, 2]  # First 3 experts use 8-bit
+      critical_bitwidth: 8
+      default_bitwidth: 4
+      quantize_router: false        # Router stays fp16 for stability
+      quantize_gate: false          # Gating stays fp16 for routing quality
+
+    # Expert parallelism configuration for multi-GPU training
+    expert_parallelism:
+      enabled: true
+      num_expert_groups: 4          # Optimal for 4xA100 or similar
+      fsdp2_enabled: true           # Use FSDP2 for modern PyTorch
+      cpu_offload: false            # Keep experts on GPU
+      memory_efficient: true        # Enable memory optimizations
+
+  datasets:
+    - name: "Open-Orca/SlimOrca"
+      split: "train"
+      max_samples: 80000
+      column_mapping:
+        text: "conversations"
+
+  train:
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 4
+    learning_rate: 1.5e-4
+    warmup_steps: 150
+    max_grad_norm: 1.0
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+    eval_steps: 500
+    seed: 42
+    max_seq_length: 4096
+
+  logging:
+    output_dir: "./output/qwen25-moe-14b-qlora-expert-parallel"
+    run_name: "qwen25-moe-expert-parallel-training"
+    loggers: []
+    report_to: "none"
+
+  distributed:
+    backend: "fsdp"
+    fsdp_config:
+      sharded_model: true
+      expert_sharding: true
+      cpu_offload: false
+      memory_efficient: true
+      gradient_checkpointing: true
+      limit_all_gathers: true
+
+  chat_template: "qwen"

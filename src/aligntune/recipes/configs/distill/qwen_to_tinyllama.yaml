@@ -1,0 +1,59 @@
+# Knowledge Distillation Recipe: Qwen2.5-0.5B Teacher -> TinyLLaMA-1.1B Student
+#
+# This recipe demonstrates knowledge distillation where a small efficient
+# teacher model (Qwen2.5-0.5B) guides a slightly larger student model
+# (TinyLLaMA-1.1B) through soft targets and weighted loss blending.
+
+training_type: distill
+backend: trl
+
+# Student model (trainable)
+student_model: TinyLlama/TinyLlama-1.1B-intermediate-step-1431k-3T
+
+# Teacher model (frozen, provides soft targets)
+teacher_model: Qwen/Qwen2.5-0.5B
+
+# Knowledge distillation hyperparameters
+temperature: 3.0          # Higher = softer probability distributions
+alpha: 0.5                # Blend: 0.5 * CE_loss + 0.5 * KD_loss
+loss_type: kl             # KL divergence loss (alternatives: mse, reverse_kl, jsd)
+on_policy: false          # Standard offline distillation
+
+# Dataset configuration
+dataset:
+  name: wikitext
+  split: train
+  max_samples: 10000      # Limit dataset for faster training
+  max_eval_samples: 500
+
+# Model precision
+model:
+  student_dtype: bf16
+  teacher_dtype: bf16
+  use_peft: false         # No LoRA for lightweight distillation
+  trust_remote_code: true
+
+# Training configuration
+train:
+  per_device_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 5e-5
+  weight_decay: 0.01
+  warmup_steps: 100
+  max_steps: 1000
+  epochs: null            # Use max_steps instead
+
+  # Logging and checkpointing
+  eval_steps: 100
+  save_steps: 100
+  logging_steps: 10
+  eval_strategy: steps
+  save_strategy: steps
+  save_total_limit: 3
+
+# Output configuration
+output_dir: ./distill_output
+run_name: qwen-to-tinyllama-kd
+
+# Random seed for reproducibility
+seed: 42

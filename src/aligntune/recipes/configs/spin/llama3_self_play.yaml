@@ -1,0 +1,65 @@
+recipe:
+  name: "llama3-self-play-spin"
+  description: "Fine-tune LLaMA 3 8B using SPIN - Self-Play Improvement through No-regret learning"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "openhermes"
+  task: "self_play_fine_tuning"
+  algorithm: "spin"
+  backend: "trl"
+  tags: ["llama", "spin", "self-play", "alignment"]
+  requires_auth: false
+  estimated_time: "4-6 hours"
+  estimated_memory: "24GB VRAM"
+
+config:
+  algo: spin
+
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 2048
+    use_peft: true
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+  datasets:
+    # Use an SFT dataset for SPIN - SPIN generates synthetic preferences from this
+    - name: "nampdn/openhermes-2-5-mistral-7b-sft"
+      split: "train[:1000]"  # Use subset for demo
+      max_samples: 1000
+
+  train:
+    # SPIN-specific hyperparameters
+    num_rounds: 2                          # Number of self-play iterations
+    generation_temperature: 0.7             # Temperature for model generation
+    generation_max_length: 512              # Max tokens to generate
+    dpo_steps_per_round: 100                # DPO training steps per round
+
+    # Standard DPO training hyperparameters
+    epochs: 1
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 5e-5
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.1                               # DPO beta parameter
+    max_prompt_length: 512
+    max_length: 2048
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 50
+
+  logging:
+    output_dir: "./output/llama3-spin"
+    run_name: "llama3-self-play-spin"
+    loggers: []
+
+  distributed:
+    backend: "single"
+
+  chat_template: "llama3"
