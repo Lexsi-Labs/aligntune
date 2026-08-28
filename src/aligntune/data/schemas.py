@@ -14,7 +14,6 @@ class TaskType(str, Enum):
     KTO = "kto"
     TEXT_CLASSIFICATION = "text_classification"
     TOKEN_CLASSIFICATION = "token_classification"
-    VLM_SFT = "vlm_sft"
     INSTRUCTION_FOLLOWING = "instruction_following"
     # Knowledge Distillation
     DISTILLATION_OFFLINE = "distillation_offline"

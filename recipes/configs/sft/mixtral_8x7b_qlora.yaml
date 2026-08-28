@@ -20,12 +20,7 @@ config:
     gradient_checkpointing: true
     use_peft: true
 
-    # MoE Configuration
-    moe_enabled: true
-    num_experts: 8
-    expert_discovery: "mixtral"
-
-    # LoRA Configuration for Per-Expert Adaptation
+    # LoRA Configuration
     lora_variant: "default"
     lora_r: 16
     lora_alpha: 32

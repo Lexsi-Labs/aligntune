@@ -18,7 +18,6 @@ class TaskType(Enum):
     CHAT_COMPLETION = "chat_completion"
     TEXT_CLASSIFICATION = "text_classification"
     TOKEN_CLASSIFICATION = "token_classification"
-    VLM_SFT = "vlm_sft"
     INSTRUCTION_FOLLOWING = "instruction_following"
 
     # RL Tasks (used by DataManager to load RL-specific datasets)
