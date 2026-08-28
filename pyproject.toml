@@ -1,10 +1,22 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# Fallback for builds with no git metadata and no SETUPTOOLS_SCM_PRETEND_VERSION
+# (e.g. building a wheel from an unpacked sdist locally). Keep in sync with the
+# latest released tag.
+fallback_version = "0.1.10"
+# Don't append a local "+g<hash>" / ".dev" segment - PyPI rejects local
+# versions, and the publish workflow already guards against dev versions.
+local_scheme = "no-local-version"
 
 [project]
 name = "aligntune"
-version = "0.1.10"
+# Version is derived from the git tag by setuptools_scm (see [tool.setuptools_scm]
+# below). CI sets SETUPTOOLS_SCM_PRETEND_VERSION to the release tag when building
+# for PyPI, so a `git tag 2.0.0` publishes aligntune 2.0.0.
+dynamic = ["version"]
 description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
 requires-python = ">=3.11"
