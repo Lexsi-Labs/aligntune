@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://aligntune.lexsi.ai/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
+  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
 </p>
 
 <div align="center">

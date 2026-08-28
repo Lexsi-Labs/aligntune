@@ -7,7 +7,7 @@ hide:
 
 <div class="at-hero" markdown>
 
-<img class="at-hero-mark" src="assets/aligntune-banner.png" alt="AlignTune. Modular Toolkit for Post-Training Alignment of Large Language Models">
+<img class="at-hero-mark" src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-banner.png" alt="AlignTune. Modular Toolkit for Post-Training Alignment of Large Language Models">
 
 <p class="at-tagline">
 AlignTune is a modular post-training ecosystem for LLMs: switch between SFT,

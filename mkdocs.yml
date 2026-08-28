@@ -13,7 +13,7 @@ copyright: >
 theme:
   name: material
   custom_dir: docs/_overrides
-  logo: assets/aligntune-logo.png
+  logo: https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-logo-dark.png
   favicon: assets/favicon.ico
   icon:
     repo: fontawesome/brands/github
