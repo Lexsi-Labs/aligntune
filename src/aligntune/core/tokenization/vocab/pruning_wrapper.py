@@ -46,8 +46,9 @@ class VocabularyPruner:
             self._PretrainedPruner = PretrainedPruner
         except ImportError as e:
             raise ImportError(
-                "tokenizer-extension library not found. "
-                "Install with: pip install git+https://github.com/taidopurason/tokenizer-extension.git"
+                "tokenizer_extension failed to import. It is vendored with aligntune "
+                "(third_party/tokenizer-extension), so this usually means a broken "
+                "install - try reinstalling aligntune."
             ) from e
 
         self.method = method
@@ -206,8 +207,9 @@ class VocabularyPruner:
             from tokenizer_extension.pruning import PretrainedPruner
         except ImportError as e:
             raise ImportError(
-                "tokenizer-extension library not found. "
-                "Install with: pip install git+https://github.com/taidopurason/tokenizer-extension.git"
+                "tokenizer_extension failed to import. It is vendored with aligntune "
+                "(third_party/tokenizer-extension), so this usually means a broken "
+                "install - try reinstalling aligntune."
             ) from e
 
         logger.info(f"Loading pruner from {path}...")

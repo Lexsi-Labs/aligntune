@@ -33,6 +33,12 @@ _MERGEKIT_PACKAGES = [
 _UNSLOTH_PACKAGES = find_packages(where="third_party/unsloth")
 _UNSLOTH_ZOO_PACKAGES = find_packages(where="third_party/unsloth_zoo")
 
+# tokenizer-extension (Apache-2.0, "Teaching Old Tokenizers New Words" - Purason
+# et al. 2025) is vendored verbatim (see third_party/tokenizer-extension/, no
+# patches) rather than installed from git, so `pip install aligntune` works
+# without a git dependency. Auto-discovered, same as the unsloth trees.
+_TOKENIZER_EXTENSION_PACKAGES = find_packages(where="third_party/tokenizer-extension")
+
 if __name__ == "__main__":
     if sys.version_info < (3, 10):
         raise RuntimeError("AlignTune requires Python 3.10 or higher")
@@ -44,11 +50,13 @@ if __name__ == "__main__":
             + _MERGEKIT_PACKAGES
             + _UNSLOTH_PACKAGES
             + _UNSLOTH_ZOO_PACKAGES
+            + _TOKENIZER_EXTENSION_PACKAGES
         ),
         package_dir={
             "": "src",
             "mergekit": "third_party/mergekit/mergekit",
             "unsloth": "third_party/unsloth/unsloth",
             "unsloth_zoo": "third_party/unsloth_zoo/unsloth_zoo",
+            "tokenizer_extension": "third_party/tokenizer-extension/tokenizer_extension",
         },
     )

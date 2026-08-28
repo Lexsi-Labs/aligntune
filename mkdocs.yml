@@ -7,13 +7,18 @@ repo_name: Lexsi-Labs/aligntune
 repo_url: https://github.com/Lexsi-Labs/aligntune
 edit_uri: edit/main/docs/
 
+# docs/README.md is a contributor-facing note about the docs tree itself; it is
+# not a site page (index.md is the landing page).
+exclude_docs: |
+  README.md
+
 copyright: >
   Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
 
 theme:
   name: material
   custom_dir: docs/_overrides
-  logo: https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-logo-dark.png
+  logo: assets/aligntune-logo-dark.png
   favicon: assets/favicon.ico
   icon:
     repo: fontawesome/brands/github
@@ -153,6 +158,7 @@ nav:
     - RL Examples: examples/rl.md
     - Distillation Examples: examples/distillation.md
     - Advanced Examples: examples/advanced.md
+    - Notebooks Overview: notebooks.md
     - Demo Notebooks: notebooks/demo.md
     - Lexsi SDK Notebooks: notebooks/lexsi-sdk.md
     - Standalone Tokenizer: notebooks/tokenizer_embedding_adaptation_experiment.ipynb

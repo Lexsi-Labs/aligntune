@@ -1,7 +1,7 @@
 # Third-Party Licenses
 
 AlignTune is distributed under the Lexsi Labs Source Available License (LSAL)
-v1.1 (see [LICENSE.md](LICENSE.md)). It vendors three third-party projects directly
+v1.1 (see [LICENSE.md](LICENSE.md)). It vendors four third-party projects directly
 and depends on several others at install/runtime. Each remains under its own
 license; the ones with non-permissive or otherwise notable terms are detailed
 below.
@@ -49,7 +49,25 @@ to obtain, inspect, and relink a modified version of the LGPL component.
 
 ---
 
-## 4. Runtime dependencies (not vendored)
+## 4. tokenizer-extension (vendored, verbatim)
+
+- **Upstream:** https://github.com/taidopurason/tokenizer-extension
+- **License:** Apache-2.0 — see `third_party/tokenizer-extension/LICENSE` for
+  the full text.
+- **Vendored at:** `third_party/tokenizer-extension/`, built into the same
+  wheel as `aligntune` (see `setup.py`'s package discovery). Imported as
+  `tokenizer_extension`.
+- **Modifications:** none — vendored verbatim (research code from Purason et
+  al., 2025, used for Indic/multilingual tokenizer vocabulary extension and
+  pruning). Its `data.py` optionally uses `dask`, which stays an optional
+  dependency (matching upstream); nothing in AlignTune imports that module.
+
+Apache-2.0 permits redistribution inside the AlignTune wheel; the vendored
+copy keeps its own `LICENSE`.
+
+---
+
+## 5. Runtime dependencies (not vendored)
 
 These are installed via `pip`/`uv` as separate distributions, not copied into
 this repository. Most (transformers, trl, peft, accelerate, torch, datasets,
@@ -67,11 +85,6 @@ terms worth knowing about specifically:
   *new* restriction on top of AlignTune's own license, but it is a distinct
   legal work with its own license file, so it's listed here explicitly rather
   than assumed.
-
-- **tokenizer-extension** — Apache-2.0 —
-  https://github.com/taidopurason/tokenizer-extension
-  Installed automatically as a hard dependency (research code from Purason et
-  al., 2025, used for Indic/multilingual tokenizer vocabulary extension).
 
 See each project's repository for full license text. This file covers
 license terms only and is not legal advice; contact **support@lexsi.ai** with

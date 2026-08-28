@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
-## [Unreleased]
+## [0.1.10] — 2026-08-05
+
+Initial public release.
 
 ### Added
 - **Distillation framework**: Standard, GOLD (cross-tokenizer), SDFT, and SDPO (self-distillation) methods under a unified config.

@@ -27,11 +27,7 @@
 # MERGED INIT 
 
 """
-<<<<<<< HEAD
-Evaluation system for aligntune.
-=======
 Evaluation system for AlignTune.
->>>>>>> origin/check_chirag
 
 This module provides a unified interface for evaluating models:
 1. Universal Evaluator (New): Modular, backend-agnostic evaluation for SFT/RL.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
+  <img src="assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
 </p>
 
 <div align="center">
@@ -364,7 +364,7 @@ AlignTune is built upon the excellent work of the following projects:
 
 <div align="center">
   <a href="https://lexsi.ai/">
-    <img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/lexsilogowhite.png" width="300">
+    <img src="assets/lexsilogowhite.png" width="300">
   </a>
   <br>
   <a href="https://lexsi.ai/">https://www.lexsi.ai</a>

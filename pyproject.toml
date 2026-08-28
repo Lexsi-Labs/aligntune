@@ -29,6 +29,8 @@ license-files = [
     # distribution too, not just live in the source repo.
     "third_party/mergekit/LICENSE",
     "third_party/mergekit/PATCH_NOTES.md",
+    # tokenizer-extension is vendored (Apache-2.0) and compiled into the wheel.
+    "third_party/tokenizer-extension/LICENSE",
 ]
 authors = [
     {name = "Zera Lyngkhoi", email = "zera.lyngkhoi@lexsi.ai"},
@@ -124,8 +126,15 @@ dependencies = [
     # "trl==0.23.0",
     # "vllm==0.11",
 
-    # Tokenization (Teaching Old Tokenizers New Words - Purason et al. 2025)
-    "tokenizer-extension @ git+https://github.com/taidopurason/tokenizer-extension.git",
+    # Tokenization (Teaching Old Tokenizers New Words - Purason et al. 2025).
+    # tokenizer-extension (Apache-2.0) is vendored in-tree - see
+    # third_party/tokenizer-extension/ and setup.py - rather than installed from
+    # git, so a plain `pip install aligntune` works. transformers / tokenizers /
+    # datasets / tqdm (its other runtime deps) are already listed above; the two
+    # below are the remainder. dask stays optional, matching upstream - only its
+    # data.py needs it and nothing in aligntune imports that module.
+    "requests>=2.28.0",
+    "heapdict>=1.0.1",
 
     # "trl==1.7.1",
     # "vllm==0.10",
@@ -175,8 +184,8 @@ dependencies = [
     "pypdf",
     "python-docx",
 
-    # Dataset curation and HF/Parquet connectors
-    "curatorkit[connectors] @ git+https://github.com/Lexsi-Labs/CuratorKIT.git",
+    # Dataset curation and HF/Parquet connectors (published on PyPI)
+    "curatorkit[connectors]>=0.1.10",
 
     # Required for SentencePiece tokenizer support (Llama, Mistral, Gemma, etc.)
     # PyICU provides Unicode script detection for merge rule validation
@@ -225,7 +234,7 @@ docs = [
 [project.urls]
 Homepage = "https://github.com/Lexsi-Labs/aligntune"
 Repository = "https://github.com/Lexsi-Labs/aligntune"
-Documentation = "https://aligntune.readthedocs.io"
+Documentation = "https://aligntune.lexsi.ai"
 "Bug Tracker" = "https://github.com/Lexsi-Labs/aligntune/issues"
 "Changelog" = "https://github.com/Lexsi-Labs/aligntune/blob/main/CHANGELOG.md"
 "Discussions" = "https://github.com/Lexsi-Labs/aligntune/discussions"

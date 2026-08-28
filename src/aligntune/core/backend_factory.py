@@ -768,7 +768,7 @@ def create_sft_trainer(
     rope_factor: Optional[float] = None,
     attn_implementation: str = "auto",
     sliding_window: Optional[int] = None,
-    **kwargs
+    **kwargs: Any
 ) -> Union[SFTTrainerBase, RLTrainerBase]:
     """Create an SFT trainer with optional long-context configuration."""
 
@@ -1091,7 +1091,7 @@ def create_rl_trainer(
     # NEW: GBMPO-specific parameters
     gbmpo_divergence_type: Optional[str] = None,
     config: Optional[Union[str, Path, Dict]] = None,
-    **kwargs
+    **kwargs: Any
 ) -> Union[SFTTrainerBase, RLTrainerBase]:
     """Create RL trainer with specified algorithm and backend."""
 
@@ -1604,7 +1604,7 @@ def create_distill_trainer(
     loss_type: str = "kl",
     max_steps: Optional[int] = None,
     config: Optional[Union[str, Path, Dict]] = None,
-    **kwargs
+    **kwargs: Any
 ) -> Union[SFTTrainerBase, RLTrainerBase]:
     """Create knowledge distillation trainer with specified backend and parameters."""
     try:
@@ -1763,7 +1763,7 @@ def create_es_trainer(
     quantization: Optional[Dict] = None,
     peft_config: Optional[Dict] = None,
     config: Optional[Union[str, Path, Dict]] = None,
-    **kwargs
+    **kwargs: Any
 ) -> Union[SFTTrainerBase, RLTrainerBase]:
     """Create Evolution Strategies trainer for population-based black-box optimization.
 
@@ -1922,8 +1922,8 @@ def create_raft_trainer(
     use_citation_loss: bool = True,
     citation_loss_weight: float = 0.1,
     config: Optional[Union[str, Path, Dict]] = None,
-    **kwargs
-):
+    **kwargs: Any
+) -> Any:
     """Create RAFT (Retrieval Augmented Fine-Tuning) trainer.
 
     Handles model/tokenizer loading, document-context formatting, and
@@ -2070,8 +2070,8 @@ def create_tokenization_trainer(
     num_new_tokens: int = 20000,
     extension_method: str = "continued_bpe",
     config: Optional[Union[str, Path, Dict]] = None,
-    **kwargs
-):
+    **kwargs: Any
+) -> Any:
     """
     Create tokenization trainer for vocabulary adaptation.
 
@@ -2264,7 +2264,7 @@ def merge_models(
     dtype: str = "bfloat16",
     global_params: Optional[Dict[str, Any]] = None,
     lora_adapters: Optional[List[Optional[str]]] = None,
-    **kwargs
+    **kwargs: Any
 ) -> str:
     """
     Merge multiple models or LoRA adapters using mergekit.
@@ -2355,7 +2355,7 @@ def merge_models(
 def merge_models_from_yaml(
     yaml_path: str,
     output_path: str,
-    **kwargs
+    **kwargs: Any
 ) -> str:
     """
     Merge models using an existing mergekit YAML config file.
