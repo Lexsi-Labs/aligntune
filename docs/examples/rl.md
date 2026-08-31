@@ -295,7 +295,7 @@ trainer.train()
 
 ### 5. GSPO Training
 
-Group Sequential Policy Optimization (TRL only):
+Group Sequence Policy Optimization (TRL only):
 
 ```python
 from aligntune.core.backend_factory import create_rl_trainer

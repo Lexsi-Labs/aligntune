@@ -128,7 +128,7 @@ AlignTune supports **13+ state-of-the-art SFT/RL algorithms** with intelligent b
 | **GBMPO** | ✅ | ✅ | Group-Based Mirror PO — unified config, 4 divergence types (L2/L2KL/ProbL2/ProbL2KL) |
 | **Counterfactual GRPO** | ✅ | ✅ | Counterfactual variant of Group-Relative PO |
 | **PACE** | ✅ | ✅ | High-efficiency Baseline-Optimized Learning |
-| **GSPO** | ✅ | ✅ | Group Sequential Policy Optimization |
+| **GSPO** | ✅ | ✅ | Group Sequence Policy Optimization |
 | **DAPO** | ✅ | ✅ | Decoupled-Clip Dynamic-Sampling PO |
 | **Dr. GRPO** | ✅ | ✅ | GRPO Done Right (Unbiased variant) |
 | **SPIN** | ✅ | ✅ | Self-Play Fine-Tuning |

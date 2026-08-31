@@ -35,7 +35,7 @@ trainer.train()
 - **DPO** (Direct Preference Optimization) - No reward model needed
 - **PPO** (Proximal Policy Optimization) - Requires reward model
 - **GRPO** (Group Relative Policy Optimization) - Multi-criteria optimization
-- **GSPO** (Group Sequential Policy Optimization) - Sequential group learning
+- **GSPO** (Group Sequence Policy Optimization) - Sequence-level group learning
 - **DAPO** (Decouple Clip and Dynamic sAmpling Policy Optimization)
 - **Dr. GRPO** (GRPO Done Right) - Unbiased GRPO variant
 

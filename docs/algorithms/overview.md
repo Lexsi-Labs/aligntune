@@ -138,7 +138,7 @@ AlignTune supports a comprehensive set of Reinforcement Learning algorithms for 
 | **Online-DPO**| Yes | Yes | Optional | Online Iterative DPO |
 | **PPO** | Yes | Yes | Yes | Proximal Policy Optimization |
 | **GRPO** | Yes | Yes | No | Group Relative Policy Optimization |
-| **GSPO** | Yes | Yes | No | Group Sequential Policy Optimization |
+| **GSPO** | Yes | Yes | No | Group Sequence Policy Optimization |
 | **DAPO** | Yes | Yes | No | Decouple Clip and Dynamic sAmpling PO |
 | **Dr. GRPO** | Yes | Yes | No | GRPO Done Right - Unbiased GRPO variant |
 | **GBMPO** | Yes | Yes | No | Group-Based Mirror Policy Optimization |

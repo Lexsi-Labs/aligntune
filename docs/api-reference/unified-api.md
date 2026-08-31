@@ -96,7 +96,7 @@ class AlgorithmType(Enum):
  PPO = "ppo" # Proximal Policy Optimization
  DPO = "dpo" # Direct Preference Optimization
  GRPO = "grpo" # Group Relative Policy Optimization
- GSPO = "gspo" # Generalized Scoring Proximal Objective
+ GSPO = "gspo" # Group Sequence Policy Optimization
  # ...and 8 more (DAPO, DRGRPO, GBMPO, COUNTERFACT_GRPO, ONLINE_DPO,
  # PACE, ORPO, SPIN)
 ```
