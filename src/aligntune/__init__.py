@@ -77,13 +77,58 @@ else:
 # -----------------------------------------------------------------------------
 # VERSION & METADATA
 # -----------------------------------------------------------------------------
-try:
-    from importlib.metadata import version as _pkg_version, PackageNotFoundError as _PkgNotFound
-    __version__ = _pkg_version("aligntune")
-except Exception:  # Fallback during editable installs before metadata exists
-    __version__ = "0.0.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+def _resolve_version() -> str:
+    """Best-effort version string.
+
+    1. Installed distribution metadata (``pip install .`` or ``pip install -e .``);
+       this is the normal path and returns the setuptools_scm version.
+    2. Running straight from a source checkout that was never installed: read the
+       ``fallback_version`` pinned in the repo's ``pyproject.toml``.
+    3. Give up with an explicit sentinel rather than a misleading ``0.0.0``.
+
+    NOTE: if ``import aligntune`` ever resolves to the *repo directory* instead of
+    this package (a folder literally named ``aligntune`` on ``sys.path`` with no
+    ``__init__.py`` - common in Colab: ``/content/aligntune``), NONE of this runs,
+    because this file is never imported. Fix that by installing non-editable
+    (``pip install .``), cloning to a differently named folder, or
+    ``sys.path.insert(0, "<repo>/src")`` - it cannot be patched from here.
+    """
+    try:
+        from importlib.metadata import version as _pkg_version
+        return _pkg_version("aligntune")
+    except Exception:
+        pass
+    try:
+        import re
+        from pathlib import Path
+
+        # src/aligntune/__init__.py -> parents[2] == repo root
+        pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+        if pyproject.is_file():
+            match = re.search(
+                r'fallback_version\s*=\s*["\']([^"\']+)["\']', pyproject.read_text()
+            )
+            if match:
+                return f"{match.group(1)}+source"
+    except Exception:
+        pass
+    return "0.0.0+unknown"
+
+
+__version__ = _resolve_version()
+__author__ = "Lexsi Labs"
+__email__ = ""
+
+
+def version() -> str:
+    """Print an ``AlignTune <version> ready`` banner and return it.
+
+    Convenience for quick smoke-tests and notebooks. Has no effect at import
+    time - it only runs when explicitly called.
+    """
+    banner = f"AlignTune {__version__} ready"
+    print(banner)
+    return banner
 
 # -----------------------------------------------------------------------------
 # CORE IMPORTS
@@ -243,6 +288,7 @@ __all__ = [
     "__version__",
     "__author__",
     "__email__",
+    "version",
     
     # Core availability flags
     "UNSLOTH_AVAILABLE",
