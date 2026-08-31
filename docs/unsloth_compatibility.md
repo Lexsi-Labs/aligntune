@@ -53,7 +53,6 @@ These were found and fixed via end-to-end training runs, not code review alone. 
 
 **Solutions**:
 - Use PyTorch 2.7.0 or earlier
-- Update Unsloth: `pip install --upgrade unsloth`
 - Use TRL backends instead: `--backend trl`
 
 ### 2. Flash Attention Issues
@@ -71,7 +70,7 @@ These were found and fixed via end-to-end training runs, not code review alone. 
 
 **Solutions**:
 - Check compatibility matrix above
-- Update all dependencies: `pip install --upgrade torch unsloth`
+- Align PyTorch with your CUDA version (`unsloth` / `unsloth_zoo` are pinned and vendored — don't `pip install` them separately)
 - Use TRL backends: `--backend trl`
 
 ## Environment Setup
@@ -81,10 +80,7 @@ These were found and fixed via end-to-end training runs, not code review alone. 
 # Install PyTorch with CUDA support
 pip install torch==2.7.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# Install Unsloth
-pip install unsloth
-
-# Install AlignTune
+# Install AlignTune (bundles the pinned unsloth + unsloth_zoo)
 pip install -e .
 ```
 
@@ -109,18 +105,21 @@ aligntune info --verbose
 ### 2. Common Issues and Solutions
 
 #### Unsloth Not Detected
+
+Unsloth is bundled with AlignTune, so this is almost always a GPU/CUDA problem at
+import time rather than a missing package.
+
 ```bash
-# Check if Unsloth is installed
+# Check the vendored Unsloth imports on this machine
 python -c "import unsloth; print('Unsloth available')"
 
-# If error occurs, check CUDA compatibility
+# If it errors, check CUDA compatibility
 python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.version.cuda}')"
 ```
 
 #### CUDA Symbol Errors
 - **Solution 1**: Downgrade PyTorch to 2.7.0
 - **Solution 2**: Use TRL backends: `--backend trl`
-- **Solution 3**: Update Unsloth: `pip install --upgrade unsloth`
 
 #### Flash Attention Issues
 - Unsloth automatically falls back to Xformers
@@ -183,8 +182,8 @@ aligntune validate model microsoft/DialoGPT-medium
 - **Solution**: Unsloth will auto-fallback to Xformers
 
 ### "Unsloth not available: missing_dependency"
-- **Cause**: Unsloth not installed
-- **Solution**: `pip install unsloth` or use TRL backends
+- **Cause**: A dependency the vendored Unsloth needs (e.g. a CUDA-enabled `torch`) failed to import
+- **Solution**: Fix the CUDA/PyTorch install, or use TRL backends
 
 ## Best Practices
 

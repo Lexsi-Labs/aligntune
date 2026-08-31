@@ -11,26 +11,24 @@ This guide helps you resolve common issues when using AlignTune.
 **Error**: `Unsloth not available` or `ImportError: Unsloth backend not available`
 
 **Causes**:
-- Unsloth not installed
-- CUDA not available
+- CUDA not available (Unsloth requires a CUDA-capable GPU)
 - PyTorch version mismatch
 - CUDA version incompatibility
 
+> Unsloth itself is vendored inside the `aligntune` package — there is no
+> separate `pip install unsloth` step, and running one is discouraged (it
+> shadows the pinned vendored copy).
+
 **Solutions**:
 
-1. **Install Unsloth**:
- ```bash
- pip install unsloth
- ```
-
-2. **Check CUDA Availability**:
+1. **Check CUDA Availability**:
  ```python
  import torch
  print(torch.cuda.is_available())
  print(torch.version.cuda)
  ```
 
-3. **Use TRL Backend Instead**:
+2. **Use TRL Backend Instead**:
  ```python
  trainer = create_sft_trainer(
  model_name="microsoft/DialoGPT-small",
@@ -39,7 +37,7 @@ This guide helps you resolve common issues when using AlignTune.
  )
  ```
 
-4. **Run Diagnostics**:
+3. **Run Diagnostics**:
  ```bash
  aligntune diagnose
  ```

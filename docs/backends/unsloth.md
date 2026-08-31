@@ -108,11 +108,20 @@ Unsloth backend supports most algorithms:
 |-----------|---------|-------|
 | SFT | Yes | Full support |
 | DPO | Yes | Full support |
+| Online-DPO | Yes | Full support |
 | PPO | Yes | Full support |
 | GRPO | Yes | Full support |
 | GSPO | Yes | Full support |
 | DAPO | Yes | Full support |
 | Dr. GRPO | Yes | Full support |
+| GBMPO | Yes | Full support |
+| C-GRPO | Yes | Counterfactual GRPO |
+| PACE | Yes | Full support |
+| ORPO | Yes | Full support |
+| SPIN | Yes | Full support |
+
+See the [Backend Support Matrix](../compatibility/backend-matrix.md) for the
+full TRL/Unsloth comparison.
 
 ---
 

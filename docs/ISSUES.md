@@ -25,8 +25,7 @@ from aligntune.core.backend_factory import create_sft_trainer
 **Problem**: Unsloth backend not available
 
 **Solution**: 
-- Check GPU compatibility
-- Install Unsloth: `pip install unsloth`
+- Unsloth is vendored in the `aligntune` package — no install needed; check GPU/CUDA compatibility (Unsloth requires a CUDA-capable GPU)
 - Use TRL backend as fallback: `backend="trl"`
 
 ### Memory Issues

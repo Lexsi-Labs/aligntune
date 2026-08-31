@@ -13,6 +13,5 @@ Initial public release.
 
 ### Added
 - **Distillation framework**: Standard, GOLD (cross-tokenizer), SDFT, and SDPO (self-distillation) methods under a unified config.
-- **RLOO implementation**: shares multi-reward-function handling with GRPO via a common reward handler.
 - **ES backend rollout abstraction**: a standard `transformers`-based rollout backend and a vLLM-backed one for hyperscale generation.
 - **GBMPO**: four divergence-specific implementations consolidated into a single configurable trainer (`divergence_type` field).

@@ -26,6 +26,4 @@ If you construct a TRL trainer manually alongside AlignTune, TRL's own `SFTTrain
 
 ### Known issues
 
-- Unsloth's RLOO trainer produces `NaN` gradients on every step across all tested configs; root cause not yet found.
-- CGPO still targets a pre-1.0 TRL API and needs a full training-loop rewrite rather than a compatibility shim.
 - Several GRPO-family algorithms on the Unsloth backend are incompatible with `trl>=1.0` because of a version mismatch in Unsloth's own generated trainer code. AlignTune currently pins an older, compatible `trl` version; bumping it repo-wide is tracked as future work and would additionally require updating the PPO backend, which depends on APIs removed in `trl>=1.0`.

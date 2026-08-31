@@ -102,7 +102,7 @@ See [Algorithms Overview](../algorithms/overview.md) for what each algorithm doe
 ### Unsloth Backend
 
 - Python 3.11+
-- `unsloth` / `unsloth_zoo`: installed separately (not currently declared as a package extra); see `pyproject.toml` for the version last verified against
+- `unsloth` / `unsloth_zoo`: vendored inside the `aligntune` wheel — no separate install; see [Unsloth Compatibility](../unsloth_compatibility.md) for the pinned version
 - GPU required (CUDA)
 
 ## Performance Comparison
