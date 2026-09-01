@@ -34,13 +34,15 @@ license-files = [
 ]
 authors = [
     {name = "Zera Lyngkhoi", email = "zera.lyngkhoi@lexsi.ai"},
+    {name = "Bhavya Goyal", email = "bhavya.goyal@lexsi.ai"},
     {name = "Chirag Chawla", email = "chirag.chawla@lexsi.ai"},
-    {name = "Pratinav Seth", email = "pratinav.seth@lexsi.ai"},
-    {name = "Utsav Avaiya", email = "utsav.avaiya@lexsi.ai"},
     {name = "Soham Bhattacharjee", email = "soham.bhattacharjee@lexsi.ai"},
+    {name = "Utsav Avaiya", email = "utsav.avaiya@lexsi.ai"},
+    {name = "Ram Mohan Rao Kadiyala", email = "ram.kadiyala@lexsi.ai"},
     {name = "Mykola Khandoga", email = "mykola.khandoga@lexsi.ai"},
     {name = "Rui Yuan", email = "rui.yuan@lexsi.ai"},
-    {name = "Vinay Kumar Sankarapu", email = "v.k@lexsi.ai"}
+    {name = "Vinay Kumar Sankarapu", email = "v.k@lexsi.ai"},
+    {name = "Pratinav Seth", email = "pratinav.seth@lexsi.ai"}
 ]
 keywords = [
     "alignment",

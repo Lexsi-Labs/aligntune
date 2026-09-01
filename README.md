@@ -319,7 +319,7 @@ If you use AlignTune in your research, please cite:
 ```bibtex
 @software{alignTune2025,
   title        = {{AlignTune}: Modular Toolkit for Post-Training Alignment of Large Language Models},
-  author       = {Goyal, Bhavya and Lyngkhoi, R E Zera Marveen and Chawla, Chirag and Seth, Pratinav and Avaiya, Utsav and Bhattacharjee, Soham and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar},
+  author       = {Lyngkhoi, R E Zera Marveen and Goyal, Bhavya and Chawla, Chirag and Bhattacharjee, Soham and Avaiya, Utsav and Kadiyala, Ram Mohan Rao and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar and Seth, Pratinav},
   year         = {2025},
   note         = {Equal contribution: Bhavya Goyal, R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth},
   organization = {Lexsi Labs},
@@ -330,8 +330,8 @@ If you use AlignTune in your research, please cite:
 
 **Plain Text:**
 ```
-Goyal, B., Lyngkhoi, R. E. Z. M., Chawla, C., Seth, P., Avaiya, U., Bhattacharjee, S.,
-Khandoga, M., Yuan, R., & Sankarapu, V. K. (2025). AlignTune: Modular Toolkit for
+Lyngkhoi, R. E. Z. M., Goyal, B., Chawla, C., Bhattacharjee, S., Avaiya, U., Kadiyala, R. M. R.,
+Khandoga, M., Yuan, R., Sankarapu, V. K., & Seth, P. (2025). AlignTune: Modular Toolkit for
 Post-Training Alignment of Large Language Models. Lexsi Labs. https://github.com/Lexsi-Labs/aligntune
 
 *Equal contribution: Bhavya Goyal, R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth

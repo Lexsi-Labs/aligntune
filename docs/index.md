@@ -173,7 +173,7 @@ If you use AlignTune in your research, please cite the library:
 
 ```bibtex
 @software{aligntune2026,
-  author    = {Goyal, Bhavya and Lyngkhoi, Zera and Chawla, Chirag and Seth, Pratinav and Avaiya, Utsav and Bhattacharjee, Soham and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar},
+  author    = {Lyngkhoi, Zera and Goyal, Bhavya and Chawla, Chirag and Bhattacharjee, Soham and Avaiya, Utsav and Kadiyala, Ram Mohan Rao and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar and Seth, Pratinav},
   title     = {AlignTune: Multi-Backend Alignment and Fine-Tuning Library for LLM Post-Training},
   year      = {2026},
   publisher = {Lexsi Labs},
