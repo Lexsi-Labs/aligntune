@@ -50,7 +50,7 @@ For developers and researchers, here is the direct mapping of features to the Al
 | **Resource Advisor** | `aligntune.core.advisor` / `aligntune.cli.advise` | Deterministic VRAM, time, cost, and carbon profiling. |
 | **Compositions** | `aligntune.core.composition/` | Multi-stage pipeline orchestration (`aligntune compose`). |
 | **Merging Hub** | `aligntune.core.merge/` | linear/task-arithmetic via `mergekit`, plus LoRA merge. |
-| **RAFT** | `aligntune.core.backend_factory.create_raft_trainer` | Retrieval-augmented SFT with golden/distractor document context. Standalone function only. Unlike every other algorithm here, RAFT is not routed through `BackendFactory` itself, and its citation-loss term is a documented no-op. |
+| **RAFT** | `aligntune.core.backend_factory.create_raft_trainer` | Retrieval-augmented SFT with golden/distractor document context. |
 | **Verifiable Rewards** | `aligntune.rewards.verifiable` | Math, code-execution, SQL, JSON-schema, and regex reward functions for RLVR. |
 | **Indic Tokenization** | `aligntune.core.tokenization/` | Script-aware BPE vocabulary expansion (continued-BPE, naive extension, pruning). |
 | **Distillation** | `aligntune.core.distill/` | Standard and SDFT (self-distillation) methods. |
@@ -133,11 +133,8 @@ AlignTune supports **13+ state-of-the-art SFT/RL algorithms** with intelligent b
 | **Dr. GRPO** | ✅ | ✅ | GRPO Done Right (Unbiased variant) |
 | **SPIN** | ✅ | ✅ | Self-Play Fine-Tuning |
 | **ORPO** | ✅ | ✅ | Odds-Ratio Preference Optimization |
-| **RAFT** | ✅* | ✅* | Retrieval Augmented Fine-Tuning (document-grounded SFT) |
+| **RAFT** | ✅ | ✅ | Retrieval Augmented Fine-Tuning (document-grounded SFT) |
 | **Distillation** | ✅ | ✅ | Knowledge Distillation (Standard, SDFT) |
-
-
-- **RAFT**: core SFT training works, but you can only reach it through the standalone `create_raft_trainer()` function. Unlike every other algorithm, it is **not** wired into `BackendFactory`. Its citation-loss term (`use_citation_loss=True`) is also a documented placeholder with no numerical effect.
 
 See the [Algorithm Zoo](docs/algorithms/overview.md) for the full comparison table and selection guide.
 
@@ -323,8 +320,7 @@ If you use AlignTune in your research, please cite:
   year         = {2025},
   note         = {Equal contribution: Bhavya Goyal, R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth},
   organization = {Lexsi Labs},
-  url          = {https://github.com/Lexsi-Labs/aligntune},
-  version      = {0.0.0}
+  url          = {https://github.com/Lexsi-Labs/aligntune}
 }
 ```
 
