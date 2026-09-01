@@ -185,7 +185,7 @@ dependencies = [
     "python-docx",
 
     # Dataset curation and HF/Parquet connectors (published on PyPI)
-    "curatorkit[connectors]>=0.1.10",
+    "curatorkit[all]",
 
     # Required for SentencePiece tokenizer support (Llama, Mistral, Gemma, etc.)
     # PyICU provides Unicode script detection for merge rule validation
