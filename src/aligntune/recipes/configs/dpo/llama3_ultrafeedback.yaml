@@ -36,6 +36,10 @@ config:
         rejected: "rejected"
   
   train:
+    # To enable DeepSpeed ZeRO or FSDP, uncomment one of the preset accelerate configs:
+    # accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero2.yaml
+    # accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero3.yaml
+    # accelerate_config_path: src/aligntune/recipes/accelerate/fsdp_full_shard.yaml
     epochs: 1
     per_device_batch_size: 2
     gradient_accumulation_steps: 8

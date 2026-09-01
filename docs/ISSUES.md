@@ -25,8 +25,7 @@ from aligntune.core.backend_factory import create_sft_trainer
 **Problem**: Unsloth backend not available
 
 **Solution**: 
-- Check GPU compatibility
-- Install Unsloth: `pip install unsloth`
+- Unsloth is vendored in the `aligntune` package — no install needed; check GPU/CUDA compatibility (Unsloth requires a CUDA-capable GPU)
 - Use TRL backend as fallback: `backend="trl"`
 
 ### Memory Issues
@@ -39,6 +38,16 @@ from aligntune.core.backend_factory import create_sft_trainer
 - Use gradient checkpointing
 - Reduce `max_seq_length`
 - Use quantization: `quantization={"load_in_4bit": True}`
+
+## Algorithm-Specific Known Issues
+
+**Problem**: `ValueError: No training dataset loaded` when using a HuggingFace slice-notation split (e.g. `split="train[:16]"`)
+
+**Status**: Not a bug, use `split="train"` with `max_samples=N` instead. **Cause**: `DataManager`'s split-name matching does exact string comparison and doesn't recognize the sliced form as its base split.
+
+**Problem**: RAFT's citation loss has no effect, and `create_raft_trainer()` can't be reached through `BackendFactory`
+
+**Status**: Known limitation, unresolved. **Cause**: `use_citation_loss=True` only enables citation tracking, the citation loss term itself is a documented placeholder, not numerically implemented (it would require generation during training). Separately, RAFT isn't wired into `BackendFactory` at all; it's only reachable via the standalone `create_raft_trainer()` function, unlike every other algorithm. See [RAFT parameters](PARAMETERS.md#raft-retrieval-augmented-fine-tuning).
 
 ## Backend-Specific Issues
 

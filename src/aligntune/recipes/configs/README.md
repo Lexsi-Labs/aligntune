@@ -2,7 +2,7 @@
 
 This directory contains production-ready training recipes for popular models and tasks.
 
-## 📚 Available Recipes (20 total)
+## Available Recipes (15 total)
 
 ### Supervised Fine-Tuning (SFT) - 3 recipes
 - **llama3-instruct-orca**: LLaMA 3 8B on SlimOrca for instruction following
@@ -24,18 +24,13 @@ This directory contains production-ready training recipes for popular models and
 - **qwen-math-grpo**: Qwen 2.5 3B on GSM8K for math
 - **deepseek-humaneval-grpo**: DeepSeek Coder on HumanEval for code generation
 
-### BOLT (Best-of-N Learning) - 2 recipes
-- **qwen-mbpp-bolt**: Qwen 3 1.7B on MBPP with baseline optimization
-- **llama-code-bolt**: LLaMA 3.2 3B on code generation with curriculum
-
-### Advanced Algorithms - 3 recipes
-- **neural-mirror-grpo-math**: Learnable mirror maps for adaptive optimization
+### Advanced Algorithms - 2 recipes
 - **dr-grpo-robust-math**: Distribution robust GRPO for multi-domain math
 - **gbmpo-l2-code**: Generalized Bregman mirror descent for code generation
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### CLI Method
 
@@ -71,7 +66,7 @@ math_recipes = search_recipes("math")
 
 ---
 
-## 📋 Recipe Selection Guide
+## Recipe Selection Guide
 
 ### **For Beginners**
 Start with **SFT recipes** - they're the simplest and most reliable:
@@ -89,18 +84,16 @@ Use **GRPO recipes**:
 - `llama3-gsm8k-grpo` (higher quality)
 
 ### **For Code Generation**
-Use **BOLT or GRPO recipes**:
-- `qwen-mbpp-bolt` (with curriculum learning)
+Use **GRPO recipes**:
 - `deepseek-humaneval-grpo` (code-specialized model)
 
 ### **For Research**
 Try **advanced algorithms**:
-- `neural-mirror-grpo-math` (adaptive optimization)
 - `gbmpo-l2-code` (custom divergence measures)
 
 ---
 
-## 🔧 Customizing Recipes
+## Customizing Recipes
 
 All recipes can be customized:
 
@@ -120,7 +113,7 @@ aligntune train --config custom.yaml
 
 ---
 
-## 💾 Resource Requirements
+## Resource Requirements
 
 | Category | Min VRAM | Recommended |
 |----------|----------|-------------|
@@ -128,14 +121,13 @@ aligntune train --config custom.yaml
 | **DPO** | 12-28GB | 16-32GB |
 | **PPO** | 20-32GB | 24-40GB |
 | **GRPO** | 12-28GB | 18-32GB |
-| **BOLT** | 16-18GB | 20-24GB |
 | **Advanced** | 24-32GB | 32-48GB |
 
 *All recipes use LoRA by default for memory efficiency*
 
 ---
 
-## 🏷️ Recipe Tags
+## Recipe Tags
 
 Filter recipes by tags:
 
@@ -154,7 +146,7 @@ Available tags:
 
 ---
 
-## 📖 Recipe Format
+## Recipe Format
 
 Each recipe YAML contains:
 
@@ -184,7 +176,7 @@ config:
 
 ---
 
-## 🤝 Contributing Recipes
+## Contributing Recipes
 
 To contribute a new recipe:
 
@@ -195,7 +187,7 @@ To contribute a new recipe:
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
 - [AlignTune Main README](../../../../README.md)
 - [Algorithm Documentation](../../../../docs/algorithms/)
@@ -204,7 +196,7 @@ To contribute a new recipe:
 
 ---
 
-## 📝 Notes
+## Notes
 
 - All recipes use **LoRA** by default for memory efficiency
 - **bf16** precision is used where supported
@@ -214,7 +206,7 @@ To contribute a new recipe:
 
 ---
 
-## 🧪 Testing Status
+## Testing Status
 
 **Configuration Validated**: All 17 recipes have validated YAML structure and parameter correctness.
 
@@ -225,7 +217,6 @@ To contribute a new recipe:
 - [ ] **qwen-math-grpo** - Math reasoning (efficient model)
 - [ ] **llama3-gsm8k-grpo** - Math reasoning (standard reference)
 - [ ] **qwen-instruct-ultrachat** - Conversation fine-tuning
-- [ ] **qwen-mbpp-bolt** - Code generation with baseline
 
 ### Standard Algorithms (Medium Priority)
 - [ ] **llama3-instruct-orca** - SFT instruction-following
@@ -236,10 +227,8 @@ To contribute a new recipe:
 - [ ] **llama3-helpful-harmless-ppo** - Classic RLHF
 - [ ] **qwen-safety-ppo** - Safety RLHF
 - [ ] **deepseek-humaneval-grpo** - Code generation
-- [ ] **llama-code-bolt** - Code generation
 
 ### Advanced Algorithms (Research/Low Priority)
-- [ ] **neural-mirror-grpo-math** - Adaptive optimization (8-12 hours)
 - [ ] **dr-grpo-robust-math** - Distribution robustness
 - [ ] **gbmpo-l2-code** - Custom divergence measures
 

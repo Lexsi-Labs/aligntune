@@ -1,8 +1,5 @@
 """
-Classification Trainer - FINAL COMPLETE VERSION
-
-Copy this to:
-/teamspace/studios/this_studio/aligntune/src/aligntune/backends/trl/sft/Classification_trainer.py
+Classification Trainer.
 """
 
 import torch

@@ -1,0 +1,68 @@
+# Generalized Knowledge Distillation (GKD) with On-Policy Sampling
+# Gemma-7B Teacher -> Gemma-2B Student
+#
+# GKD (Generalized KD) uses on-policy sampling where the student generates
+# tokens and the teacher scores them. This produces more natural, diverse
+# student behavior than offline distillation, reducing mode averaging.
+#
+# Reference: "Towards the Limit of Model Scaling" (2024)
+# TRL Implementation: GKDTrainer with reverse KL loss
+
+training_type: distill
+backend: trl
+
+# Student model (trainable)
+student_model: google/gemma-2b
+
+# Teacher model (frozen, scores on-policy samples)
+teacher_model: google/gemma-7b
+
+# Knowledge distillation hyperparameters
+temperature: 3.0              # Soft target temperature
+alpha: 0.5                    # Blend weight (0.5 * CE + 0.5 * KD)
+loss_type: kl                 # Legacy loss type (overridden by distill_mode)
+
+# SOTA Distillation mode configuration
+distill_mode: gkd            # Generalized KD (on-policy)
+on_policy: true              # Student generates, teacher scores
+skew_alpha: 0.1              # Not used in GKD mode
+reasoning_trace_field: null  # Not used in GKD mode
+
+# Dataset configuration
+dataset:
+  name: wikitext
+  split: train
+  max_samples: 5000          # Smaller dataset due to on-policy generation cost
+  max_eval_samples: 500
+
+# Model precision
+model:
+  student_dtype: bf16
+  teacher_dtype: bf16
+  use_peft: false            # Full model training for GKD
+  trust_remote_code: true
+
+# Training configuration (smaller for on-policy due to generation overhead)
+train:
+  per_device_batch_size: 2   # Smaller batch: on-policy generation is expensive
+  gradient_accumulation_steps: 8
+  learning_rate: 5e-5
+  weight_decay: 0.01
+  warmup_steps: 100
+  max_steps: 500             # Shorter run, higher quality signals
+  epochs: null               # Use max_steps instead
+
+  # Logging and checkpointing
+  eval_steps: 50
+  save_steps: 50
+  logging_steps: 5
+  eval_strategy: steps
+  save_strategy: steps
+  save_total_limit: 3
+
+# Output configuration
+output_dir: ./gkd_gemma_output
+run_name: gkd-gemma-2b-from-7b
+
+# Random seed for reproducibility
+seed: 42

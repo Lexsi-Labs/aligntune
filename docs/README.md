@@ -36,57 +36,40 @@ mkdocs gh-deploy
 
 ## Documentation Structure
 
+The `nav:` section of `mkdocs.yml` is the source of truth for structure and
+ordering. Current top-level layout:
+
 ```
 docs/
- index.md # Homepage
- getting-started/ # Getting started guides
- installation.md
- quickstart.md
- configuration.md
- backend-selection.md
- user-guide/ # User guides
- sft.md
- rl.md
- reward-functions.md
- reward-model-training.md
- evaluation.md
- model-management.md
- api-reference/ # API documentation
- overview.md
- core.md
- backend-factory.md
- configuration.md
- trainers.md
- cli/ # CLI documentation
- overview.md # CLI overview
- commands.md # CLI commands
- configuration.md # CLI configuration
- api-reference/ # API reference documentation
- overview.md # API overview
- unified-api.md # Unified API system
- core.md # Core API
- backend-factory.md # Backend factory
- configuration.md # Configuration classes
- trainers.md # Trainer classes
- reward-functions-reference.md # Reward functions reference
- reward-model-training-reference.md # Reward model training reference
- examples/ # Examples
- overview.md
- sft.md
- rl.md
- advanced.md
- advanced/ # Advanced topics
- architecture.md
- custom-backends.md
- distributed.md
- performance.md
- compatibility/ # Compatibility guides
- backend-matrix.md
- contributing/ # Contributing guides
- guide.md
- code-style.md
- testing.md
- unsloth_compatibility.md # Unsloth compatibility
+  index.md                         # Homepage
+  getting-started/                 # installation, quickstart, basic-concepts,
+                                   #   configuration, backend-selection
+  user-guide/                      # sft, rl, distillation, reward-functions,
+                                   #   reward-model-training, evaluation,
+                                   #   model-management, sample-logging,
+                                   #   troubleshooting, overview
+  algorithms/                      # overview + one page per algorithm
+                                   #   (dpo, online-dpo, ppo, grpo, gspo, dapo,
+                                   #    dr-grpo, gbmpo, counterfactual-grpo,
+                                   #    pace, orpo, spin, raft)
+  PARAMETERS.md                    # full parameter reference
+  backends/                        # overview, trl, unsloth, comparison
+  api-reference/                   # overview, core, backend-factory,
+                                   #   configuration, trainers, unified-api,
+                                   #   reward-functions-reference,
+                                   #   reward-model-training-reference
+  advanced/                        # architecture, adapters, merging,
+                                   #   long-context, tokenization, distillation,
+                                   #   composition, indic
+  examples/                        # overview, sft, rl, distillation, advanced
+  notebooks/                       # demo, lexsi-sdk, local + standalone .ipynb
+  cli/                             # overview, commands, configuration,
+                                   #   raw-factory-configs (+ cli-reference.md)
+  compatibility/                   # backend-matrix (+ unsloth_compatibility.md)
+  contributing/                    # guide, code-style, testing
+  community/                       # faq
+  novelty_frontiers.md             # research roadmap
+  CHANGELOG.md  ISSUES.md  CODE_OF_CONDUCT.md  SECURITY.md
 ```
 
 ## Adding Documentation

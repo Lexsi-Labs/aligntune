@@ -12,7 +12,7 @@ import numpy as np
 
 # Import New Metrics
 from .metrics.base import Metric
-from .metrics.generic import PerplexityMetric, AccuracyMetric
+from .metrics.generic import PerplexityMetric, AccuracyMetric, completion_loss_totals
 from .metrics.code import PassAtKMetric
 from .metrics.math import MathAccuracyMetric
 from .metrics.text import RougeMetric, BleuMetric
@@ -94,9 +94,40 @@ class BaseEvaluator:
         """Add a metric to the evaluator."""
         self.metrics.append(metric)
 
-    def evaluate_benchmark(self, model_name_or_path: str, tasks: List[str]) -> Dict[str, Any]:
+    def evaluate_benchmark(
+        self,
+        model_name_or_path: str,
+        tasks: Optional[List[str]] = None,
+        bundle: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Evaluate model on benchmark tasks.
+
+        Args:
+            model_name_or_path: Model identifier
+            tasks: List of task names to evaluate
+            bundle: Name of preset bundle ('alignment_core', 'safety', 'reasoning')
+                   If provided, expands to list of tasks in bundle
+
+        Returns:
+            Dictionary of results keyed by task/metric name
+        """
         if not LM_EVAL_AVAILABLE:
             logger.warning("lm-eval integration not available. Skipping benchmark evaluation.")
+            return {}
+
+        # Expand bundle if provided
+        if bundle is not None:
+            from .benchmarks.presets import get_bundle
+            bundle_tasks = get_bundle(bundle)
+            if tasks is None:
+                tasks = bundle_tasks
+            else:
+                tasks = list(set(tasks) | set(bundle_tasks))
+            logger.info(f"Expanded bundle '{bundle}' to tasks: {tasks}")
+
+        if not tasks:
+            logger.warning("No tasks specified for benchmark evaluation")
             return {}
 
         logger.info(f"Running benchmarks: {tasks}")
@@ -106,15 +137,15 @@ class BaseEvaluator:
             device=self.device
         )
         runner = LMEvalRunner(config)
-        
+
         task_objects = [get_lm_eval_task(t) for t in tasks]
         results = runner.evaluate_tasks(task_objects)
-        
+
         final_metrics = {}
         for res in results:
             for k, v in res.metrics.items():
                 final_metrics[f"{res.task_name}/{k}"] = v
-        
+
         return final_metrics
 
     def _prepare_batch(self, batch, tokenizer):
@@ -232,7 +263,8 @@ class BaseEvaluator:
         
         all_predictions = []
         all_references = []
-        all_losses = []
+        total_completion_nll = 0.0
+        total_completion_tokens = 0
 
         sft_schema = TASK_SCHEMAS.get(SchemaTaskType.SFT)
         rl_schema = TASK_SCHEMAS.get(SchemaTaskType.GRPO)
@@ -301,79 +333,52 @@ class BaseEvaluator:
                     else:
                         targets = [str(t) if t is not None else "" for t in targets]
 
-                # 1. Forward Pass (Perplexity) https://github.com/huggingface/evaluate/blob/main/metrics/perplexity/perplexity.py
-                if isinstance(inputs[0], str):
-                    if original_padding_side == 'right':
-                         tokenizer.padding_side = 'right'
-                         
-                    # tokenized_inputs = tokenizer(inputs, return_tensors="pt", padding=True, truncation=True).to(self.device)
-                    # outputs = model(**tokenized_inputs, labels=tokenized_inputs["input_ids"])
-                    # loss = outputs.loss.item() if outputs.loss is not None else 0.0
-                    # # all_losses.extend([loss] * len(inputs))
-                    # all_losses.extend([loss])
-                        
-                    tokenized_inputs = tokenizer(inputs, return_tensors="pt", padding=True, truncation=True).to(self.device)
-                    
-                    # Get input_ids and attention_mask
-                    encoded_batch = tokenized_inputs["input_ids"]
-                    attn_mask = tokenized_inputs["attention_mask"]
-                    labels = encoded_batch
-                    
-                    # Forward pass
+                # 1. Forward Pass (Perplexity) - FIXED: Compute loss over completions only
+                if targets and len(targets) > 0 and isinstance(inputs[0], str):
+                    # Set padding to right for loss calculation
+                    tokenizer.padding_side = 'right'
+
+                    # Concatenate prompt + completion
+                    full_texts = [p + t for p, t in zip(inputs, targets)]
+
+                    # Tokenize full sequences (batched)
+                    full_enc = tokenizer(full_texts, return_tensors="pt", padding=True, truncation=True).to(self.device)
+
+                    # Get prompt lengths for masking
+                    prompt_enc = tokenizer(inputs, return_tensors="pt", padding=True, truncation=True)
+                    prompt_lens = prompt_enc.attention_mask.sum(1)
+
+                    # Create labels with prompt tokens masked
+                    labels = full_enc.input_ids.clone()
+                    for i, prompt_len in enumerate(prompt_lens):
+                        labels[i, :prompt_len] = -100  # Mask prompt tokens
+
+                    # Forward pass (batched)
                     with torch.no_grad():
-                        out_logits = model(encoded_batch, attention_mask=attn_mask).logits
-                    
-                    # Shift logits and labels (following HF implementation exactly)
-                    shift_logits = out_logits[..., :-1, :].contiguous()
-                    shift_labels = labels[..., 1:].contiguous()
-                    shift_attention_mask_batch = attn_mask[..., 1:].contiguous()
-                    
-                    # Calculate per-sample perplexity using CrossEntropyLoss
+                        out_logits = model(full_enc.input_ids, attention_mask=full_enc.attention_mask).logits
+
+                    # Shift for next-token prediction
+                    shift_logits = out_logits[:, :-1, :].contiguous()
+                    shift_labels = labels[:, 1:].contiguous()
+                    shift_mask = full_enc.attention_mask[:, 1:].contiguous()
+
+                    # Compute completion-token NLL. PPL is token-weighted,
+                    # so accumulate totals rather than averaging examples.
                     from torch.nn import CrossEntropyLoss
                     loss_fct = CrossEntropyLoss(reduction="none")
-                    
-                    # Compute perplexity per sample (EXACT HF formula)
-                    perplexity_batch = torch.exp(
-                        (loss_fct(shift_logits.transpose(1, 2), shift_labels) * shift_attention_mask_batch).sum(1)
-                        / shift_attention_mask_batch.sum(1)
+                    per_token_loss = loss_fct(shift_logits.transpose(1, 2), shift_labels)
+
+                    # Mask padded and prompt tokens
+                    loss_mask = (shift_labels != -100).float() * shift_mask
+                    batch_nll, batch_tokens = completion_loss_totals(
+                        per_token_loss, loss_mask
                     )
-                    
-                    # Convert to losses (inverse of exp)
-                    # loss_batch = torch.log(perplexity_batch)
-                    
-                    # ✅ Add per-sample losses
-                    all_losses.extend(perplexity_batch.cpu().tolist())
-                    
+                    total_completion_nll += batch_nll
+                    total_completion_tokens += batch_tokens
+
+                    # Restore padding side
                     if not is_encoder_decoder:
                         tokenizer.padding_side = 'left'
-                        
-                elif 'input_ids' in batch and isinstance(batch['input_ids'], torch.Tensor):
-                    tokenized_inputs = {k: v.to(self.device) for k, v in batch.items() if k in ['input_ids', 'attention_mask']}
-                    # outputs = model(**tokenized_inputs, labels=tokenized_inputs["input_ids"])
-                    # loss = outputs.loss.item() if outputs.loss is not None else 0.0
-                    # all_losses.extend([loss] * len(inputs))
-                    
-                    encoded_batch = tokenized_inputs["input_ids"]
-                    attn_mask = tokenized_inputs.get("attention_mask", torch.ones_like(encoded_batch))
-                    labels = encoded_batch
-                    
-                    with torch.no_grad():
-                        out_logits = model(encoded_batch, attention_mask=attn_mask).logits
-                    
-                    shift_logits = out_logits[..., :-1, :].contiguous()
-                    shift_labels = labels[..., 1:].contiguous()
-                    shift_attention_mask_batch = attn_mask[..., 1:].contiguous()
-                    
-                    from torch.nn import CrossEntropyLoss
-                    loss_fct = CrossEntropyLoss(reduction="none")
-                    
-                    perplexity_batch = torch.exp(
-                        (loss_fct(shift_logits.transpose(1, 2), shift_labels) * shift_attention_mask_batch).sum(1)
-                        / shift_attention_mask_batch.sum(1)
-                    )
-                    
-                    # loss_batch = torch.log(perplexity_batch)
-                    all_losses.extend( perplexity_batch.cpu().tolist())
 
                 # 2. Generation Pass
                 if any(m.requires_generation for m in self.metrics):
@@ -438,11 +443,9 @@ class BaseEvaluator:
 
         # After the evaluation loop, BEFORE metric computation:
         print(f"\nDEBUG: Collected data:")
-        print(f"  all_losses: {len(all_losses)} items")
+        print(f"  completion tokens: {total_completion_tokens}")
         print(f"  all_predictions: {len(all_predictions)} items")
         print(f"  all_references: {len(all_references)} items")
-        if all_losses:
-            print(f"  Sample losses: {all_losses[:3]}")
 
         results = {}
         for metric in self.metrics:
@@ -450,8 +453,13 @@ class BaseEvaluator:
             print(f"  requires_generation: {metric.requires_generation}")
             
             if metric.name == "perplexity":
-                print(f"  Using all_losses: {len(all_losses)} values")
-                res = metric.safe_compute(all_losses, [])
+                mean_loss = (
+                    total_completion_nll / total_completion_tokens
+                    if total_completion_tokens
+                    else float("nan")
+                )
+                print(f"  Using mean completion-token loss: {mean_loss}")
+                res = metric.safe_compute([mean_loss], [])
                 print(f"  Result: {res}")
             elif metric.requires_generation:
                 print(f"  Using predictions/references")

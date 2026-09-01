@@ -35,7 +35,7 @@ trainer.train()
 - **DPO** (Direct Preference Optimization) - No reward model needed
 - **PPO** (Proximal Policy Optimization) - Requires reward model
 - **GRPO** (Group Relative Policy Optimization) - Multi-criteria optimization
-- **GSPO** (Group Sequential Policy Optimization) - Sequential group learning
+- **GSPO** (Group Sequence Policy Optimization) - Sequence-level group learning
 - **DAPO** (Decouple Clip and Dynamic sAmpling Policy Optimization)
 - **Dr. GRPO** (GRPO Done Right) - Unbiased GRPO variant
 
@@ -59,7 +59,7 @@ AlignTune provides two backend implementations:
 
 ### TRL Backend
 
-**TRL** (Transformers Reinforcement Learning) backend is the standard, battle-tested implementation:
+**TRL** (Transformers Reinforcement Learning) is AlignTune's default backend:
 
 - **Reliable**: Production-ready, extensively tested
 - **Complete**: Supports all algorithms (SFT, DPO, PPO, GRPO, GSPO, etc.)
@@ -146,15 +146,10 @@ train:
 ```
 
 ```python
-from aligntune.core.sft.config_loader import SFTConfigLoader
-from aligntune.core.backend_factory import create_sft_trainer
+from aligntune.core.rl.config_loader import ConfigLoader
 
-
-# Load configuration
-config = SFTConfigLoader.load_from_yaml("config.yaml")
-
-# Create trainer from config
-trainer = create_sft_trainer(config=config)
+config = ConfigLoader.load_from_yaml("config.yaml")
+trainer = create_sft_trainer(**config)
 ```
 
 ### 3. CLI
@@ -267,5 +262,5 @@ tokenizer = AutoTokenizer.from_pretrained("./output/my_model")
 
 - [Configuration Guide](configuration.md) - Learn about all configuration options
 - [Backend Selection](backend-selection.md) - Detailed backend comparison
-- [SFT Guide](../user-guide/sft.md) - Deep dive into SFT training
-- [RL Guide](../user-guide/rl.md) - Deep dive into RL training
+- [SFT Guide](../user-guide/sft.md) - SFT training walkthrough
+- [RL Guide](../user-guide/rl.md) - RL training walkthrough

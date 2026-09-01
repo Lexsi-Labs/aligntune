@@ -3,9 +3,9 @@
 The **Unified Dataset Handler** (`DataManager`) is the central engine for loading, normalizing, and preparing data for all AlignTune algorithms (SFT, DPO, GRPO, etc.). It eliminates the need for manual data parsing and ensures consistency across training and evaluation.
 
 
-## 🚀 Quick Start
+## Quick Start
 
-Dataset can be loaded simply with a **Task** and **Source**.
+Load a dataset by specifying a **Task** and **Source**.
 
 ```{python}
 from aligntune.data.manager import DataManager
@@ -22,7 +22,7 @@ eval_data = dataset["validation"]
 ```
 
 
-## 🎯 Supported Tasks & Schemas
+## Supported Tasks & Schemas
 
 The manager automatically detects column names based on the task type. It standardizes them into the internal format required by AlignTune trainers.
 
@@ -48,7 +48,7 @@ The manager automatically detects column names based on the task type. It standa
 * Local Directory: `manager.load_dataset("./my_data_folder/") (Loads all compatible files inside)`
 
 
-## ✨ Key Features
+## Key Features
 
 ### 1. Automatic Column Mapping
 
@@ -67,12 +67,12 @@ Ensures you always have `train`, `validation`, and `test` splits for reliable ev
 
 ### 3. System Prompt Injection
 
-Seamlessly injects system prompts into both plain text and chat formats.
+Inserts a system prompt into both plain text and chat formats without extra configuration.
 
 * Text: Prepends to prompt: `System Prompt\n\nUser Input`
 * Chat: Inserts as first message: `[{"role": "system", "content": "..."}, ...]`
 
-## 🛠️ Advanced Usage
+## Advanced Usage
 
 ### Custom Column Mapping
 
@@ -120,4 +120,4 @@ manager = DataManager(
 Warning: `Dataset too small to split`
 
 * Cause: Your dataset has fewer than ~5 examples.
-* Fix: Provide more data! The splitter needs enough samples to create meaningful validation sets.
+* Fix: add more examples. The splitter needs enough samples to create meaningful validation sets.

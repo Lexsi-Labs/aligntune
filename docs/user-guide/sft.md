@@ -11,7 +11,7 @@ Supervised Fine-Tuning (SFT) is the process of training a pre-trained language m
 AlignTune supports six main SFT task types:
 
 1. **Instruction Following** - Teach models to follow instructions
-2. **Supervised Fine-Tuning** - General-purpose fine-tuning
+2. **Supervised Fine-Tuning** - General-purpose text fine-tuning
 3. **Text Classification** - Classify text into categories
 4. **Token Classification** - Named Entity Recognition (NER), POS tagging
 5. **Text Generation** - Generate coherent text

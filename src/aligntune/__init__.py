@@ -6,6 +6,41 @@ import logging
 import os
 import sys
 
+# Colab OutStream has no watch_fd_thread. Logging/TRL still calls close();
+# do not actually close kernel stdout/stderr (that kills later print/log).
+def _patch_colab_outstream():
+    try:
+        from ipykernel.iostream import OutStream
+    except Exception:
+        return
+    if getattr(OutStream.close, "_aligntune", False):
+        return
+    def _close(self):
+        return None
+    _close._aligntune = True
+    OutStream.close = _close
+    _write = OutStream.write
+    def _safe_write(self, *a, **k):
+        try:
+            return _write(self, *a, **k)
+        except ValueError as e:
+            if "closed" not in str(e).lower():
+                raise
+            return 0
+    OutStream.write = _safe_write
+
+_patch_colab_outstream()
+
+# TRL 1.7 GRPOTrainer always imports VLLMGeneration. If vllm is installed but
+# its CUDA 13 runtime is missing, that import kills the cell. Notebooks use
+# HF rollout; leave vllm off unless ALIGNTUNE_ENABLE_VLLM=1.
+if os.environ.get("ALIGNTUNE_ENABLE_VLLM", "0") != "1":
+    try:
+        import trl.import_utils as _trl_iu
+        _trl_iu.is_vllm_available = lambda *a, **k: False
+    except Exception:
+        pass
+
 # Import colored logging utilities
 try:
     from .utils.colored_logging import (
@@ -42,13 +77,58 @@ else:
 # -----------------------------------------------------------------------------
 # VERSION & METADATA
 # -----------------------------------------------------------------------------
-try:
-    from importlib.metadata import version as _pkg_version, PackageNotFoundError as _PkgNotFound
-    __version__ = _pkg_version("aligntune")
-except Exception:  # Fallback during editable installs before metadata exists
-    __version__ = "0.0.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+def _resolve_version() -> str:
+    """Best-effort version string.
+
+    1. Installed distribution metadata (``pip install .`` or ``pip install -e .``);
+       this is the normal path and returns the setuptools_scm version.
+    2. Running straight from a source checkout that was never installed: read the
+       ``fallback_version`` pinned in the repo's ``pyproject.toml``.
+    3. Give up with an explicit sentinel rather than a misleading ``0.0.0``.
+
+    NOTE: if ``import aligntune`` ever resolves to the *repo directory* instead of
+    this package (a folder literally named ``aligntune`` on ``sys.path`` with no
+    ``__init__.py`` - common in Colab: ``/content/aligntune``), NONE of this runs,
+    because this file is never imported. Fix that by installing non-editable
+    (``pip install .``), cloning to a differently named folder, or
+    ``sys.path.insert(0, "<repo>/src")`` - it cannot be patched from here.
+    """
+    try:
+        from importlib.metadata import version as _pkg_version
+        return _pkg_version("aligntune")
+    except Exception:
+        pass
+    try:
+        import re
+        from pathlib import Path
+
+        # src/aligntune/__init__.py -> parents[2] == repo root
+        pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+        if pyproject.is_file():
+            match = re.search(
+                r'fallback_version\s*=\s*["\']([^"\']+)["\']', pyproject.read_text()
+            )
+            if match:
+                return f"{match.group(1)}+source"
+    except Exception:
+        pass
+    return "0.0.0+unknown"
+
+
+__version__ = _resolve_version()
+__author__ = "Lexsi Labs"
+__email__ = ""
+
+
+def version() -> str:
+    """Print an ``AlignTune <version> ready`` banner and return it.
+
+    Convenience for quick smoke-tests and notebooks. Has no effect at import
+    time - it only runs when explicitly called.
+    """
+    banner = f"AlignTune {__version__} ready"
+    print(banner)
+    return banner
 
 # -----------------------------------------------------------------------------
 # CORE IMPORTS
@@ -177,7 +257,12 @@ from ._imports import (
     BackendConfig,
     create_sft_trainer,
     create_rl_trainer,
+    create_tokenization_trainer,
+    create_distill_trainer,
+    create_es_trainer,
     list_backends,
+    merge_models,
+    merge_models_from_yaml,
     
     # CLI components
     cli_main,
@@ -187,26 +272,11 @@ from ._imports import (
     print_available_trainers,
     check_dependencies,
     get_missing_dependencies,
+    evaluate_tokenizer,
 )
 
-# Import fallback functions from dedicated module
-from ._fallbacks import (
-    train_dpo_from_yaml,
-    train_ppo_from_yaml,
-    train_grpo_from_yaml,
-    train_grpo_from_config,
-    create_sample_dpo_config,
-    create_minimal_dpo_config,
-    create_sample_ppo_config,
-    create_minimal_ppo_config,
-    create_specialized_ppo_configs,
-    load_ppo_config_from_yaml,
-    show_ppo_configuration_menu,
-    select_ppo_dataset_size,
-    create_grpo_configurations,
-    select_grpo_config_interactively,
-    evaluate_grpo_model,
-)
+# Fallback functions have been removed as they were never used.
+# Use backend_factory.create_sft_trainer() and create_rl_trainer() instead.
 
 # =============================================================================
 # EXPORTS
@@ -218,6 +288,7 @@ __all__ = [
     "__version__",
     "__author__",
     "__email__",
+    "version",
     
     # Core availability flags
     "UNSLOTH_AVAILABLE",
@@ -361,8 +432,16 @@ if BACKEND_FACTORY_AVAILABLE:
         "BackendConfig",
         "create_sft_trainer",
         "create_rl_trainer",
+        "create_tokenization_trainer",
+        "create_distill_trainer",
+        "create_es_trainer",
         "list_backends",
-        
+        "merge_models",
+        "merge_models_from_yaml",
+
         # CLI components
         "cli_main",
     ])
+
+if EVAL_AVAILABLE:
+    __all__.append("evaluate_tokenizer")

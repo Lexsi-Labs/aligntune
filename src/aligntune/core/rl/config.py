@@ -14,6 +14,7 @@ class AlgorithmType(Enum):
     """Supported RLHF algorithms."""
     PPO = "ppo"
     DPO = "dpo"
+    ONLINE_DPO = "online_dpo"  # Online Iterative DPO
     GRPO = "grpo"
     GSPO = "gspo"
     COUNTERFACT_GRPO = "counterfact_grpo"
@@ -21,8 +22,8 @@ class AlgorithmType(Enum):
     DRGRPO = "drgrpo"
     DAPO = "dapo"
     PACE = "pace"  # Baseline-Optimized Learning Technique
-    NMGRPO="nmgrpo"
-    METAES="metaes"
+    ORPO = "orpo"  # Odds Ratio Preference Optimization
+    SPIN = "spin"
 
 
 
@@ -65,12 +66,17 @@ class ModelConfig:
     reward_model_quantization: Dict[str, Any] = field(default_factory=dict)
     value_model_quantization: Dict[str, Any] = field(default_factory=dict)
     use_peft: bool = True  # Enable PEFT (LoRA) by default
+    lora_variant: str = "standard"  # LoRA variant: standard, kron, moa, text2lora, doc2lora, squeezed
     lora_r: int = 16
     lora_alpha: int = 32
     lora_dropout: float = 0.05
     lora_target_modules: List[str] = field(default_factory=lambda: ["q_proj", "k_proj", "v_proj", "o_proj"])
     trust_remote_code: bool = True  # Trust remote code for model loading
-
+    # Advanced PEFT methods - DoRA support for RL
+    dora_enabled: bool = False
+    rslora_enabled: bool = False
+    loftq_init: bool = False
+    pissa_init: bool = False
 
     # New parameters from model initialization
     model_init_kwargs: Dict[str, Any] = field(default_factory=dict)
@@ -81,6 +87,8 @@ class ModelConfig:
     disable_dropout: bool = True
     use_logits_to_keep: bool = False
     reward_device: str = "auto"
+    # tokenizer_name_or_path: Optional[str] = None  # TODO: Add in next sprint
+    # embedding_init_method: str = "random"  # TODO: Add in next sprint
 
 
     
@@ -88,8 +96,8 @@ class ModelConfig:
     def __post_init__(self):
         """Validate model configuration."""
         # Validate backend
-        if self.backend not in ["trl", "unsloth"]:
-            raise ValueError(f"backend must be 'trl' or 'unsloth', got '{self.backend}'")
+        if self.backend not in ["trl", "unsloth", "verl"]:
+            raise ValueError(f"backend must be 'trl', 'unsloth', or 'verl', got '{self.backend}'")
         
         # Validate precision
         if not isinstance(self.precision, PrecisionType):
@@ -117,7 +125,7 @@ class ModelConfig:
 class DatasetConfig:
     """Dataset configuration with flexible field mapping support."""
     name: str
-    split: str = "train"
+    split: Optional[str] = None
     percent: Optional[float] = None
     max_samples: Optional[int] = None
     max_eval_samples: Optional[int] = None
@@ -151,6 +159,18 @@ class DatasetConfig:
     processing_fn: Optional[Any] = None  # NEW: Custom processing function
     processing_batched: bool = False  # NEW: Whether processing is batched
     processing_fn_kwargs: Dict[str, Any] = field(default_factory=dict)  # NEW: Args for processing_fn
+
+    # CuratorKIT and split management. DataManager processes all source
+    # splits when split is None and creates missing splits from these ratios.
+    keep_columns: Optional[bool] = None
+    val_split_ratio: Optional[float] = None
+    test_split_ratio: Optional[float] = None
+    split_seed: int = 42
+    curator_schema_gate: bool = True
+    curator_clean: bool = False
+    curator_dedup: str = "none"
+    curator_use_tiktoken: bool = False
+    curator_max_tokens: int = 1_000_000
     
     config_name: Optional[str] = None 
     
@@ -348,7 +368,11 @@ class TrainingConfig:
 
     # Generation sampling parameters
     top_p: float = 0.95
-    
+    top_k: int = 0
+    max_new_tokens: int = 64
+    repetition_penalty: float = 1.0
+    min_p: Optional[float] = None
+
     # Processing parameters
     padding_free: bool = False
     truncation_mode: str = 'keep_end'
@@ -380,8 +404,16 @@ class TrainingConfig:
     # GSPO-specific parameters
     gspo_gamma: float = 0.1
     gspo_delta: float = 0.1
-    
-    
+
+    # SPIN-specific parameters (Self-Play Fine-Tuning)
+    num_rounds: int = 2
+    generation_temperature: float = 0.7
+    generation_max_length: int = 512
+    generation_batch_size: Optional[int] = None
+    dpo_steps_per_round: int = 100
+    samples_per_round: Optional[int] = None
+    eval_samples: Optional[int] = None
+
     # Evaluation parameters
     eval_steps: Optional[int] = 100
     eval_strategy: str = "no"
@@ -406,17 +438,20 @@ class TrainingConfig:
     
     # Generation parameters (GRPO-specific)
     num_generations: Optional[int] = None
-    mask_truncated_completions: bool = True
+    mask_truncated_completions: bool = False
     scale_rewards: str = "group"
     reward_weights: Optional[List[float]] = None
     enable_thinking: bool = False  # Qwen3 thinking mode
     fast_inference: bool = False  # Unsloth vLLM fast inference (2-3x faster generation)
     vllm_gpu_memory_utilization: float = 0.7  # vLLM GPU memory (0.95 for max speed with spare VRAM)
 
+    # Rollout backend configuration
+    rollout_backend: str = "hf"  # choices: hf (HuggingFace), vllm, sglang
+    vllm_tensor_parallel_size: int = 1  # Tensor parallelism for vLLM (distribute across GPUs)
+
     # Seed parameters
     seed: Optional[int] = 42
     data_seed: Optional[int] = 47  # Match training_script.py for fair comparison
-    
 
     # Meta-ES specific
     meta_iterations: int = 15
@@ -527,18 +562,11 @@ class TrainingConfig:
     Required when using GBMPO algorithms.
     """
     
-    gbmpo_epsilon: float = 0.2
-    """PPO-style clipping parameter for GBMPO.
-    Used for advantage clipping in policy updates.
-    Typical range: 0.1-0.3
-    """
-    
-    
     # Performance optimization
     use_liger_kernel: bool = False
     use_liger_loss: Optional[bool] = None
 
-    # BOLT-specific parameters (Baseline-Optimized Learning Technique)
+    # PACE curriculum/baseline parameters
     curriculum_enabled: bool = False  # Enable uncertainty-based sampling
     curriculum_epsilon: float = 0.05  # Floor for sampling weights
     curriculum_update_freq: int = 10  # Steps between weight updates
@@ -549,8 +577,59 @@ class TrainingConfig:
     baseline_warm_start: Optional[str] = None  # Path to JSON/PKL for warm-start
     use_baseline_advantages: bool = False  # Use A = r - v̂(x) vs group mean
 
+    # Curriculum RL (TAROT-based adaptive sampling)
+    curriculum_rl_enabled: bool = False
+    """Enable curriculum learning with adaptive difficulty sampling (TAROT)."""
 
-    group_by_length: bool = True 
+    curriculum_rl_strategy: str = "adaptive"
+    """Curriculum strategy: easy_first, adaptive, or mixed.
+    - easy_first: Sample easy examples early, hard examples late
+    - adaptive: UCB-style balance between exploitation and exploration
+    - mixed: 70% current difficulty, 30% random
+    """
+
+    curriculum_rl_warmup_steps: int = 1000
+    """Number of steps before curriculum strategy takes effect."""
+
+    curriculum_rl_pass_threshold: float = 0.5
+    """Reward threshold above which an example counts as 'passed'."""
+
+
+    group_by_length: bool = False
+
+    # Distributed training via HF Accelerate
+    # Point to a valid `accelerate config`-generated YAML to enable DeepSpeed/FSDP.
+    # AlignTune surfaces this path; TRL + Accelerate handle the actual distributed setup.
+    accelerate_config_path: Optional[str] = None
+
+    # ============================================================================
+    # veRL Backend Configuration (High-throughput RLHF via HybridFlow)
+    # ============================================================================
+    verl_micro_batch_size: Optional[int] = None
+    """Micro batch size for veRL gradient accumulation.
+    If None, defaults to batch_size / 2.
+    """
+
+    verl_rollout_n: int = 4
+    """Number of rollouts per prompt for veRL (especially GRPO).
+    Each prompt gets multiple completions for ranking/grouping.
+    Typical range: 2-8
+    """
+
+    verl_fsdp_config: Optional[Dict[str, Any]] = None
+    """Custom FSDP configuration for veRL distributed training.
+    If not specified, uses default FULL_SHARD strategy.
+    """
+
+    verl_n_gpus_per_node: int = 8
+    """Number of GPUs per node for veRL Ray cluster.
+    Common values: 8 (A100), 8 (H100)
+    """
+
+    verl_nnodes: int = 1
+    """Number of nodes for distributed veRL training.
+    Set > 1 for multi-node setups.
+    """
 
     extra_params: Dict[str, Any] = field(default_factory=dict)
 
@@ -558,39 +637,56 @@ class TrainingConfig:
         """Validate training configuration."""
         if self.per_device_batch_size <= 0:
             raise ValueError("per_device_batch_size must be positive")
-        
+
         if self.gradient_accumulation_steps <= 0:
             raise ValueError("gradient_accumulation_steps must be positive")
-        
+
         # if self.max_steps is not None and self.max_steps <= 0:
         #     raise ValueError("max_steps must be positive")
-        
+
         if self.epochs is not None and self.epochs <= 0:
             raise ValueError("epochs must be positive")
-        
+
         if self.max_steps is None and self.epochs is None:
             raise ValueError("Either max_steps or epochs must be specified")
-        
+
         if self.eval_interval <= 0:
             raise ValueError("eval_interval must be positive")
-        
+
         if self.save_interval <= 0:
             raise ValueError("save_interval must be positive")
-        
+
         if self.rollout_batch_size <= 0:
             raise ValueError("rollout_batch_size must be positive")
-        
+
         if self.kl_coef < 0:
             raise ValueError("kl_coef must be non-negative")
-        
+
         if self.cliprange <= 0:
             raise ValueError("cliprange must be positive")
-        
+
         if self.learning_rate <= 0:
             raise ValueError("learning_rate must be positive")
-        
+
         if self.max_grad_norm < 0:
             raise ValueError("max_grad_norm must be non-negative")
+
+        # Validate rollout backend
+        valid_backends = ["hf", "vllm", "sglang"]
+        if self.rollout_backend not in valid_backends:
+            raise ValueError(
+                f"rollout_backend must be one of {valid_backends}, "
+                f"got '{self.rollout_backend}'"
+            )
+
+        if self.vllm_tensor_parallel_size <= 0:
+            raise ValueError("vllm_tensor_parallel_size must be positive")
+
+        if self.vllm_gpu_memory_utilization <= 0 or self.vllm_gpu_memory_utilization > 1.0:
+            raise ValueError(
+                "vllm_gpu_memory_utilization must be in range (0.0, 1.0], "
+                f"got {self.vllm_gpu_memory_utilization}"
+            )
 
 @dataclass
 class DistributedConfig:
@@ -654,17 +750,43 @@ class LoggingConfig:
     log_level: str = "INFO"
     sample_logging: SampleLoggingConfig = field(default_factory=SampleLoggingConfig)
     report_to: str = "none"
-    
+
+    # Weights & Biases (wandb) integration - optional, gracefully degraded
+    wandb_project: Optional[str] = None
+    """wandb project name. If None, wandb tracking is disabled."""
+
+    wandb_entity: Optional[str] = None
+    """wandb entity (team or username). Optional."""
+
+    wandb_tags: List[str] = field(default_factory=list)
+    """List of tags to attach to wandb run for filtering and organization."""
+
+    wandb_notes: Optional[str] = None
+    """Optional notes about the run to log to wandb."""
+
+    wandb_name: Optional[str] = None
+    """Optional custom run name for wandb. If not provided, wandb generates one."""
+
     def __post_init__(self):
         """Validate logging configuration."""
-        valid_loggers = {"tensorboard", "wandb"}
+        valid_loggers = {"azure_ml", "clearml", "codecarbon", "comet_ml", "dagshub", "dvclive", "flyte", "mlflow", "neptune", "swanlab", "tensorboard", "trackio", "wandb", "all", "none"}
         for logger in self.loggers:
             if logger not in valid_loggers:
                 raise ValueError(f"Invalid logger: {logger}. Must be one of {valid_loggers}")
-        
+
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         if self.log_level.upper() not in valid_levels:
             raise ValueError(f"Invalid log level: {self.log_level}. Must be one of {valid_levels}")
+
+        # Validate wandb configuration
+        if self.wandb_project is None and (self.wandb_entity or self.wandb_tags):
+            # Warn if entity/tags provided without project
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "wandb_entity or wandb_tags provided without wandb_project. "
+                "wandb tracking will be disabled."
+            )
 
 
 # @dataclass

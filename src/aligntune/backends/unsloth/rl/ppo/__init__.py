@@ -21,7 +21,8 @@ os.environ['UNSLOTH_FORCE_RECOMPILE'] = '1'
 # Apply TRL patch BEFORE any Unsloth imports
 try:
     import trl.trainer.utils
-    from trl.trainer.utils import first_true_indices
+    from .unsloth_patches import get_first_true_indices
+    first_true_indices = get_first_true_indices()
     import torch
 
     def patched_get_reward(

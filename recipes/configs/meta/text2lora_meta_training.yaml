@@ -1,0 +1,256 @@
+# Text-to-LoRA Meta-Training Configuration (v3.3 Advanced Parameterization Suite)
+#
+# This configuration enables meta-training of a hypernetwork that generates
+# LoRA adapter weights directly from task descriptions.
+#
+# Workflow:
+# 1. Hypernetwork learns to map task embeddings → LoRA weights
+# 2. Train on diverse task distribution (Alpaca, FLAN, CoT chains)
+# 3. At inference: new task → embed → generate LoRA → apply to base model
+#
+# Key components:
+# - TextToLoRAHypernet: Maps text embeddings to LoRA weights
+# - TextToLoRATrainer: Meta-learning optimization loop
+# - Task distribution: Collection of fine-tuning tasks for meta-training
+
+# ============================================================================
+# HYPERNETWORK ARCHITECTURE
+# ============================================================================
+hypernetwork:
+  # Embedding dimension (must match sentence-transformer output)
+  hidden_dim: 768
+
+  # LoRA rank for generated adapters (controls expressiveness)
+  lora_r: 16
+
+  # Number of independent LoRA pairs to generate
+  # Each pair targets different linear layer groups
+  num_target_modules: 5
+
+  # MLP hidden dimension for weight generation
+  mlp_hidden: 512
+
+  # Sentence-transformer model for embedding task descriptions
+  embedding_model_name: "all-MiniLM-L6-v2"
+
+  # Initialization scale for A matrices (B starts at zeros)
+  lora_init_std: 0.02
+
+  # Device for computation
+  device: "cpu"  # Change to "cuda" for GPU training
+
+# ============================================================================
+# META-TRAINING CONFIGURATION
+# ============================================================================
+training:
+  # Total meta-training steps (sample tasks, generate LoRA, optimize)
+  num_meta_steps: 10000
+
+  # Learning rate for hypernetwork optimizer
+  learning_rate: 1.0e-4
+
+  # Linear warmup schedule length (steps to reach full learning rate)
+  warmup_steps: 500
+
+  # L2 regularization for optimizer (prevents overfit to small task set)
+  weight_decay: 1.0e-5
+
+  # Gradient clipping threshold (prevents exploding gradients)
+  max_grad_norm: 1.0
+
+  # Batch size per meta-training step
+  batch_size: 1
+
+  # Validation interval (evaluate every N steps)
+  val_interval: 500
+
+  # Optimizer configuration
+  optimizer: "adamw"
+
+  # Random seed for reproducibility
+  seed: 42
+
+# ============================================================================
+# TRAINING TASK DISTRIBUTION
+# ============================================================================
+train_tasks:
+  # Alpaca instruction-following dataset
+  - name: "alpaca"
+    description: "Instruction-following tasks with diverse inputs and outputs"
+    source: "tatsu-lab/alpaca"
+    num_samples: 1000
+
+  # FLAN multi-task learning
+  - name: "flan_v2"
+    description: "Diverse NLU and NLG tasks from FLAN collection"
+    source: "google/flan"
+    num_samples: 1000
+
+  # Chain-of-thought reasoning
+  - name: "cot_chains"
+    description: "Tasks requiring reasoning chains and step-by-step solutions"
+    source: "kaist-ai/CoT-Collection"
+    num_samples: 500
+
+  # Domain-specific: Code generation
+  - name: "code_gen"
+    description: "Python code generation from natural language specs"
+    source: "sahil2801/CodeAlpaca-20k"
+    num_samples: 500
+
+  # Domain-specific: Mathematical reasoning
+  - name: "math_reasoning"
+    description: "Mathematical problem-solving with numerical answers"
+    source: "meta-math/MetaMathQA"
+    num_samples: 500
+
+# ============================================================================
+# VALIDATION TASK DISTRIBUTION
+# ============================================================================
+val_tasks:
+  # Held-out from training tasks for hypernetwork evaluation
+  - name: "alpaca_heldout"
+    description: "Alpaca validation split (unseen tasks)"
+    num_samples: 200
+
+  - name: "flan_heldout"
+    description: "FLAN validation split (unseen tasks)"
+    num_samples: 200
+
+  - name: "cot_heldout"
+    description: "CoT validation split (unseen reasoning tasks)"
+    num_samples: 100
+
+# ============================================================================
+# BASE MODEL CONFIGURATION
+# ============================================================================
+base_model:
+  # Model to fine-tune with generated LoRA adapters
+  model_name: "meta-llama/Llama-2-7b"
+
+  # Modules to apply LoRA to (5 generated pairs target these)
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "up_proj"
+
+  # Keep base model frozen (LoRA only)
+  freeze_base: true
+
+# ============================================================================
+# DOCUMENT-TO-LORA CONFIGURATION (OPTIONAL)
+# ============================================================================
+doc2lora:
+  # Enable document-based LoRA generation (alternative to embedding)
+  enabled: true
+
+  # Chunk size in characters for long documents
+  chunk_size: 512
+
+  # Maximum number of chunks to process per document
+  num_chunks: 3
+
+  # Pooling strategy: "mean" or "weighted" (attention-based)
+  pooling_strategy: "weighted"
+
+# ============================================================================
+# CHECKPOINTING & LOGGING
+# ============================================================================
+checkpointing:
+  # Directory to save checkpoints
+  checkpoint_dir: "./checkpoints/text2lora"
+
+  # Save checkpoint every N steps
+  save_interval: 500
+
+  # Keep last N checkpoints (older ones deleted)
+  keep_last_n: 3
+
+  # Save best checkpoint (by validation loss)
+  save_best: true
+
+logging:
+  # Logging level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+
+  # Log every N steps
+  log_interval: 100
+
+  # Metrics to track during training
+  metrics:
+    - "loss"
+    - "learning_rate"
+    - "gradient_norm"
+    - "validation_loss"
+
+# ============================================================================
+# INFERENCE CONFIGURATION
+# ============================================================================
+inference:
+  # After training, use hypernetwork for inference:
+  # 1. Embed new task description
+  # 2. Generate LoRA weights
+  # 3. Apply to base model
+
+  # Maximum LoRA rank at inference (can be different from training)
+  inference_lora_r: 16
+
+  # Scaling factor for LoRA contribution (alpha parameter)
+  lora_scaling: 1.0
+
+  # Device for inference
+  device: "cpu"
+
+# ============================================================================
+# EXPERIMENTAL FEATURES (v3.3 Beta)
+# ============================================================================
+experimental:
+  # Meta-learning inner loop optimization (generate LoRA, then optimize for 1-2 steps)
+  inner_loop_steps: 0
+
+  # Annealing schedule for lora_init_std (start large, decay to small)
+  anneal_init_std: false
+  anneal_start: 0.1
+  anneal_end: 0.02
+
+  # Gradient checkpointing for memory efficiency
+  gradient_checkpointing: false
+
+# ============================================================================
+# EXAMPLE USAGE
+# ============================================================================
+#
+# from aligntune.core.adapters.text2lora import TextToLoRAHypernet, TextToLoRATrainer
+# import yaml
+#
+# # Load config
+# with open("recipes/configs/meta/text2lora_meta_training.yaml") as f:
+#     config = yaml.safe_load(f)
+#
+# # Initialize hypernetwork
+# hypernet = TextToLoRAHypernet(**config["hypernetwork"])
+#
+# # Initialize trainer (with loaded tasks)
+# trainer = TextToLoRATrainer(
+#     hypernet=hypernet,
+#     target_model=model,
+#     train_tasks=train_task_list,
+#     val_tasks=val_task_list,
+#     **config["training"]
+# )
+#
+# # Meta-training loop
+# for step in range(config["training"]["num_meta_steps"]):
+#     metrics = trainer.train_step_meta()
+#
+#     if step % config["training"]["val_interval"] == 0:
+#         val_metrics = trainer.validate()
+#         trainer.save_checkpoint(f"checkpoint_step{step}.pt")
+#
+# # At inference: new task
+# task_description = "Fine-tune on medical question-answering"
+# task_embedding = embedding_model.encode(task_description)  # [1, 768]
+# lora_weights = hypernet(task_embedding)
+# # Apply lora_weights to base model

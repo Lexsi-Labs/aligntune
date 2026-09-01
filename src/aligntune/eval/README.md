@@ -1,20 +1,16 @@
-# 📊 Universal Evaluation Framework
+# Universal Evaluation Framework
 
-A robust, backend-agnostic evaluation system for Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL) models. This framework unifies modern modular evaluation with legacy benchmark support (via `lm-eval`).
+A backend-agnostic evaluation system for Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL) models, combining modular evaluation with legacy benchmark support via `lm-eval`.
 
-## 🌟 Key Features
+## Key Features
 
-* **Unified Interface:** Single entry point for Generation (SFT), Comparative (RL), and Standard Benchmarks (MMLU/GSM8K).
+* **Unified Interface:** one entry point for generation (SFT), comparative (RL), and standard benchmarks (MMLU/GSM8K).
+* **Backend Agnostic:** evaluates models regardless of training origin (TRL, Unsloth, HF).
+* **Safe Compute:** a per-sample wrapper catches individual failures (NaNs, empty strings, missing dependencies) and returns an error key instead of crashing the run.
+* **Smart Caching:** results are cached based on a hash of (model + dataset + config).
+* **Specialized Metrics:** built-in support for math (regex extraction) and code (sandboxed execution).
 
-* **Backend Agnostic:** Evaluate models regardless of training origin (TRL, Unsloth, HF).
-
-* **Robustness ("Safe Compute"):** Individual sample failures (NaNs, empty strings) or missing dependencies won't crash your run.
-
-* **Smart Caching:** Results are cached based on a hash of (Model + Dataset + Config).
-
-* **Specialized Metrics:** Built-in support for Math (Regex extraction) and Code (Safe execution).
-
-## 🚀 Quick Start
+## Quick Start
 
 1. **Evaluating an SFT Model (Generation)**
 
@@ -81,7 +77,7 @@ benchmark_results = evaluator.evaluate_benchmark(
 )
 ```
 
-## 📂 Architecture
+## Architecture
 
 The system uses a Strategy Pattern for metrics and separates the new modular logic from legacy support.
 
@@ -102,7 +98,7 @@ src/aligntune/eval/
 ```
 
 
-## 🛡️ "Safe Compute" & Robustness
+## Safe Compute in Detail
 
 All metrics use a `safe_compute` wrapper. If a metric fails (e.g., missing library, math error), the evaluator logs a warning and returns a failure key (`_error`) instead of crashing the process.
 
@@ -117,7 +113,7 @@ Example Response on Failure:
 ```
 
 
-## 🛠️ Custom Metrics
+## Custom Metrics
 
 You can inject custom logic without modifying the library.
 
@@ -139,7 +135,7 @@ evaluator.add_metric(DiversityMetric())
 ```
 
 
-## 📦 Requirements
+## Requirements
 
 * **Core:** `torch`, `transformers`, `datasets`
 

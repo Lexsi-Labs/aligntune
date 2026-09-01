@@ -8,6 +8,8 @@ from .text import BleuMetric, RougeMetric
 from .rl import KLDivergenceMetric, RewardAccuracyMetric, PolicyEntropyMetric
 from .math import MathAccuracyMetric
 from .code import PassAtKMetric
+from .alignment import RefusalRate, SycophancyScore, VerbosityDelta
+
 __all__ = [
     "Metric",
     "PerplexityMetric",
@@ -19,4 +21,7 @@ __all__ = [
     "PolicyEntropyMetric",
     "MathAccuracyMetric",
     "PassAtKMetric",
+    "RefusalRate",
+    "SycophancyScore",
+    "VerbosityDelta",
 ]

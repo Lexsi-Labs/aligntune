@@ -2,7 +2,7 @@
 
 ## Overview
 
-AlignTune provides **27+ prebuilt reward functions** covering all major aspects of text generation quality, safety, and task-specific performance. These reward functions can be used individually or combined to create sophisticated reward landscapes for RLHF training.
+AlignTune provides **50+ prebuilt reward functions** covering all major aspects of text generation quality, safety, and task-specific performance. These reward functions can be used individually or combined to create sophisticated reward landscapes for RLHF training.
 
 ## Available Reward Functions
 
@@ -150,18 +150,22 @@ AlignTune provides **27+ prebuilt reward functions** covering all major aspects 
 - **Use Case**: Trustworthy AI, factual accuracy
 - **Example**: `{"type": "honesty", "weight": 1.2}`
 
-### **Multi-Modal Rewards (Future)**
+### **Experimental Multimodal Rewards**
+
+These registry entries are available for experimentation only. They currently
+return a neutral placeholder score; image/audio input evaluation is not yet
+implemented.
 
 #### 23. **Image Relevance Reward** (`image_relevance`)
-- **Purpose**: Measures relevance to provided images
+- **Purpose**: Reserved for image relevance scoring
 - **Parameters**: None
-- **Use Case**: Multi-modal tasks, image captioning
+- **Status**: Experimental placeholder; not a production multimodal evaluator
 - **Example**: `{"type": "image_relevance", "weight": 1.0}`
 
 #### 24. **Audio Quality Reward** (`audio_quality`)
-- **Purpose**: Measures audio quality and clarity
+- **Purpose**: Reserved for audio quality scoring
 - **Parameters**: None
-- **Use Case**: Speech generation, audio processing
+- **Status**: Experimental placeholder; not a production audio evaluator
 - **Example**: `{"type": "audio_quality", "weight": 1.0}`
 
 ## Usage Examples
@@ -276,8 +280,17 @@ rewards:
 
 ### **Custom Reward Weights**
 
+!!! note "Two `RewardConfig` classes"
+    AlignTune has two different classes named `RewardConfig`: one in
+    `aligntune.rewards.core` (fields: `reward_type: RewardType`, `weight`,
+    `params`, ...) and one in `aligntune.core.rl.config` (fields: `type: str`,
+    `weight`, `params`, ...). The top-level `aligntune.RewardConfig` resolves
+    to the **`core.rl.config`** version, not the one used with `RewardType`
+    below -- import from `aligntune.rewards.core` explicitly to get the
+    `reward_type=`/`RewardType` pairing shown here.
+
 ```python
-from aligntune import RewardConfig, RewardType
+from aligntune.rewards.core import RewardConfig, RewardType
 
 # Create custom reward configuration
 rewards = [
@@ -354,8 +367,19 @@ rewards:
 
 ### **Custom Reward Functions**
 
+!!! note "Two `RewardRegistry` classes"
+    AlignTune also has two different classes named `RewardRegistry`: one in
+    `aligntune.rewards.registry` (expects `RewardFunction` subclasses like
+    `CustomReward` below, registered via `register_custom_reward()`) and one
+    in `aligntune.core.rl.registries` (expects plain callables, registered
+    via `register()`). The top-level `aligntune.RewardRegistry` resolves to
+    the **`core.rl.registries`** version -- for a `RewardFunction` subclass
+    like this, import `RewardRegistry` from `aligntune.rewards.registry`
+    explicitly, as shown here.
+
 ```python
-from aligntune import RewardFunction, RewardType
+from aligntune.rewards.core import RewardFunction, RewardConfig, RewardType
+from aligntune.rewards.registry import RewardRegistry
 
 class CustomReward(RewardFunction):
  def __init__(self, config: RewardConfig):
@@ -366,9 +390,10 @@ class CustomReward(RewardFunction):
  # Implement your custom reward computation
  return 0.8 # Return reward score between 0 and 1
 
-# Register custom reward
-from aligntune import RewardRegistry
-RewardRegistry.register_reward("custom", CustomReward)
+# Register custom reward (RewardConfig always needs a RewardType; pick
+# whichever existing member best matches your reward's purpose)
+custom_config = RewardConfig(reward_type=RewardType.HELPFULNESS, weight=1.0)
+RewardRegistry.register_custom_reward("custom", CustomReward, custom_config)
 ```
 
 ### **Combining Rewards**

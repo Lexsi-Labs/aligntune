@@ -24,15 +24,9 @@ UNSLOTH_ERROR_INFO = None  # Will store detailed error information
 # Check if we should prevent Unsloth from loading at all
 def _should_prevent_unsloth():
     """Check if Unsloth should be prevented from loading."""
-    import os
-    return (
-        os.environ.get('TRL_ONLY_MODE', '0') == '1' or
-        os.environ.get('DISABLE_UNSLOTH_FOR_TRL', '0') == '1' or
-        os.environ.get('PURE_TRL_MODE', '0') == '1'
-    )
+    return os.environ.get('PURE_TRL_MODE', '0') == '1'
 
 # Set PURE_TRL_MODE at module level to prevent Unsloth import
-import os
 if os.environ.get('PURE_TRL_MODE', '0') == '1':
     # Force Unsloth to be unavailable
     UNSLOTH_AVAILABLE = False
@@ -188,32 +182,6 @@ def _check_trl_available():
             }
             logger.warning(f"TRL not available: {e}")
     return TRL_AVAILABLE
-
-def enable_unsloth_after_trl():
-    """Re-enable Unsloth after TRL training is complete."""
-    global UNSLOTH_AVAILABLE, UNSLOTH_ERROR_INFO
-    
-    # Clear environment variables that disable Unsloth
-    import os
-    os.environ.pop('DISABLE_UNSLOTH_FOR_TRL', None)
-    os.environ.pop('TRL_ONLY_MODE', None)
-    os.environ.pop('UNSLOTH_DISABLE_PATCHING', None)
-    os.environ.pop('UNSLOTH_COMPILED_CACHE', None)
-    
-    # Reset Unsloth availability to force re-check
-    UNSLOTH_AVAILABLE = None
-    UNSLOTH_ERROR_INFO = None
-    
-    # Force re-check Unsloth availability
-    logger.info("🔄 Re-enabling Unsloth after TRL training...")
-    _check_unsloth_available()
-    
-    if UNSLOTH_AVAILABLE:
-        logger.info("✅ Unsloth successfully re-enabled")
-    else:
-        logger.warning("⚠️ Unsloth could not be re-enabled")
-    
-    return UNSLOTH_AVAILABLE
 
 # =============================================================================
 # LEGACY BACKEND REMOVED
@@ -413,6 +381,7 @@ try:
         LMEvalRunner,
         get_available_lm_eval_tasks,
         run_standard_benchmark,
+        evaluate_tokenizer,
     )
     EVAL_AVAILABLE = True
     logger.info("Evaluation system imported successfully")
@@ -430,6 +399,7 @@ except ImportError as e:
     LMEvalRunner = None
     get_available_lm_eval_tasks = None
     run_standard_benchmark = None
+    evaluate_tokenizer = None
 
 # =============================================================================
 # REWARDS SYSTEM IMPORTS
@@ -468,42 +438,20 @@ except ImportError as e:
     rewards_registry = None
 
 # =============================================================================
-# BACKEND FACTORY IMPORTS (LAZY LOADING)
+# INFERENCE UTILITIES IMPORTS
 # =============================================================================
 
-# Don't import backend factory here to avoid triggering imports before Unsloth
-# The factory will be imported lazily when needed
-BACKEND_FACTORY_AVAILABLE = True  # Assume available, will be checked when used
+# Re-export inference utilities used by evaluators
+try:
+    from .utils.inference_utils import maybe_enable_unsloth_inference
+except ImportError:
+    maybe_enable_unsloth_inference = None
 
-# Lazy import wrapper for backend factory
-def _lazy_import_backend_factory():
-    """Lazy import backend factory to ensure proper import order."""
-    try:
-        from .core.backend_factory import (
-            BackendFactory,
-            TrainingType,
-            BackendType as FactoryBackendType,
-            RLAlgorithm,
-            BackendConfig,
-            create_sft_trainer,
-            create_rl_trainer,
-            list_backends,
-        )
-        return {
-            'BackendFactory': BackendFactory,
-            'TrainingType': TrainingType,
-            'FactoryBackendType': FactoryBackendType,
-            'RLAlgorithm': RLAlgorithm,
-            'BackendConfig': BackendConfig,
-            'create_sft_trainer': create_sft_trainer,
-            'create_rl_trainer': create_rl_trainer,
-            'list_backends': list_backends,
-        }
-    except ImportError as e:
-        logger.warning(f"Backend factory not available: {e}")
-        return None
+# =============================================================================
+# BACKEND FACTORY IMPORTS
+# =============================================================================
 
-# Import backend factory components directly
+# Import backend factory components
 try:
     from .core.backend_factory import (
         BackendFactory,
@@ -513,10 +461,16 @@ try:
         BackendConfig,
         create_sft_trainer,
         create_rl_trainer,
+        create_tokenization_trainer,
+        create_distill_trainer,
+        create_es_trainer,
         list_backends,
+        merge_models,
+        merge_models_from_yaml,
     )
     # Use BackendFactoryType as the main BackendType for backend factory
     FactoryBackendType = BackendFactoryType
+    BACKEND_FACTORY_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Backend factory not available: {e}")
     BackendFactory = None
@@ -526,8 +480,14 @@ except ImportError as e:
     RLAlgorithm = None
     BackendConfig = None
     create_sft_trainer = None
+    merge_models = None
+    merge_models_from_yaml = None
     create_rl_trainer = None
+    create_tokenization_trainer = None
+    create_distill_trainer = None
+    create_es_trainer = None
     list_backends = None
+    BACKEND_FACTORY_AVAILABLE = False
 
 # =============================================================================
 # CLI IMPORTS
@@ -595,4 +555,3 @@ def get_missing_dependencies() -> list:
         missing.append("Unsloth: pip install unsloth")
     
     return missing
-

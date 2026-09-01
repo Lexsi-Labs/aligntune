@@ -3,7 +3,7 @@ recipe:
   description: "Fine-tune LLaMA 3 8B on SlimOrca for instruction following with memory-efficient settings"
   model: "meta-llama/Meta-Llama-3-8B-Instruct"
   dataset: "Open-Orca/SlimOrca"
-  task: "instruction_following"
+  task: "sft"
   algorithm: "sft"
   backend: "unsloth"
   tags: ["llama", "instruction-tuning", "memory-efficient", "popular"]
@@ -33,6 +33,10 @@ config:
         text: "conversations"
   
   train:
+    # To enable DeepSpeed ZeRO or FSDP, uncomment one of the preset accelerate configs:
+    # accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero2.yaml
+    # accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero3.yaml
+    # accelerate_config_path: src/aligntune/recipes/accelerate/fsdp_full_shard.yaml
     epochs: 1
     per_device_batch_size: 2
     gradient_accumulation_steps: 8

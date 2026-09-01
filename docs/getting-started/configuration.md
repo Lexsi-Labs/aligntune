@@ -146,28 +146,24 @@ logging:
 from aligntune.core.sft.config_loader import SFTConfigLoader
 from aligntune.core.backend_factory import create_sft_trainer
 
-
-# Load configuration
+# Load from YAML
 config = SFTConfigLoader.load_from_yaml("config.yaml")
 
-
-# Create trainer from config
+# Create trainer
 trainer = create_sft_trainer(config=config)
 
-
+# Train
 trainer.train()
 ```
 
 ## Configuration Validation
 
 ```python
-from aligntune.core.rl.config_loader import ConfigLoader
-
 from aligntune.core.sft.config_loader import SFTConfigLoader
 
 # Load and validate
-config = ConfigLoader.load_from_yaml("config.yaml")
-ConfigLoader.validate_config(config)
+config = SFTConfigLoader.load_from_yaml("config.yaml")
+SFTConfigLoader.validate_config(config)
 ```
 
 ## Environment Variables

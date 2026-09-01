@@ -89,9 +89,11 @@ trainer = create_rl_trainer(
  learning_rate=5e-6,
  beta=0.1,
  max_seq_length=512,
- reference_free=False, # Use reference model
  label_smoothing=0.0,
- loss_type="sigmoid" # DPO loss type
+ loss_type="sigmoid", # TRL normalizes this to ["sigmoid"]
+ # For combined losses:
+ # loss_type=["sigmoid", "sft"],
+ # loss_weights=[0.8, 0.2],
 )
 ```
 
@@ -99,23 +101,19 @@ trainer = create_rl_trainer(
 
 ## Configuration Parameters
 
-### DPO-Specific Parameters
+Config class: `trl.DPOConfig`. DPO also accepts every parameter in the
+[common RL parameters](../PARAMETERS.md#rl-reinforcement-learning-common-parameters)
+reference (batch size, learning rate, epochs, LoRA settings, etc.): any
+`TrainingConfig` field matching a real `DPOConfig` field is forwarded
+automatically, even if not listed below.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `beta` | `float` | `0.1` | DPO temperature parameter (controls KL penalty) |
-| `reference_free` | `bool` | `False` | Whether to use reference-free DPO |
-| `label_smoothing` | `float` | `0.0` | Label smoothing factor |
-| `loss_type` | `str` | `"sigmoid"` | Loss function type |
+Use `max_seq_length` as the overall TRL `DPOConfig.max_length` limit.
+`max_prompt_length` and `max_completion_length` are not fields in the pinned
+TRL `DPOConfig`. DPO uses a reference model through
+`DPOTrainer(ref_model=...)` by default; `reference_free` is not a supported
+field in this TRL DPO configuration.
 
-### General RL Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `num_epochs` | `int` | `1` | Number of training epochs |
-| `batch_size` | `int` | `4` | Per-device batch size |
-| `learning_rate` | `float` | `1e-6` | Learning rate |
-| `max_seq_length` | `int` | `512` | Maximum sequence length |
+--8<-- "docs/PARAMETERS.md:dpo"
 
 ---
 
@@ -180,7 +178,10 @@ DPO typically requires lower learning rates than SFT:
 DPO evaluation includes:
 
 ```python
-from aligntune.eval.core import EvalConfig, run_eval
+# Note: aligntune.eval.core also defines an unrelated EvalConfig class
+# (used with EvalRunner/EvalTask); run_eval() and the model_path-style
+# EvalConfig used here both live in aligntune.eval.runner.
+from aligntune.eval.runner import EvalConfig, run_eval
 
 MODEL_NAME = "microsoft/phi-2"
 DATASET = "Anthropic/hh-rlhf"
@@ -200,8 +201,12 @@ trained_config = EvalConfig(
     use_unsloth=True
 )
 trained_results = run_eval(trained_config)
-Note: For Base model we don't need to pass model_path also if model is not trained using lora no need to pass base_model also
+# Note: For the base model you don't need to pass model_path; also, if the
+# model wasn't trained with LoRA, you don't need to pass base_model either.
 ```
+
+The `dpo_eval_*` settings control optional AlignTune-side DPO evaluation and
+are separate from TRL's periodic `DPOTrainer` validation metrics.
 
 ---
 

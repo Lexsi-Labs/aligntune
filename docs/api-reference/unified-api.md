@@ -1,6 +1,6 @@
 # Unified RLHF API Documentation
 
-This document describes the unified RLHF training system that provides a consistent interface for training with PPO, DPO, GRPO, GSPO, DAPO, and Dr. GRPO algorithms.
+This document describes the unified RLHF training system that provides a consistent interface for training with PPO, DPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, and Counterfactual GRPO algorithms.
 
 ## Overview
 
@@ -19,16 +19,16 @@ The unified system provides:
 
 ```python
 from aligntune import (
- UnifiedConfig, AlgorithmType, ModelConfig, DatasetConfig,
- TrainingConfig, ConfigLoader, TrainerFactory
+ UnifiedConfig, AlgorithmType, UnifiedModelConfig, UnifiedDatasetConfig,
+ UnifiedTrainingConfig, ConfigLoader, TrainerFactory
 )
 
 # Create configuration
 config = UnifiedConfig(
  algo=AlgorithmType.PPO,
- model=ModelConfig(name_or_path="microsoft/DialoGPT-small"),
- datasets=[DatasetConfig(name="Anthropic/hh-rlhf", percent=1)],
- train=TrainingConfig(max_steps=100)
+ model=UnifiedModelConfig(name_or_path="microsoft/DialoGPT-small"),
+ datasets=[UnifiedDatasetConfig(name="Anthropic/hh-rlhf", percent=1)],
+ train=UnifiedTrainingConfig(max_steps=100)
 )
 
 # Create and run trainer
@@ -36,19 +36,34 @@ trainer = TrainerFactory.create_trainer(config)
 trainer.train()
 ```
 
+!!! note
+    The top-level `aligntune` package exports these as `UnifiedModelConfig`,
+    `UnifiedDatasetConfig`, and `UnifiedTrainingConfig` (aliased on import from
+    `aligntune.core.rl.config`, where the classes are actually named
+    `ModelConfig`, `DatasetConfig`, and `TrainingConfig`). Bare `ModelConfig`
+    / `DatasetConfig` / `TrainingConfig` are **not** exported from the
+    top-level `aligntune` package -- the reference tables below use the
+    unaliased source names since that's how they appear in
+    `aligntune.core.rl.config`.
+
 ### CLI Usage
 
 ```bash
 # Train with YAML config
-python -m aligntune.cli.train_unified --config examples/configs/ppo_minimal.yaml
+aligntune train --config src/aligntune/recipes/configs/ppo/llama3_helpful_harmless.yaml
 
 # Train with CLI arguments
-python -m aligntune.cli.train_unified \
- --algo ppo \
+aligntune train \
+ --type ppo \
  --model microsoft/DialoGPT-small \
  --dataset Anthropic/hh-rlhf:train#percent=1 \
  --max-steps 100
 ```
+
+The `aligntune` (and shorthand `at`) console script is installed by the
+package (`aligntune.cli:main`); there is no `aligntune.cli.train_unified`
+module to invoke with `python -m`. Run `aligntune train --help` for the full
+list of flags.
 
 ## Configuration
 
@@ -73,15 +88,21 @@ class UnifiedConfig:
 
 ### Algorithm Types
 
+AlignTune's `AlgorithmType` enum (`aligntune.core.rl.config.AlgorithmType`) supports
+11 algorithms. A few of the most commonly used:
+
 ```python
 class AlgorithmType(Enum):
  PPO = "ppo" # Proximal Policy Optimization
  DPO = "dpo" # Direct Preference Optimization
  GRPO = "grpo" # Group Relative Policy Optimization
- GSPO = "gspo" # Generalized Scoring Proximal Objective
- DAPO = "dapo" # Decouple Clip and Dynamic sAmpling Policy Optimization
- DRGRPO = "drgrpo" # Dr. GRPO (GRPO Done Right)
+ GSPO = "gspo" # Group Sequence Policy Optimization
+ # ...and 8 more (DAPO, DRGRPO, GBMPO, COUNTERFACT_GRPO, ONLINE_DPO,
+ # PACE, ORPO, SPIN)
 ```
+
+See [Algorithms Overview](../algorithms/overview.md) for the complete,
+maintained list of supported algorithms and their descriptions.
 
 ### Model Configuration
 
@@ -343,13 +364,16 @@ trainer.train()
 
 **New (Unified)**:
 ```python
-from aligntune import UnifiedConfig, TrainerFactory
+from aligntune import (
+ UnifiedConfig, AlgorithmType, UnifiedModelConfig, UnifiedDatasetConfig,
+ UnifiedTrainingConfig, TrainerFactory
+)
 
 config = UnifiedConfig(
  algo=AlgorithmType.PPO,
- model=ModelConfig(name_or_path="model_name"),
- datasets=[DatasetConfig(name="dataset_name")],
- train=TrainingConfig(max_steps=1000)
+ model=UnifiedModelConfig(name_or_path="model_name"),
+ datasets=[UnifiedDatasetConfig(name="dataset_name")],
+ train=UnifiedTrainingConfig(max_steps=1000)
 )
 
 trainer = TrainerFactory.create_trainer(config)

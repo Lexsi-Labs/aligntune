@@ -11,26 +11,24 @@ This guide helps you resolve common issues when using AlignTune.
 **Error**: `Unsloth not available` or `ImportError: Unsloth backend not available`
 
 **Causes**:
-- Unsloth not installed
-- CUDA not available
+- CUDA not available (Unsloth requires a CUDA-capable GPU)
 - PyTorch version mismatch
 - CUDA version incompatibility
 
+> Unsloth itself is vendored inside the `aligntune` package — there is no
+> separate `pip install unsloth` step, and running one is discouraged (it
+> shadows the pinned vendored copy).
+
 **Solutions**:
 
-1. **Install Unsloth**:
- ```bash
- pip install unsloth
- ```
-
-2. **Check CUDA Availability**:
+1. **Check CUDA Availability**:
  ```python
  import torch
  print(torch.cuda.is_available())
  print(torch.version.cuda)
  ```
 
-3. **Use TRL Backend Instead**:
+2. **Use TRL Backend Instead**:
  ```python
  trainer = create_sft_trainer(
  model_name="microsoft/DialoGPT-small",
@@ -39,7 +37,7 @@ This guide helps you resolve common issues when using AlignTune.
  )
  ```
 
-4. **Run Diagnostics**:
+3. **Run Diagnostics**:
  ```bash
  aligntune diagnose
  ```
@@ -168,7 +166,7 @@ from aligntune.core.backend_factory import create_rl_trainer, BackendType
 2. **Check Required Parameters**:
  - `model_name`: Must be a valid HuggingFace model ID
  - `dataset_name`: Must be a valid HuggingFace dataset ID
- - `algorithm`: Must be one of: `dpo`, `ppo`, `grpo`, `gspo`, `dapo`, `drgrpo`
+ - `algorithm`: Must be one of: `dpo`, `ppo`, `grpo`, `gspo`, `dapo`, `drgrpo`, `gbmpo`, `counterfact_grpo`, `pace`
 
 3. **Check Parameter Types**:
  ```python
@@ -528,4 +526,4 @@ When reporting issues, please include:
 
 - [Backend Selection](../getting-started/backend-selection.md) - Choose the right backend
 - [Configuration Guide](../getting-started/configuration.md) - Configure training properly
-- [Performance Optimization](../advanced/performance.md) - Optimize training speed and memory
+- [Backend Comparison](../backends/comparison.md) - Speed and memory by backend

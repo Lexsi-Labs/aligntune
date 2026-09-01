@@ -1,0 +1,122 @@
+# Llama-3.2-3B for RBI Compliance & Banking Regulation
+# ~3B params, optimized for Reserve Bank of India circulars
+# Trained on RBI regulatory documents, monetary policy, banking supervision
+# Comprehensive understanding of BFSI compliance requirements
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: meta-llama/Llama-3.2-3b
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: meta-llama/Llama-3.2-3b
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided RBI compliance dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    instruction_column: instruction
+    response_column: response
+    context_column: context
+
+training:
+  output_dir: ./outputs/llama3_2_3b_rbi_compliance
+  overwrite_output_dir: true
+
+  # Learning rate for 3B model
+  learning_rate: 2.0e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 150
+  warmup_ratio: 0.08
+
+  # Batch sizes for 3B model
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 2
+
+  # Extended training for compliance depth
+  num_train_epochs: 4
+  max_steps: -1
+
+  # Optimizer
+  optim: adamw_torch
+  weight_decay: 0.01
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 500
+  per_device_eval_batch_size: 8
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 500
+  save_total_limit: 3
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 2
+
+  # Generation parameters for detailed compliance explanations
+  max_new_tokens: 768
+  temperature: 0.7
+  top_p: 0.9
+
+# LoRA for 3B model
+peft:
+  peft_type: lora
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# 8-bit quantization for 3B model
+quantization:
+  load_in_8bit: true
+  load_in_4bit: false
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# RBI Compliance Task Configuration
+task:
+  task_type: instruction_following
+  instruction_column: instruction
+  response_column: response
+  context_column: context
+
+# Notes:
+# - Llama-3.2-3B provides excellent compliance understanding
+# - Training corpus: RBI circulars on credit policy, forex, banking supervision
+# - Covers AML/KYC regulations, BFSI compliance, deposit insurance
+# - Inference: 80-150ms per token
+# - VRAM requirement: ~8GB (with 8-bit quantization)
+# - Recommended datasets: RBI circular summaries, compliance Q&A pairs,
+#   regulatory requirement explanations, banking supervision guidelines
+# - Evaluation on RBI compliance benchmarks (circular understanding, policy interpretation)

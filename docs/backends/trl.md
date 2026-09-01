@@ -6,7 +6,7 @@ Complete guide to using the TRL (Transformers Reinforcement Learning) backend in
 
 ## Overview
 
-The **TRL Backend** is the standard, battle-tested implementation based on HuggingFace's TRL library. It provides reliable, production-ready training for all supported algorithms.
+The **TRL Backend** is AlignTune's default implementation, built on HuggingFace's TRL library. It supports every algorithm in AlignTune, including the ones Unsloth doesn't (see Key Features below).
 
 ---
 
@@ -30,8 +30,7 @@ Use TRL backend when:
  - Long-running training jobs
 
 2. **Algorithm Requirements**
- - Using GSPO (Unsloth doesn't support)
- - Need all algorithm support
+ - Need all algorithm support (GSPO is supported on both TRL and Unsloth)
 
 3. **Hardware Constraints**
  - CPU-only environments
@@ -110,7 +109,7 @@ TRL backend supports all algorithms:
 | DPO | | Full support |
 | PPO | | Full support |
 | GRPO | | Full support |
-| GSPO | | **Only TRL supports GSPO** |
+| GSPO | | Full support (also supported on Unsloth) |
 | DAPO | | Full support |
 | Dr. GRPO | | Full support |
 
@@ -228,7 +227,7 @@ See [Troubleshooting Guide](../user-guide/troubleshooting.md) for more details.
 | Memory | Baseline | 60-80% less |
 | Algorithm Support | All | Most |
 | CPU Support | Yes | No |
-| Reliability | Battle-tested | Production-ready |
+| Reliability | Default, most-used backend | Production-ready |
 
 See [Backend Comparison](comparison.md) for detailed comparison.
 

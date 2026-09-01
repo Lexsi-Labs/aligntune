@@ -24,6 +24,8 @@ from aligntune.rewards.registry import RewardRegistry
 from aligntune.core.rl.reward_model_wrapper import UniversalRewardModelWrapper
 from aligntune.core.rl.sample_logger import generate_and_log_samples
 from aligntune.utils.config_extractor import  extract_extra_and_missing_params
+from aligntune.core.model_loader import build_model
+from aligntune.core.registry import TaskType
 
 # Debug flag - set to True to enable verbose debug logging
 DEBUG = False
@@ -36,7 +38,8 @@ GLOBAL_UNSLOTH_TRAINER_REF = None
 def patched_get_reward(model, query_responses, pad_token_id, context_length):
     """Patched get_reward to handle encoder models and function-based rewards."""
     import os
-    from trl.trainer.utils import first_true_indices
+    from .unsloth_patches import get_first_true_indices
+    first_true_indices = get_first_true_indices()
     import torch
     
     DEBUG_MODE = os.environ.get("aligntune_DEBUG", "0") == "1"
@@ -257,6 +260,8 @@ class UnslothPPOTrainer(TrainerBase):
     2. Custom trained: Train using TRL's RewardTrainer
     3. Hybrid: Fine-tune pretrained with custom reward functions
     """
+    TASK_TYPE = "ppo"
+    KEEP_COLUMNS = True
     
     def __init__(self, config: UnifiedConfig):
         super().__init__(config)
@@ -297,7 +302,7 @@ class UnslothPPOTrainer(TrainerBase):
                 return False
                 
             # Check TRL availability
-            from trl import PPOTrainer, PPOConfig
+            from trl.experimental.ppo import PPOTrainer, PPOConfig
             from transformers import AutoModelForSequenceClassification
             
             return True
@@ -1034,44 +1039,18 @@ class UnslothPPOTrainer(TrainerBase):
 
             logger.info(f"Setting up Unsloth PPO model: {model_name}")
             
-            # Load tokenizer first (before any model loading)
-            from transformers import AutoTokenizer
-            from trl.trainer.utils import SIMPLE_CHAT_TEMPLATE
-            
-            self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left", trust_remote_code=False)
-
-            # Tokenizer setup
+            # Shared loader owns tokenizer, precision, quantization, and PEFT.
+            # Unsloth-specific cache and compatibility patches remain below.
+            self.policy_model, self.tokenizer = build_model(
+                config=self.config,
+                task_type=TaskType.PPO,
+                use_unsloth=True,
+                apply_peft=bool(self._get_config_value(self.config.model, "use_peft", True)),
+            )
+            self.tokenizer.padding_side = "left"
             if self.tokenizer.pad_token is None:
-                if self.tokenizer.eos_token:
-                    self.tokenizer.pad_token = self.tokenizer.eos_token
-                    self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-                else:
-                    self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-            if self.tokenizer.pad_token_id is None:
-                self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-            
-            if self.tokenizer.chat_template is None:
-                logger.info("Applying Unsloth chat template for PPO...")
-                from unsloth import FastLanguageModel
-                
-                # Get chat template from config if available
-                chat_template = self._get_config_value(self.config.dataset, 'chat_template', None)
-                    
-                # Default mapping
-                mapping = {"role": "role", "content": "content", "user": "user", "assistant": "assistant"}
-                
-                try:
-                    self.tokenizer = FastLanguageModel.get_chat_template(
-                        self.tokenizer,
-                        chat_template=chat_template if chat_template else "llama-3", # Default to llama-3
-                        mapping=mapping,
-                    )
-                    logger.info(f"Applied chat template: {chat_template if chat_template else 'llama-3 (default)'}")
-                except Exception as e:
-                    logger.warning(f"Failed to apply Unsloth chat template: {e}. Falling back to SIMPLE_CHAT_TEMPLATE.")
-                    self.tokenizer.chat_template = SIMPLE_CHAT_TEMPLATE
-
-            logger.info(f"Tokenizer ready (vocab={len(self.tokenizer)})")
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            logger.info("Policy/tokenizer loaded through centralized model_loader (vocab=%s)", len(self.tokenizer))
 
             # Check if separate reward model is specified
             reward_model_name = self._get_config_value(
@@ -1254,30 +1233,10 @@ class UnslothPPOTrainer(TrainerBase):
                 else:
                     self._load_reward_value_models_standard(reward_value_model)
 
-            # NOW build policy/ref models (Unsloth already imported at top)
-            logger.info("Building policy/ref models with Unsloth...")
-
-            # Load Unsloth policy model
-            self.unsloth_model, _ = FastLanguageModel.from_pretrained(
-                model_name=model_name,
-                max_seq_length=max_seq_length,
-                dtype=torch.bfloat16,  # FIXED: Explicitly set dtype to bfloat16
-                load_in_4bit=quantization.get("load_in_4bit", True),
-            )
-
-            # CRITICAL FIX: Apply LoRA with use_gradient_checkpointing=False
-            logger.info("Applying LoRA WITHOUT gradient checkpointing...")
-            self.policy_model = FastLanguageModel.get_peft_model(
-                self.unsloth_model,
-                r=16,
-                target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-                lora_alpha=16,
-                lora_dropout=0,
-                bias="none",
-                use_gradient_checkpointing=False,  # CHANGED: Set to False directly
-                random_state=3407,
-                use_rslora=False,
-            )
+            # The shared loader returns the trainable Unsloth+PEFT policy.
+            # Keep this alias for older PPO code that still inspects it.
+            self.unsloth_model = getattr(self.policy_model, "base_model", self.policy_model)
+            logger.info("Building reference model with Unsloth...")
 
             # Using class-level patches applied before model loading
             from .unsloth_patches import verify_attention_patches
@@ -1596,10 +1555,43 @@ class UnslothPPOTrainer(TrainerBase):
             reward_params = self._get_config_value(reward_config, 'params', {})
             reward_weight = self._get_config_value(reward_config, 'weight', 1.0)
             reward_clip = self._get_config_value(reward_config, 'clip', None)
-            
-            # Get reward function from registry
-            reward_func = RewardRegistry.get_reward_function(reward_type)
-            
+
+            # Case 1: a custom function passed directly, same
+            # {"type": "custom", "params": {"function"/"reward_function": fn}}
+            # convention every other backend (GRPO/Unsloth-GRPO/TRL PPO)
+            # accepts. Without this, a reward spec that works everywhere else
+            # raised "Unknown reward: custom" here instead of loading it.
+            custom_fn = None
+            if isinstance(reward_params, dict):
+                custom_fn = reward_params.get('function') or reward_params.get('reward_function')
+            if callable(custom_fn):
+                reward_func = custom_fn
+            else:
+                # Case 2: registry lookup, passing reward_params through via
+                # a real RewardConfig - `get_reward_function(name)` alone (no
+                # config) previously silently discarded reward_params/
+                # reward_type-specific config and used the reward's hardcoded
+                # defaults instead (e.g. LengthReward's default min_length=10
+                # instead of a user-configured value), which is its own
+                # source of unexpectedly-zero rewards.
+                #
+                # The object returned exposes `.compute(text, reference=None,
+                # **kwargs)` - it has no `__call__`, so unwrap to the bound
+                # method here. Without this, every `func(text, **kwargs)`
+                # call below raises "object is not callable" and the reward
+                # silently scores 0.
+                from aligntune.rewards.core import RewardConfig, RewardType
+                try:
+                    reward_cfg = RewardConfig(
+                        reward_type=RewardType[reward_type.upper()],
+                        weight=1.0,
+                        params=reward_params,
+                    )
+                    reward_func_obj = RewardRegistry.get_reward_function(reward_type, reward_cfg)
+                except KeyError:
+                    reward_func_obj = RewardRegistry.get_reward_function(reward_type)
+                reward_func = reward_func_obj.compute if hasattr(reward_func_obj, 'compute') else reward_func_obj
+
             # Apply weight
             if reward_weight != 1.0:
                 def weighted_reward(text, weight=reward_weight, func=reward_func, **kwargs):
@@ -1776,6 +1768,9 @@ class UnslothPPOTrainer(TrainerBase):
         processing_batched = self._get_config_value(dataset_config, 'processing_batched', default=False)
         max_samples = self._get_config_value(dataset_config, 'max_samples', default=None)
         percent = self._get_config_value(dataset_config, 'percent', default=None)
+        val_split_ratio = self._get_config_value(dataset_config, 'val_split_ratio', default=None)
+        test_split_ratio = self._get_config_value(dataset_config, 'test_split_ratio', default=None)
+        split_seed = self._get_config_value(dataset_config, 'split_seed', default=42)
         
         logger.info(f"Loading dataset: {dataset_name} (split: {split}, config: {config_name})")
         
@@ -1789,8 +1784,11 @@ class UnslothPPOTrainer(TrainerBase):
             enable_thinking=enable_thinking,
             column_mapping=column_mapping,
             processing_fn=processing_fn,
-            max_samples = max_samples, 
-            processing_batched=processing_batched
+            max_samples=max_samples,
+            processing_batched=processing_batched,
+            val_split_ratio=val_split_ratio,
+            test_split_ratio=test_split_ratio,
+            seed=split_seed,
         )
         
         # Load dataset - DataManager handles everything
@@ -1801,9 +1799,11 @@ class UnslothPPOTrainer(TrainerBase):
         )
         
         max_eval_samples =  self._get_config_value(dataset_config, 'max_eval_samples', default=None)
-        # Extract train and validation splits
-        self.train_dataset = dataset_dict.get("train", None)
-       
+        # Extract train and validation splits. Look up whatever split was actually
+        # requested/loaded first (DataManager keeps the requested split's own name
+        # as the dict key rather than always relabeling it "train"), falling back
+        # to "train" to preserve the previous behavior when split is None/"train".
+        self.train_dataset = dataset_dict.get(split, dataset_dict.get("train", None))
 
         self.eval_dataset = dataset_dict.get("validation", None)
 
@@ -1884,14 +1884,14 @@ class UnslothPPOTrainer(TrainerBase):
         GLOBAL_UNSLOTH_TRAINER_REF = self
         
         try:
-            from trl import PPOTrainer, PPOConfig
+            from trl.experimental.ppo import PPOTrainer, PPOConfig
             
             logger.info("Setting up PPOTrainer")
             
             # Logging configuration with defaults
             output_dir = getattr(self.config.logging, 'output_dir', './output/ppo')
             run_name = getattr(self.config.logging, 'run_name', None) or 'ppo_experiment'
-            report_to = getattr(self.config.logging, 'loggers', 'none')
+            report_to = self.config.logging.loggers if self.config.logging.loggers else []
             
             # Training parameters from config with defaults
             num_epochs = getattr(self.config.train, 'epochs', None) or 1
@@ -1922,20 +1922,22 @@ class UnslothPPOTrainer(TrainerBase):
             # Seed with default
             seed = getattr(self.config.distributed, 'seed', 42)
             
-            # Precision handling - direct string comparison with default
+            # Precision handling - auto-detects hardware bf16 support (e.g. T4/older
+            # GPUs need fp16, not bf16) instead of assuming bf16 whenever "auto" is set.
             precision_str = getattr(self.config.model, 'precision', 'auto')
             if hasattr(precision_str, 'value'):  # Handle enum
                 precision_str = precision_str.value
-            
-            bf16 = precision_str in ['bf16', 'auto']
-            fp16 = precision_str == 'fp16'
+
+            from aligntune.core.precision_handler import PrecisionHandler
+            _precision_flags = PrecisionHandler.get_training_args_precision(precision_str)
+            bf16 = _precision_flags["bf16"]
+            fp16 = _precision_flags["fp16"]
             
             # Calculate total episodes
             total_episodes = len(self.train_dataset) * num_epochs
             
             # Create PPOConfig
             ppo_config = PPOConfig(
-                exp_name=run_name,
                 learning_rate=lr,
                 batch_size=batch_size,
                 mini_batch_size=batch_size,

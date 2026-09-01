@@ -11,13 +11,78 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-def parse_config_to_unified(config_dict: Dict[str, Any], training_type: str = "rl") -> Dict[str, Any]:
+def parse_config_to_unified(config_dict: Dict[str, Any], training_type: str = "rl"):
     """
     Parse a config dictionary (from YAML/JSON) into the format expected by UnifiedConfig or SFTConfig.
-    
+
     This handles nested structures like model, datasets, train, logging, etc.
-    Returns a flattened dict suitable for create_rl_trainer/create_sft_trainer kwargs.
+    For ES: Returns UnifiedESConfig object.
+    For RL/SFT: Returns a flattened dict suitable for create_rl_trainer/create_sft_trainer kwargs.
     """
+    # Handle ES configuration
+    if training_type == "es":
+        from aligntune.core.es.config import UnifiedESConfig, ESConfig, ESModelConfig, ESDatasetConfig, ESPeftConfig
+
+        # Parse ES config
+        es_dict = config_dict.get('es', {})
+        es_config = ESConfig(**es_dict)
+
+        # Parse PEFT config
+        peft_dict = config_dict.get('model', {}).get('peft', {})
+        if isinstance(peft_dict, dict):
+            peft_config = ESPeftConfig(
+                rank=peft_dict.get('rank', peft_dict.get('r', 8)),
+                alpha=peft_dict.get('alpha', peft_dict.get('lora_alpha', 16)),
+                dropout=peft_dict.get('dropout', peft_dict.get('lora_dropout', 0.05)),
+                target_modules=peft_dict.get('target_modules'),
+                peft_type=peft_dict.get('peft_type', 'lora'),
+                variant=peft_dict.get('variant', 'standard'),
+                use_dora=peft_dict.get('use_dora', False),
+                use_rslora=peft_dict.get('use_rslora', False),
+                init_lora_weights=peft_dict.get('init_lora_weights', True),
+                bias=peft_dict.get('bias', 'none'),
+            )
+        else:
+            peft_config = peft_dict
+
+        # Parse model config
+        model_dict = config_dict.get('model', {})
+        model_config = ESModelConfig(
+            name_or_path=model_dict.get('name_or_path', ''),
+            dtype=model_dict.get('dtype', 'auto'),
+            max_seq_length=model_dict.get('max_seq_length', 2048),
+            peft=peft_config,
+            quantization=model_dict.get('quantization', {}),
+            use_peft=model_dict.get('use_peft', True),
+            device_map=model_dict.get('device_map', 'auto')
+        )
+
+        # Parse dataset config (singular)
+        dataset_dict = config_dict.get('dataset', {})
+        dataset_config = ESDatasetConfig(
+            name=dataset_dict.get('name', ''),
+            split=dataset_dict.get('split', 'train'),
+            column_mapping=dataset_dict.get('column_mapping', {}),
+            system_prompt=dataset_dict.get('system_prompt'),
+            task_type=dataset_dict.get('task_type', 'chat_completion'),
+            processing_fn=dataset_dict.get('processing_fn'),
+            loader_kwargs=dataset_dict.get('loader_kwargs', {})
+        )
+
+        # Get rewards and output_dir
+        rewards = config_dict.get('rewards', [])
+        output_dir = config_dict.get('output_dir', './es_output')
+
+        # Create and return UnifiedESConfig object
+        return UnifiedESConfig(
+            es=es_config,
+            model=model_config,
+            dataset=dataset_config,
+            rewards=rewards,
+            output_dir=output_dir
+        )
+
+    # Handle RL/SFT configuration (existing logic)
     parsed = {}
     
     # Extract top-level fields
@@ -126,7 +191,9 @@ def parse_config_to_unified(config_dict: Dict[str, Any], training_type: str = "r
             parsed['top_p'] = train_section.get('top_p', 0.95)
             parsed['max_grad_norm'] = train_section.get('max_grad_norm', 1.0)
             parsed['whiten_rewards'] = train_section.get('whiten_rewards', False)
-            parsed['loss_type'] = train_section.get('loss_type', 'sigmoid')
+            # Loss semantics are algorithm-specific.  Do not inject the DPO
+            # default (sigmoid) into GRPO/PACE configs.
+            parsed['loss_type'] = train_section.get('loss_type')
             parsed['response_length'] = train_section.get('response_length', 128)
             parsed['generation_kwargs'] = train_section.get('generation_kwargs', {})
             parsed['scale_rewards'] = train_section.get('scale_rewards', 'group')
@@ -156,7 +223,7 @@ def parse_config_to_unified(config_dict: Dict[str, Any], training_type: str = "r
             parsed['gbmpo_l2_coefficient'] = train_section.get('gbmpo_l2_coefficient', 0.0001)
             parsed['gbmpo_epsilon'] = train_section.get('gbmpo_epsilon', 0.2)
             
-            # BOLT params
+            # PACE curriculum/baseline params
             parsed['curriculum_enabled'] = train_section.get('curriculum_enabled', False)
             parsed['baseline_enabled'] = train_section.get('baseline_enabled', False)
         

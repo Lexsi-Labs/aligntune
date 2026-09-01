@@ -40,7 +40,7 @@ logging:
 ### Algorithm Configuration
 
 ```yaml
-algo: dpo # Options: dpo, ppo, grpo, gspo, dapo, dr-grpo
+algo: dpo # Options: dpo, ppo, grpo, gspo, dapo, dr-grpo, gbmpo, counterfactual-grpo, pace
 ```
 
 ### Model Configuration
@@ -242,7 +242,7 @@ logging:
 aligntune train --config config.yaml
 
 # Override specific values
-aligntune train --config config.yaml --max-steps 2000 --learning-rate 1e-5
+aligntune train --config config.yaml --max-steps 2000 --lr 1e-5
 ```
 
 

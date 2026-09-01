@@ -1,0 +1,76 @@
+# Reasoning-Trace Distillation (DeepSeek-R1 Style)
+# DeepSeek-R1-Distill-Qwen-32B Teacher -> Qwen2.5-1.5B Student
+#
+# In reasoning-trace mode, the dataset contains teacher's Chain-of-Thought (CoT)
+# traces. The student learns to reproduce these detailed reasoning steps,
+# developing better reasoning ability through supervised imitation of CoT.
+#
+# Dataset format:
+#   {
+#     "text": "The quick brown fox...",          # Input text
+#     "reasoning_trace": [token_ids...],      # Teacher's CoT tokens
+#   }
+#
+# The loss is primarily CE on reasoning_trace tokens, with optional KL guidance.
+# This is what dominated HF leaderboards in early 2025 (e.g., Qwen2.5 series).
+#
+# Reference: DeepSeek-R1, OpenAI o1-style distillation
+
+training_type: distill
+backend: trl
+
+# Student model (trainable)
+student_model: Qwen/Qwen2.5-1.5B
+
+# Teacher model (frozen, provides reasoning traces)
+teacher_model: deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
+
+# Knowledge distillation hyperparameters
+temperature: 3.0               # Soft target temperature
+alpha: 0.5                     # Not heavily used in reasoning_trace mode
+loss_type: kl                  # Legacy loss type
+
+# SOTA Distillation mode configuration
+distill_mode: reasoning_trace   # DeepSeek-R1 style reasoning trace distillation
+on_policy: false               # Offline: use pre-computed teacher traces
+skew_alpha: 0.1                # Not used in reasoning_trace mode
+reasoning_trace_field: reasoning_trace  # Field name in dataset containing CoT tokens
+
+# Dataset configuration
+dataset:
+  name: openqa                 # Example: openqa, math, code reasoning datasets
+  split: train
+  max_samples: 10000           # Larger dataset possible (offline, no generation)
+  max_eval_samples: 500
+
+# Model precision
+model:
+  student_dtype: bf16
+  teacher_dtype: bf16
+  use_peft: false              # Full model fine-tuning for reasoning
+  trust_remote_code: true
+
+# Training configuration
+train:
+  per_device_batch_size: 4     # Can be larger: offline distillation
+  gradient_accumulation_steps: 4
+  learning_rate: 5e-5
+  weight_decay: 0.01
+  warmup_steps: 200
+  max_steps: 2000              # Longer run: more data, no generation overhead
+  epochs: null                 # Use max_steps instead
+
+  # Logging and checkpointing
+  eval_steps: 100
+  save_steps: 100
+  logging_steps: 10
+  eval_strategy: steps
+  save_strategy: steps
+  save_total_limit: 3
+
+# Output configuration
+output_dir: ./qwen_r1_reasoning_output
+run_name: qwen-2.5-1.5b-r1-reasoning
+
+# Random seed for reproducibility
+seed: 42

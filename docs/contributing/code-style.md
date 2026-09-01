@@ -60,7 +60,7 @@ flake8 src/
 
 ### Ruff (Alternative)
 
-We also support [Ruff](https://github.com/astral-sh/ruff) as a modern alternative.
+We also support [Ruff](https://github.com/astral-sh/ruff) as a modern alternative. `[tool.ruff]` is already configured in `pyproject.toml`, but `ruff` is **not** currently listed in the `[project.optional-dependencies].dev` extra, so `pip install -e ".[dev]"` will not install it. Install it separately: `pip install ruff`.
 
 **Usage:**
 ```bash
@@ -268,7 +268,6 @@ raise ValueError("Invalid backend")
 - Test function: `test_<function_name>`
 
 ```python
-# test_backend_factory.py
 class TestBackendFactory:
  def test_create_sft_trainer(self):
  """Test SFT trainer creation."""

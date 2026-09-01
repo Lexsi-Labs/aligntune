@@ -86,11 +86,15 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
 
         train_cfg = self.config.train
 
+        if self._get_config_value(train_cfg, "curriculum_enabled", default=False):
+            logger.warning(
+                "Curriculum sampling (the BOLT variant of PACE) is not available "
+                "in this build. Falling back to standard PACE."
+            )
+
         self.pace_config = PaceConfig(
             # Curriculum
-            curriculum_enabled=self._get_config_value(
-                train_cfg, "curriculum_enabled", default=False
-            ),
+            curriculum_enabled=False,
             curriculum_epsilon=self._get_config_value(
                 train_cfg, "curriculum_epsilon", default=0.05
             ),
@@ -265,29 +269,48 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         if not isinstance(prompts, list):
             prompts = [prompts] * len(completions)
 
+        from aligntune.core.rl.reward_handler import resolve_reward_call_kwargs, slice_batch_kwargs_for_sample
+
         for idx, completion in enumerate(completions):
             total_reward = 0.0
             test_cases = test_lists[idx] if idx < len(test_lists) else None
+            # Slice every remaining batch-aligned kwarg (prompts,
+            # completion_ids, reference/answer columns, etc.) down to this
+            # sample instead of forwarding TRL's whole-batch lists.
+            sample_kwargs = slice_batch_kwargs_for_sample(kwargs, idx, len(completions))
 
             for rf in self.reward_functions:
                 try:
-                    reward_func = rf["function"]
-                    weight = rf["weight"]
+                    # NOTE: self.reward_functions is populated by the inherited
+                    # GRPO setup_rewards() as a plain list of callables, not
+                    # {"function":..., "weight":..., "name":...} dicts. The
+                    # dict-based access previously here was copy-pasted from
+                    # BOLT's reward handler and didn't match this trainer's
+                    # actual data, causing "TypeError: 'function' object is not
+                    # subscriptable" on every reward call - and the same error
+                    # again inside this except-handler (via rf['name']),
+                    # turning a caught exception into an unhandled crash.
+                    reward_func = rf
+                    weight = 1.0
 
-                    # Call reward function with test_cases
-                    try:
-                        reward = reward_func(completion, test_cases=test_cases)
-                    except TypeError:
-                        try:
-                            reward = reward_func(completion)
-                        except BaseException:
-                            reward = 0.0
+                    # Bind by signature instead of guessing calling patterns
+                    # (completion-only, then completion+test_cases) and
+                    # swallowing any resulting exception as reward=0 - that
+                    # masked genuine bugs inside reward functions, and never
+                    # forwarded `reference`/other dataset columns at all.
+                    call_kwargs = resolve_reward_call_kwargs(
+                        reward_func, completion, test_cases=test_cases, **sample_kwargs
+                    )
+                    reward = reward_func(**call_kwargs)
+                    if reward is None:
+                        continue
 
-                    weighted_reward = weight * reward
+                    weighted_reward = weight * float(reward)
                     total_reward += weighted_reward
 
                 except Exception as e:
-                    logger.warning(f"Error computing reward {rf['name']}: {e}")
+                    reward_name = getattr(rf, "__name__", repr(rf))
+                    logger.warning(f"Error computing reward {reward_name}: {e}")
 
             batch_rewards.append(total_reward)
 
@@ -478,6 +501,8 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         # Setup GRPO config
         from trl import GRPOConfig
 
+        report_to = self.config.logging.loggers if self.config.logging.loggers else []
+
         grpo_config = GRPOConfig(
             output_dir=output_dir,
             num_train_epochs=num_epochs,
@@ -495,9 +520,12 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
             gradient_checkpointing=gradient_checkpointing,
             max_steps=max_steps,
             # Generation parameters
+            # NOTE: max_prompt_length was removed from trl's GRPOConfig in the
+            # installed trl version (1.7.1) - only max_completion_length remains.
+            # We still read it from config above for logging, but don't forward
+            # it to GRPOConfig.
             num_generations=num_generations,
             max_completion_length=max_completion_length,
-            max_prompt_length=max_prompt_length,
             temperature=temperature,
             top_p=top_p,
             top_k=top_k,
@@ -507,6 +535,7 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
             epsilon=epsilon,
             # Precision (unified handling)
             **precision_args,
+            report_to=report_to,
         )
 
         # ============ FIX: Better dataset retrieval ============

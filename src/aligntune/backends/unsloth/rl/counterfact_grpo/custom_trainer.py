@@ -1551,7 +1551,10 @@ class CounterfactualGRPOTrainer(GRPOTrainer):
         attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
         logits_to_keep = completion_ids.size(1)
 
-        per_token_logps, entropies = self._get_per_token_logps_and_entropies(
+        # NOTE: the installed trl version (1.7.1) returns a 3-tuple
+        # (logps, entropies, aux_loss) from this method - aux_loss is only
+        # used for MoE load-balancing and isn't needed here.
+        per_token_logps, entropies, _ = self._get_per_token_logps_and_entropies(
             model, input_ids, attention_mask, logits_to_keep, compute_entropy=True,
             pixel_values=inputs.get("pixel_values"),
             image_grid_thw=inputs.get("image_grid_thw"),
@@ -1559,8 +1562,11 @@ class CounterfactualGRPOTrainer(GRPOTrainer):
             image_sizes=inputs.get("image_sizes"),
         )
 
-        # Handle Unsloth's 3D tensor format - Unsloth returns hidden states without gradients
-        if per_token_logps.dim() == 3:
+        # Handle Unsloth's 3D tensor format - Unsloth returns hidden states without gradients.
+        # Also catches Unsloth's chunked/memory-efficient 2D log-prob path, which can return
+        # per_token_logps already detached (no grad_fn) even though it isn't 3D - counterfactual
+        # weighting needs gradients, so either case must fall back to a manual forward pass.
+        if per_token_logps.dim() == 3 or not per_token_logps.requires_grad:
             if not hasattr(self, '_unsloth_warning_shown'):
                 print("\n[INFO] Running forward pass for per-token log probs (counterfactual weighting needs gradients)")
                 self._unsloth_warning_shown = True
@@ -1869,8 +1875,15 @@ class CounterfactualGRPOTrainer(GRPOTrainer):
             mean_kl = masked_batch_mean(per_token_kl)
             self._metrics[mode]["kl"].append(self.accelerator.gather(mean_kl).nanmean().item())
 
-        mean_entropy = masked_batch_mean(entropies)
-        self._metrics[mode]["entropy"].append(self.accelerator.gather(mean_entropy).nanmean().item())
+        # Unsloth's chunked/memory-efficient log-prob path (used when
+        # per_token_logps comes back already 2D, i.e. not the raw 3D hidden
+        # states handled above) doesn't compute entropies - it returns None
+        # unconditionally there for performance, regardless of
+        # compute_entropy=True. Only log the entropy metric when it's
+        # actually available.
+        if entropies is not None:
+            mean_entropy = masked_batch_mean(entropies)
+            self._metrics[mode]["entropy"].append(self.accelerator.gather(mean_entropy).nanmean().item())
 
         is_low_clipped = (coef_1 < 1 - self.epsilon_low) & (advantages.unsqueeze(1) < 0)
         is_high_clipped = (coef_1 > 1 + self.epsilon_high) & (advantages.unsqueeze(1) > 0)

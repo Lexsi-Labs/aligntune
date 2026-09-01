@@ -252,11 +252,11 @@ Configuration loader for RL configs.
 
 ## Helper Functions
 
-### `create_instruction_following_config()`
+### `create_supervised_finetuning_config()`
 
-Create configuration for instruction following.
+Create configuration for general-purpose supervised fine-tuning (instruction following, chat, text generation).
 
-::: core.sft.config.create_instruction_following_config
+::: core.sft.config.create_supervised_finetuning_config
  options:
  show_source: true
  heading_level: 3
@@ -266,6 +266,15 @@ Create configuration for instruction following.
 Create configuration for text classification.
 
 ::: core.sft.config.create_text_classification_config
+ options:
+ show_source: true
+ heading_level: 3
+
+### `create_token_classification_config()`
+
+Create configuration for token classification (NER, POS tagging).
+
+::: core.sft.config.create_token_classification_config
  options:
  show_source: true
  heading_level: 3

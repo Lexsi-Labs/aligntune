@@ -10,14 +10,12 @@ DPO_AVAILABLE = True
 PPO_AVAILABLE = True
 GRPO_AVAILABLE = True
 GSPO_AVAILABLE = True
-BOLT_AVAILABLE = True
 COUNTERFACT_GRPO_AVAILABLE = True
 
 UnslothDPOTrainer = None
 UnslothPPOTrainer = None
 UnslothGRPOTrainer = None
 UnslothGSPOTrainer = None
-UnslothBoltTrainer = None
 UnslothCounterFactGRPOTrainer = None
 
 __all__ = [
@@ -25,12 +23,10 @@ __all__ = [
     "UnslothPPOTrainer",
     "UnslothGRPOTrainer",
     "UnslothGSPOTrainer",
-    "UnslothBoltTrainer",
     "UnslothCounterFactGRPOTrainer",
     "DPO_AVAILABLE",
     "PPO_AVAILABLE",
     "GRPO_AVAILABLE",
     "GSPO_AVAILABLE",
-    "BOLT_AVAILABLE",
     "COUNTERFACT_GRPO_AVAILABLE",
 ]

@@ -8,10 +8,16 @@ Welcome to the AlignTune User Guide! This section provides comprehensive tutoria
 
 AlignTune is a production-ready fine-tuning library for Large Language Models (LLMs) that supports:
 
-- **Supervised Fine-Tuning (SFT)**: Adapt pre-trained models to specific tasks
-- **Reinforcement Learning (RL)**: Align models with human preferences using RLHF algorithms
-- **Multi-Backend Support**: Choose between TRL (reliable) and Unsloth (faster) backends
-- **RL Algorithms**: DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO
+- **Supervised Fine-Tuning (SFT)**: Including classification tasks
+- **Reinforcement Learning (RL)**: Align models using 13+ RLHF algorithms — DPO, PPO, GRPO, GSPO, PACE, ORPO, SPIN, RAFT, and more; see the [Algorithms Overview](../algorithms/overview.md) for the full list
+- **Multi-Backend Support**: Choose between TRL, Unsloth, and ES backends
+- **Distillation**: Train student models natively
+- **Advanced Adapters**: MoA, Text2LoRA/Doc2LoRA
+- **Long Context**: Built-in support for RoPE scaling and attention variants
+- **Compositions**: Multi-stage training pipelines that chain SFT/RL/distillation stages together (see [Production Compositions](../advanced/composition.md))
+- **Model Merging**: Combine multiple fine-tuned models or LoRA adapters via mergekit (linear, task arithmetic, etc.): see [Model Merging](../advanced/merging.md)
+- **Advisor CLI**: Deterministic VRAM/time/cost/carbon estimation and algorithm recommendations without needing GPU access (see [CLI Commands](../cli/commands.md#advisor-commands))
+- **Alignment Auditing**: Automated alignment-drift detection and audit reporting via the `AlignmentAuditor` callback (see [examples/alignment_audit_example.py](https://github.com/Lexsi-Labs/aligntune/blob/main/examples/alignment_audit_example.py))
 
 ---
 
@@ -44,13 +50,13 @@ trainer = create_rl_trainer(
 
 AlignTune supports three configuration methods:
 
+- **YAML files / JSON**: Declarative configuration passed to `create_*_trainer(config="path/to.yaml")`
 - **Python API**: Direct function calls with keyword arguments
-- **YAML Files**: Declarative configuration files
 - **CLI**: Command-line interface
 
 ### 3. Reward System
 
-27+ built-in reward functions for quality, safety, style, and task-specific metrics.
+50+ built-in reward functions for quality, safety, style, and task-specific metrics.
 
 ### 4. Evaluation System
 
@@ -65,6 +71,12 @@ Comprehensive evaluation with basic metrics, quality metrics, and safety metrics
 1. **Start with [SFT Guide](sft.md)**: Complete guide to Supervised Fine-Tuning
 2. **Learn [Configuration](../getting-started/configuration.md)**: Understand configuration options
 3. **Explore [Examples](../examples/sft.md)**: See real-world examples
+
+### For Distillation Training
+
+1. **Start with [Distillation Guide](distillation.md)**: Choose Standard or SDFT
+2. **Review [Distillation Parameters](../PARAMETERS.md#distillation-parameters)**: Check method-specific controls
+3. **Use [Distillation Internals](../advanced/distillation.md)**: Method-routing logic and implementation gotchas
 
 ### For RL Training
 
@@ -135,6 +147,12 @@ Comprehensive evaluation with basic metrics, quality metrics, and safety metrics
  - CUDA/GPU issues
  - Configuration issues
  - Training issues
+
+### Advanced Topics
+
+- **[Adapters v3.3](../advanced/adapters.md)**: MoA, Text2LoRA/Doc2LoRA
+- **[Long Context](../advanced/long-context.md)**: RoPE scaling and packing
+- **[Distillation Internals](../advanced/distillation.md)**: Method-routing logic and TRL config classes
 
 ---
 
@@ -209,7 +227,6 @@ trainer.save_model()
 
 - **[API Reference](../api-reference/overview.md)**: Complete API documentation
 - **[CLI Overview](../cli/overview.md)**: Command-line interface
-- **[API Reference](../api-reference/overview.md)**: Complete API documentation
 - **[Examples](../examples/overview.md)**: Code examples and tutorials
 - **[Advanced Topics](../advanced/architecture.md)**: Architecture and advanced usage
 - **[Contributing](../contributing/guide.md)**: Contribute to AlignTune

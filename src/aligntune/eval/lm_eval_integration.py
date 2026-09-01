@@ -26,6 +26,52 @@ class TaskCategory:
     MATH_REASONING = "math_reasoning"
     CODE_GENERATION = "code_generation"
     BIAS_DETECTION = "bias_detection"
+    REASONING = "reasoning"  # For process reward model evaluation
+
+
+# Reasoning Tasks Registry for Process Reward Model Evaluation
+REASONING_TASKS = {
+    "aime": {
+        "name": "AIME",
+        "category": "reasoning",
+        "description": "American Invitational Mathematics Examination - challenging arithmetic problems",
+        "lm_eval_task_name": "aime",
+        "metrics": ["exact_match"],
+        "metric_type": "exact_match",
+    },
+    "math": {
+        "name": "MATH",
+        "category": "reasoning",
+        "description": "Diverse mathematical problems from competitions",
+        "lm_eval_task_name": "math",
+        "metrics": ["exact_match"],
+        "metric_type": "exact_match",
+    },
+    "gpqa": {
+        "name": "GPQA",
+        "category": "reasoning",
+        "description": "Graduate-level Professional and Academic Questions",
+        "lm_eval_task_name": "gpqa",
+        "metrics": ["acc"],
+        "metric_type": "exact_match",
+    },
+    "livecode": {
+        "name": "LiveCodeBench",
+        "category": "reasoning",
+        "description": "Code execution benchmarks with reasoning requirements",
+        "lm_eval_task_name": "livecodedbench",
+        "metrics": ["score"],
+        "metric_type": "code_execution",
+    },
+    "gsm8k_cot": {
+        "name": "GSM8K-CoT",
+        "category": "reasoning",
+        "description": "Grade school math with chain-of-thought annotations",
+        "lm_eval_task_name": "gsm8k",
+        "metrics": ["exact_match"],
+        "metric_type": "exact_match",
+    },
+}
 
 
 @dataclass
@@ -414,6 +460,47 @@ LMEVAL_TASKS = {
         lm_eval_task_name="winogender",
         metrics=["acc", "acc_norm"]
     ),
+
+    # Reasoning and Process Reward Model Evaluation
+    "aime": LMEvalTask(
+        name="aime",
+        category=TaskCategory.REASONING,
+        description="American Invitational Mathematics Examination - challenging arithmetic problems",
+        lm_eval_task_name="aime",
+        metrics=["exact_match"]
+    ),
+
+    "math": LMEvalTask(
+        name="math",
+        category=TaskCategory.REASONING,
+        description="Diverse mathematical problems from competitions",
+        lm_eval_task_name="math",
+        metrics=["exact_match"]
+    ),
+
+    "gpqa": LMEvalTask(
+        name="gpqa",
+        category=TaskCategory.REASONING,
+        description="Graduate-level Professional and Academic Questions",
+        lm_eval_task_name="gpqa",
+        metrics=["acc"]
+    ),
+
+    "livecode": LMEvalTask(
+        name="livecode",
+        category=TaskCategory.REASONING,
+        description="Code execution benchmarks with reasoning requirements",
+        lm_eval_task_name="livecodedbench",
+        metrics=["score"]
+    ),
+
+    "gsm8k_cot": LMEvalTask(
+        name="gsm8k_cot",
+        category=TaskCategory.REASONING,
+        description="Grade school math with chain-of-thought annotations",
+        lm_eval_task_name="gsm8k",
+        metrics=["exact_match"]
+    ),
 }
 
 
@@ -429,15 +516,233 @@ def get_lm_eval_task(task_name: str) -> LMEvalTask:
     return LMEVAL_TASKS[task_name]
 
 
+# Indic Benchmark Tasks Registry
+# Re-implemented under Apache 2.0 license (not IndicEvalHarness)
+INDIC_TASKS = {
+    # MILU: IIT-KGP Indic MMLU (multiple choice)
+    "milu_hi": LMEvalTask(
+        name="MILU-Hindi",
+        category="question_answering",
+        description="IIT-KGP Indic MMLU - Hindi (multiple choice knowledge)",
+        lm_eval_task_name="milu_hi",
+        metrics=["exact_match"],
+    ),
+    "milu_ta": LMEvalTask(
+        name="MILU-Tamil",
+        category="question_answering",
+        description="IIT-KGP Indic MMLU - Tamil (multiple choice knowledge)",
+        lm_eval_task_name="milu_ta",
+        metrics=["exact_match"],
+    ),
+    "milu_bn": LMEvalTask(
+        name="MILU-Bengali",
+        category="question_answering",
+        description="IIT-KGP Indic MMLU - Bengali (multiple choice knowledge)",
+        lm_eval_task_name="milu_bn",
+        metrics=["exact_match"],
+    ),
+
+    # IndicXTREME tasks
+    "indicopa_hi": LMEvalTask(
+        name="IndicCOPA-Hindi",
+        category="commonsense_reasoning",
+        description="IndicCOPA - Hindi causal reasoning",
+        lm_eval_task_name="indicopa_hi",
+        metrics=["exact_match"],
+    ),
+    "indicsentiment_hi": LMEvalTask(
+        name="IndicSentiment-Hindi",
+        category="sentiment_analysis",
+        description="IndicSentiment - Hindi sentiment classification",
+        lm_eval_task_name="indicsentiment_hi",
+        metrics=["exact_match"],
+    ),
+    "indicxnli_hi": LMEvalTask(
+        name="IndicXNLI-Hindi",
+        category="reasoning",
+        description="IndicXNLI - Hindi natural language inference",
+        lm_eval_task_name="indicxnli_hi",
+        metrics=["exact_match"],
+    ),
+    "indicqa_hi": LMEvalTask(
+        name="IndicQA-Hindi",
+        category="question_answering",
+        description="IndicQA - Hindi question answering",
+        lm_eval_task_name="indicqa_hi",
+        metrics=["f1"],
+    ),
+
+    # IndicGenBench tasks
+    "floresin_hi_en": LMEvalTask(
+        name="FloresIN-Hindi-English",
+        category="machine_translation",
+        description="FloresIN - Hindi to English machine translation",
+        lm_eval_task_name="floresin_hi_en",
+        metrics=["bleu"],
+    ),
+    "floresin_ta_en": LMEvalTask(
+        name="FloresIN-Tamil-English",
+        category="machine_translation",
+        description="FloresIN - Tamil to English machine translation",
+        lm_eval_task_name="floresin_ta_en",
+        metrics=["bleu"],
+    ),
+    "floresin_bn_en": LMEvalTask(
+        name="FloresIN-Bengali-English",
+        category="machine_translation",
+        description="FloresIN - Bengali to English machine translation",
+        lm_eval_task_name="floresin_bn_en",
+        metrics=["bleu"],
+    ),
+    "crosssumin_hi": LMEvalTask(
+        name="CrossSumIN-Hindi",
+        category="summarization",
+        description="CrossSumIN - Hindi cross-lingual summarization",
+        lm_eval_task_name="crosssumin_hi",
+        metrics=["rouge1", "rouge2", "rougeL"],
+    ),
+    "xquadin_hi": LMEvalTask(
+        name="XQuAD-IN-Hindi",
+        category="question_answering",
+        description="XQuAD-IN - Hindi extractive QA",
+        lm_eval_task_name="xquadin_hi",
+        metrics=["f1"],
+    ),
+
+    # Sarvam Indic Evaluations
+    "mmlu_in_hi": LMEvalTask(
+        name="MMLU-IN-Hindi",
+        category="question_answering",
+        description="Sarvam MMLU-IN - Hindi multitask language understanding",
+        lm_eval_task_name="mmlu_in_hi",
+        metrics=["exact_match"],
+    ),
+    "gsm8k_in_hi": LMEvalTask(
+        name="GSM8K-IN-Hindi",
+        category="math_reasoning",
+        description="Sarvam GSM8K-IN - Hindi grade school math",
+        lm_eval_task_name="gsm8k_in_hi",
+        metrics=["exact_match"],
+    ),
+    "triviaqa_in_hi": LMEvalTask(
+        name="TriviaQA-IN-Hindi",
+        category="question_answering",
+        description="Sarvam TriviaQA-IN - Hindi factual QA",
+        lm_eval_task_name="triviaqa_in_hi",
+        metrics=["f1"],
+    ),
+}
+
+# Extended task registry with Indic tasks
+LMEVAL_TASKS.update(INDIC_TASKS)
+
+
+def get_available_indic_tasks() -> List[str]:
+    """Get list of available Indic evaluation tasks."""
+    return list(INDIC_TASKS.keys())
+
+
+def get_available_indic_tasks_by_language(language: str) -> List[str]:
+    """
+    Get available Indic tasks for a specific language.
+
+    Args:
+        language: Language code ("hi", "ta", "bn")
+
+    Returns:
+        List of task names for that language
+    """
+    lang_map = {
+        "hi": "hi",
+        "hindi": "hi",
+        "ta": "ta",
+        "tamil": "ta",
+        "bn": "bn",
+        "bengali": "bn",
+    }
+    lang_code = lang_map.get(language.lower())
+    if not lang_code:
+        raise ValueError(f"Unknown language: {language}. Supported: hi, ta, bn")
+
+    return [task for task in INDIC_TASKS.keys() if f"_{lang_code}" in task]
+
+
 def run_standard_benchmark(model_name: str, tasks: Optional[List[str]] = None, **kwargs) -> List[EvalResult]:
     """Run standard benchmark evaluation."""
     if tasks is None:
         tasks = ["hellaswag", "arc_challenge", "mmlu", "gsm8k", "human_eval"]
-    
+
     config = LMEvalConfig(model_name=model_name, **kwargs)
     runner = LMEvalRunner(config)
-    
+
     lm_eval_tasks = [get_lm_eval_task(task_name) for task_name in tasks]
     results = runner.evaluate_tasks(lm_eval_tasks)
-    
+
+    return results
+
+
+def run_indic_benchmark(
+    model_name: str,
+    languages: Optional[List[str]] = None,
+    benchmarks: Optional[List[str]] = None,
+    **kwargs
+) -> List[EvalResult]:
+    """
+    Run Indic benchmark evaluation for specified languages.
+
+    Args:
+        model_name: HuggingFace model identifier
+        languages: List of language codes ("hi", "ta", "bn"). If None, evaluates all.
+        benchmarks: List of benchmark types ("milu", "indicxtreme", "genbench", "sarvam").
+                   If None, evaluates all available.
+        **kwargs: Additional arguments for LMEvalConfig
+
+    Returns:
+        List of EvalResult objects
+
+    Examples:
+        # Evaluate Hindi and Tamil on MILU and IndicXTREME
+        results = run_indic_benchmark(
+            "meta-llama/Llama-2-7b",
+            languages=["hi", "ta"],
+            benchmarks=["milu", "indicxtreme"]
+        )
+    """
+    if languages is None:
+        languages = ["hi", "ta", "bn"]
+
+    if benchmarks is None:
+        benchmarks = ["milu", "indicxtreme", "genbench", "sarvam"]
+
+    config = LMEvalConfig(model_name=model_name, **kwargs)
+    runner = LMEvalRunner(config)
+
+    benchmark_map = {
+        "milu": [t for t in INDIC_TASKS.keys() if t.startswith("milu_")],
+        "indicxtreme": [t for t in INDIC_TASKS.keys()
+                        if any(x in t for x in ["indicopa", "indicsentiment", "indicxnli", "indicqa"])],
+        "genbench": [t for t in INDIC_TASKS.keys()
+                     if any(x in t for x in ["floresin", "crosssumin", "xquadin"])],
+        "sarvam": [t for t in INDIC_TASKS.keys() if any(x in t for x in ["mmlu_in", "gsm8k_in", "triviaqa_in"])],
+    }
+
+    # Collect tasks for selected languages and benchmarks
+    tasks_to_run = []
+    for benchmark in benchmarks:
+        for task in benchmark_map.get(benchmark, []):
+            # Check if task matches selected languages
+            for lang in languages:
+                lang_code = {"hi": "hi", "ta": "ta", "bn": "bn"}.get(lang)
+                if lang_code and f"_{lang_code}" in task:
+                    tasks_to_run.append(task)
+                    break
+
+    if not tasks_to_run:
+        logger.warning(f"No tasks found for languages={languages}, benchmarks={benchmarks}")
+        return []
+
+    lm_eval_tasks = [get_lm_eval_task(task_name) for task_name in tasks_to_run]
+    logger.info(f"Running {len(lm_eval_tasks)} Indic tasks: {[t.name for t in lm_eval_tasks]}")
+
+    results = runner.evaluate_tasks(lm_eval_tasks)
     return results

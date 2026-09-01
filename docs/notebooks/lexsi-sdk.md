@@ -1,7 +1,9 @@
 # Lexsi SDK Notebooks
 
 !!! note
-    All notebooks on this page are **Google Colab notebooks**. Click "Open in Colab" to open and run them directly in your browser — no local setup required.
+    All notebooks on this page are **Google Colab notebooks**. Click "Open in
+    Colab" to open and run them directly in your browser, no local setup
+    required.
 
 | Notebook | Link |
 | --- | --- |

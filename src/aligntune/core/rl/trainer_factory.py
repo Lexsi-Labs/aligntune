@@ -113,16 +113,8 @@ def create_trainer_from_config(config: UnifiedConfig) -> Any:
         (AlgorithmType.DAPO, "trl"): ("aligntune.backends.trl.rl.dapo.dapo", "TRLDAPOTrainer"),
         (AlgorithmType.DAPO, "unsloth"): ("aligntune.backends.unsloth.rl.dapo.dapo", "UnslothDAPOTrainer"),
         
-        # BOLT trainers
-        (AlgorithmType.BOLT, "trl"): ("aligntune.backends.trl.rl.bolt.bolt", "TRLBoltTrainer"),
-        (AlgorithmType.BOLT, "unsloth"): ("aligntune.backends.unsloth.rl.bolt.bolt", "UnslothBoltTrainer"),
-        
-        # Neural Mirror GRPO trainers
-        (AlgorithmType.NMGRPO, "trl"): ("aligntune.backends.trl.rl.neural_mirror_grpo.NMGrpo", "TRLNeuralMirrorGRPOTrainer"),
-        (AlgorithmType.NMGRPO, "unsloth"): ("aligntune.backends.unsloth.rl.neural_mirror_grpo.NMGrpo", "UnslothNeuralMirrorGRPOTrainer"),
-        
-        # Meta ES trainers
-        (AlgorithmType.METAES, "trl"): ("aligntune.backends.trl.rl.meta_es.meta_es_trainer", "TRLMetaEsTrainer"),
+        # Evolution Strategies trainer
+        (AlgorithmType.ES, "trl"): ("aligntune.backends.es.trainer", "ESTrainerBackend"),
     }
     
     key = (algorithm, backend)
@@ -151,4 +143,3 @@ def create_trainer_from_config(config: UnifiedConfig) -> Any:
 
 
 __all__ = ["create_trainer_from_config"]
-

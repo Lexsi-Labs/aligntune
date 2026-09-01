@@ -8,6 +8,48 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
+# trl>=1.0 removed these two from trl.trainer.utils (present in the trl==0.23.0
+# this backend was originally written against). Local fallbacks matching their
+# historical trl implementations, used only when the installed trl no longer
+# exports them.
+def first_true_indices(bools: torch.Tensor, dtype=torch.long) -> torch.Tensor:
+    """Index of the first True along the last dim of `bools` (row length if none is True)."""
+    row_len = bools.size(-1)
+    zero_or_index = row_len * (~bools).type(dtype) + torch.arange(row_len, dtype=dtype, device=bools.device)
+    return torch.min(zero_or_index, dim=-1).values
+
+
+SIMPLE_CHAT_TEMPLATE = (
+    "{% for message in messages %}{{message['role'].capitalize() + ': ' + "
+    "message['content']}}\n\n{% endfor %}{% if add_generation_prompt %}"
+    "{{ 'Assistant:' }}{% endif %}"
+)
+
+
+def get_first_true_indices():
+    """Return trl's first_true_indices if available, else the local fallback."""
+    try:
+        from trl.trainer.utils import first_true_indices as _trl_impl
+        return _trl_impl
+    except ImportError:
+        logger.warning(
+            "trl.trainer.utils.first_true_indices not found (removed in trl>=1.0) "
+            "- using local fallback implementation")
+        return first_true_indices
+
+
+def get_simple_chat_template():
+    """Return trl's SIMPLE_CHAT_TEMPLATE if available, else the local fallback."""
+    try:
+        from trl.trainer.utils import SIMPLE_CHAT_TEMPLATE as _trl_impl
+        return _trl_impl
+    except ImportError:
+        logger.warning(
+            "trl.trainer.utils.SIMPLE_CHAT_TEMPLATE not found (removed in trl>=1.0) "
+            "- using local fallback implementation")
+        return SIMPLE_CHAT_TEMPLATE
+
+
 def clear_all_unsloth_caches():
     """Aggressively clear all Unsloth caches before training."""
     logger.info("Clearing all Unsloth caches...")
@@ -30,69 +72,78 @@ def clear_all_unsloth_caches():
     logger.info("  Set UNSLOTH_FORCE_RECOMPILE=1")
 
 
+def _apply_qkv(self, *args):
+    """Apply QKV projections. Handles Unsloth's self.apply_qkv(self, hidden_states) pattern."""
+    # Handle both calling patterns:
+    # 1. self.apply_qkv(hidden_states) - 2 args
+    # 2. self.apply_qkv(self, hidden_states) - 3 args (Unsloth pattern)
+    if len(args) == 1:
+        hidden_states = args[0]
+    elif len(args) == 2:
+        hidden_states = args[1]  # Skip the explicit self
+    else:
+        raise ValueError(
+            f"apply_qkv called with {
+                len(args)} arguments, expected 1 or 2")
+
+    Q = self.q_proj(hidden_states)
+    K = self.k_proj(hidden_states)
+    V = self.v_proj(hidden_states)
+    return Q, K, V
+
+
+def _apply_o(self, *args):
+    """Apply output projection. Handles Unsloth's self.apply_o(self, attn_output) pattern."""
+    # Handle both calling patterns:
+    # 1. self.apply_o(attn_output) - 2 args
+    # 2. self.apply_o(self, attn_output) - 3 args (Unsloth pattern)
+    if len(args) == 1:
+        attn_output = args[0]
+    elif len(args) == 2:
+        attn_output = args[1]  # Skip the explicit self
+    else:
+        raise ValueError(
+            f"apply_o called with {
+                len(args)} arguments, expected 1 or 2")
+
+    return self.o_proj(attn_output)
+
+
+# Unsloth model modules whose Attention class may lack apply_qkv/apply_o -
+# each of these shares the same q_proj/k_proj/v_proj/o_proj layout, so the
+# same patch logic applies to all of them.
+_UNSLOTH_ATTENTION_MODULES = (
+    ("unsloth.models.qwen3", "Qwen3Attention"),
+    ("unsloth.models.qwen2", "Qwen2Attention"),
+)
+
+
 def patch_attention_classes_globally():
     """Patch attention classes at the class level BEFORE model loading.
 
     This ensures Unsloth's compilation process sees the patched methods.
     """
-    try:
-        # Import attention classes
-        from unsloth.models.qwen3 import Qwen3Attention
+    for module_path, class_name in _UNSLOTH_ATTENTION_MODULES:
+        try:
+            module = __import__(module_path, fromlist=[class_name])
+            attention_cls = getattr(module, class_name)
 
-        # Check if already patched
-        if hasattr(Qwen3Attention, '_aligntune_patched'):
-            logger.info("Qwen3Attention already patched at class level")
-            return
+            if hasattr(attention_cls, '_aligntune_patched'):
+                logger.info(f"{class_name} already patched at class level")
+                continue
 
-        # Add apply_qkv method to the class
-        def apply_qkv(self, *args):
-            """Apply QKV projections. Handles Unsloth's self.apply_qkv(self, hidden_states) pattern."""
-            # Handle both calling patterns:
-            # 1. self.apply_qkv(hidden_states) - 2 args
-            # 2. self.apply_qkv(self, hidden_states) - 3 args (Unsloth pattern)
-            if len(args) == 1:
-                hidden_states = args[0]
-            elif len(args) == 2:
-                hidden_states = args[1]  # Skip the explicit self
-            else:
-                raise ValueError(
-                    f"apply_qkv called with {
-                        len(args)} arguments, expected 1 or 2")
+            attention_cls.apply_qkv = _apply_qkv
+            attention_cls.apply_o = _apply_o
+            attention_cls._aligntune_patched = True
 
-            Q = self.q_proj(hidden_states)
-            K = self.k_proj(hidden_states)
-            V = self.v_proj(hidden_states)
-            return Q, K, V
+            logger.info(
+                f"Successfully patched {class_name} class with apply_qkv and apply_o methods")
 
-        def apply_o(self, *args):
-            """Apply output projection. Handles Unsloth's self.apply_o(self, attn_output) pattern."""
-            # Handle both calling patterns:
-            # 1. self.apply_o(attn_output) - 2 args
-            # 2. self.apply_o(self, attn_output) - 3 args (Unsloth pattern)
-            if len(args) == 1:
-                attn_output = args[0]
-            elif len(args) == 2:
-                attn_output = args[1]  # Skip the explicit self
-            else:
-                raise ValueError(
-                    f"apply_o called with {
-                        len(args)} arguments, expected 1 or 2")
-
-            return self.o_proj(attn_output)
-
-        # Patch the class
-        Qwen3Attention.apply_qkv = apply_qkv
-        Qwen3Attention.apply_o = apply_o
-        Qwen3Attention._aligntune_patched = True
-
-        logger.info(
-            "Successfully patched Qwen3Attention class with apply_qkv and apply_o methods")
-
-    except ImportError as e:
-        logger.warning(f"Could not import Qwen3Attention for patching: {e}")
-    except Exception as e:
-        logger.error(f"Error patching Qwen3Attention class: {e}")
-        raise
+        except ImportError as e:
+            logger.warning(f"Could not import {class_name} for patching: {e}")
+        except Exception as e:
+            logger.error(f"Error patching {class_name} class: {e}")
+            raise
 
 
 def verify_attention_patches(model):

@@ -575,3 +575,85 @@ def get_model_info(model_path_or_name: str) -> Dict[str, Any]:
     """Convenience function to get model information."""
     loader = ModelLoader()
     return loader.get_model_info(model_path_or_name)
+
+
+def load_and_merge_lora(
+    base_model: Union[str, Path],
+    adapter_path: Union[str, Path],
+    output_path: Union[str, Path],
+    *,
+    tokenizer_name_or_path: Optional[Union[str, Path]] = None,
+    task_type: Any = "sft",
+    precision: str = "bf16",
+    quantization: Optional[Dict[str, Any]] = None,
+    max_seq_length: int = 2048,
+    rope: Optional[Any] = None,
+    attn_implementation: str = "auto",
+    sliding_window: Optional[int] = None,
+    device_map: Optional[Union[str, Dict[str, Any]]] = "auto",
+    trust_remote_code: bool = True,
+    use_unsloth: bool = False,
+) -> str:
+    """Load a configured base model and merge a LoRA adapter.
+
+    The base is loaded through AlignTune's core model loader with PEFT
+    disabled. The adapter is then attached to that loaded model and merged.
+    Passing the loaded object to ``PEFTMerger`` preserves AlignTune's RoPE and
+    tokenizer configuration; passing a path would reload the model directly.
+
+    Use an unquantized BF16/FP16 base when producing a portable merged model.
+    Quantization is intended for training or inference, not final merging.
+    """
+    from types import SimpleNamespace
+
+    from ..core.long_context.rope_config import RopeConfig
+    from ..core.merge import PEFTMerger
+    from ..core.model_loader import build_model
+    from ..core.registry import TaskType
+    from ..core.sft.config import ModelConfig
+
+    if isinstance(task_type, str):
+        try:
+            task_type = TaskType(task_type)
+        except ValueError as exc:
+            supported = ", ".join(item.value for item in TaskType)
+            raise ValueError(
+                f"Unknown task_type {task_type!r}. Supported values: {supported}"
+            ) from exc
+
+    model_config = ModelConfig(
+        name_or_path=str(base_model),
+        tokenizer_name_or_path=(
+            str(tokenizer_name_or_path)
+            if tokenizer_name_or_path is not None
+            else None
+        ),
+        precision=precision,
+        quantization=dict(quantization or {}),
+        max_seq_length=max_seq_length,
+        rope=rope if rope is not None else RopeConfig(),
+        attn_implementation=attn_implementation,
+        sliding_window=sliding_window,
+        device_map=device_map,
+        trust_remote_code=trust_remote_code,
+        use_unsloth=use_unsloth,
+        peft_enabled=False,
+        train_embeddings=False,
+    )
+
+    # build_model only needs a config object exposing ``model`` here.
+    loader_config = SimpleNamespace(model=model_config)
+    model, tokenizer = build_model(
+        loader_config,
+        task_type=task_type,
+        use_unsloth=use_unsloth,
+        apply_peft=False,
+    )
+    model.eval()
+
+    return PEFTMerger().merge_lora(
+        base_model=model,
+        adapter_path=str(adapter_path),
+        tokenizer=tokenizer,
+        output_path=str(output_path),
+    )

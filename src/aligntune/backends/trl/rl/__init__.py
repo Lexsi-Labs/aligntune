@@ -32,22 +32,13 @@ except ImportError:
     GSPO_AVAILABLE = False
     TRLGSPOTrainer = None
 
-try:
-    from .bolt.bolt import TRLBoltTrainer
-    BOLT_AVAILABLE = True
-except ImportError:
-    BOLT_AVAILABLE = False
-    TRLBoltTrainer = None
-
 __all__ = [
     "TRLDPOTrainer",
     "TRLPPOTrainer",
     "TRLGRPOTrainer",
     "TRLGSPOTrainer",
-    "TRLBoltTrainer",
     "DPO_AVAILABLE",
     "PPO_AVAILABLE",
     "GRPO_AVAILABLE",
     "GSPO_AVAILABLE",
-    "BOLT_AVAILABLE",
 ]

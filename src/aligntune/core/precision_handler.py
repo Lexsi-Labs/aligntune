@@ -18,6 +18,8 @@ class PrecisionType(Enum):
     FP16 = "fp16"
     BF16 = "bf16"
     AUTO = "auto"
+    INT8 = "int8"  # 8-bit quantization (bitsandbytes)
+    FP8 = "fp8"    # 8-bit floating point (bitsandbytes paged)
 
 
 class PrecisionHandler:
@@ -69,20 +71,24 @@ class PrecisionHandler:
     def get_torch_dtype(precision: str) -> torch.dtype:
         """
         Convert precision string to torch dtype.
-        
+
         Args:
-            precision: "fp32", "fp16", "bf16", or "auto"
-            
+            precision: "fp32", "fp16", "bf16", "int8", "fp8", or "auto"
+
         Returns:
             torch.dtype
         """
         precision = precision.lower()
-        
+
         if precision == "bf16":
             return torch.bfloat16
         elif precision == "fp16":
             return torch.float16
         elif precision == "fp32":
+            return torch.float32
+        elif precision in ["int8", "fp8"]:
+            # 8-bit quantization is handled separately via bitsandbytes,
+            # so we return float32 as the base dtype
             return torch.float32
         elif precision == "auto":
             # Auto-detect based on CUDA availability
@@ -133,25 +139,25 @@ class PrecisionHandler:
     def validate_precision(precision: str) -> str:
         """
         Validate precision string and provide helpful error.
-        
+
         Args:
             precision: Precision string to validate
-            
+
         Returns:
             Validated precision string
-            
+
         Raises:
             ValueError: If precision is invalid
         """
-        valid = ["fp32", "fp16", "bf16", "auto"]
+        valid = ["fp32", "fp16", "bf16", "int8", "fp8", "auto"]
         precision = precision.lower()
-        
+
         if precision not in valid:
             raise ValueError(
                 f"Invalid precision '{precision}'. "
                 f"Valid options: {valid}"
             )
-        
+
         # Warn if bf16 requested but not supported
         if precision == "bf16" and torch.cuda.is_available():
             if not torch.cuda.is_bf16_supported():
@@ -160,7 +166,18 @@ class PrecisionHandler:
                     "Falling back to fp16."
                 )
                 return "fp16"
-        
+
+        # Warn if int8/fp8 requested but bitsandbytes not available
+        if precision in ["int8", "fp8"]:
+            try:
+                import bitsandbytes
+                logger.info(f"8-bit quantization ({precision}) will use bitsandbytes paged AdamW optimizer")
+            except ImportError:
+                logger.warning(
+                    f"⚠️  {precision} requested but bitsandbytes not installed. "
+                    "Install with: pip install bitsandbytes"
+                )
+
         return precision
     
     @staticmethod
@@ -185,12 +202,12 @@ class PrecisionHandler:
     ) -> Dict[str, Any]:
         """
         Get complete model loading kwargs with precision.
-        
+
         Args:
             precision: Precision string
             device_map: Device map for model
             quantization_config: Optional quantization config
-            
+
         Returns:
             Dict of kwargs for model loading
         """
@@ -198,10 +215,35 @@ class PrecisionHandler:
             "torch_dtype": PrecisionHandler.get_torch_dtype(precision),
             "device_map": device_map or "auto",
         }
-        
+
         if quantization_config:
             # If quantizing, dtype might be overridden by quantization
             if quantization_config.get("load_in_4bit") or quantization_config.get("load_in_8bit"):
                 logger.info("Quantization enabled, precision will be handled by quantization config")
-        
+
         return kwargs
+
+    @staticmethod
+    def get_8bit_optimizer_kwargs(precision: str) -> Dict[str, Any]:
+        """
+        Get optimizer kwargs for 8-bit quantization (bitsandbytes paged optimizer).
+
+        Args:
+            precision: Precision string ("int8" or "fp8")
+
+        Returns:
+            Dict of optimizer kwargs for TrainingArguments
+        """
+        if precision not in ["int8", "fp8"]:
+            return {}
+
+        # Configure 8-bit optimizer state with bitsandbytes
+        # Using paged AdamW for better memory efficiency
+        optimizer_kwargs = {
+            "optim": "paged_adamw_8bit",  # Paged 8-bit AdamW from bitsandbytes
+            "optim_target_modules": ["linear"],  # Apply 8-bit to linear layers
+            "optim_args": "eps=1e-8",  # Optional: tuning parameters
+        }
+
+        logger.info(f"8-bit optimizer state configured for {precision} precision")
+        return optimizer_kwargs

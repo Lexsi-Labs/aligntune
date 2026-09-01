@@ -72,7 +72,7 @@ class SFTConfigLoader:
             percent=dataset_data.get("percent"),
             max_samples=dataset_data.get("max_samples"),
             column_mapping=dataset_data.get("column_mapping", {}),
-            task_type=TaskType(dataset_data.get("task_type", "supervised_fine_tuning"))
+            task_type=TaskType(dataset_data.get("task_type", "sft"))
         )
         
         # Convert training config

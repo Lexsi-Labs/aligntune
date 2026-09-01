@@ -1,0 +1,77 @@
+recipe:
+  name: "mistral-7b-32k-sliding-window"
+  description: >
+    Fine-tune Mistral-7B-Instruct-v0.3 for 32k long-context tasks using the
+    model's built-in sliding-window attention (SWA).  Mistral uses grouped-query
+    attention (GQA) with a sliding window of 4096 tokens; no RoPE extension is
+    required.  Flash-attention-2 is used for efficient SWA computation.
+  model: "mistralai/Mistral-7B-Instruct-v0.3"
+  dataset:
+    - "longalpaca"
+    - "books3_chunks"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "trl"
+  tags:
+    - "mistral"
+    - "mistral-7b"
+    - "long-context"
+    - "32k"
+    - "sliding-window"
+    - "flash-attention-2"
+    - "v3.9-long-context"
+  requires_auth: false
+  estimated_time: "3-5 hours"
+  # Notes:
+  #   Mistral uses a built-in sliding window of 4096 tokens at the attention
+  #   layer, providing an effective context of 32k tokens without any RoPE
+  #   frequency extension.  Do NOT set rope_scaling_type for this recipe.
+  estimated_memory: "20GB VRAM with bf16"
+  multi_gpu_recommended: false
+
+config:
+  algo: sft
+
+  model:
+    name_or_path: "mistralai/Mistral-7B-Instruct-v0.3"
+    precision: "bf16"
+    gradient_checkpointing: true
+    attn_implementation: "flash_attention_2"
+    trust_remote_code: false
+
+    # ── Sliding-window attention ──────────────────────────────────────────────
+    # Mistral uses built-in sliding-window attention (SWA).  The window size
+    # is baked into the model architecture; we expose it here for documentation
+    # and runtime validation purposes only.
+    #
+    # No rope_scaling_type or rope_scaling_factor is set: Mistral's native
+    # ALiBi-free positional encoding already supports 32k via its sliding window.
+    target_context_length: 32768           # 32k tokens
+    sliding_window_size: 4096              # Matches Mistral default SWA window
+
+  datasets:
+    - name: "longalpaca"
+      split: "train"
+    - name: "books3_chunks"
+      split: "train"
+
+  train:
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 4
+    learning_rate: 2.0e-5
+    warmup_ratio: 0.03
+    max_grad_norm: 1.0
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 200
+    eval_steps: 200
+    seed: 42
+    max_seq_length: 32768
+
+  logging:
+    output_dir: "./output/mistral-7b-32k-sliding-window"
+    run_name: "mistral-7b-32k-swa"
+    loggers: []
+    report_to: "none"

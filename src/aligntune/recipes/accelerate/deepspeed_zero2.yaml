@@ -1,0 +1,35 @@
+# AlignTune preset: DeepSpeed ZeRO Stage 2
+#
+# Usage:
+#   Add to your training recipe YAML:
+#     train:
+#       accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero2.yaml
+#
+#   Or pass via CLI:
+#     aligntune train --config my_recipe.yaml --accelerate-config src/aligntune/recipes/accelerate/deepspeed_zero2.yaml
+#
+# ZeRO Stage 2 shards optimizer states and gradients across GPUs.
+# Good default for multi-GPU training when model fits in single GPU memory.
+
+compute_environment: LOCAL_MACHINE
+distributed_type: DEEPSPEED
+deepspeed_config:
+  deepspeed_multinode_launcher: standard
+  gradient_accumulation_steps: 1
+  gradient_clipping: 1.0
+  offload_optimizer_device: none       # set to "cpu" to offload optimizer state
+  offload_param_device: none           # set to "cpu" to offload parameters
+  zero3_init_flag: false
+  zero3_save_16bit_model: false
+  zero_stage: 2
+downcast_bf16: "no"
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 1                       # update to number of GPUs
+rdzv_backend: static
+same_network: true
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false

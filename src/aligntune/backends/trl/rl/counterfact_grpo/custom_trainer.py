@@ -1559,7 +1559,10 @@ class CounterfactualGRPOTrainer(GRPOTrainer):
         attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
         logits_to_keep = completion_ids.size(1)
 
-        per_token_logps, entropies = self._get_per_token_logps_and_entropies(
+        # NOTE: the installed trl version (1.7.1) returns a 3-tuple
+        # (logps, entropies, aux_loss) from this method - aux_loss is only
+        # used for MoE load-balancing and isn't needed here.
+        per_token_logps, entropies, _ = self._get_per_token_logps_and_entropies(
             model, input_ids, attention_mask, logits_to_keep, compute_entropy=True,
             pixel_values=inputs.get("pixel_values"),
             image_grid_thw=inputs.get("image_grid_thw"),

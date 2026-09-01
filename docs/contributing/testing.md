@@ -10,20 +10,16 @@ AlignTune uses [pytest](https://pytest.org/) for testing with comprehensive cove
 
 ### Directory Layout
 
+The test suite is flat, not organized into `core/`/`backends/`/`integration/` subpackages. Tests live directly under `tests/`, named after the module or feature they cover (e.g. `test_gbmpo`, `test_distillation_offline`, `test_adapters_moa`). `tests/conftest.py` holds shared fixtures.
+
 ```
 tests/
- __init__.py
- core/
- test_backend_factory.py
- test_config.py
- backends/
- trl/
- unsloth/
- integration/
- test_training_pipeline.py
- fixtures/
- sample_data.py
+    conftest.py
+    test_<feature_or_module>.py   # flat, one per module/feature
+    ...
 ```
+
+When adding a new test file, put it directly under `tests/`, matching the flat convention above.
 
 ### Test File Naming
 
@@ -32,7 +28,6 @@ tests/
 - Test functions: `test_<function_name>`
 
 ```python
-# test_backend_factory.py
 class TestBackendFactory:
  def test_create_sft_trainer(self):
  """Test SFT trainer creation."""
@@ -219,7 +214,7 @@ pytest
 ### Specific Test
 
 ```bash
-pytest tests/core/test_backend_factory.py::test_create_sft_trainer
+pytest tests/test_advisor.py::TestDataStructures::test_gpu_profile_creation
 ```
 
 ### Verbose Output

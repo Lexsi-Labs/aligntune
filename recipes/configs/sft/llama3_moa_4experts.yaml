@@ -1,0 +1,75 @@
+recipe:
+  name: "llama3-moa-4experts-sft"
+  description: "Fine-tune LLaMA 3 8B using Mixture of Adapters (MoA) with 4 LoRA experts and top-2 gating"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "Open-Orca/SlimOrca"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "trl"
+  tags: ["llama", "moa", "mixture-of-adapters", "sparse-adaptation", "v3.3-advanced-parameterization"]
+  requires_auth: true
+  estimated_time: "4-5 hours"
+  estimated_memory: "22GB VRAM"
+
+config:
+  algo: sft
+
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    precision: "bf16"
+    gradient_checkpointing: true
+    use_peft: true
+    lora_variant: "moa"  # Use Mixture of Adapters variant
+    lora_r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+    # MoA-specific configuration
+    moa_num_experts: 4        # Number of LoRA experts per layer
+    moa_top_k: 2              # Select top-2 experts per token
+    moa_router_temp: 1.0      # Temperature for router softmax (1.0 = no scaling)
+    moa_router_use_mlp: false # Use linear gate (set to true for MLP gate)
+
+    # Advanced PEFT methods
+    dora_enabled: false
+    rslora_enabled: false
+    loftq_init: false
+    pissa_init: false
+    trust_remote_code: true
+
+  datasets:
+    - name: "Open-Orca/SlimOrca"
+      split: "train"
+      max_samples: 100000
+      column_mapping:
+        text: "conversations"
+
+  train:
+    # Memory-efficient settings: MoA with sparse routing further reduces computation
+    epochs: 1
+    per_device_batch_size: 2
+    gradient_accumulation_steps: 8
+    learning_rate: 2e-4
+    warmup_steps: 100
+    max_grad_norm: 1.0
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+    eval_steps: 500
+    seed: 42
+
+    # MoA-specific training configuration
+    moa_lb_loss_weight: 0.01  # Load balance loss weight (auxiliary loss to prevent expert collapse)
+
+  logging:
+    output_dir: "./output/llama3-moa-4experts-sft"
+    run_name: "llama3-moa-4experts-instruction"
+    loggers: []
+    report_to: "none"
+
+  distributed:
+    backend: "single"
+
+  chat_template: "llama3"

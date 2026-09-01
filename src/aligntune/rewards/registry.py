@@ -523,6 +523,94 @@ def _initialize_default_rewards():
         )
     )
 
+    # ========================================================================
+    # RUBRIC-ANCHORED RL
+    # ========================================================================
+    RewardRegistry.register_reward_type(
+        "rubric",
+        RewardType.RUBRIC,
+        RewardConfig(
+            RewardType.RUBRIC,
+            weight=1.0,
+            params={
+                "rubric": "",  # Must be provided at instantiation
+                "judge_type": "openai",  # Default to OpenAI judge
+            }
+        )
+    )
+
+    # ========================================================================
+    # RLVR (RL with Verifiable Rewards)
+    # ========================================================================
+    RewardRegistry.register_reward_type(
+        "math_verifiable",
+        RewardType.MATH_VERIFIABLE,
+        RewardConfig(
+            RewardType.MATH_VERIFIABLE,
+            weight=1.0,
+            params={"simplify": True, "timeout": 5.0}
+        )
+    )
+
+    RewardRegistry.register_reward_type(
+        "code_verifiable",
+        RewardType.CODE_VERIFIABLE,
+        RewardConfig(
+            RewardType.CODE_VERIFIABLE,
+            weight=1.0,
+            params={"language": "python", "timeout": 5.0, "test_cases": []}
+        )
+    )
+
+    RewardRegistry.register_reward_type(
+        "sql_verifiable",
+        RewardType.SQL_VERIFIABLE,
+        RewardConfig(
+            RewardType.SQL_VERIFIABLE,
+            weight=1.0,
+            params={"execute": False, "db_path": ":memory:"}
+        )
+    )
+
+    RewardRegistry.register_reward_type(
+        "json_schema_verifiable",
+        RewardType.JSON_SCHEMA_VERIFIABLE,
+        RewardConfig(
+            RewardType.JSON_SCHEMA_VERIFIABLE,
+            weight=1.0,
+            params={"schema": {}}
+        )
+    )
+
+    RewardRegistry.register_reward_type(
+        "regex_verifiable",
+        RewardType.REGEX_VERIFIABLE,
+        RewardConfig(
+            RewardType.REGEX_VERIFIABLE,
+            weight=1.0,
+            params={"pattern": "", "case_sensitive": True}
+        )
+    )
+
+    # ========================================================================
+    # REWARD MODEL ENSEMBLES
+    # ========================================================================
+    RewardRegistry.register_reward_type(
+        "reward_model_ensemble",
+        RewardType.REWARD_MODEL_ENSEMBLE,
+        RewardConfig(
+            RewardType.REWARD_MODEL_ENSEMBLE,
+            weight=1.0,
+            params={
+                "model_ids": [
+                    "OpenAssistant/reward-model-deberta-v3-large-v2",
+                    "gpt2",  # Fallback for testing
+                ],
+                "ensemble_mode": "mean",
+            }
+        )
+    )
+
 
 # Initialize on import
 _initialize_default_rewards()

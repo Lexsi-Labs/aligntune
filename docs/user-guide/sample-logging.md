@@ -20,7 +20,7 @@ AlignTune can periodically generate qualitative samples during RL training to sp
 | `percent_of_max_steps` | float? | `None` | Log at percentages of `train.max_steps` (e.g., `0.25`) |
 | `num_samples` | int | `3` | How many prompts to evaluate (capped at the number of prompts) |
 | `max_new_tokens` | int | `80` | Max tokens per response |
-| `temperature` | float | `0.7` | Sampling temperature |
+| `temperature` | float | `0.6` | Sampling temperature |
 | `top_p` | float | `0.9` | Nucleus sampling parameter |
 
 Validation in `__post_init__` ensures all numeric values are positive and that percentages fall inside `(0, 1]`.
@@ -88,4 +88,4 @@ Qualitative samples (post-train) - prompts: 2
 - On distributed training setups the samples run on the trainer's primary device; make sure enough GPU memory remains to run generation with the configured `max_new_tokens`.
 - Disable qualitative samples on highly resource-constrained runs to avoid extra generation overhead.
 
-For more context on logging knobs, revisit the [`logging.sample_logging` section of the README](#) or the API docs for `SampleLoggingConfig`.
+For more context on logging knobs, revisit the API docs for `SampleLoggingConfig`.

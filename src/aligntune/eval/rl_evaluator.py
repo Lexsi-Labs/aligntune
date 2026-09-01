@@ -23,7 +23,9 @@ import numpy as np
 
 from .evaluator import BaseEvaluator
 from .metrics.rl import KLDivergenceMetric, RewardAccuracyMetric, PolicyEntropyMetric
+from .metrics.generic import PerplexityMetric, completion_loss_totals
 from .metrics.code import PassAtKMetric
+from .metrics.text import RougeMetric, BleuMetric
 from ..data.schemas import TASK_SCHEMAS, TaskType as SchemaTaskType
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,14 @@ class RLEvaluator(BaseEvaluator):
     def __init__(self, *args, **kwargs):
         # Check if metrics were explicitly provided
         metrics_provided = kwargs.get('metrics') is not None
+        self.data_task_type = kwargs.pop('data_task_type', None)
+        self.apply_chat_template = kwargs.pop('apply_chat_template', True)
+        self.enable_thinking = kwargs.pop('enable_thinking', False)
+        self.dpo_beta = kwargs.pop('dpo_beta', 0.1)
+
+        if self.data_task_type == "sft" and not metrics_provided:
+            kwargs['metrics'] = [PerplexityMetric(), RougeMetric(), BleuMetric()]
+            metrics_provided = True
         
         # BaseEvaluator.__init__ will handle task_type, generation_kwargs, use_unsloth
         super().__init__(*args, **kwargs)
@@ -47,12 +57,171 @@ class RLEvaluator(BaseEvaluator):
             self.add_metric(RewardAccuracyMetric())
             self.add_metric(PolicyEntropyMetric())
 
+    @staticmethod
+    def _extract_sft_rows(batch: Dict[str, Any], prompts: List[Any], targets: List[Any]):
+        """Build evaluation prompt histories and references from SFT conversations."""
+        message_rows = batch.get("messages")
+        if not message_rows:
+            message_rows = [
+                [
+                    {"role": "user", "content": str(prompt)},
+                    {"role": "assistant", "content": str(target)},
+                ]
+                for prompt, target in zip(prompts, targets)
+            ]
+
+        valid_prompts, valid_targets, valid_messages, valid_kwargs = [], [], [], []
+        template_kwargs_rows = batch.get("chat_template_kwargs", [])
+        for index, messages in enumerate(message_rows):
+            if not isinstance(messages, list) or not messages:
+                logger.warning("Skipping SFT evaluation row without messages")
+                continue
+
+            normalized = [
+                message for message in messages
+                if isinstance(message, dict)
+                and message.get("role") in {"system", "user", "assistant"}
+                and "content" in message
+            ]
+            if not normalized or normalized[-1].get("role") != "assistant":
+                logger.warning(
+                    "Skipping SFT evaluation row whose final message is not an assistant response"
+                )
+                continue
+
+            history = normalized[:-1]
+            if not history:
+                logger.warning("Skipping SFT evaluation row without prompt history")
+                continue
+
+            valid_prompts.append(str(history[-1].get("content", "")))
+            valid_targets.append(str(normalized[-1]["content"]))
+            valid_messages.append(normalized)
+            row_kwargs = (
+                template_kwargs_rows[index]
+                if index < len(template_kwargs_rows)
+                else {}
+            )
+            valid_kwargs.append(row_kwargs if isinstance(row_kwargs, dict) else {})
+
+        return valid_prompts, valid_targets, valid_messages, valid_kwargs
+
+    def _format_generation_prompts(
+        self,
+        tokenizer,
+        prompts: List[str],
+        message_rows: Optional[List[Any]] = None,
+        template_kwargs_rows: Optional[List[Any]] = None,
+    ) -> List[str]:
+        """Format generation inputs from conversation history or raw prompts."""
+        if not self.apply_chat_template or not getattr(tokenizer, 'chat_template', None):
+            return prompts
+
+        formatted_prompts = []
+        for index, prompt in enumerate(prompts):
+            messages = None
+            if message_rows is not None and index < len(message_rows):
+                candidate = message_rows[index]
+                if isinstance(candidate, list):
+                    messages = [
+                        message for message in candidate
+                        if isinstance(message, dict)
+                        and message.get("role") in {"system", "user", "assistant"}
+                    ]
+
+            if messages:
+                # The final assistant turn is the reference completion. Keep
+                # the system prompt and conversation history, but never feed
+                # that answer to generation.
+                if messages[-1].get("role") == "assistant":
+                    messages = messages[:-1]
+            else:
+                messages = [{"role": "user", "content": prompt}]
+
+            template_kwargs = {"enable_thinking": self.enable_thinking}
+            if template_kwargs_rows is not None and index < len(template_kwargs_rows):
+                row_kwargs = template_kwargs_rows[index]
+                if isinstance(row_kwargs, dict):
+                    template_kwargs.update(row_kwargs)
+
+            try:
+                formatted = tokenizer.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                    **template_kwargs,
+                )
+            except TypeError:
+                # Older tokenizers do not expose the Qwen-specific argument.
+                formatted = tokenizer.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+            formatted_prompts.append(formatted)
+        return formatted_prompts
+
+    @staticmethod
+    def _prepare_dpo_batch(
+        tokenizer,
+        prompts: List[Any],
+        chosen: List[Any],
+        rejected: List[Any],
+        template_kwargs_rows: Optional[List[Any]] = None,
+    ) -> tuple[List[str], List[str], List[str]]:
+        """Render canonical DPO rows into strings using TRL's own formatter."""
+        from trl.data_utils import maybe_apply_chat_template
+
+        if not (len(prompts) == len(chosen) == len(rejected)):
+            raise ValueError("DPO prompt, chosen, and rejected batches must have equal lengths")
+
+        rendered_prompts, rendered_chosen, rendered_rejected = [], [], []
+        for index, (prompt, chosen_value, rejected_value) in enumerate(
+            zip(prompts, chosen, rejected)
+        ):
+            row = {
+                "prompt": prompt,
+                "chosen": chosen_value,
+                "rejected": rejected_value,
+            }
+            if template_kwargs_rows and index < len(template_kwargs_rows):
+                row_kwargs = template_kwargs_rows[index]
+                if isinstance(row_kwargs, dict):
+                    row["chat_template_kwargs"] = row_kwargs
+
+            rendered = maybe_apply_chat_template(row, tokenizer)
+            values = (
+                rendered.get("prompt"),
+                rendered.get("chosen"),
+                rendered.get("rejected"),
+            )
+            if not all(isinstance(value, str) for value in values):
+                raise ValueError("TRL did not render DPO row to prompt/chosen/rejected strings")
+
+            rendered_prompts.append(values[0])
+            rendered_chosen.append(values[1])
+            rendered_rejected.append(values[2])
+
+        return rendered_prompts, rendered_chosen, rendered_rejected
+
     def _extract_column_data(self, batch: Dict, heuristics: List[str]) -> List[Any]:
-        """Helper to find data from the first matching column in the batch."""
-        for col in heuristics:
-            if col in batch:
-                return batch[col]
-        return []
+        """Extract the first non-empty candidate value for each batch row."""
+        candidate_columns = [batch[col] for col in heuristics if col in batch]
+        if not candidate_columns:
+            return []
+
+        values = []
+        for row_index in range(len(candidate_columns[0])):
+            value = ""
+            for column in candidate_columns:
+                candidate = column[row_index]
+                if candidate is not None and (
+                    not isinstance(candidate, str) or candidate.strip()
+                ):
+                    value = candidate
+                    break
+            values.append(value)
+        return values
 
     def evaluate_rl(
         self,
@@ -107,11 +276,14 @@ class RLEvaluator(BaseEvaluator):
             collate_fn=self._custom_collate_fn 
         )
         
-        # ========== MODIFIED: Added all_losses ==========
-        all_losses = []  # ← ADD THIS LINE
+        total_completion_nll = 0.0
+        total_completion_tokens = 0
         kl_divs = []
         entropies = []
         reward_pairs = []
+        dpo_reward_pairs = []
+        policy_logprob_pairs = []
+        policy_reference_pairs = []
         all_predictions = []
         all_references = []
         all_queries = []
@@ -136,9 +308,15 @@ class RLEvaluator(BaseEvaluator):
 
         schema = TASK_SCHEMAS.get(SchemaTaskType.GRPO)
         
-        # Priority: input/instruction (actual content) before prompt (often template text)
-        prompt_keys = ["input", "instruction", "question", "prompt"] + list(schema.column_heuristics["prompt"])
-        target_keys = ["output", "response", "completion"] + list(schema.column_heuristics["response"])
+        # DataManager's canonical prompt is complete; optional `input` fields
+        # are often present but blank after normalization.
+        prompt_keys = ["prompt", "instruction", "question", "input"] + list(schema.column_heuristics["prompt"])
+        # GRPO's canonical reference field is named ``reference``. Keep the
+        # generic output aliases as well because DataManager may normalize
+        # SFT/preference data to ``completion`` or ``chosen``.
+        target_keys = ["output", "response", "completion"] + list(
+            schema.column_heuristics.get("reference", [])
+        )
 
         if column_mapping:
             for key in ["prompt", "input", "instruction", "question"]:
@@ -171,6 +349,14 @@ class RLEvaluator(BaseEvaluator):
 
                     prompts = self._extract_column_data(batch, prompt_keys)
                     targets = self._extract_column_data(batch, target_keys)
+
+                    if self.data_task_type == "sft":
+                        prompts, targets, message_rows, template_kwargs_rows = (
+                            self._extract_sft_rows(batch, prompts, targets)
+                        )
+                    else:
+                        message_rows = batch.get("messages")
+                        template_kwargs_rows = batch.get("chat_template_kwargs")
                     
                     if first_batch:
                         print(f"DEBUG: Extracted Prompts Count: {len(prompts)}")
@@ -194,6 +380,18 @@ class RLEvaluator(BaseEvaluator):
 
                     chosen = batch.get('chosen', [])
                     rejected = batch.get('rejected', [])
+
+                    if self.data_task_type == "dpo":
+                        prompts, chosen, rejected = self._prepare_dpo_batch(
+                            tokenizer,
+                            batch.get("prompt", []),
+                            chosen,
+                            rejected,
+                            template_kwargs_rows,
+                        )
+                        targets = chosen
+                        message_rows = None
+                        template_kwargs_rows = None
                     
                     if not len(prompts) and 'input_ids' in batch:
                         # Only use raw input_ids if they were collated successfully (are tensor)
@@ -229,25 +427,19 @@ class RLEvaluator(BaseEvaluator):
                     else:
                         targets = [str(t) if t is not None else "" for t in targets]
 
-                if isinstance(prompts[0], str):
-                    # Apply chat template if available (for instruct models)
-                    # if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
-                    #     try:
-                    #         formatted_prompts = []
-                    #         for p in prompts:
-                    #             messages = [{"role": "user", "content": p}]
-                    #             formatted = tokenizer.apply_chat_template(
-                    #                 messages, 
-                    #                 tokenize=False, 
-                    #                 add_generation_prompt=True
-                    #             )
-                    #             formatted_prompts.append(formatted)
-                    #         inputs = tokenizer(formatted_prompts, return_tensors="pt", padding=True, truncation=True).to(self.device)
-                    #     except Exception as e:
-                    #         logger.debug(f"Chat template failed, using raw prompts: {e}")
-                    #         inputs = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).to(self.device)
-                    # else:
-                    inputs = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).to(self.device)
+                    if self.data_task_type == "dpo":
+                        # DPO rows are already rendered by TRL above.
+                        model_prompts = prompts
+                    elif isinstance(prompts[0], str):
+                        model_prompts = self._format_generation_prompts(
+                            tokenizer,
+                            prompts,
+                            message_rows=message_rows,
+                            template_kwargs_rows=template_kwargs_rows,
+                        )
+                    inputs = tokenizer(
+                        model_prompts, return_tensors="pt", padding=True, truncation=True
+                    ).to(self.device)
                 elif 'input_ids' in batch and isinstance(batch['input_ids'], torch.Tensor):
                      inputs = {k: v.to(self.device) for k, v in batch.items() if k in ['input_ids', 'attention_mask']}
                 else:
@@ -261,34 +453,55 @@ class RLEvaluator(BaseEvaluator):
                         
                         # Use right padding for loss computation
                         tokenizer.padding_side = 'right'
-                        
-                        # Prepare inputs
-                        if isinstance(prompts[0], str):
-                            loss_inputs = tokenizer(
-                                prompts, 
-                                return_tensors="pt", 
-                                padding=True, 
-                                truncation=True
-                            ).to(self.device)
-                        else:
-                            loss_inputs = inputs
-                        
-                        # Forward pass - Fallback mechanism for DynamicCache errors
-                        try:
-                            outputs = policy_model(**loss_inputs, labels=loss_inputs["input_ids"])
-                        except (AttributeError, TypeError, RuntimeError) as cache_err:
-                            err_str = str(cache_err)
-                            if "DynamicCache" in err_str or "seen_tokens" in err_str or "past_key_values" in err_str:
-                                # Retry with cache disabled
-                                outputs = policy_model(**loss_inputs, labels=loss_inputs["input_ids"], use_cache=False)
-                            else:
-                                raise cache_err
-                        
-                        # Collect loss
-                        if outputs.loss is not None:
-                            batch_loss = outputs.loss.item()
-                            all_losses.extend([batch_loss] * len(prompts))
-                        
+
+                        # FIXED: Compute loss over completions only (same as evaluator.py)
+                        if targets and len(targets) > 0 and isinstance(prompts[0], str):
+                            # Concatenate prompt + completion
+                            full_texts = [p + t for p, t in zip(model_prompts, targets)]
+
+                            # Tokenize full sequences (batched)
+                            full_enc = tokenizer(full_texts, return_tensors="pt", padding=True, truncation=True).to(self.device)
+
+                            # Get prompt lengths for masking
+                            prompt_enc = tokenizer(model_prompts, return_tensors="pt", padding=True, truncation=True)
+                            prompt_lens = prompt_enc.attention_mask.sum(1)
+
+                            # Create labels with prompt tokens masked
+                            labels = full_enc.input_ids.clone()
+                            for i, prompt_len in enumerate(prompt_lens):
+                                labels[i, :prompt_len] = -100  # Mask prompt tokens
+
+                            # Forward pass (batched) with fallback for DynamicCache errors
+                            try:
+                                with torch.no_grad():
+                                    out_logits = policy_model(full_enc.input_ids, attention_mask=full_enc.attention_mask).logits
+                            except (AttributeError, TypeError, RuntimeError) as cache_err:
+                                err_str = str(cache_err)
+                                if "DynamicCache" in err_str or "seen_tokens" in err_str or "past_key_values" in err_str:
+                                    with torch.no_grad():
+                                        out_logits = policy_model(full_enc.input_ids, attention_mask=full_enc.attention_mask, use_cache=False).logits
+                                else:
+                                    raise cache_err
+
+                            # Shift for next-token prediction
+                            shift_logits = out_logits[:, :-1, :].contiguous()
+                            shift_labels = labels[:, 1:].contiguous()
+                            shift_mask = full_enc.attention_mask[:, 1:].contiguous()
+
+                            # PPL is token-weighted across the full evaluation
+                            # corpus, not an equal-weight average of examples.
+                            from torch.nn import CrossEntropyLoss
+                            loss_fct = CrossEntropyLoss(reduction="none")
+                            per_token_loss = loss_fct(shift_logits.transpose(1, 2), shift_labels)
+
+                            # Mask padded and prompt tokens
+                            loss_mask = (shift_labels != -100).float() * shift_mask
+                            batch_nll, batch_tokens = completion_loss_totals(
+                                per_token_loss, loss_mask
+                            )
+                            total_completion_nll += batch_nll
+                            total_completion_tokens += batch_tokens
+
                         # Restore padding
                         tokenizer.padding_side = temp_padding
                         
@@ -346,49 +559,91 @@ class RLEvaluator(BaseEvaluator):
                         # Case B: Implicit Reward (Policy Model LogProbs)
                         # Used when no external reward model is provided, common for DPO eval
                         else:
-                            # Helper to compute logprobs for full sequences with Fallback
-                            def get_batch_logprobs(texts, model):
-                                enc = tokenizer(texts, return_tensors="pt", padding=True, truncation=True).to(self.device)
-                                
+                            def get_batch_logprobs(prompts_list, responses_list, model):
+                                """Compute log P(response | prompt) for entire batch."""
+                                # Concatenate prompt + response
+                                full_texts = [p + r for p, r in zip(prompts_list, responses_list)]
+
+                                # Tokenize full sequences (batched)
+                                full_enc = tokenizer(full_texts, return_tensors="pt", padding=True, truncation=True).to(self.device)
+
+                                # Get prompt lengths for masking
+                                prompt_enc = tokenizer(prompts_list, return_tensors="pt", padding=True, truncation=True)
+                                prompt_lens = prompt_enc.attention_mask.sum(1)
+
+                                # Forward pass with fallback for DynamicCache errors
                                 try:
-                                    out = model(**enc)
+                                    with torch.no_grad():
+                                        logits = model(full_enc.input_ids, attention_mask=full_enc.attention_mask).logits
                                 except (AttributeError, TypeError, RuntimeError) as cache_err:
                                     err_str = str(cache_err)
                                     if "DynamicCache" in err_str or "seen_tokens" in err_str or "past_key_values" in err_str:
-                                        out = model(**enc, use_cache=False)
+                                        with torch.no_grad():
+                                            logits = model(full_enc.input_ids, attention_mask=full_enc.attention_mask, use_cache=False).logits
                                     else:
                                         raise cache_err
 
-                                logits = out.logits[:, :-1, :]
-                                labels = enc.input_ids[:, 1:]
-                                log_probs = F.log_softmax(logits, dim=-1)
-                                token_log_probs = torch.gather(log_probs, -1, labels.unsqueeze(-1)).squeeze(-1)
-                                mask = enc.attention_mask[:, 1:]
-                                # Sum log probs over valid tokens
-                                return (token_log_probs * mask).sum(dim=-1).tolist()
+                                # Shift for next-token prediction
+                                shift_logits = logits[:, :-1, :].contiguous()
+                                shift_labels = full_enc.input_ids[:, 1:].contiguous()
+
+                                # Compute log probs (batched)
+                                log_probs = F.log_softmax(shift_logits, dim=-1)
+                                token_log_probs = log_probs.gather(-1, shift_labels.unsqueeze(-1)).squeeze(-1)
+
+                                # Shifted labels predict token i + 1, so the first
+                                # response token is at prompt_length - 1.
+                                positions = torch.arange(shift_labels.shape[1], device=self.device).unsqueeze(0)
+                                prompt_lens_expanded = prompt_lens.unsqueeze(1).to(self.device)
+                                response_mask = positions >= (prompt_lens_expanded - 1)
+
+                                # Exclude right-padding tokens.
+                                valid_mask = full_enc.attention_mask[:, 1:].bool()
+                                final_mask = response_mask & valid_mask
+
+                                # Sum log probs over response tokens only (batched)
+                                sample_logprobs = (token_log_probs * final_mask.float()).sum(1)
+
+                                return sample_logprobs.tolist()
 
                             # 1. Policy Scores
-                            # Temporarily switch padding to right for loss/logprob calc if needed
+                            # Temporarily switch padding to right for loss/logprob calc
                             curr_pad = tokenizer.padding_side
                             tokenizer.padding_side = 'right'
-                            
-                            policy_chosen_log = get_batch_logprobs(chosen, policy_model)
-                            policy_rejected_log = get_batch_logprobs(rejected, policy_model)
-                            
-                            # 2. Reference Scores (Optional but recommended for DPO)
+
+                            policy_chosen_log = get_batch_logprobs(model_prompts, chosen, policy_model)
+                            policy_rejected_log = get_batch_logprobs(model_prompts, rejected, policy_model)
+
+                            batch_policy_pairs = list(
+                                zip(policy_chosen_log, policy_rejected_log)
+                            )
+                            policy_logprob_pairs.extend(batch_policy_pairs)
+
+                            # DPO implicit rewards require a reference model.
                             if reference_model:
-                                ref_chosen_log = get_batch_logprobs(chosen, reference_model)
-                                ref_rejected_log = get_batch_logprobs(rejected, reference_model)
-                                beta = 0.1 # Default DPO beta
-                                c_scores = [beta * (p - r) for p, r in zip(policy_chosen_log, ref_chosen_log)]
-                                r_scores = [beta * (p - r) for p, r in zip(policy_rejected_log, ref_rejected_log)]
+                                ref_chosen_log = get_batch_logprobs(model_prompts, chosen, reference_model)
+                                ref_rejected_log = get_batch_logprobs(model_prompts, rejected, reference_model)
+
+                                for pc, pr, rc, rr in zip(
+                                    policy_chosen_log,
+                                    policy_rejected_log,
+                                    ref_chosen_log,
+                                    ref_rejected_log,
+                                ):
+                                    chosen_reward = self.dpo_beta * (pc - rc)
+                                    rejected_reward = self.dpo_beta * (pr - rr)
+                                    dpo_reward_pairs.append(
+                                        (chosen_reward, rejected_reward)
+                                    )
+                                    policy_reference_pairs.append(
+                                        ((pc, rc), (pr, rr))
+                                    )
                             else:
-                                # Fallback: Just use Policy LogProbs (Higher logprob = Preferred)
-                                c_scores = policy_chosen_log
-                                r_scores = policy_rejected_log
-                                
+                                # A policy-only ranking is useful when no reference
+                                # model is available, but is not an implicit DPO reward.
+                                dpo_reward_pairs.extend(batch_policy_pairs)
+
                             tokenizer.padding_side = curr_pad
-                            reward_pairs.extend(list(zip(c_scores, r_scores)))
 
                     except Exception as e:
                         # logger.debug(f"Reward/DPO computation failed: {e}")
@@ -496,15 +751,13 @@ class RLEvaluator(BaseEvaluator):
             print(f"\n{'='*60}")
             print(f"DEBUG: Collected data")
             print(f"{'='*60}")
-            print(f"  all_losses: {len(all_losses)} items")
+            print(f"  completion tokens: {total_completion_tokens}")
             print(f"  all_predictions: {len(all_predictions)} items")
             print(f"  all_references: {len(all_references)} items")
             print(f"  kl_divs: {len(kl_divs)} items")
             print(f"  entropies: {len(entropies)} items")
             print(f"  reward_pairs: {len(reward_pairs)} items")
             
-            if all_losses:
-                print(f"  Sample losses: {all_losses[:3]}")
             if all_predictions:
                 sample_pred = all_predictions[0]
                 if isinstance(sample_pred, list):
@@ -526,20 +779,27 @@ class RLEvaluator(BaseEvaluator):
             elif metric.name == "reward_accuracy" and reward_pairs:
                 results.update(metric.safe_compute(reward_pairs, []))
             elif metric.name == "perplexity":
-                if all_losses:
-                    results.update(metric.safe_compute(all_losses, []))
+                if total_completion_tokens:
+                    mean_loss = total_completion_nll / total_completion_tokens
+                    results.update(metric.safe_compute([mean_loss], []))
                 else:
                     results["perplexity"] = float('nan')
             
-            # ========== NEW: DPO metrics (uses same reward_pairs data) ==========
-            elif metric.name in ["win_rate", "reward_margin", "preference_accuracy", 
-                                  "calibration", "log_ratio", "implicit_reward"]:
-                if reward_pairs:
-                    logger.debug(f"Computing DPO metric '{metric.name}' with {len(reward_pairs)} pairs")
-                    results.update(metric.safe_compute(reward_pairs, []))
+            elif metric.name in ["win_rate", "reward_margin", "preference_accuracy", "calibration"]:
+                if dpo_reward_pairs:
+                    results.update(metric.safe_compute(dpo_reward_pairs, []))
                 else:
                     logger.warning(f"DPO metric '{metric.name}' requires chosen/rejected pairs")
-            # ========== END NEW ==========
+            elif metric.name == "log_ratio":
+                if policy_logprob_pairs:
+                    results.update(metric.safe_compute(policy_logprob_pairs, []))
+                else:
+                    logger.warning("DPO metric 'log_ratio' requires chosen/rejected pairs")
+            elif metric.name == "implicit_reward":
+                if policy_reference_pairs:
+                    results.update(metric.safe_compute(policy_reference_pairs, []))
+                else:
+                    logger.warning("DPO metric 'implicit_reward' requires a reference model")
             
             elif metric.requires_generation:
                 results.update(metric.safe_compute(all_predictions, all_references))

@@ -9,7 +9,7 @@ Original file is located at
 <center>
 
 <div style="text-align:center;">
-<a href="https://aligntune.lexsi.ai/"><img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/docs/assets/banner_aligntune.png" width="690"></a>
+<a href="https://aligntune.lexsi.ai/"><img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-banner.png" width="690"></a>
 
 <a href="https://aligntune.lexsi.ai/"><img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/docs.png" width="150"></a>
 <a href="https://discord.gg/dSB62Q7A"><img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/discord.png" width="150"></a>
@@ -27,8 +27,8 @@ To run this, press "*Runtime*" and press "*Run all*" on a Google Colab instance!
 """
 
 # Commented out IPython magic to ensure Python compatibility.
-!git clone https://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@github.com/zeralyngkhoi19/FinetuneHub_Internal.git
-# %cd FinetuneHub_Internal/
+!git clone https://github.com/Lexsi-Labs/aligntune.git
+# %cd aligntune/
 !pip install -e .
 
 """# DPO Fine-tuning & Evaluation Pipeline
@@ -214,7 +214,8 @@ def run_dpo_training():
             save_steps=200,
             logging_steps=10,
             save_total_limit=3,
-            eval_strategy="steps",
+            eval_strategy="no",  # no eval_dataset/eval_split is configured for the training loop;
+                                 # this script evaluates separately post-training via run_evaluation()
 
             # Reference model settings
             precompute_ref_log_probs=True,

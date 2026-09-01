@@ -18,6 +18,7 @@ from transformers import (
 )
 
 from .config import ModelConfig, PrecisionType
+from aligntune.core.long_context.rope_scaling import RopeScalingConfig, RopeScalingApplier
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class ModelWrapper:
         # Add attention implementation
         if self.config.attn_implementation != "auto":
             model_kwargs["attn_implementation"] = self.config.attn_implementation
-        
+
         # Load model
         try:
             self.model = AutoModelForCausalLM.from_pretrained(

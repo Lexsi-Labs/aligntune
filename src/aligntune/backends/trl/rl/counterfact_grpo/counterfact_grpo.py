@@ -31,6 +31,7 @@ from aligntune.core.rl.sample_logger import generate_and_log_samples
 from aligntune.core.sft.evaluator import EnhancedEvaluator
 from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
 from aligntune.core.precision_handler import PrecisionHandler
+from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +255,7 @@ for result in results:
 # COUNTERFACTUAL TRL TRAINER (mirrors TRLGRPOTrainer 1:1)
 # ============================================================================
 class TRLCounterFactGRPOTrainer(TrainerBase):
+    KEEP_COLUMNS = True
     """Counterfactual GRPO trainer using custom CounterfactualGRPOTrainer with enhanced rewards."""
     
     def __init__(self, config: UnifiedConfig):
@@ -504,7 +506,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             self.train_dataset = dataset_dict["train"]
             self.eval_dataset = dataset_dict.get("validation", None)
             self.dataset_dict = dataset_dict
-            
+
             logger.info(f"Dataset loaded: {len(self.train_dataset)} train examples")
             if self.eval_dataset:
                 logger.info(f"Evaluation dataset: {len(self.eval_dataset)} examples")
@@ -1190,7 +1192,7 @@ for r in results:
 
         # Generation parameters
         num_generations = self._get_config_value(self.config.train, 'num_generations', default=per_device_batch_size)
-        mask_truncated_completions = self._get_config_value(self.config.train, 'mask_truncated_completions', default=True)
+        mask_truncated_completions = self._get_config_value(self.config.train, 'mask_truncated_completions', default=False)
         temperature = self._get_config_value(self.config.train, 'temperature', default=0.6)
         top_p = self._get_config_value(self.config.train, 'top_p', default=0.95)
         reward_weights = self._get_config_value(self.config.train, 'reward_weights', default=[1.0])
@@ -1387,7 +1389,11 @@ for r in results:
             num_generations=num_generations,
             max_steps=max_steps,
             learning_rate=learning_rate,
-            max_prompt_length=max_prompt_length,
+            # NOTE: max_prompt_length was removed from trl's GRPOConfig in the
+            # installed trl version (1.7.1) - only max_completion_length remains.
+            # Passing it raises "GRPOConfig.__init__() got an unexpected keyword
+            # argument 'max_prompt_length'". We still read it from config above
+            # for logging, but don't forward it to GRPOConfig.
             max_completion_length=max_completion_length,
             temperature=temperature,
             top_p=top_p,
@@ -1404,6 +1410,27 @@ for r in results:
             eval_strategy=eval_strategy,
             eval_steps=eval_steps,
         )
+
+        # Backfill anything else the caller set (e.g. epsilon, epsilon_high,
+        # scale_rewards, importance_sampling_level, ...) that the explicit
+        # list above doesn't already cover.
+        missing = extract_extra_and_missing_params(
+            backend_config=grpo_config, config=self.config, algorithm='counterfact_grpo'
+        )
+        for key, value in missing.items():
+            setattr(grpo_config, key, value)
+
+        # extract_extra_and_missing_params treats a field left at its config
+        # class's OWN declared default as "not explicitly set" (see
+        # get_already_set_params) and backfills it from config.train. TRL's
+        # GRPOConfig.loss_type defaults to 'dapo' -- exactly the value the
+        # sigmoid-guard above resolves to -- so it gets silently overwritten
+        # by config.train.loss_type (which defaults to 'sigmoid', a
+        # DPO-family value that isn't valid here), undoing the guard and
+        # crashing training with "Unknown loss type: sigmoid". Re-validate
+        # once more after the backfill to make the guard actually stick.
+        if grpo_config.loss_type == 'sigmoid':
+            grpo_config.loss_type = 'dapo'
 
 
 #       # Create Counterfactual GRPO trainer

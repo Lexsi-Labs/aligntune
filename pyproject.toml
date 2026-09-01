@@ -1,24 +1,48 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# Fallback for builds with no git metadata and no SETUPTOOLS_SCM_PRETEND_VERSION
+# (e.g. building a wheel from an unpacked sdist locally). Keep in sync with the
+# latest released tag.
+fallback_version = "0.1.10"
+# Don't append a local "+g<hash>" / ".dev" segment - PyPI rejects local
+# versions, and the publish workflow already guards against dev versions.
+local_scheme = "no-local-version"
 
 [project]
 name = "aligntune"
-version = "0.1.17"
+# Version is derived from the git tag by setuptools_scm (see [tool.setuptools_scm]
+# below). CI sets SETUPTOOLS_SCM_PRETEND_VERSION to the release tag when building
+# for PyPI, so a `git tag 2.0.0` publishes aligntune 2.0.0.
+dynamic = ["version"]
 description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
-requires-python = ">=3.12"
-license = { text = "MIT" }
+requires-python = ">=3.11"
+license = "LicenseRef-LSAL-1.1"
+license-files = [
+    "LICENSE.md",
+    "THIRD_PARTY_LICENSES.md",
+    # mergekit is vendored and compiled into this wheel (see setup.py); its
+    # own LGPL-3.0 license and patch notes must ship inside the built
+    # distribution too, not just live in the source repo.
+    "third_party/mergekit/LICENSE",
+    "third_party/mergekit/PATCH_NOTES.md",
+    # tokenizer-extension is vendored (Apache-2.0) and compiled into the wheel.
+    "third_party/tokenizer-extension/LICENSE",
+]
 authors = [
     {name = "Zera Lyngkhoi", email = "zera.lyngkhoi@lexsi.ai"},
-    {name = "Chirag Chawla", email = "chirag.chawla@lexsi.ai"},
-    {name = "Pratinav Seth", email = "pratinav.seth@lexsi.ai"},
-    {name = "Utsav Avaiya", email = "utsav.avaiya@lexsi.ai"},
-    {name = "Soham Bhattacharjee", email = "soham.bhattacharjee@lexsi.ai"},
     {name = "Bhavya Goyal", email = "bhavya.goyal@lexsi.ai"},
+    {name = "Chirag Chawla", email = "chirag.chawla@lexsi.ai"},
+    {name = "Soham Bhattacharjee", email = "soham.bhattacharjee@lexsi.ai"},
+    {name = "Utsav Avaiya", email = "utsav.avaiya@lexsi.ai"},
+    {name = "Ram Mohan Rao Kadiyala", email = "ram.kadiyala@lexsi.ai"},
     {name = "Mykola Khandoga", email = "mykola.khandoga@lexsi.ai"},
     {name = "Rui Yuan", email = "rui.yuan@lexsi.ai"},
-    {name = "Vinay Kumar Sankarapu", email = "v.k@lexsi.ai"}
+    {name = "Vinay Kumar Sankarapu", email = "v.k@lexsi.ai"},
+    {name = "Pratinav Seth", email = "pratinav.seth@lexsi.ai"}
 ]
 keywords = [
     "alignment",
@@ -51,7 +75,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -60,52 +83,133 @@ classifiers = [
 
 dependencies = [
     # Core ML dependencies
-    "transformers>=4.35.0",
+    "transformers==5.14.1",
+    # unsloth/unsloth_zoo's own metadata caps this at <4.4.0, but that's
+    # incompatible with trl==1.7.1 below (needs datasets>=4.7.0) - trl's
+    # requirement wins since it's a hard pin already in use elsewhere in
+    # this project. Left as a floor only; not verified against unsloth's
+    # actual (not just declared) behavior at datasets>=4.7.0.
     "datasets>=2.14.0",
-    "accelerate>=0.24.0",
-    "peft>=0.6.0",
-    "bitsandbytes>=0.41.0",
-    
+    "accelerate>=1.6.0",
+    # Tightened from >=0.6.0 to match unsloth/unsloth_zoo's own requirement.
+    "peft>=0.18.0,!=0.11.0",
+    # Tightened from >=0.41.0 to match unsloth's own requirement.
+    "bitsandbytes>=0.45.5,!=0.46.0,!=0.48.0",
+    "torchao>=0.16.0",
+    # unsloth's metadata caps this at <2.11.0 (unsloth_zoo says <2.13.0),
+    # but that's stricter than reality: `from unsloth import
+    # FastLanguageModel` was verified working against torch==2.11.0 already
+    # installed in this project's dev environment (see
+    # third_party/unsloth/PATCH_NOTES.md). Left as a floor only, same
+    # reasoning as the datasets pin above - don't force a downgrade of an
+    # already-working torch install based on an unverified upstream cap.
+    "torch>=2.4.0",
+    "torchvision",
+
     # Core Python dependencies
     "numpy>=1.21.0",
     "pyyaml>=6.0",
-    "huggingface-hub>=0.17.0",
-    "tqdm>=4.64.0",
+    # Tightened from >=0.17.0 to match unsloth/unsloth_zoo's own requirement.
+    "huggingface-hub>=0.34.0",
+    "tqdm>=4.67.1",
     "psutil>=5.9.0",
-    
+
     # Data processing
     "pandas>=1.3.0",
     "scikit-learn>=1.0.0",
-    
+    "sqlglot>=20.0.0",
+
     # Utilities
-    "click>=8.0.0",
+    "click>=8.2.1",
     "rich>=12.0.0",
     "typer>=0.7.0",
     
     # Reinforcement Learning
-    "trl==0.23.0",
-    "vllm==0.11",
-    
-    # Unsloth acceleration
-    "unsloth==2025.11.1",
-    "unsloth_zoo==2025.11.2",
-    
+    # "trl==0.23.0",
+    # "vllm==0.11",
+
+    # Tokenization (Teaching Old Tokenizers New Words - Purason et al. 2025).
+    # tokenizer-extension (Apache-2.0) is vendored in-tree - see
+    # third_party/tokenizer-extension/ and setup.py - rather than installed from
+    # git, so a plain `pip install aligntune` works. transformers / tokenizers /
+    # datasets / tqdm (its other runtime deps) are already listed above; the two
+    # below are the remainder. dask stays optional, matching upstream - only its
+    # data.py needs it and nothing in aligntune imports that module.
+    "requests>=2.28.0",
+    "heapdict>=1.0.1",
+
+    # "trl==1.7.1",
+    # "vllm==0.10",
+    "trl[vllm]==1.7.1",
+
+    # unsloth and unsloth_zoo (2026.7.2) are vendored in-tree - see
+    # third_party/unsloth/PATCH_NOTES.md and
+    # third_party/unsloth_zoo/PATCH_NOTES.md (both include AGPL-3.0-licensed
+    # files alongside this project's own LSAL-1.1 code; see those files and
+    # THIRD_PARTY_LICENSES.md for what's AGPL-licensed and why) - rather
+    # than installed as separate distributions, so a plain
+    # `pip install aligntune` is enough. The entries below are their own
+    # runtime dependencies (unsloth_zoo itself is not listed - it's vendored,
+    # not pip-installed).
+    "wheel>=0.42.0",
+    "packaging>=24.1",
+    "tyro",
+    "hf_transfer",
+    "diffusers",
+    "nest-asyncio",
+    "pillow",
+    "regex",
+    "msgspec",
+    "filelock",
+    "xformers>=0.0.27.post2; (\"linux\" in sys_platform or sys_platform == \"win32\") and (platform_machine == \"AMD64\" or platform_machine == \"x86_64\")",
+    "triton>=3.0.0; \"linux\" in sys_platform",
+    "triton-windows; sys_platform == \"win32\" and (platform_machine == \"AMD64\" or platform_machine == \"x86_64\")",
+    "cut_cross_entropy; python_version >= \"3.10\" and (sys_platform != \"darwin\" or platform_machine != \"arm64\")",
+    "mlx>=0.22.0; sys_platform == \"darwin\" and platform_machine == \"arm64\"",
+    "mlx-lm>=0.22.0; sys_platform == \"darwin\" and platform_machine == \"arm64\"",
+    "mlx-vlm>=0.4.4; sys_platform == \"darwin\" and platform_machine == \"arm64\"",
+
     # Logging and monitoring
     "wandb>=0.15.0",
     "tensorboard>=2.12.0",
     "matplotlib>=3.5.0",
-    "seaborn>=0.11.0",
-    
+
     # Evaluation metrics
     "evaluate>=0.4.0",
     "rouge-score>=0.1.2",
+    "bert-score>=0.3.13",
     "sacrebleu>=2.3.0",
     "lm-eval>=0.4.0",
     "nltk>=3.8.0",
     
-    # Device management (Linux/Windows only)
-    "nvitop>=1.1.0; platform_system!='Darwin'",
-    "nvidia-ml-py>=11.495.46; platform_system!='Darwin'",
+    #Extra
+    "pypdf",
+    "python-docx",
+
+    # Dataset curation and HF/Parquet connectors (published on PyPI)
+    "curatorkit[all]",
+
+    # Required for SentencePiece tokenizer support (Llama, Mistral, Gemma, etc.)
+    # PyICU provides Unicode script detection for merge rule validation
+    "PyICU>=2.10",
+
+    # Required for TextToLoRA/Doc2LoRA hypernetwork text embeddings, and optional
+    # semantic-similarity reward/eval scoring
+    "sentence-transformers>=2.2.0",
+
+    # mergekit (model merging, notebooks 35-42) is vendored as part of this
+    # package (see third_party/mergekit, PATCH_NOTES.md for the two patches
+    # applied) rather than installed as a separate distribution, so a plain
+    # `pip install -e .` / `uv pip install -e .` is enough - no second
+    # install step. These are its own runtime dependencies, folded in here.
+    "safetensors>=0.5.2",
+    "pydantic>=2.10.6",
+    "immutables>=0.21",
+    "tokenizers>=0.20.1",
+    "typing-extensions",
+    "sentencepiece",
+    "protobuf",
+    "scipy",
 ]
 
 [project.optional-dependencies]
@@ -132,7 +236,7 @@ docs = [
 [project.urls]
 Homepage = "https://github.com/Lexsi-Labs/aligntune"
 Repository = "https://github.com/Lexsi-Labs/aligntune"
-Documentation = "https://aligntune.readthedocs.io"
+Documentation = "https://aligntune.lexsi.ai"
 "Bug Tracker" = "https://github.com/Lexsi-Labs/aligntune/issues"
 "Changelog" = "https://github.com/Lexsi-Labs/aligntune/blob/main/CHANGELOG.md"
 "Discussions" = "https://github.com/Lexsi-Labs/aligntune/discussions"
@@ -140,6 +244,19 @@ Documentation = "https://aligntune.readthedocs.io"
 [project.scripts]
 aligntune = "aligntune.cli:main"
 at = "aligntune.cli:main"
+
+# Vendored mergekit's own CLI entry points (kept identical to upstream so its
+# docs/notebooks still work), now installed as part of this package.
+mergekit-yaml = "mergekit.scripts.run_yaml:main"
+mergekit-legacy = "mergekit.scripts.legacy:main"
+mergekit-layershuffle = "mergekit.scripts.layershuffle:main"
+bakllama = "mergekit.scripts.bakllama:main"
+mergekit-moe = "mergekit.scripts.moe:main"
+mergekit-tokensurgeon = "mergekit.scripts.tokensurgeon:main"
+mergekit-extract-lora = "mergekit.scripts.extract_lora:main"
+mergekit-evolve = "mergekit.scripts.evolve:main"
+mergekit-pytorch = "mergekit.scripts.merge_raw_pytorch:main"
+mergekit-multi = "mergekit.scripts.multimerge:main"
 
 [project.entry-points."aligntune.trainers"]
 # TRL Backend Trainers
@@ -162,11 +279,13 @@ lm_eval = "aligntune.eval.lm_eval_runner:LMEvalRunner"
 custom = "aligntune.eval.custom_runner:CustomEvalRunner"
 
 [project.entry-points."aligntune.rewards"]
-registry = "aligntune.rewards.core:RewardRegistry"
+registry = "aligntune.rewards.registry:RewardRegistry"
 factory = "aligntune.rewards.core:RewardFunctionFactory"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+# Package discovery (aligntune under src/, plus the vendored mergekit package
+# living under third_party/mergekit/mergekit) is done imperatively in
+# setup.py, since declarative [tool.setuptools.packages.find] only supports a
+# single `where` root and can't be combined with an explicit extra package.
 
 [tool.setuptools.package-data]
 "aligntune" = [
@@ -176,6 +295,8 @@ where = ["src"]
     "*.md",
     "*.txt",
     "py.typed",
+    # Branding assets (e.g. model-card banner used by push_model_to_hf)
+    "assets/*.png",
     # Configuration files
     "configs/*.yaml",
     "configs/*.yml",
@@ -206,6 +327,12 @@ where = ["src"]
     "rewards/*.yml",
     "rewards/*.json",
 ]
+# Vendored mergekit's own data files (architecture defs, chat templates)
+"mergekit._data.architectures" = ["*.json"]
+"mergekit._data.chat_templates" = ["*.jinja"]
+# Vendored unsloth_zoo's own data file (diffusion_studio UI), matching its
+# own upstream package-data declaration.
+"unsloth_zoo.diffusion_studio" = ["*.html"]
 
 
 # Black configuration

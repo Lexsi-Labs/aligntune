@@ -9,7 +9,7 @@ Original file is located at
 <center>
 
 <div style="text-align:center;">
-<a href="https://aligntune.lexsi.ai/"><img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/docs/assets/banner_aligntune.png" width="690"></a>
+<a href="https://aligntune.lexsi.ai/"><img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/refs/heads/main/assets/aligntune-banner.png" width="690"></a>
 
 <a href="https://aligntune.lexsi.ai/"><img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/docs.png" width="150"></a>
 <a href="https://discord.gg/dSB62Q7A"><img src="https://raw.githubusercontent.com/Lexsi-Labs/TabTune/refs/heads/docs/assets/discord.png" width="150"></a>

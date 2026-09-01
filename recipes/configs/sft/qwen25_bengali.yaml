@@ -1,0 +1,134 @@
+# Bengali-specific SFT configuration
+# For: Qwen/Qwen2.5-14B or similar models
+# Optimized for Bengali language instruction following
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: Qwen/Qwen2.5-14B
+  torch_dtype: bfloat16
+  attn_implementation: eager
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: Qwen/Qwen2.5-14B
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided Bengali instruction dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    remove_columns: []
+    chat_template: null
+
+training:
+  output_dir: ./outputs/qwen25_bengali
+  overwrite_output_dir: true
+
+  # Learning hyperparameters - tuned for Bengali data
+  learning_rate: 1.8e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 75
+  warmup_ratio: 0.08
+
+  # Batch size - Qwen2.5-14B is larger
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+
+  # Training duration
+  num_train_epochs: 3
+  max_steps: -1
+
+  # Optimizer
+  optim: paged_adamw_8bit
+  weight_decay: 0.01
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 450
+  per_device_eval_batch_size: 4
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 450
+  save_total_limit: 3
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 4
+
+  # Generation
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# LoRA for Qwen2.5
+peft:
+  peft_type: lora
+  r: 12
+  lora_alpha: 24
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# Quantization
+quantization:
+  load_in_8bit: true
+  load_in_4bit: false
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# Bengali-specific guidelines
+# Script characteristics:
+#   - Complex script system with compound characters (juktoborno)
+#   - Inherent vowel 'o' in consonants
+#   - Bengali-specific punctuation and spacing conventions
+#
+# Cultural context:
+#   - Rich literary and philosophical traditions
+#   - Distinct East Bengal (Bangladesh) vs West Bengal dialects
+#   - Different formality levels and registers
+#
+# Training recommendations:
+#   1. Use native Bengali speaker verified data
+#   2. Include both formal and colloquial Bengali
+#   3. Respect Bengali literary traditions (Tagore, Bankim, etc.)
+#   4. Include regional variations
+#   5. Test on Bengali benchmarks (IndicXTREME-Bengali, MILU-Bn)
+#   6. Use Bengali alignment probes (refusal_bn, sycophancy_bn, verbosity_bn)
+#
+# Dataset format:
+#   - Instruction: Bengali instruction/question
+#   - Context: Optional Bengali context
+#   - Response: Native Bengali response
+#   - Language: Set to 'bengali' or 'bn'
+#
+# Post-training evaluation:
+#   - Compare with baseline on Bengali QA tasks
+#   - Check alignment on cultural sensitivity probes
+#   - Verify refusal behavior in Bengali
+#   - Measure verbosity in Bengali responses

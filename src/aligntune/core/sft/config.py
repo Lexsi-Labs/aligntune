@@ -13,21 +13,9 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Union, Callable
 from enum import Enum
 
-
-class TaskType(Enum):
-    """Supported SFT task types."""
-    INSTRUCTION_FOLLOWING = "instruction_following"
-    SUPERVISED_FINE_TUNING = "supervised_fine_tuning"
-    TEXT_CLASSIFICATION = "text_classification"
-    TOKEN_CLASSIFICATION = "token_classification"
-    TEXT_GENERATION = "text_generation"
-    CHAT_COMPLETION = "chat_completion"
-
-
-class TrainingType(Enum):
-    """Training types for backend selection."""
-    SFT = "sft"
-    RL = "rl"
+# Import TaskType and TrainingType from unified registry
+from ..registry import TaskType, TrainingType
+from ..long_context.rope_config import RopeConfig
 
 
 class PrecisionType(Enum):
@@ -47,29 +35,73 @@ class BackendType(Enum):
 
 
 @dataclass
+class PeftConfigData:
+    """Dedicated configuration for PEFT settings."""
+    enabled: bool = False
+    variant: str = "standard"  # "standard", "moa", etc.
+    rank: int = 16
+    alpha: int = 32
+    dropout: float = 0.1
+    target_modules: Optional[List[str]] = None
+    bias: str = "none"
+    
+    # Advanced LoRA variants
+    dora_enabled: bool = False
+    rslora_enabled: bool = False
+    
+    # Advanced initialization
+    loftq_init: bool = False
+    pissa_init: bool = False
+    
+    # Legacy flags for backward compatibility
+    rslora: bool = False
+    init_weights: Union[str, bool] = True
+    
+    loraplus_lr_ratio: Optional[float] = None
+    loraplus_lr_embedding: Optional[float] = None
+
+@dataclass
 class ModelConfig:
     """Model configuration with task-aware defaults."""
     name_or_path: str
-    precision: PrecisionType = PrecisionType.BF16
+    tokenizer_name_or_path: Optional[str] = None  # If None, use name_or_path for tokenizer
+    precision: PrecisionType = PrecisionType.AUTO
     quantization: Dict[str, Any] = field(default_factory=dict)
     attn_implementation: str = "auto"
+    sliding_window: Optional[int] = None
+    s2_group_size_ratio: float = 0.25
+    s2_min_seq_length: int = 64
+    s2_shift_ratio: float = 0.5
     gradient_checkpointing: bool = True
     max_memory: Optional[Dict[str, str]] = None
     use_unsloth: bool = False
     max_seq_length: int = 2048
-    peft_enabled: bool = False
-    lora_rank: int = 16
-    lora_alpha: int = 32
-    lora_dropout: float = 0.1
-    target_modules: Optional[List[str]] = None
-    bias: str = "none"
     use_gradient_checkpointing: bool = True
+    peft: PeftConfigData = field(default_factory=PeftConfigData)
+    rope: RopeConfig = field(default_factory=RopeConfig)
     # Classification-specific
     num_labels: Optional[int] = None
     model_init_kwargs: Dict[str, Any] = field(default_factory=dict)
-    device_map: Optional[Union[str, Dict]] = "auto"  # Add this line
+    device_map: Optional[Union[str, Dict]] = "auto"
     trust_remote_code: bool = True
-    
+    embedding_pad_to_multiple_of: Optional[int] = None
+    train_embeddings: bool = False
+    embedding_init_method: str = "random"  # Options: random, mean, mean_of_constituents (FVT)
+    # VLM fields
+    is_vlm: bool = False
+    vision_tower_mode: str = "freeze"
+    image_column: str = "image"
+    max_image_tokens: int = 4096
+    # PEFT convenience fields
+    peft_enabled: bool = True
+    lora_rank: int = 16
+    dora_enabled: bool = False
+    rslora_enabled: bool = False
+    loftq_init: bool = False
+    pissa_init: bool = False
+    use_liger_kernel: bool = False
+
+
     def __post_init__(self):
         """Validate model configuration."""
         if not self.name_or_path:
@@ -77,8 +109,7 @@ class ModelConfig:
         
         if not isinstance(self.precision, PrecisionType):
             if self.precision is None:
-                # Use default if None is explicitly passed
-                self.precision = PrecisionType.BF16
+                self.precision = PrecisionType.AUTO
             elif isinstance(self.precision, str):
                 self.precision = PrecisionType(self.precision)
             else:
@@ -86,16 +117,28 @@ class ModelConfig:
 
 
 @dataclass
+class VLMModelConfig:
+    """Vision-Language Model configuration."""
+    is_vlm: bool = True
+    vision_tower_mode: str = "freeze"
+    image_column: str = "image"
+    max_image_tokens: int = 4096
+
+
+@dataclass
 class DatasetConfig:
     """Dataset configuration with task-specific field support."""
     name: str
-    split: str = "train"
+    train_split: str = "train"
+    test_split: Optional[str] = None
+    split: Optional[str] = None  # Legacy split field
+    config_name: Optional[str] = None  # Hugging Face dataset configuration
     subset: Optional[str] = None  # Add this line for dataset config/subset
     config: Optional[str] = None  # Alternative name for subset
     percent: Optional[float] = None
     max_samples: Optional[int] = None
     column_mapping: Dict[str, str] = field(default_factory=dict)
-    task_type: TaskType = TaskType.SUPERVISED_FINE_TUNING
+    task_type: TaskType = TaskType.SFT
     system_prompt: Optional[str] = None
     
     # Auto-detection
@@ -124,18 +167,32 @@ class DatasetConfig:
     
     # Dataset text field for trainers
     dataset_text_field: str = "text"
+
+    # VLM-specific
+    image_column: str = "image"
     
     # Chat template
     chat_template: Optional[str] = None
-    
+
     dataset_num_proc: Optional[int] = None
     pad_token: Optional[str] = None
 
     # Processing and Filtering (Added to match RLDatasetConfig and fix factory error)
     preserve_columns: Optional[List[str]] = None
+    keep_columns: Optional[bool] = None
     processing_fn: Optional[Callable] = None
     processing_batched: bool = False
     processing_fn_kwargs: Dict[str, Any] = field(default_factory=dict)
+
+    # CuratorKIT data processing
+    val_split_ratio: Optional[float] = None
+    test_split_ratio: Optional[float] = None
+    split_seed: int = 42
+    curator_schema_gate: bool = True
+    curator_clean: bool = False
+    curator_dedup: str = "none"
+    curator_use_tiktoken: bool = False
+    curator_max_tokens: int = 1_000_000
     
     def __post_init__(self):
         """Validate dataset configuration."""
@@ -164,32 +221,15 @@ class DatasetConfig:
         self._set_task_defaults()
     
     def _set_task_defaults(self):
-        """Set task-specific default field names."""
-        if self.task_type == TaskType.INSTRUCTION_FOLLOWING:
-            # Ensure we have instruction and response columns
-            if not self.column_mapping:
-                self.column_mapping = {}
-        
-        elif self.task_type == TaskType.TEXT_CLASSIFICATION:
-            # Classification needs text and label
-            if not self.column_mapping:
-                self.column_mapping = {}
-        
-        elif self.task_type == TaskType.TOKEN_CLASSIFICATION:
-            # Token classification needs tokens and tags
-            if not self.column_mapping:
-                self.column_mapping = {}
-        
-        elif self.task_type == TaskType.CHAT_COMPLETION:
-            # Chat needs messages field
-            if not self.column_mapping:
-                self.column_mapping = {}
+        if not self.column_mapping:
+            self.column_mapping = {}
 
 
 @dataclass
 class TrainingConfig:
     """Training configuration with task-aware defaults."""
     per_device_batch_size: int = 1
+    per_device_eval_batch_size: Optional[int] = None
     gradient_accumulation_steps: int = 1
     max_steps: Optional[int] = None
     epochs: Optional[int] = None
@@ -243,15 +283,26 @@ class TrainingConfig:
     loss_type: str = "nll"
     activation_offloading: bool = False
     use_flash_attention_2: Optional[bool] = None
+    enable_thinking: bool = False
     gradient_checkpointing: bool = False # Added
     gradient_checkpointing_kwargs: Dict[str, Any] = field(default_factory=dict) # Added
     extra_params: Dict[str, Any] = field(default_factory=dict)
+
+    # Speed optimization flags
+    torch_compile: bool = False
+    use_liger_kernel: bool = False
+    fp8_adamw: bool = False
 
     # Reproducibility
     seed: int = 42
     data_seed: Optional[int] = None
 
-    
+    # Distributed training via HF Accelerate
+    # Point to a valid `accelerate config`-generated YAML to enable DeepSpeed/FSDP.
+    # AlignTune surfaces this path; TRL + Accelerate handle the actual distributed setup.
+    accelerate_config_path: Optional[str] = None
+
+
     def __post_init__(self):
         """Validate training configuration."""
         if self.per_device_batch_size <= 0:
@@ -320,6 +371,11 @@ class LoggingConfig:
     
     def __post_init__(self):
         """Validate logging configuration."""
+        valid_loggers = {"azure_ml", "clearml", "codecarbon", "comet_ml", "dagshub", "dvclive", "flyte", "mlflow", "neptune", "swanlab", "tensorboard", "trackio", "wandb", "all", "none"}
+        for logger in self.loggers:
+            if logger not in valid_loggers:
+                raise ValueError(f"Invalid logger: {logger}. Must be one of {valid_loggers}")
+
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         if self.log_level.upper() not in valid_levels:
             raise ValueError(f"Invalid log level: {self.log_level}. Must be one of {valid_levels}")
@@ -327,19 +383,10 @@ class LoggingConfig:
 
 @dataclass
 class SFTConfig:
-    """
-    Unified configuration for SFT training with complete task type support.
-    
-    This config supports all task types:
-    - Instruction Following
-    - Supervised Fine-Tuning
-    - Text Classification
-    - Token Classification
-    - Text Generation
-    - Chat Completion
-    """
+    """Unified configuration for SFT training. Supports: SFT, Text Classification, Token Classification."""
     model: ModelConfig
     dataset: DatasetConfig
+    eval_dataset: Optional[DatasetConfig] = None
     train: TrainingConfig = field(default_factory=TrainingConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     evaluation: EvaluationConfig = field(default_factory=EvaluationConfig)
@@ -357,56 +404,21 @@ class SFTConfig:
         self._apply_task_specific_settings()
     
     def _apply_task_specific_settings(self):
-        """Apply task-specific configuration settings."""
+        import logging
+        logger = logging.getLogger(__name__)
         task_type = self.dataset.task_type
-        
+
         if task_type == TaskType.TEXT_CLASSIFICATION:
-            # Classification tasks should not use Unsloth
             if self.model.use_unsloth:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(
-                    "Unsloth is not recommended for text classification. "
-                    "Consider using TRL backend."
-                )
-            
-            # Ensure num_labels is set
+                logger.warning("Unsloth is not recommended for text classification.")
             if self.model.num_labels is None:
-                self.model.num_labels = 2  # Binary classification default
-        
+                self.model.num_labels = 2
+
         elif task_type == TaskType.TOKEN_CLASSIFICATION:
-            # Token classification also not ideal for Unsloth
             if self.model.use_unsloth:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(
-                    "Unsloth is not recommended for token classification. "
-                    "Consider using TRL backend."
-                )
-            
-            # Ensure num_labels is set
+                logger.warning("Unsloth is not recommended for token classification.")
             if self.model.num_labels is None:
-                self.model.num_labels = 9  # Common for NER
-        
-        elif task_type in [TaskType.INSTRUCTION_FOLLOWING, TaskType.CHAT_COMPLETION]:
-            # These tasks benefit from longer sequences
-            if self.model.max_seq_length < 1024:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.info(
-                    f"Task {task_type.value} typically benefits from longer sequences. "
-                    f"Consider increasing max_seq_length from {self.model.max_seq_length}."
-                )
-        
-        elif task_type == TaskType.TEXT_GENERATION:
-            # Generation tasks can benefit from Unsloth
-            if not self.model.use_unsloth:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.info(
-                    "Text generation tasks can benefit from Unsloth acceleration. "
-                    "Consider setting use_unsloth=True."
-                )
+                self.model.num_labels = 9
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
@@ -467,13 +479,7 @@ class SFTConfig:
         ]
     
     def is_generation_task(self) -> bool:
-        """Check if this is a generation task."""
-        return self.dataset.task_type in [
-            TaskType.INSTRUCTION_FOLLOWING,
-            TaskType.SUPERVISED_FINE_TUNING,
-            TaskType.TEXT_GENERATION,
-            TaskType.CHAT_COMPLETION
-        ]
+        return not self.is_classification_task()
     
     def supports_unsloth(self) -> bool:
         """Check if Unsloth backend is suitable for this task."""
@@ -489,81 +495,6 @@ class SFTConfig:
 
 
 # Helper functions for creating configs
-def create_instruction_following_config(
-    model_name: str,
-    dataset_name: str,
-    output_dir: str = "./output/instruction",
-    **kwargs
-) -> SFTConfig:
-    """Create configuration for instruction following tasks."""
-    return SFTConfig(
-        model=ModelConfig(
-            name_or_path=model_name,
-            max_seq_length=kwargs.get('max_seq_length', 1024),
-            use_unsloth=kwargs.get('use_unsloth', True),
-            peft_enabled=kwargs.get('peft_enabled', True),
-            quantization=kwargs.get('quantization', {"load_in_4bit": True})
-        ),
-        dataset=DatasetConfig(
-            name=dataset_name,
-            split=kwargs.get('split', 'train'),
-            max_samples=kwargs.get('max_samples'),
-            task_type=TaskType.INSTRUCTION_FOLLOWING,
-            instruction_column=kwargs.get('instruction_column', 'instruction'),
-            response_column=kwargs.get('response_column', 'output'),
-            context_column=kwargs.get('context_column', 'input')
-        ),
-        train=TrainingConfig(
-            epochs=kwargs.get('epochs', 3),
-            per_device_batch_size=kwargs.get('batch_size', 4),
-            learning_rate=kwargs.get('learning_rate', 2e-4),
-            gradient_accumulation_steps=kwargs.get('gradient_accumulation_steps', 1),
-            seed=kwargs.get('seed', 42),
-            data_seed=kwargs.get('data_seed')
-        ),
-        logging=LoggingConfig(
-            output_dir=output_dir,
-            run_name=kwargs.get('run_name', 'instruction_following')
-        )
-    )
-
-
-def create_chat_completion_config(
-    model_name: str,
-    dataset_name: str,
-    output_dir: str = "./output/chat",
-    **kwargs
-) -> SFTConfig:
-    """Create configuration for chat completion tasks."""
-    return SFTConfig(
-        model=ModelConfig(
-            name_or_path=model_name,
-            max_seq_length=kwargs.get('max_seq_length', 2048),
-            use_unsloth=kwargs.get('use_unsloth', True),
-            peft_enabled=kwargs.get('peft_enabled', True),
-            quantization=kwargs.get('quantization', {"load_in_4bit": True})
-        ),
-        dataset=DatasetConfig(
-            name=dataset_name,
-            split=kwargs.get('split', 'train'),
-            max_samples=kwargs.get('max_samples'),
-            task_type=TaskType.CHAT_COMPLETION,
-            messages_column=kwargs.get('messages_column', 'messages'),
-            chat_template=kwargs.get('chat_template')
-        ),
-        train=TrainingConfig(
-            epochs=kwargs.get('epochs', 2),
-            per_device_batch_size=kwargs.get('batch_size', 2),
-            learning_rate=kwargs.get('learning_rate', 2e-4),
-            gradient_accumulation_steps=kwargs.get('gradient_accumulation_steps', 4)
-        ),
-        logging=LoggingConfig(
-            output_dir=output_dir,
-            run_name=kwargs.get('run_name', 'chat_completion')
-        )
-    )
-
-
 def create_text_classification_config(
     model_name: str,
     dataset_name: str,
@@ -577,7 +508,7 @@ def create_text_classification_config(
             name_or_path=model_name,
             max_seq_length=kwargs.get('max_seq_length', 512),
             use_unsloth=False,  # Not recommended for classification
-            peft_enabled=kwargs.get('peft_enabled', True),
+            peft=PeftConfigData(enabled=kwargs.get('peft_enabled', True)),
             num_labels=num_labels,
             quantization=kwargs.get('quantization', {})
         ),
@@ -615,7 +546,7 @@ def create_token_classification_config(
             name_or_path=model_name,
             max_seq_length=kwargs.get('max_seq_length', 512),
             use_unsloth=False,  # Not recommended for token classification
-            peft_enabled=kwargs.get('peft_enabled', True),
+            peft=PeftConfigData(enabled=kwargs.get('peft_enabled', True)),
             num_labels=num_labels,
             quantization=kwargs.get('quantization', {})
         ),
@@ -640,41 +571,6 @@ def create_token_classification_config(
     )
 
 
-def create_text_generation_config(
-    model_name: str,
-    dataset_name: str,
-    output_dir: str = "./output/generation",
-    **kwargs
-) -> SFTConfig:
-    """Create configuration for text generation tasks."""
-    return SFTConfig(
-        model=ModelConfig(
-            name_or_path=model_name,
-            max_seq_length=kwargs.get('max_seq_length', 1024),
-            use_unsloth=kwargs.get('use_unsloth', True),
-            peft_enabled=kwargs.get('peft_enabled', True),
-            quantization=kwargs.get('quantization', {"load_in_4bit": True})
-        ),
-        dataset=DatasetConfig(
-            name=dataset_name,
-            split=kwargs.get('split', 'train'),
-            max_samples=kwargs.get('max_samples'),
-            task_type=TaskType.TEXT_GENERATION,
-            text_column=kwargs.get('text_column', 'text')
-        ),
-        train=TrainingConfig(
-            epochs=kwargs.get('epochs', 3),
-            per_device_batch_size=kwargs.get('batch_size', 4),
-            learning_rate=kwargs.get('learning_rate', 2e-4),
-            gradient_accumulation_steps=kwargs.get('gradient_accumulation_steps', 1)
-        ),
-        logging=LoggingConfig(
-            output_dir=output_dir,
-            run_name=kwargs.get('run_name', 'text_generation')
-        )
-    )
-
-
 def create_supervised_finetuning_config(
     model_name: str,
     dataset_name: str,
@@ -687,7 +583,7 @@ def create_supervised_finetuning_config(
             name_or_path=model_name,
             max_seq_length=kwargs.get('max_seq_length', 512),
             use_unsloth=kwargs.get('use_unsloth', True),
-            peft_enabled=kwargs.get('peft_enabled', True),
+            peft=PeftConfigData(enabled=kwargs.get('peft_enabled', True)),
             quantization=kwargs.get('quantization', {"load_in_4bit": True})
         ),
         dataset=DatasetConfig(
@@ -718,53 +614,14 @@ __all__ = [
     'PrecisionType',
     'BackendType',
     'ModelConfig',
+    'VLMModelConfig',
+
     'DatasetConfig',
     'TrainingConfig',
     'EvaluationConfig',
     'LoggingConfig',
     'SFTConfig',
-    'create_instruction_following_config',
-    'create_chat_completion_config',
     'create_text_classification_config',
     'create_token_classification_config',
-    'create_text_generation_config',
     'create_supervised_finetuning_config',
 ]
-
-
-if __name__ == "__main__":
-    # Example: Create different task configs
-    
-    # Instruction Following
-    instruction_config = create_instruction_following_config(
-        model_name="meta-llama/Llama-2-7b-hf",
-        dataset_name="tatsu-lab/alpaca",
-        max_samples=1000
-    )
-    print(f"Instruction Following Config:")
-    print(f"  Task: {instruction_config.get_task_type().value}")
-    print(f"  Recommended Backend: {instruction_config.get_recommended_backend()}")
-    print(f"  Supports Unsloth: {instruction_config.supports_unsloth()}")
-    
-    # Text Classification
-    classification_config = create_text_classification_config(
-        model_name="distilbert-base-uncased",
-        dataset_name="imdb",
-        num_labels=2,
-        max_samples=5000
-    )
-    print(f"\nText Classification Config:")
-    print(f"  Task: {classification_config.get_task_type().value}")
-    print(f"  Recommended Backend: {classification_config.get_recommended_backend()}")
-    print(f"  Supports Unsloth: {classification_config.supports_unsloth()}")
-    
-    # Chat Completion
-    chat_config = create_chat_completion_config(
-        model_name="mistralai/Mistral-7B-v0.1",
-        dataset_name="HuggingFaceH4/ultrachat_200k",
-        max_samples=10000
-    )
-    print(f"\nChat Completion Config:")
-    print(f"  Task: {chat_config.get_task_type().value}")
-    print(f"  Recommended Backend: {chat_config.get_recommended_backend()}")
-    print(f"  Supports Unsloth: {chat_config.supports_unsloth()}")

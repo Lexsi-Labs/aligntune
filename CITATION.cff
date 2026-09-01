@@ -1,0 +1,58 @@
+cff-version: 1.2.0
+message: "If you use AlignTune in your research, please cite it as below."
+type: software
+title: "AlignTune: Multi-Backend Alignment and Fine-Tuning Library for LLM Post-Training"
+authors:
+  - family-names: "Lyngkhoi"
+    given-names: "Zera"
+    email: "zera.lyngkhoi@lexsi.ai"
+  - family-names: "Goyal"
+    given-names: "Bhavya"
+    email: "bhavya.goyal@lexsi.ai"
+  - family-names: "Chawla"
+    given-names: "Chirag"
+    email: "chirag.chawla@lexsi.ai"
+  - family-names: "Bhattacharjee"
+    given-names: "Soham"
+    email: "soham.bhattacharjee@lexsi.ai"
+  - family-names: "Avaiya"
+    given-names: "Utsav"
+    email: "utsav.avaiya@lexsi.ai"
+  - family-names: "Kadiyala"
+    given-names: "Ram Mohan Rao"
+    email: "ram.kadiyala@lexsi.ai"
+  - family-names: "Khandoga"
+    given-names: "Mykola"
+    email: "mykola.khandoga@lexsi.ai"
+  - family-names: "Yuan"
+    given-names: "Rui"
+    email: "rui.yuan@lexsi.ai"
+  - family-names: "Sankarapu"
+    given-names: "Vinay Kumar"
+    email: "v.k@lexsi.ai"
+  - family-names: "Seth"
+    given-names: "Pratinav"
+    email: "pratinav.seth@lexsi.ai"
+  - name: "Lexsi Labs"
+    website: "https://lexsi.ai"
+version: 0.1.10
+date-released: 2026-08-05
+url: "https://github.com/Lexsi-Labs/aligntune"
+repository-code: "https://github.com/Lexsi-Labs/aligntune"
+license: LicenseRef-LSAL-1.1
+license-url: "https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md"
+contact:
+  - family-names: "Seth"
+    given-names: "Pratinav"
+    email: "pratinav.seth@lexsi.ai"
+keywords:
+  - alignment
+  - rlhf
+  - fine-tuning
+  - llm
+  - post-training
+  - sft
+  - rl
+  - dpo
+  - grpo
+  - ppo

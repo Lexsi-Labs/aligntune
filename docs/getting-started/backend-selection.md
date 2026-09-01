@@ -6,17 +6,15 @@ AlignTune supports multiple backends for training. Choose the one that best fits
 
 ### TRL Backend
 
-- **Reliability**: Battle-tested, stable
-- **Compatibility**: Works everywhere
-- **Performance**: Standard speed
-- **Use Case**: Production, reliability-focused
+- **Reliability**: the reference implementation; runs on CPU or GPU, no extra setup
+- **Performance**: standard `transformers`/`peft` training speed
+- **Use Case**: production, or any environment without a compatible GPU
 
 ### Unsloth Backend
 
-- **Speed**: faster training
-- **Memory**: Optimized memory usage
-- **Compatibility**: Requires GPU, specific setup
-- **Use Case**: Fast iteration, research
+- **Speed**: 2x faster training, ~60% lower memory use, via custom kernels
+- **Compatibility**: requires a CUDA-compatible GPU
+- **Use Case**: fast iteration, research, large models on limited VRAM
 
 ## Backend Support Matrix
 
@@ -32,7 +30,7 @@ AlignTune supports multiple backends for training. Choose the one that best fits
 
 ## Automatic Backend Selection
 
-AlignTune can automatically select the best backend:
+AlignTune can select the backend for you:
 
 ```python
 from aligntune.core.backend_factory import create_sft_trainer
@@ -45,9 +43,14 @@ trainer = create_sft_trainer(
 )
 ```
 
-## Manual Backend Selection
+When `backend="auto"`, AlignTune:
 
-### TRL Backend
+1. Checks if Unsloth is available
+2. Checks if the model is compatible with Unsloth
+3. Falls back to TRL if Unsloth is unavailable or incompatible
+4. Logs the selected backend
+
+## Selecting a Backend Explicitly
 
 ```python
 from aligntune.core.backend_factory import create_sft_trainer
@@ -55,30 +58,13 @@ from aligntune.core.backend_factory import create_sft_trainer
 trainer = create_sft_trainer(
  model_name="microsoft/DialoGPT-small",
  dataset_name="tatsu-lab/alpaca",
- backend="trl" # Explicitly use TRL
+ backend="trl", # or "unsloth" (use unsloth/... model checkpoints with the Unsloth backend)
+ num_epochs=3,
+ batch_size=4,
 )
 ```
 
-### Unsloth Backend
-
-```python
-from aligntune.core.backend_factory import create_sft_trainer
-
-trainer = create_sft_trainer(
- model_name="unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
- dataset_name="tatsu-lab/alpaca",
- backend="unsloth" # Explicitly use Unsloth
-)
-```
-
-## Backend Selection Logic
-
-When using `backend="auto"`, AlignTune:
-
-1. Checks if Unsloth is available
-2. Checks if model is compatible with Unsloth
-3. Falls back to TRL if Unsloth unavailable or incompatible
-4. Logs the selected backend
+Unsloth requires an Unsloth-format checkpoint (e.g. `unsloth/Llama-3.2-1B-Instruct-bnb-4bit`); TRL works with any standard HF checkpoint. No other config changes are needed to switch backends.
 
 ## Checking Backend Status
 
@@ -86,55 +72,24 @@ When using `backend="auto"`, AlignTune:
 from aligntune.core.backend_factory import get_backend_status
 
 status = get_backend_status()
-print(f"TRL available: {status['trl']['available']}")
-print(f"Unsloth available: {status['unsloth']['available']}")
+print(f"TRL available: {status['trl_available']}")
+print(f"Unsloth available: {status['unsloth_available']}")
 ```
 
 ## When to Use Each Backend
 
 ### Use TRL Backend When:
 
-- You need maximum reliability
-- You're in production
-- You don't have GPU or Unsloth setup
-- You need GSPO algorithm
-- You want battle-tested code
+- You're in production and need the most reliable path
+- You don't have a GPU, or don't have Unsloth set up
+- You need the GSPO algorithm (Unsloth doesn't support it)
 
 ### Use Unsloth Backend When:
 
-- You need faster training (faster training)
-- You have GPU available
-- You're doing research/experimentation
-- You want memory optimization
-- You're fine-tuning large models
-
-## Backend-Specific Configuration
-
-### TRL Backend
-
-```python
-trainer = create_sft_trainer(
- model_name="microsoft/DialoGPT-small",
- dataset_name="tatsu-lab/alpaca",
- backend="trl",
- # Standard configuration works
- num_epochs=3,
- batch_size=4
-)
-```
-
-### Unsloth Backend
-
-```python
-trainer = create_sft_trainer(
- model_name="unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
- dataset_name="tatsu-lab/alpaca",
- backend="unsloth",
- # Unsloth-specific optimizations enabled
- num_epochs=3,
- batch_size=4
-)
-```
+- You want faster training and lower VRAM use
+- You have a CUDA-compatible GPU
+- You're doing research or fast iteration
+- You're fine-tuning a large model on limited hardware
 
 ## Troubleshooting
 

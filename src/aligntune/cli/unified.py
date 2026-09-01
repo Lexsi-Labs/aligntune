@@ -59,6 +59,70 @@ except ImportError:
     diagnose_app = None
     DIAGNOSE_AVAILABLE = False
 
+# Advise CLI imports (cost estimator and algorithm recommendations)
+try:
+    from .advise import app as advise_app
+    ADVISE_AVAILABLE = True
+except ImportError:
+    advise_app = None
+    ADVISE_AVAILABLE = False
+
+# Export CLI imports
+try:
+    from .export import app as export_app
+    EXPORT_AVAILABLE = True
+except ImportError:
+    export_app = None
+    EXPORT_AVAILABLE = False
+
+# Merge CLI imports
+try:
+    from .merge import app as merge_app
+    MERGE_AVAILABLE = True
+except ImportError:
+    merge_app = None
+    MERGE_AVAILABLE = False
+
+# Aligner CLI imports
+try:
+    from .aligner import app as aligner_app
+    ALIGNER_AVAILABLE = True
+except ImportError:
+    aligner_app = None
+    ALIGNER_AVAILABLE = False
+
+# Verify-export CLI imports (Quantization regression)
+try:
+    from .verify_export import app as verify_export_app
+    VERIFY_EXPORT_AVAILABLE = True
+except ImportError:
+    verify_export_app = None
+    VERIFY_EXPORT_AVAILABLE = False
+
+# Adapters CLI imports (LoRA compression and management)
+try:
+    from .adapters import app as adapters_app
+    ADAPTERS_AVAILABLE = True
+except ImportError:
+    adapters_app = None
+    ADAPTERS_AVAILABLE = False
+
+# Compose CLI imports (Multi-stage composition)
+try:
+    from .compose import app as compose_app
+    COMPOSE_AVAILABLE = True
+except ImportError:
+    compose_app = None
+    COMPOSE_AVAILABLE = False
+
+# Indic Evaluation CLI imports (Indic language benchmarks)
+try:
+    from .indic_eval import app as indic_eval_app
+    INDIC_EVAL_AVAILABLE = True
+except ImportError:
+    indic_eval_app = None
+    INDIC_EVAL_AVAILABLE = False
+
 app = typer.Typer(
     name="aligntune",
     help="AlignTune: A comprehensive fine-tuning library for SFT and RL training",
@@ -449,6 +513,31 @@ def train(
     attn_implementation: Optional[str] = typer.Option(
         None, "--attn-implementation", help="Attention implementation: auto, flash_attention_2, sdpa"
     ),
+    target_context_length: Optional[int] = typer.Option(
+        None, "--target-context-length",
+        help=(
+            "Target context window size in tokens for long-context training "
+            "(e.g. 131072 for 128k).  Maps to model_config.target_context_length. "
+            "Pair with --rope-scaling-type and --rope-scaling-factor."
+        ),
+    ),
+    rope_scaling_type: Optional[str] = typer.Option(
+        None, "--rope-scaling-type",
+        help=(
+            "RoPE position-embedding scaling strategy used to extend the "
+            "model's context window beyond its original training length. "
+            "Supported values: linear, dynamic, yarn, ntk. "
+            "Maps to model_config.rope_scaling_type."
+        ),
+    ),
+    rope_scaling_factor: Optional[float] = typer.Option(
+        None, "--rope-scaling-factor",
+        help=(
+            "Multiplicative factor for RoPE scaling (e.g. 4.0 extends a 32k "
+            "base context to 128k).  Only meaningful when --rope-scaling-type "
+            "is set.  Maps to model_config.rope_scaling_factor."
+        ),
+    ),
     use_unsloth: Optional[bool] = typer.Option(
         None, "--use-unsloth", help="Use Unsloth optimizations"
     ),
@@ -654,7 +743,7 @@ def train(
     
     # ========== RL-Specific Parameters ==========
     beta: Optional[float] = typer.Option(
-        None, "--beta", help="Beta parameter for DPO/KTO"
+        None, "--beta", help="Beta parameter for DPO"
     ),
     kl_coef: Optional[float] = typer.Option(
         None, "--kl-coef", help="KL divergence coefficient for PPO/GRPO"
@@ -791,7 +880,18 @@ def train(
     mask_truncated_completions: Optional[bool] = typer.Option(
         None, "--mask-truncated-completions", help="Mask truncated completions"
     ),
-    
+
+    # ========== vLLM Rollout Backend ==========
+    rollout_backend: Optional[str] = typer.Option(
+        None, "--rollout-backend", help="Rollout backend: hf (HuggingFace), vllm, sglang (default: hf)"
+    ),
+    vllm_gpu_memory_utilization: Optional[float] = typer.Option(
+        None, "--vllm-memory", help="vLLM GPU memory utilization (0.0-1.0, default: 0.7)"
+    ),
+    vllm_tensor_parallel_size: Optional[int] = typer.Option(
+        None, "--vllm-tensor-parallel", help="vLLM tensor parallelism (number of GPUs, default: 1)"
+    ),
+
     # ========== Custom Reward Model Training ==========
     train_custom_reward_model: Optional[bool] = typer.Option(
         None, "--train-custom-reward", help="Train a custom reward model"
@@ -974,6 +1074,14 @@ def train(
     distributed_backend: Optional[str] = typer.Option(
         None, "--distributed", help="Distributed backend: single, ddp, deepspeed, fsdp"
     ),
+    accelerate_config: Optional[str] = typer.Option(
+        None, "--accelerate-config",
+        help=(
+            "Path to an HF Accelerate config YAML for DeepSpeed/FSDP. "
+            "Preset configs are in src/aligntune/recipes/accelerate/. "
+            "Sets the ACCELERATE_CONFIG_FILE env var so TRL picks it up automatically."
+        ),
+    ),
     
     # ========== Counterfactual GRPO Parameters ==========
     boost_factor: Optional[float] = typer.Option(
@@ -1015,33 +1123,33 @@ def train(
         None, "--gbmpo-epsilon", help="GBMPO epsilon"
     ),
     
-    # ========== BOLT Parameters ==========
+    # ========== PACE Parameters ==========
     curriculum_enabled: Optional[bool] = typer.Option(
-        None, "--curriculum-enabled", help="Enable BOLT curriculum learning"
+        None, "--curriculum-enabled", help="Not available in this build; always forced to False"
     ),
     curriculum_epsilon: Optional[float] = typer.Option(
-        None, "--curriculum-epsilon", help="BOLT curriculum epsilon"
+        None, "--curriculum-epsilon", help="Not available in this build"
     ),
     curriculum_update_freq: Optional[int] = typer.Option(
-        None, "--curriculum-update-freq", help="BOLT curriculum update frequency"
+        None, "--curriculum-update-freq", help="Not available in this build"
     ),
     baseline_enabled: Optional[bool] = typer.Option(
-        None, "--baseline-enabled", help="Enable BOLT baseline"
+        None, "--baseline-enabled", help="Enable PACE per-prompt baseline"
     ),
     baseline_rho_min: Optional[float] = typer.Option(
-        None, "--baseline-rho-min", help="BOLT baseline rho min"
+        None, "--baseline-rho-min", help="PACE baseline rho min"
     ),
     baseline_rho_max: Optional[float] = typer.Option(
-        None, "--baseline-rho-max", help="BOLT baseline rho max"
+        None, "--baseline-rho-max", help="PACE baseline rho max"
     ),
     baseline_D_half: Optional[float] = typer.Option(
-        None, "--baseline-d-half", help="BOLT baseline D half"
+        None, "--baseline-d-half", help="PACE baseline D half"
     ),
     baseline_warm_start: Optional[int] = typer.Option(
-        None, "--baseline-warm-start", help="BOLT baseline warm start steps"
+        None, "--baseline-warm-start", help="PACE baseline warm start steps"
     ),
     use_baseline_advantages: Optional[bool] = typer.Option(
-        None, "--use-baseline-advantages", help="Use BOLT baseline advantages"
+        None, "--use-baseline-advantages", help="Use PACE baseline advantages"
     ),
     
     # ========== Sample Logging ==========
@@ -1178,6 +1286,13 @@ def train(
             typer.echo(f"Output: {logging_cfg.get('output_dir', './output')}")
             typer.echo("="*60 + "\n")
             
+            # CLI --accelerate-config overrides any value in the YAML
+            if accelerate_config:
+                if 'train' not in final_config:
+                    final_config['train'] = {}
+                final_config['train']['accelerate_config_path'] = accelerate_config
+                typer.echo(f"Accelerate config: {accelerate_config}")
+
             # Create trainer by passing config directly
             if algo == 'sft':
                 trainer = create_sft_trainer(config=final_config)
@@ -1218,6 +1333,9 @@ def train(
     if precision: model_config['precision'] = precision
     if gradient_checkpointing is not None: model_config['gradient_checkpointing'] = gradient_checkpointing
     if attn_implementation: model_config['attn_implementation'] = attn_implementation
+    if target_context_length: model_config['target_context_length'] = target_context_length
+    if rope_scaling_type: model_config['rope_scaling_type'] = rope_scaling_type
+    if rope_scaling_factor: model_config['rope_scaling_factor'] = rope_scaling_factor
     if use_unsloth is not None: model_config['use_unsloth'] = use_unsloth
     if max_seq_length: model_config['max_seq_length'] = max_seq_length
     if use_peft is not None: model_config['use_peft'] = use_peft
@@ -1395,7 +1513,12 @@ def train(
     if enable_thinking is not None: train_config['enable_thinking'] = enable_thinking
     if use_rewards_directly is not None: train_config['use_rewards_directly'] = use_rewards_directly
     if mask_truncated_completions is not None: train_config['mask_truncated_completions'] = mask_truncated_completions
-    
+
+    # vLLM Rollout Backend parameters
+    if rollout_backend: train_config['rollout_backend'] = rollout_backend
+    if vllm_gpu_memory_utilization: train_config['vllm_gpu_memory_utilization'] = vllm_gpu_memory_utilization
+    if vllm_tensor_parallel_size: train_config['vllm_tensor_parallel_size'] = vllm_tensor_parallel_size
+
     # Counterfactual GRPO parameters
     if boost_factor: train_config['boost_factor'] = boost_factor
     if min_weight: train_config['min_weight'] = min_weight
@@ -1412,7 +1535,7 @@ def train(
     if gbmpo_l2_coefficient: train_config['gbmpo_l2_coefficient'] = gbmpo_l2_coefficient
     if gbmpo_epsilon: train_config['gbmpo_epsilon'] = gbmpo_epsilon
     
-    # BOLT parameters
+    # PACE parameters
     if curriculum_enabled is not None: train_config['curriculum_enabled'] = curriculum_enabled
     if curriculum_epsilon: train_config['curriculum_epsilon'] = curriculum_epsilon
     if curriculum_update_freq: train_config['curriculum_update_freq'] = curriculum_update_freq
@@ -1485,7 +1608,10 @@ def train(
     # Seeds
     if seed: train_config['seed'] = seed
     if data_seed: train_config['data_seed'] = data_seed
-    
+
+    # Accelerate / DeepSpeed / FSDP
+    if accelerate_config: train_config['accelerate_config_path'] = accelerate_config
+
     if train_config:
         cli_config['train'] = train_config
     
@@ -1674,6 +1800,38 @@ if VALIDATE_AVAILABLE and validate_app:
 # Add diagnose subcommand if available
 if DIAGNOSE_AVAILABLE and diagnose_app:
     app.add_typer(diagnose_app, name="diagnose", help="Diagnose training issues and monitor system health")
+
+# Add advise subcommand if available
+if ADVISE_AVAILABLE and advise_app:
+    app.add_typer(advise_app, name="advise", help="Get cost estimates and algorithm recommendations")
+
+# Add export subcommand if available
+if EXPORT_AVAILABLE and export_app:
+    app.add_typer(export_app, name="export", help="Export fine-tuned models to various formats")
+
+# Add merge subcommand if available
+if MERGE_AVAILABLE and merge_app:
+    app.add_typer(merge_app, name="merge", help="Merge models via linear, task_arithmetic, ram, or LoRA merge")
+
+# Add aligner subcommand if available
+if ALIGNER_AVAILABLE and aligner_app:
+    app.add_typer(aligner_app, name="aligner", help="Interactive training inspector with live metric inspection and hyperparameter adjustment")
+
+# Add verify-export subcommand if available
+if VERIFY_EXPORT_AVAILABLE and verify_export_app:
+    app.add_typer(verify_export_app, name="verify-export", help="Verify exported artifacts against baseline for quantization regression")
+
+# Add adapters subcommand if available
+if ADAPTERS_AVAILABLE and adapters_app:
+    app.add_typer(adapters_app, name="adapters", help="Manage LoRA adapters: compress, validate, export")
+
+# Add compose subcommand if available
+if COMPOSE_AVAILABLE and compose_app:
+    app.add_typer(compose_app, name="compose", help="Run multi-stage training compositions")
+
+# Add indic-eval subcommand if available
+if INDIC_EVAL_AVAILABLE and indic_eval_app:
+    app.add_typer(indic_eval_app, name="indic-eval", help="Evaluate models on Indic language benchmarks (Hindi, Tamil, Bengali)")
 
 if __name__ == "__main__":
     app()

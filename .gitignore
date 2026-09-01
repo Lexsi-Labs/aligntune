@@ -212,6 +212,10 @@ vocab.txt
 *.feather
 datasets/
 raw_data/
+
+# Vendored mergekit ships architecture/config data as *.json - do not let the
+# dataset-file rule above silently drop it (see third_party/mergekit/PATCH_NOTES.md)
+!third_party/mergekit/**/*.json
 processed_data/
 
 
@@ -219,9 +223,16 @@ processed_data/
 checkpoints/
 checkpoint-*/
 models/
+# Vendored unsloth ships an unsloth/models/ subpackage (FastLanguageModel,
+# loader, per-architecture code) - the bare "models/" rule above silently
+# dropped it from every `git add` (see third_party/unsloth/PATCH_NOTES.md).
+!third_party/unsloth/**/models/
+!third_party/unsloth/**/models/**
 outputs/
 output*/
 results/
+notebooks/out_*/
+notebooks/**/out_*/
 logs/
 runs/
 wandb/
@@ -239,6 +250,9 @@ HF_HOME/
 
 # Jupyter notebook outputs
 *.ipynb
+!/notebooks/*.ipynb
+!/notebooks/usecases/*.ipynb
+!/notebooks/unsloth/*.ipynb
 
 # Unsloth specific
 unsloth_compiled_cache/

@@ -4,30 +4,129 @@ Complete guide to using reward functions in AlignTune for RLHF training.
 
 ## Overview
 
-Reward functions measure the quality of model outputs and guide reinforcement learning training. AlignTune provides **27+ prebuilt reward functions** covering quality, safety, task-specific metrics, and more.
+Reward functions score generated completions during online RL training. AlignTune
+provides **50+ registered rewards** covering quality, safety, task-specific
+metrics, and more. This is separate from training a neural reward model: PPO
+can consume a reward model, while GRPO, Online-DPO, and related trainers
+can consume registry rewards or custom callables directly.
 
 ## Quick Start
 
-### Using Reward Functions in PPO
+### Using Registry Rewards in Online RL
 
 ```python
 from aligntune.core.backend_factory import create_rl_trainer
 
 trainer = create_rl_trainer(
- model_name="unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
- dataset_name="Anthropic/hh-rlhf",
- algorithm="ppo",
- backend="unsloth",
- reward_model_name="Skywork/Skywork-Reward-V2-Qwen3-0.6B",
- # Reward functions for custom reward model training
- reward_functions=["length", "sentiment", "safety", "coherence"],
- reward_function_weights=[0.2, 0.3, 0.3, 0.2],
+ model_name="Qwen/Qwen3-0.6B",
+ dataset_name="openai/gsm8k",
+ algorithm="grpo",  # also works for other GRPO-family trainers and Online-DPO
+ backend="trl",
+ reward_functions=["math_correctness"],
+ reward_function_weights=[1.0],
+ num_generations=4,
+ max_completion_length=256,
  num_epochs=1,
- batch_size=1
+ batch_size=2,
 )
 
 trainer.train()
 ```
+
+`reward_functions` is the convenience factory argument for registered names.
+The factory converts it to the canonical `rewards` configuration. You can
+also pass that configuration directly:
+
+```python
+trainer = create_rl_trainer(
+    model_name="Qwen/Qwen3-0.6B",
+    dataset_name="openai/gsm8k",
+    algorithm="grpo",
+    rewards=[
+        {
+            "type": "math_correctness",
+            "weight": 1.0,
+            "params": {},
+        }
+    ],
+)
+```
+
+For a custom reward, provide a TRL-style callable through a `custom` reward
+spec. It must return one numeric score per completion in the batch:
+
+```python
+def short_answer_reward(completions, **kwargs):
+    return [1.0 if len(text.split()) <= 100 else 0.0 for text in completions]
+
+trainer = create_rl_trainer(
+    model_name="Qwen/Qwen3-0.6B",
+    dataset_name="openai/gsm8k",
+    algorithm="grpo",
+    rewards=[
+        {"type": "custom", "params": {"function": short_answer_reward}, "weight": 1.0}
+    ],
+)
+```
+
+TRL calls rewards batch-wise with `prompts`, `completions`, and any preserved
+dataset columns. Do not return one scalar for a multi-example batch. Keep
+reference columns in the dataset when the reward needs them.
+
+## Define and Pass a Custom Reward
+
+Custom rewards must use TRL's batch interface. Return exactly one numeric score
+for every completion in the batch:
+
+```python
+def my_reward(prompts, completions, **kwargs):
+    return [
+        1.0 if "final answer" in completion.lower() else 0.0
+        for completion in completions
+    ]
+
+trainer = create_rl_trainer(
+    model_name="Qwen/Qwen3-0.6B",
+    dataset_name="openai/gsm8k",
+    algorithm="grpo",
+    rewards=[my_reward],
+)
+```
+
+You can also pass the callable using an explicit custom reward specification:
+
+```python
+rewards=[
+    {
+        "type": "custom",
+        "weight": 1.0,
+        "params": {"function": my_reward},
+    }
+]
+```
+
+If the reward needs a target or reference, include that column in the dataset
+and accept it as a batch argument:
+
+```python
+def exact_match_reward(completions, reference, **kwargs):
+    return [
+        1.0 if prediction.strip() == target.strip() else 0.0
+        for prediction, target in zip(completions, reference)
+    ]
+
+trainer = create_rl_trainer(
+    model_name="Qwen/Qwen3-0.6B",
+    dataset_name="your-dataset",
+    algorithm="grpo",
+    rewards=[exact_match_reward],
+)
+```
+
+Registry rewards such as `"math_correctness"` can still be passed by name in
+`reward_functions=[...]` or as `{"type": "math_correctness", ...}` in
+`rewards=[...]`; AlignTune adapts those built-in scalar `compute(...)` methods
+to TRL's batch interface automatically.
 
 ### Using Reward Functions in Reward Model Training
 
@@ -203,31 +302,18 @@ reward_functions=["logical_consistency"]
 
 ## Composite Rewards
 
-Combine multiple reward functions with weights:
+Combine multiple registry rewards with weights:
 
 ```python
 trainer = create_rl_trainer(
- model_name="unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
- algorithm="ppo",
- backend="unsloth",
- # Multiple reward functions
- reward_functions=[
- "length",
- "sentiment",
- "safety",
- "coherence",
- "helpfulness"
+ model_name="Qwen/Qwen3-0.6B",
+ dataset_name="openai/gsm8k",
+ algorithm="grpo",
+ rewards=[
+  {"type": "math_correctness", "weight": 0.7, "params": {}},
+  {"type": "length", "weight": 0.3,
+   "params": {"min_length": 1, "max_length": 256}},
  ],
- reward_function_weights=[
- 0.2, # length
- 0.2, # sentiment
- 0.3, # safety (higher weight)
- 0.15, # coherence
- 0.15 # helpfulness
- ],
- train_custom_reward_model=True,
- reward_training_texts=training_texts,
- reward_training_base_model="microsoft/DialoGPT-medium"
 )
 ```
 
@@ -249,34 +335,37 @@ length_func = registry.get_reward_function("length")
 sentiment_func = registry.get_reward_function("sentiment")
 ```
 
-### Create Custom Reward Function
+### Train a Neural Reward Model (separate workflow)
+
+`RewardModelTrainer` trains a model from text and reward features. It is not
+the same as passing a reward callable to GRPO/Online-DPO. Use this path
+when you need a reusable neural reward model, then pass its saved path to a
+trainer that supports `reward_model_name` or `reward_model_path`.
+
+### Create Custom Reward Function for Online RL
 
 ```python
-from aligntune.rewards import RewardFunction, RewardType
+from aligntune.rewards.core import RewardFunction, RewardConfig, RewardType
 from aligntune.rewards.registry import RewardRegistry
 from aligntune.core.backend_factory import create_rl_trainer
-class CustomReward(RewardFunction):
- def __init__(self):
-    super().__init__(RewardType.CUSTOM)
 
- def compute(self, text: str, **kwargs) -> float:
-    # Your custom reward logic
-    score = 0.0
-    # ... compute score based on text
-    return score
+def custom_reward(completions, **kwargs):
+    # Return exactly one numeric score per completion.
+    return [1.0 if "final answer" in text.lower() else 0.0
+            for text in completions]
 
-# Register custom function
-RewardRegistry.register_custom_reward("custom", CustomReward)
-
-# Use in training
 trainer = create_rl_trainer(
-    model_name="unsloth/Llama-3.2-1B-Instruct-bnb-4bit",
-    algorithm="ppo",
-    dataset_name="HuggingFaceH4/ultrafeedback_binarized",
-    reward_functions=["custom", "length", "safety"],
-    reward_function_weights=[0.5, 0.3, 0.2]
+    model_name="Qwen/Qwen3-0.6B",
+    dataset_name="openai/gsm8k",
+    algorithm="grpo",
+    rewards=[
+        {"type": "custom", "params": {"function": custom_reward}, "weight": 1.0}
+    ],
 )
 ```
+
+For a reusable named reward, register it with `RewardRegistry` and then use
+its name in `reward_functions` or `rewards`.
 
 ## Best Practices
 
@@ -378,7 +467,7 @@ trainer.train()
 
 ## Available Reward Functions
 
-For a complete list of all 27+ reward functions, see the [Reward Functions Reference](../api-reference/reward-functions-reference.md).
+For a complete list of all 50+ reward functions, see the [Reward Functions Reference](../api-reference/reward-functions-reference.md).
 
 **Categories:**
 - Basic Quality (length, coherence, fluency)

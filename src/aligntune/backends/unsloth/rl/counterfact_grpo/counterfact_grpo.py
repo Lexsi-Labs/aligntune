@@ -46,6 +46,7 @@ def apply_chat_template_safe(
 
 
 class UnslothCounterFactGRPOTrainer(TrainerBase):
+    KEEP_COLUMNS = True
     """
     Counterfactual GRPO trainer using Unsloth's FastLanguageModel + TRL's CounterfactualGRPOTrainer.
 
@@ -159,6 +160,19 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             if self.tokenizer.pad_token is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
                 self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+
+            # Unsloth's FastLanguageModel.from_pretrained doesn't always carry
+            # over the base checkpoint's chat_template (e.g. for
+            # Qwen/Qwen2.5-0.5B, unlike a plain AutoTokenizer.from_pretrained
+            # load) - setup_dataset()'s apply_chat_template_safe() then
+            # crashes with "tokenizer.chat_template is not set". Restore it
+            # from a plain tokenizer load of the same checkpoint, same as
+            # what the TRL backend gets for free.
+            if self.tokenizer.chat_template is None:
+                from transformers import AutoTokenizer
+                plain_tokenizer = AutoTokenizer.from_pretrained(model_name)
+                if plain_tokenizer.chat_template is not None:
+                    self.tokenizer.chat_template = plain_tokenizer.chat_template
 
             # Configure model for training with LoRA
             logger.info(
@@ -460,7 +474,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             self.train_dataset = dataset_dict["train"]
             self.eval_dataset = dataset_dict.get("validation", None)
             self.dataset_dict = dataset_dict
-            
+
             logger.info(f"Dataset loaded: {len(self.train_dataset)} train examples")
             if self.eval_dataset:
                 logger.info(f"Evaluation dataset: {len(self.eval_dataset)} examples")
@@ -631,7 +645,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             scale_rewards = self._get_config_value(
                 self.config.train, 'scale_rewards', default='group')
             mask_truncated_completions = self._get_config_value(
-                self.config.train, 'mask_truncated_completions', default=True)
+                self.config.train, 'mask_truncated_completions', default=False)
             max_grad_norm = self._get_config_value(
                 self.config.train, 'max_grad_norm', default=0.0)
 
@@ -721,8 +735,11 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 per_device_train_batch_size=per_device_batch_size,
                 num_generations=num_generations,
                 gradient_accumulation_steps=gradient_accumulation_steps,
+                # NOTE: max_prompt_length was removed from trl's GRPOConfig in
+                # the installed trl version (1.7.1) - only max_completion_length
+                # remains. We still read it from config above for logging, but
+                # don't forward it to GRPOConfig.
                 max_completion_length=max_completion_length,
-                max_prompt_length=max_prompt_length,
                 learning_rate=learning_rate,
                 warmup_steps=warmup_steps,
                 warmup_ratio=warmup_ratio,

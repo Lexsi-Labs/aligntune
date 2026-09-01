@@ -16,7 +16,14 @@ from .model_loader import (
     ModelLoader,
     load_local_model,
     load_model_auto,
-    get_model_info
+    get_model_info,
+    load_and_merge_lora,
+)
+
+from .hf_publish import (
+    brand_hf_repo,
+    load_finetuned_model,
+    push_model_to_hf,
 )
 
 from .checkpointing import (
@@ -26,7 +33,7 @@ from .checkpointing import (
     get_latest_checkpoint
 )
 
-from .logging import (
+from .logging_utils import (
     LoggingManager,
     create_logging_manager,
     create_wandb_config,
@@ -84,7 +91,13 @@ __all__ = [
     "load_local_model",
     "load_model_auto",
     "get_model_info",
-    
+    "load_and_merge_lora",
+
+    # HF Hub publishing utilities
+    "brand_hf_repo",
+    "load_finetuned_model",
+    "push_model_to_hf",
+
     # Checkpointing utilities
     "CheckpointManager",
     "save_checkpoint",

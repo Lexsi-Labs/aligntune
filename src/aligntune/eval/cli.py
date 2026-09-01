@@ -13,7 +13,7 @@ import torch
 
 from .core import EvalConfig, EvalType, TaskCategory, EvalRunner
 from .lm_eval_integration import LMEvalConfig, LMEvalRunner, get_available_lm_eval_tasks
-from .registry import EvaluationRegistry
+from .registry import EvalRegistry
 
 app = typer.Typer(name="eval", help="Model evaluation commands")
 
@@ -24,27 +24,42 @@ logger = logging.getLogger(__name__)
 def benchmark(
     model_name: str = typer.Argument(..., help="Model name or path to evaluate"),
     tasks: Optional[List[str]] = typer.Option(None, "--task", "-t", help="Specific tasks to run"),
+    bundle: Optional[str] = typer.Option(None, "--bundle", "-b", help="Preset bundle (alignment_core, safety, reasoning)"),
     output_dir: str = typer.Option("./eval_results", "--output-dir", "-o", help="Output directory for results"),
-    batch_size: int = typer.Option(1, "--batch-size", "-b", help="Batch size for evaluation"),
+    batch_size: int = typer.Option(1, "--batch-size", help="Batch size for evaluation"),
     limit: Optional[int] = typer.Option(None, "--limit", "-l", help="Limit number of samples"),
     device: str = typer.Option("auto", "--device", "-d", help="Device to use (auto, cpu, cuda)"),
     verbose: bool = typer.Option(False, "--verbose/--quiet", help="Verbose output"),
 ):
     """Run standard benchmark evaluation on a model."""
-    typer.echo(f"🔍 Running benchmark evaluation on model: {model_name}")
-    
+    typer.echo(f"Running benchmark evaluation on model: {model_name}")
+
+    # Handle bundle expansion
+    if bundle is not None:
+        from .registry import EvalRegistry
+        if bundle not in EvalRegistry.list_bundles():
+            available = ", ".join(EvalRegistry.list_bundles())
+            typer.echo(f"Error: Unknown bundle '{bundle}'. Available: {available}")
+            raise typer.Exit(1)
+        bundle_tasks = EvalRegistry.get_bundle(bundle)
+        typer.echo(f"Using preset bundle '{bundle}': {bundle_tasks}")
+        if tasks is None:
+            tasks = bundle_tasks
+        else:
+            tasks = list(set(tasks) | set(bundle_tasks))
+
     if tasks is None:
         # Use default benchmark tasks
         tasks = ["hellaswag", "arc_challenge", "mmlu", "gsm8k", "human_eval"]
         typer.echo(f"Using default benchmark tasks: {tasks}")
-    
+
     # Check if tasks are lm-eval tasks
     available_lm_eval = get_available_lm_eval_tasks()
     lm_eval_tasks = [task for task in tasks if task in available_lm_eval]
     custom_tasks = [task for task in tasks if task not in available_lm_eval]
-    
+
     results = []
-    
+
     # Run lm-eval tasks
     if lm_eval_tasks:
         typer.echo(f"Running lm-eval tasks: {lm_eval_tasks}")
@@ -56,32 +71,32 @@ def benchmark(
             verbose=verbose
         )
         runner = LMEvalRunner(config)
-        
+
         from .lm_eval_integration import get_lm_eval_task
         lm_eval_task_objects = [get_lm_eval_task(task) for task in lm_eval_tasks]
         lm_eval_results = runner.evaluate_tasks(lm_eval_task_objects)
         results.extend(lm_eval_results)
-    
+
     # Run custom tasks
     if custom_tasks:
         typer.echo(f"Running custom tasks: {custom_tasks}")
         # This would require loading the model and tokenizer
         typer.echo("Custom task evaluation not yet implemented")
-    
+
     # Display results
-    typer.echo("\n📊 Evaluation Results:")
+    typer.echo("\nEvaluation Results:")
     typer.echo("=" * 50)
-    
+
     for result in results:
         typer.echo(f"\nTask: {result.task_name}")
-        typer.echo(f"Category: {result.category.value}")
+        typer.echo(f"Category: {result.category.value if hasattr(result.category, 'value') else result.category}")
         typer.echo(f"Samples: {result.num_samples}")
         typer.echo(f"Time: {result.eval_time:.2f}s")
         typer.echo("Metrics:")
         for metric, value in result.metrics.items():
             typer.echo(f"  {metric}: {value:.4f}")
-    
-    typer.echo(f"\n✅ Evaluation completed! Results saved to: {output_dir}")
+
+    typer.echo(f"\nEvaluation completed! Results saved to: {output_dir}")
 
 
 @app.command()
@@ -101,7 +116,7 @@ def task(
     
     try:
         # Get the task
-        task = EvaluationRegistry.get_task(task_name)
+        task = EvalRegistry.get_task(task_name)
         
         # Create evaluation config
         config = EvalConfig(
@@ -159,11 +174,11 @@ def list_tasks():
     typer.echo("=" * 50)
     
     # Custom tasks
-    custom_tasks = EvaluationRegistry.list_tasks()
+    custom_tasks = EvalRegistry.list_tasks()
     if custom_tasks:
         typer.echo("\nCustom Tasks:")
         for task_name in custom_tasks:
-            task = EvaluationRegistry.get_task(task_name)
+            task = EvalRegistry.get_task(task_name)
             typer.echo(f"  {task_name}: {task.description}")
     
     # lm-eval tasks
@@ -182,7 +197,7 @@ def list_metrics():
     typer.echo("📊 Available Evaluation Metrics:")
     typer.echo("=" * 50)
     
-    metrics = EvaluationRegistry.list_metrics()
+    metrics = EvalRegistry.list_metrics()
     for metric in metrics:
         typer.echo(f"  {metric}")
     
@@ -198,16 +213,16 @@ def compare(
     limit: Optional[int] = typer.Option(None, "--limit", "-l", help="Limit samples"),
 ):
     """Compare multiple models on the same tasks."""
-    typer.echo(f"🔄 Comparing models: {models}")
-    
+    typer.echo(f"Comparing models: {models}")
+
     if tasks is None:
         tasks = ["hellaswag", "arc_challenge", "mmlu"]
-    
+
     all_results = {}
-    
+
     for model in models:
         typer.echo(f"\nEvaluating model: {model}")
-        
+
         # Run evaluation for this model
         config = LMEvalConfig(
             model_name=model,
@@ -217,22 +232,22 @@ def compare(
             verbose=False
         )
         runner = LMEvalRunner(config)
-        
+
         from .lm_eval_integration import get_lm_eval_task
         task_objects = [get_lm_eval_task(task) for task in tasks if task in get_available_lm_eval_tasks()]
         results = runner.evaluate_tasks(task_objects)
-        
+
         all_results[model] = results
-    
+
     # Display comparison
-    typer.echo("\n📊 Model Comparison Results:")
+    typer.echo("\nModel Comparison Results:")
     typer.echo("=" * 80)
-    
+
     for task in tasks:
         if task in get_available_lm_eval_tasks():
             typer.echo(f"\nTask: {task}")
             typer.echo("-" * 40)
-            
+
             for model, results in all_results.items():
                 task_result = next((r for r in results if r.task_name == task), None)
                 if task_result:
@@ -240,8 +255,43 @@ def compare(
                     for metric, value in task_result.metrics.items():
                         typer.echo(f"{metric}: {value:.4f} ", end="")
                     typer.echo()
-    
-    typer.echo(f"\n✅ Comparison completed! Results saved to: {output_dir}")
+
+    typer.echo(f"\nComparison completed! Results saved to: {output_dir}")
+
+
+@app.command()
+def viz_rewards(
+    run_dir: str = typer.Argument(..., help="Path to training run directory"),
+    output_path: Optional[str] = typer.Option(None, "--output", "-o", help="Output path for PNG file"),
+    display: bool = typer.Option(False, "--display/--no-display", help="Display the plot in GUI"),
+):
+    """Visualize per-component reward trajectories and correlations.
+
+    Reads logged scalars from TensorBoard or metrics_history.json and generates:
+    - Stacked-area chart of reward components over training
+    - Correlation heatmap between components
+    """
+    from .reward_viz import save_reward_visualization, plot_reward_trajectory
+    import matplotlib.pyplot as plt
+
+    typer.echo(f"Generating reward visualization for run: {run_dir}")
+
+    # Generate and save visualization
+    saved_path = save_reward_visualization(run_dir, output_path)
+
+    if saved_path:
+        typer.echo(f"Reward visualization saved to: {saved_path}")
+
+        if display:
+            try:
+                fig = plot_reward_trajectory(run_dir)
+                if fig:
+                    plt.show()
+            except Exception as e:
+                typer.echo(f"Failed to display plot: {e}")
+    else:
+        typer.echo("Failed to generate reward visualization")
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":

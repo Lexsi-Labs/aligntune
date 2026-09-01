@@ -50,8 +50,19 @@ print(f"Perplexity: {metrics.get('eval_perplexity', 'N/A')}")
 
 ### RL Model Evaluation
 
+!!! note "Two `EvalConfig` classes"
+    `aligntune.eval` has two different classes named `EvalConfig`: one in
+    `aligntune.eval.core` (fields: `eval_type`, `task_categories`, ...; used
+    with `EvalRunner`) and one in `aligntune.eval.runner` (fields:
+    `model_path`, `dataset_name`, `task_type`, ...; used with `run_eval()`).
+    `run_eval` itself is only defined in `aligntune.eval.runner` -- the
+    examples below that call `run_eval()` import `EvalConfig` from
+    `aligntune.eval.runner`, while the "Standalone Evaluation Config"
+    example further down (which uses `EvalRunner`/`EvalTask` instead)
+    correctly imports its `EvalConfig` from `aligntune.eval.core`.
+
 ```python
-from aligntune.eval.core import EvalConfig, run_eval
+from aligntune.eval.runner import EvalConfig, run_eval
 
 # Evaluate DPO model
 config = EvalConfig(
@@ -181,7 +192,7 @@ Evaluate RL-trained models (DPO, PPO, GRPO):
 #### DPO Evaluation
 
 ```python
-from aligntune.eval.core import EvalConfig, run_eval
+from aligntune.eval.runner import EvalConfig, run_eval
 
 # Evaluate DPO model
 config = EvalConfig(
@@ -403,7 +414,7 @@ config = EvalConfig(
 ### RL Evaluation Config
 
 ```python
-from aligntune.eval.core import EvalConfig, run_eval
+from aligntune.eval.runner import EvalConfig, run_eval
 
 config = EvalConfig(
     # Model configuration
@@ -498,7 +509,7 @@ for prompt, result in zip(prompts, results):
 
 ```python
 from aligntune.core.backend_factory import create_rl_trainer
-from aligntune.eval.core import EvalConfig, run_eval
+from aligntune.eval.runner import EvalConfig, run_eval
 
 MODEL_NAME = "microsoft/phi-2"
 DATASET = "Anthropic/hh-rlhf"

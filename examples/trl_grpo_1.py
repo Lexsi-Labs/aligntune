@@ -93,7 +93,7 @@ trainer = create_rl_trainer(
     # GRPO Specifics (TRL 0.23.0)
     beta=0.01,                       # KL coefficient (lower = more exploration)
     loss_type="grpo",                # Valid: grpo, dapo, dr_grpo
-    scale_rewards="std",             # TRL 0.23.0: normalize by std dev
+    scale_rewards="group",            # normalize by per-group std dev (renamed from "std" in newer trl; valid values are batch/group/none)
 
     # Generation (Speed optimized - GSM8K solutions ~300 tokens)
     max_prompt_length=384,           # GSM8K prompts are short

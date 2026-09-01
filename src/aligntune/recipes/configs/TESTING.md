@@ -4,7 +4,7 @@ This document tracks the testing status of all AlignTune recipes.
 
 ## Testing Categories
 
-### ✅ Configuration Validation
+### Configuration Validation
 **Status**: COMPLETE (17/17)
 
 All recipes have been validated for:
@@ -31,10 +31,9 @@ These recipes cover the most common use cases and should be tested first.
 | `llama3-ultrafeedback-dpo` | DPO | 8B | 2-3h | 24GB | ⏳ Pending |
 | `qwen-instruct-ultrachat` | SFT | 3B | 2-3h | 16GB | ⏳ Pending |
 | `gemma-instruct-finetome` | SFT | 2B | 1-2h | 12GB | ⏳ Pending |
-| `qwen-mbpp-bolt` | BOLT | 1.7B | 2-3h | 16GB | ⏳ Pending |
 
 **Why these first?**
-- Most commonly requested algorithms (SFT, DPO, GRPO, BOLT)
+- Most commonly requested algorithms (SFT, DPO, GRPO)
 - Relatively fast to train (1-3 hours)
 - Cover key use cases (instruction, math, code, alignment)
 - Efficient models (good for testing infrastructure)
@@ -52,7 +51,6 @@ Standard algorithms with larger models or longer training times.
 | `mistral-hhrlhf-dpo` | DPO | 7B | 3-4h | 28GB | ⏳ Pending |
 | `gemma-helpfulness-dpo` | DPO | 2B | 1-2h | 12GB | ⏳ Pending |
 | `deepseek-humaneval-grpo` | GRPO | 1.3B | 1-2h | 12GB | ⏳ Pending |
-| `llama-code-bolt` | BOLT | 3B | 2-3h | 18GB | ⏳ Pending |
 | `llama3-helpful-harmless-ppo` | PPO | 8B | 4-6h | 32GB | ⏳ Pending |
 | `qwen-safety-ppo` | PPO | 3B | 2-3h | 20GB | ⏳ Pending |
 
@@ -69,7 +67,6 @@ Research-grade algorithms with longer training times.
 
 | Recipe | Algorithm | Model Size | Est. Time | Est. VRAM | Status |
 |--------|-----------|------------|-----------|-----------|--------|
-| `neural-mirror-grpo-math` | NMGRPO | 7B | 8-12h | 32GB | ⏳ Pending |
 | `dr-grpo-robust-math` | DR-GRPO | 8B | 4-6h | 28GB | ⏳ Pending |
 | `gbmpo-l2-code` | GBMPO | 6.7B | 3-4h | 24GB | ⏳ Pending |
 

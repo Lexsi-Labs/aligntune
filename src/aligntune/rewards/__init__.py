@@ -47,7 +47,7 @@ from . import registry
 
 __all__ = [
     "RewardType",
-    "RewardConfig", 
+    "RewardConfig",
     "RewardFunction",
     "RewardFunctionFactory",
     "CompositeReward",

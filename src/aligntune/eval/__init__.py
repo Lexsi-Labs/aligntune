@@ -27,11 +27,7 @@
 # MERGED INIT 
 
 """
-<<<<<<< HEAD
-Evaluation system for aligntune.
-=======
 Evaluation system for AlignTune.
->>>>>>> origin/check_chirag
 
 This module provides a unified interface for evaluating models:
 1. Universal Evaluator (New): Modular, backend-agnostic evaluation for SFT/RL.
@@ -47,6 +43,30 @@ from .metrics.text import BleuMetric, RougeMetric
 from .metrics.rl import KLDivergenceMetric, RewardAccuracyMetric, PolicyEntropyMetric
 from .metrics.math import MathAccuracyMetric
 from .metrics.code import PassAtKMetric
+from .alignment_auditor import AlignmentAuditor, AlignmentDriftTracker, AuditReport
+from .probes import load_all_probe_sets, load_custom_probes
+from .model_adapters import (
+    ModelAdapter,
+    HFModelAdapter,
+    VLLMModelAdapter,
+    GGUFModelAdapter,
+    OllamaModelAdapter,
+    build_adapter,
+)
+from .quant_regression import (
+    ExportedArtifact,
+    RegressionThresholds,
+    ArtifactResult,
+    RegressionReport,
+    QuantRegressionRunner,
+)
+
+# Tokenization Evaluation
+from .tokenization import (
+    evaluate_unreachable_tokens,
+    evaluate_fertility,
+    evaluate_tokenizer,
+)
 
 # --- Legacy Framework Exports (Backward Compatibility) ---
 # Assumes the old 'core.py' is preserved in the directory
@@ -89,25 +109,52 @@ __all__ = [
     "MathAccuracyMetric",
     "PassAtKMetric",
 
+    # Alignment Auditing
+    "AlignmentAuditor",
+    "AlignmentDriftTracker",
+    "AuditReport",
+    "load_all_probe_sets",
+    "load_custom_probes",
+
+    # Model Adapters
+    "ModelAdapter",
+    "HFModelAdapter",
+    "VLLMModelAdapter",
+    "GGUFModelAdapter",
+    "OllamaModelAdapter",
+    "build_adapter",
+
+    # Quantization Regression
+    "ExportedArtifact",
+    "RegressionThresholds",
+    "ArtifactResult",
+    "RegressionReport",
+    "QuantRegressionRunner",
+
+    # Tokenization Evaluation
+    "evaluate_unreachable_tokens",
+    "evaluate_fertility",
+    "evaluate_tokenizer",
+
     # Legacy Core Classes
     "EvalType",
-    "TaskCategory", 
+    "TaskCategory",
     "EvalConfig",
     "EvalTask",
     "EvalResult",
     "EvalLogger",
     "EvalRegistry",
     "EvalRunner",
-    
+
     # lm-eval Integration
     "LMEvalConfig",
-    "LMEvalTask", 
+    "LMEvalTask",
     "LMEvalRunner",
     "LMEVAL_TASKS",
     "get_available_lm_eval_tasks",
     "get_lm_eval_task",
     "run_standard_benchmark",
-    
+
     # Registry
     "registry",
 ]

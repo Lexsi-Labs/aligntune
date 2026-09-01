@@ -157,6 +157,7 @@ class SFTEvaluator:
             # multiple metrics (ROUGE, BLEU, BERTScore, etc.) can reuse them.
             predictions: Optional[List[str]] = None
             if task_type in [
+                TaskType.SFT,
                 TaskType.INSTRUCTION_FOLLOWING,
                 TaskType.SUPERVISED_FINE_TUNING,
                 TaskType.TEXT_GENERATION,
@@ -169,18 +170,9 @@ class SFTEvaluator:
                     max_samples=max_samples,
                 )
             
-            if task_type == TaskType.INSTRUCTION_FOLLOWING:
+            if task_type == TaskType.SFT:
                 metrics.update(
                     self._compute_instruction_following_metrics(
-                        model,
-                        tokenizer,
-                        eval_dataset,
-                        predictions=predictions,
-                    )
-                )
-            elif task_type == TaskType.TEXT_GENERATION:
-                metrics.update(
-                    self._compute_text_generation_metrics(
                         model,
                         tokenizer,
                         eval_dataset,
@@ -328,14 +320,14 @@ class SFTEvaluator:
                     prompt,
                     return_tensors="pt",
                     truncation=True,
-                    max_length=512,
+                    max_length=getattr(self.config.model, 'max_seq_length', 2048),
                 )
                 with tokenizer.as_target_tokenizer():
                     labels = tokenizer(
                         target,
                         return_tensors="pt",
                         truncation=True,
-                        max_length=512,
+                        max_length=getattr(self.config.model, 'max_seq_length', 2048),
                     )
 
                 input_ids = inputs["input_ids"]
@@ -746,9 +738,82 @@ class SFTEvaluator:
     
     def _extract_instruction_reference(self, example: Dict[str, Any]) -> tuple:
         """Extract instruction and reference from example."""
-        # Try direct instruction/response keys first
-        if "instruction" in example and "response" in example:
-            return example["instruction"], example["response"]
+        def extract_messages(value: Any) -> tuple:
+            """Return the final user/assistant text from a message list."""
+            if not isinstance(value, list):
+                return None, None
+
+            user_messages = [
+                message for message in value
+                if isinstance(message, dict)
+                and message.get("role", message.get("from")) in {"user", "human"}
+            ]
+            assistant_messages = [
+                message for message in value
+                if isinstance(message, dict)
+                and message.get("role", message.get("from")) in {"assistant", "gpt", "bot"}
+            ]
+
+            if not user_messages or not assistant_messages:
+                return None, None
+
+            def content(message: Dict[str, Any]) -> str:
+                return str(message.get("content", message.get("value", "")) or "")
+
+            return content(user_messages[-1]), content(assistant_messages[-1])
+
+        # Conversational datasets may use either ``messages`` or a list-valued
+        # ``prompt``. Normalize both before falling back to scalar columns.
+        message_prompt, message_reference = extract_messages(example.get("messages"))
+        if message_prompt and message_reference:
+            return message_prompt, message_reference
+
+        prompt_value = example.get("prompt")
+        if isinstance(prompt_value, list):
+            message_prompt, message_reference = extract_messages(prompt_value)
+            if not message_prompt:
+                user_messages = [
+                    message for message in prompt_value
+                    if isinstance(message, dict)
+                    and message.get("role", message.get("from")) in {"user", "human"}
+                ]
+                if user_messages:
+                    message_prompt = str(
+                        user_messages[-1].get(
+                            "content", user_messages[-1].get("value", "")
+                        )
+                        or ""
+                    )
+            if message_prompt:
+                reference = example.get(
+                    "completion",
+                    example.get("response", example.get("output", message_reference or "")),
+                )
+                if reference:
+                    return message_prompt, str(reference)
+
+        # Canonical prompt-completion and prompt-response formats.
+        if isinstance(prompt_value, str) and prompt_value.strip():
+            reference = example.get(
+                "completion",
+                example.get(
+                    "response",
+                    example.get("output", example.get("summary", "")),
+                ),
+            )
+            if reference:
+                return prompt_value, str(reference)
+
+        # Direct instruction/response formats, including CuratorKIT's
+        # canonical ``instruction`` + ``output`` representation.
+        instruction = example.get("instruction")
+        if isinstance(instruction, str) and instruction.strip():
+            reference = example.get(
+                "output",
+                example.get("response", example.get("completion", "")),
+            )
+            if reference:
+                return instruction, str(reference)
         
         # Try Q&A format (question/answers) - common in QA datasets
         if "question" in example:
@@ -822,7 +887,7 @@ class SFTEvaluator:
     def _generate_response(self, model, tokenizer, instruction: str) -> Optional[str]:
         """Generate response from instruction."""
         try:
-            inputs = tokenizer(instruction, return_tensors="pt", truncation=True, max_length=512)
+            inputs = tokenizer(instruction, return_tensors="pt", truncation=True, max_length=getattr(self.config.model, 'max_seq_length', 2048))
             device = next(model.parameters()).device
             inputs = {k: v.to(device) for k, v in inputs.items()}
             
@@ -863,10 +928,10 @@ class SFTEvaluator:
                         continue
                     
                     # Generate
-                    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
+                    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=getattr(self.config.model, 'max_seq_length', 2048))
                     device = next(model.parameters()).device
                     inputs = {k: v.to(device) for k, v in inputs.items()}
-                    
+
                     outputs = model.generate(
                         **inputs,
                         max_new_tokens=256,
@@ -923,10 +988,10 @@ class SFTEvaluator:
                         continue
                     
                     # Generate
-                    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
+                    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=getattr(self.config.model, 'max_seq_length', 2048))
                     device = next(model.parameters()).device
                     inputs = {k: v.to(device) for k, v in inputs.items()}
-                    
+
                     outputs = model.generate(
                         **inputs,
                         max_new_tokens=256,
@@ -989,7 +1054,7 @@ class SFTEvaluator:
                 texts,
                 padding=True,
                 truncation=True,
-                max_length=512,
+                max_length=getattr(self.config.model, 'max_seq_length', 2048),
                 return_tensors="pt"
             )
             

@@ -1,0 +1,73 @@
+# SFT Training Configuration for Customer Support Chatbot
+# Task: Instruction Following
+# Model: meta-llama/Llama-3.2-3B-Instruct
+# Dataset: philschmid/customer-support-intent-dataset
+
+model:
+  name_or_path: "meta-llama/Llama-3.2-3B-Instruct"
+  backend: unsloth
+  precision: bf16
+  quantization:
+    load_in_4bit: false
+  gradient_checkpointing: true
+  max_seq_length: 512  # Better for instruction following
+  use_unsloth: true
+  peft_enabled: true
+  lora_rank: 32
+  lora_alpha: 32
+  lora_dropout: 0.1
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]  # All attention layers
+
+dataset:
+  name: "bitext/Bitext-customer-support-llm-chatbot-training-dataset"
+  split: "train"
+  max_samples: 1000  # Increased for better training
+  task_type: sft
+  column_mapping:
+    instruction: "instruction"
+    response: "response"
+  instruction_column: "instruction"
+  response_column: "response"
+  system_prompt: "You are a helpful customer support assistant. Provide clear, concise, and professional responses."
+
+train:
+  epochs: 1
+  max_steps: 250  # Better convergence
+  per_device_batch_size: 4
+  gradient_accumulation_steps: 8  # Effective batch = 32
+  learning_rate: 1e-4  # More stable
+  warmup_ratio: 0.1  # Gradual warmup
+  max_grad_norm: 1.0
+  save_interval: 50
+  eval_interval: 100
+  bf16: true
+
+evaluation:
+  enabled: true
+  pre_training: true
+  post_training: true
+  eval_dataset:
+    name: "bitext/Bitext-customer-support-llm-chatbot-training-dataset"
+    split: "train[2000:2100]"
+    max_samples: 100
+    column_mapping:
+      instruction: "instruction"
+      response: "response"
+  metrics:
+    - type: perplexity
+      name: "perplexity"
+    - type: rouge
+      name: "rouge"
+    - type: bleu
+      name: "bleu"
+
+logging:
+  output_dir: "output"
+  run_name: "sft_customer_support"
+  loggers: ["tensorboard"]
+  log_level: "INFO"
+  log_interval: 10
+  save_strategy: "steps"
+  eval_strategy: "steps"
+
+chat_template: auto

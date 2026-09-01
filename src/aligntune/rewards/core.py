@@ -105,9 +105,22 @@ class RewardType(Enum):
     IMAGE_RELEVANCE = "image_relevance"
     AUDIO_QUALITY = "audio_quality"
     
-    # New Rewards 
+    # New Rewards
     COUNTERFACTUAL_MATH = "counterfactual_math"
     MBPP_REWARD = "mbpp_reward"
+
+    # Rubric-Anchored RL
+    RUBRIC = "rubric"
+
+    # RLVR (RL with Verifiable Rewards)
+    MATH_VERIFIABLE = "math_verifiable"
+    CODE_VERIFIABLE = "code_verifiable"
+    SQL_VERIFIABLE = "sql_verifiable"
+    JSON_SCHEMA_VERIFIABLE = "json_schema_verifiable"
+    REGEX_VERIFIABLE = "regex_verifiable"
+
+    # Reward Model Ensembles
+    REWARD_MODEL_ENSEMBLE = "reward_model_ensemble"
 
 
 @dataclass
@@ -151,18 +164,27 @@ class RewardFunction:
     
     def batch_compute(self, texts: List[str], references: Optional[List[str]] = None, **kwargs) -> List[float]:
         """Compute rewards for a batch of texts.
-        
+
         For pipeline-based rewards, this uses batch processing for efficiency.
         For other rewards, falls back to sequential computation.
         """
         if references is None:
             references = [None] * len(texts)
-        
+        elif len(references) != len(texts):
+            # zip() would otherwise silently truncate to the shorter list,
+            # returning FEWER scores than completions with no error at all.
+            logger.warning(
+                f"batch_compute got {len(texts)} texts but {len(references)} references; "
+                f"padding/truncating to {len(texts)} instead of silently returning a "
+                f"shorter, misaligned list of scores."
+            )
+            references = list(references[:len(texts)]) + [None] * max(0, len(texts) - len(references))
+
         # Check if this reward supports batch processing via pipeline
         if hasattr(self, '_batch_compute_pipeline'):
             # Use batch processing for pipeline-based rewards
             return self._batch_compute_pipeline(texts, references, **kwargs)
-        
+
         # Fallback to sequential computation
         return [self.compute(text, ref, **kwargs) for text, ref in zip(texts, references)]
 
@@ -171,10 +193,13 @@ class LengthReward(RewardFunction):
     """Reward based on text length."""
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        if not isinstance(text, str):
+            logger.warning(f"LengthReward got non-string text ({type(text)}); scoring 0.0")
+            return 0.0
         min_length = self.config.params.get("min_length", 10)
         max_length = self.config.params.get("max_length", 500)
         target_length = self.config.params.get("target_length", None)
-        
+
         word_count = len(text.split())
         
         if target_length:
@@ -193,6 +218,9 @@ class CoherenceReward(RewardFunction):
     """Reward for text coherence."""
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        if not isinstance(text, str):
+            logger.warning(f"CoherenceReward got non-string text ({type(text)}); scoring 0.0")
+            return 0.0
         sentences = [s.strip() for s in text.split('.') if s.strip()]
         if len(sentences) < 2:
             return 0.0
@@ -537,6 +565,9 @@ class MathCorrectnessReward(RewardFunction):
     """Reward for mathematical correctness."""
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        if not isinstance(text, str):
+            logger.warning(f"MathCorrectnessReward got non-string text ({type(text)}); scoring 0.0")
+            return 0.0
         # Extract mathematical expressions
         math_expressions = self._extract_math_expressions(text)
         if not math_expressions:
@@ -580,8 +611,11 @@ class MathCorrectnessReward(RewardFunction):
 
 class CodeSyntaxReward(RewardFunction):
     """Reward for code syntax correctness."""
-    
+
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        if not isinstance(text, str):
+            logger.warning(f"CodeSyntaxReward got non-string text ({type(text)}); scoring 0.0")
+            return 0.0
         # Extract code blocks
         code_blocks = re.findall(r'```[\s\S]*?```', text)
         if not code_blocks:
@@ -3086,17 +3120,95 @@ class RewardFunctionFactory:
         RewardType.COUNTERFACTUAL_REASONING: CounterfactualReasoningReward,
         RewardType.IMAGE_RELEVANCE: ImageRelevanceReward,
         RewardType.AUDIO_QUALITY: AudioQualityReward,
-        RewardType.COUNTERFACTUAL_MATH: CounterfactualMathReward, # New 
+        RewardType.COUNTERFACTUAL_MATH: CounterfactualMathReward, # New
         RewardType.MBPP_REWARD: MBPPReward,
     }
-    
+
+    @classmethod
+    def _lazy_load_verifiable_rewards(cls):
+        """Lazy load verifiable rewards to avoid circular imports."""
+        try:
+            from .verifiable import (
+                MathVerifiableReward,
+                CodeExecutionVerifiableReward,
+                SQLVerifiableReward,
+                JSONSchemaVerifiableReward,
+                RegexVerifiableReward,
+            )
+            cls._reward_classes.update({
+                RewardType.MATH_VERIFIABLE: MathVerifiableReward,
+                RewardType.CODE_VERIFIABLE: CodeExecutionVerifiableReward,
+                RewardType.SQL_VERIFIABLE: SQLVerifiableReward,
+                RewardType.JSON_SCHEMA_VERIFIABLE: JSONSchemaVerifiableReward,
+                RewardType.REGEX_VERIFIABLE: RegexVerifiableReward,
+            })
+        except ImportError as e:
+            logger.warning(f"Could not load verifiable rewards: {e}")
+
+    @classmethod
+    def _lazy_load_rubric_reward(cls):
+        """Lazy load RubricReward to avoid circular imports."""
+        if RewardType.RUBRIC not in cls._reward_classes:
+            from aligntune.rewards.rubric_reward import RubricReward
+            cls._reward_classes[RewardType.RUBRIC] = RubricReward
+        return cls._reward_classes.get(RewardType.RUBRIC)
+
+    @classmethod
+    def _lazy_load_ensemble_reward(cls):
+        """Lazy load RewardModelEnsemble to avoid circular imports."""
+        if RewardType.REWARD_MODEL_ENSEMBLE not in cls._reward_classes:
+            from aligntune.rewards.ensemble import RewardModelEnsemble
+            cls._reward_classes[RewardType.REWARD_MODEL_ENSEMBLE] = RewardModelEnsemble
+        return cls._reward_classes.get(RewardType.REWARD_MODEL_ENSEMBLE)
+
     @classmethod
     def create_reward(cls, config: RewardConfig) -> RewardFunction:
         """Create a reward function from config."""
+        # Lazy load RubricReward if needed
+        if config.reward_type == RewardType.RUBRIC:
+            cls._lazy_load_rubric_reward()
+
+        # Lazy load ensemble reward if needed
+        if config.reward_type == RewardType.REWARD_MODEL_ENSEMBLE:
+            cls._lazy_load_ensemble_reward()
+
+        # Lazy load verifiable rewards if needed
+        if config.reward_type in (
+            RewardType.MATH_VERIFIABLE,
+            RewardType.CODE_VERIFIABLE,
+            RewardType.SQL_VERIFIABLE,
+            RewardType.JSON_SCHEMA_VERIFIABLE,
+            RewardType.REGEX_VERIFIABLE,
+        ):
+            cls._lazy_load_verifiable_rewards()
+
         if config.reward_type not in cls._reward_classes:
             raise ValueError(f"Unknown reward type: {config.reward_type}")
-        
+
         reward_class = cls._reward_classes[config.reward_type]
+
+        # RubricReward doesn't follow the uniform `reward_class(config)`
+        # constructor every other reward type uses - it takes `rubric` (str)
+        # and `judge` (LLMJudge) directly, not a RewardConfig. Calling it the
+        # generic way bound the whole RewardConfig object to the `rubric`
+        # positional parameter, so `isinstance(rubric, str)` was always
+        # False and every rubric reward raised "Rubric must be a non-empty
+        # string" regardless of what was actually configured. Build the
+        # judge from params (or accept an already-constructed one, for
+        # tests/embedding a custom judge without an API key) and pass both
+        # explicitly instead.
+        if config.reward_type == RewardType.RUBRIC:
+            params = config.params or {}
+            judge = params.get("judge")
+            if judge is None:
+                from aligntune.eval.llm_judge import JudgeFactory
+                judge = JudgeFactory.create(
+                    params.get("judge_type", "openai"),
+                    model=params.get("judge_model"),
+                    api_key=params.get("judge_api_key"),
+                )
+            return reward_class(rubric=params.get("rubric", ""), judge=judge, config=config)
+
         return reward_class(config)
     
     @classmethod
@@ -3111,17 +3223,54 @@ class RewardFunctionFactory:
 
 
 class CompositeReward:
-    """Composite reward function that combines multiple rewards."""
-    
-    def __init__(self, reward_functions: List[RewardFunction], weights: Optional[List[float]] = None):
+    """Composite reward function that combines multiple rewards.
+
+    Supports multiple aggregation modes for ensemble reward modeling:
+    - mean: Weighted average of all rewards (default)
+    - worst_case: Minimum score across all rewards (prevents reward hacking)
+    - uncertainty_weighted: Score weighted by inverse of standard deviation
+    """
+
+    def __init__(
+        self,
+        reward_functions: List[RewardFunction],
+        weights: Optional[List[float]] = None,
+        ensemble_mode: str = "mean"
+    ):
+        """Initialize CompositeReward.
+
+        Args:
+            reward_functions: List of reward functions to combine
+            weights: Optional weights for each reward function
+            ensemble_mode: How to aggregate rewards - "mean", "worst_case", or "uncertainty_weighted"
+        """
+        if not reward_functions:
+            raise ValueError("CompositeReward requires at least one reward function")
+
         self.reward_functions = reward_functions
         self.weights = weights or [1.0] * len(reward_functions)
-        
+        self.ensemble_mode = ensemble_mode
+
         if len(self.weights) != len(self.reward_functions):
             raise ValueError("Number of weights must match number of reward functions")
-    
+
+        if self.ensemble_mode not in ["mean", "worst_case", "uncertainty_weighted"]:
+            raise ValueError(
+                f"ensemble_mode must be 'mean', 'worst_case', or 'uncertainty_weighted', "
+                f"got {self.ensemble_mode}"
+            )
+
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        """Compute weighted composite reward."""
+        """Compute composite reward using specified ensemble mode.
+
+        Args:
+            text: Text to compute reward for
+            reference: Optional reference text
+            **kwargs: Additional arguments passed to reward functions
+
+        Returns:
+            Aggregated reward score in [0, 1]
+        """
         rewards = []
         for reward_func in self.reward_functions:
             try:
@@ -3130,20 +3279,97 @@ class CompositeReward:
             except Exception as e:
                 logger.warning(f"Reward computation failed: {e}")
                 rewards.append(0.0)
-        
-        # Weighted average
-        weighted_sum = sum(w * r for w, r in zip(self.weights, rewards))
-        total_weight = sum(self.weights)
-        
-        return weighted_sum / total_weight if total_weight > 0 else 0.0
+
+        if not rewards:
+            return 0.0
+
+        if self.ensemble_mode == "mean":
+            # Weighted average (original behavior)
+            weighted_sum = sum(w * r for w, r in zip(self.weights, rewards))
+            total_weight = sum(self.weights)
+            return weighted_sum / total_weight if total_weight > 0 else 0.0
+
+        elif self.ensemble_mode == "worst_case":
+            # Return minimum score to prevent reward hacking
+            return min(rewards)
+
+        elif self.ensemble_mode == "uncertainty_weighted":
+            # Weight by inverse of uncertainty (std dev)
+            mean_reward = np.mean(rewards)
+            std_dev = np.std(rewards)
+
+            # Avoid division by zero - if all rewards identical, use mean
+            if std_dev < 1e-6:
+                return mean_reward
+
+            # Uncertainty factor: (1 - normalized_std)
+            # Normalized std: std / max_possible_std. For values bounded in
+            # [0,1], the maximum possible standard deviation is 0.5 (half the
+            # values at 0, half at 1) -- NOT 1. Dividing by 1 (i.e. not
+            # normalizing at all, as this previously did) understates the
+            # uncertainty penalty for any rewards that actually disagree.
+            uncertainty_weight = max(0.0, 1.0 - std_dev / 0.5)
+
+            # Return mean reward modulated by uncertainty
+            return mean_reward * uncertainty_weight
+
+        return 0.0
     
-    def batch_compute(self, texts: List[str], references: Optional[List[str]] = None, **kwargs) -> List[float]:
-        """Compute composite rewards for a batch."""
+    def batch_compute(
+        self,
+        texts: List[str],
+        references: Optional[List[str]] = None,
+        return_breakdown: bool = False,
+        **kwargs
+    ) -> Union[List[float], Tuple[List[float], List[Dict[str, float]]]]:
+        """Compute composite rewards for a batch.
+
+        Args:
+            texts: List of texts to compute rewards for
+            references: Optional list of reference texts
+            return_breakdown: If True, also return breakdown dict for each sample
+                keyed by reward component name
+            **kwargs: Additional arguments passed to compute methods
+
+        Returns:
+            If return_breakdown=False: List[float] of composite rewards
+            If return_breakdown=True: Tuple[List[float], List[Dict[str, float]]]
+                where each dict maps reward name to component score
+        """
         if references is None:
             references = [None] * len(texts)
-        
-        return [self.compute(text, ref, **kwargs) for text, ref in zip(texts, references)]
-    
+
+        composite_rewards = []
+        breakdowns = [] if return_breakdown else None
+
+        for text, ref in zip(texts, references):
+            composite_score = self.compute(text, ref, **kwargs)
+            composite_rewards.append(composite_score)
+
+            if return_breakdown:
+                breakdown = self._get_breakdown(text, ref, **kwargs)
+                breakdowns.append(breakdown)
+
+        if return_breakdown:
+            return composite_rewards, breakdowns
+        return composite_rewards
+
+    def _get_breakdown(self, text: str, reference: Optional[str] = None, **kwargs) -> Dict[str, float]:
+        """Get breakdown of component rewards for a single sample."""
+        breakdown = {}
+        for reward_func in self.reward_functions:
+            try:
+                reward = reward_func.compute(text, reference, **kwargs)
+                # Use the registered reward name (RewardType enum value)
+                reward_name = reward_func.config.reward_type.value
+                breakdown[reward_name] = reward
+            except Exception as e:
+                logger.warning(f"Individual reward computation failed: {e}")
+                reward_name = reward_func.config.reward_type.value
+                breakdown[reward_name] = 0.0
+
+        return breakdown
+
     def get_individual_rewards(self, text: str, reference: Optional[str] = None, **kwargs) -> Dict[str, float]:
         """Get individual reward scores."""
         individual_rewards = {}
@@ -3154,7 +3380,7 @@ class CompositeReward:
             except Exception as e:
                 logger.warning(f"Individual reward computation failed: {e}")
                 individual_rewards[f"reward_{i}_{reward_func.config.reward_type.value}"] = 0.0
-        
+
         return individual_rewards
 
 

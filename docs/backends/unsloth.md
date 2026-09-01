@@ -36,8 +36,7 @@ Use Unsloth backend when:
  - Need memory efficiency
 
 3. **Supported Algorithms**
- - Using DPO, PPO, GRPO, etc.
- - Not using GSPO
+ - Using DPO, PPO, GRPO, GSPO, etc.
 
 4. **GPU Available**
  - CUDA-capable GPU
@@ -109,11 +108,20 @@ Unsloth backend supports most algorithms:
 |-----------|---------|-------|
 | SFT | Yes | Full support |
 | DPO | Yes | Full support |
+| Online-DPO | Yes | Full support |
 | PPO | Yes | Full support |
 | GRPO | Yes | Full support |
-| GSPO | No | **Not supported** |
+| GSPO | Yes | Full support |
 | DAPO | Yes | Full support |
 | Dr. GRPO | Yes | Full support |
+| GBMPO | Yes | Full support |
+| C-GRPO | Yes | Counterfactual GRPO |
+| PACE | Yes | Full support |
+| ORPO | Yes | Full support |
+| SPIN | Yes | Full support |
+
+See the [Backend Support Matrix](../compatibility/backend-matrix.md) for the
+full TRL/Unsloth comparison.
 
 ---
 

@@ -1,920 +1,313 @@
-
 """
-Abstract base trainer for unified RLHF training.
-
-This module provides the abstract TrainerBase class that defines the lifecycle
-and interface for all RLHF training algorithms.
+Abstract base trainer for RLHF training, inheriting from UnifiedTrainerBase.
 """
 
 import logging
-import time
-import torch
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from abc import abstractmethod
 from typing import Dict, Any, Optional, List, Union
-from pathlib import Path
 
 from .config import UnifiedConfig
 from .distributed import BackendFactory
-from .logging import UnifiedLogger
+from .logging_utils import UnifiedLogger
 from .evaluator import UnifiedEvaluator
-from ..callbacks import CallbackHandler, TrainerControl, TrainerCallback
+from ..trainer_base import UnifiedTrainerBase, TrainingState
+from ..callbacks import CallbackHandler, TrainerCallback
 
 from ...eval import BaseEvaluator, RLEvaluator
-from ...eval.metrics import (
-    RougeMetric, BleuMetric, PerplexityMetric,
-    KLDivergenceMetric, RewardAccuracyMetric
-)
-
-
+from ...eval.metrics import RougeMetric, BleuMetric, PerplexityMetric
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class TrainingState:
-    """Training state tracking."""
-    step: int = 0
-    epoch: int = 0
-    best_metric: float = 0.0
-    checkpoint_path: Optional[str] = None
-    start_time: float = field(default_factory=time.time)
-    last_eval_time: float = field(default_factory=time.time)
-    last_save_time: float = field(default_factory=time.time)
-    
-    def update_step(self, step: int):
-        """Update current step."""
-        self.step = step
-    
-    def update_epoch(self, epoch: int):
-        """Update current epoch."""
-        self.epoch = epoch
-    
-    def update_best_metric(self, metric: float):
-        """Update best metric if improved."""
-        if metric > self.best_metric:
-            self.best_metric = metric
-            return True
-        return False
-    
-    def get_elapsed_time(self) -> float:
-        """Get elapsed training time in seconds."""
-        return time.time() - self.start_time
-
-
-class TrainerBase(ABC):
+class RLTrainerBase(UnifiedTrainerBase):
     """
-    Abstract base trainer with lifecycle management.
-    
-    All RLHF trainers should inherit from this class and implement
-    the abstract methods for model, data, and reward setup.
+    RLHF-specific base trainer. Inherits lifecycle, saving, and callbacks from UnifiedTrainerBase.
+    Adds support for Reward/Value models and complex RL train loops.
     """
+    # Algorithm backends override this. Users can override it through the
+    # public dataset `keep_columns` option.
+    KEEP_COLUMNS = False
     
     def __init__(self, config: UnifiedConfig, callbacks: Optional[List[TrainerCallback]] = None):
-        """Initialize trainer with configuration."""
-        self.config = config
-        self.state = TrainingState()
-        self.control = TrainerControl()
+        super().__init__(config, callbacks)
         
-        # Initialize distributed backend
         self.backend = BackendFactory.create(config.distributed)
-        
-        # Initialize logging (rank-0 only)
         self.logger = UnifiedLogger(config.logging)
-        
-        # Initialize evaluator (rank-0 only)
         self.evaluator = UnifiedEvaluator(config)
         
-        # Training components (to be set by subclasses)
-        self.model = None
-        self.tokenizer = None
-        self.dataset = None
-        self.data_loader = None
         self.reward_functions = []
+        self.ref_model = None
+        self.reward_model = None
+        self.value_model = None
         
-        # Setup callbacks
-        self.callbacks = callbacks or []
-        self.callback_handler = None  # Will be initialized after model/tokenizer setup
-        
-        # Evaluation components
         self.base_evaluator = None
         self.rl_evaluator = None
-        self.eval_dataset = None  # To be set by subclasses
         
         logger.info(f"Initialized {self.__class__.__name__} with {config.algo.value} algorithm")
-    
+
     @abstractmethod
     def setup_model(self) -> None:
-        """Setup model, tokenizer, and optimization."""
         pass
-    
-    @abstractmethod
+        
     def setup_data(self) -> None:
-        """Setup datasets and data loaders."""
-        pass
-    
-    @abstractmethod
+        """
+        Unified setup_data implementation for RL trainers.
+        Uses DataManager to load and process datasets.
+        Override this method only if you need custom dataset handling.
+        """
+        logger.info("Setting up RL datasets with unified DataManager...")
+
+        task_type = self._get_task_type()
+        dataset_config = self._extract_dataset_config()
+        params = self._extract_dataset_params(dataset_config)
+        keep_columns = (
+            params['keep_columns']
+            if params['keep_columns'] is not None
+            else self.KEEP_COLUMNS
+        )
+
+        logger.info(f"Loading dataset: {params['dataset_name']} (split: {params['split']}, task: {task_type})")
+
+        from aligntune.data.manager import DataManager
+
+        manager = DataManager(
+            task_type=task_type,
+            system_prompt=params['system_prompt'],
+            tokenizer=self.tokenizer,
+            enable_thinking=params['enable_thinking'],
+            column_mapping=params['column_mapping'],
+            processing_fn=params['processing_fn'],
+            processing_batched=params['processing_batched'],
+            max_samples=params['max_samples'],
+            max_length=getattr(self.config.model, 'max_seq_length', 1024),
+            expected_format=params['format_type'],
+            keep_columns=keep_columns,
+            val_split_ratio=params['val_split_ratio'],
+            test_split_ratio=params['test_split_ratio'],
+            seed=params['split_seed'],
+            curator_schema_gate=params['curator_schema_gate'],
+            curator_clean=params['curator_clean'],
+            curator_dedup=params['curator_dedup'],
+            curator_use_tiktoken=params['curator_use_tiktoken'],
+            curator_max_tokens=params['curator_max_tokens'],
+        )
+
+        dataset_dict = manager.load_dataset(
+            params['dataset_name'],
+            config_name=params['config_name'],
+            split=params['split'],
+        )
+
+        # Look up whatever split was actually requested/loaded first (DataManager
+        # keeps the requested split's own name as the dict key rather than always
+        # relabeling it "train" - see DataManager.load_dataset). Falling back to
+        # "train" preserves the previous behavior when split is None/"train".
+        requested_split = params['split']
+        self.train_dataset = dataset_dict.get(requested_split, dataset_dict.get("train", None))
+        self.eval_dataset = dataset_dict.get("validation", None)
+        self.dataset_dict = dataset_dict
+
+        if self.train_dataset is None:
+            raise ValueError("No training dataset loaded")
+
+        logger.info(f"Dataset loaded: {len(self.train_dataset)} train samples")
+        if self.eval_dataset:
+            logger.info(f"Evaluation dataset: {len(self.eval_dataset)} samples")
+
+    def _get_task_type(self) -> str:
+        """Get task type from config or class attribute."""
+        if hasattr(self, 'TASK_TYPE'):
+            return self.TASK_TYPE
+        if hasattr(self.config, 'algo'):
+            return self.config.algo.value.lower()
+        return "ppo"
+
+    def _extract_dataset_config(self):
+        """Extract dataset configuration from config."""
+        if hasattr(self.config, 'dataset'):
+            return self.config.dataset
+        elif hasattr(self.config, 'datasets') and len(self.config.datasets) > 0:
+            return self.config.datasets[0]
+        else:
+            raise ValueError("No dataset configuration found")
+
+    def _extract_dataset_params(self, dataset_config) -> Dict[str, Any]:
+        """Extract all dataset parameters from config."""
+        return {
+            'dataset_name': self._get_config_value(dataset_config, 'name', 'dataset_name', default='imdb'),
+            'split': self._get_config_value(dataset_config, 'split', default=None),
+            'config_name': self._get_config_value(dataset_config, 'config_name', default=None),
+            'system_prompt': self._get_config_value(dataset_config, 'system_prompt', default=None),
+            'enable_thinking': self._get_config_value(self.config.train, 'enable_thinking', default=False),
+            'column_mapping': self._get_config_value(dataset_config, 'column_mapping', default=None),
+            'processing_fn': self._get_config_value(dataset_config, 'processing_fn', default=None),
+            'processing_batched': self._get_config_value(dataset_config, 'processing_batched', default=False),
+            'max_samples': self._get_config_value(dataset_config, 'max_samples', default=None),
+            'format_type': self._get_config_value(dataset_config, 'format_type', default=None),
+            'keep_columns': self._get_config_value(dataset_config, 'keep_columns', default=None),
+            'val_split_ratio': self._get_config_value(dataset_config, 'val_split_ratio', default=None),
+            'test_split_ratio': self._get_config_value(dataset_config, 'test_split_ratio', default=None),
+            'split_seed': self._get_config_value(dataset_config, 'split_seed', default=42),
+            'curator_schema_gate': self._get_config_value(dataset_config, 'curator_schema_gate', default=True),
+            'curator_clean': self._get_config_value(dataset_config, 'curator_clean', default=False),
+            'curator_dedup': self._get_config_value(dataset_config, 'curator_dedup', default='none'),
+            'curator_use_tiktoken': self._get_config_value(dataset_config, 'curator_use_tiktoken', default=False),
+            'curator_max_tokens': self._get_config_value(dataset_config, 'curator_max_tokens', default=1_000_000),
+        }
+
+    def _get_config_value(self, config_obj, *keys, default=None):
+        """Get config value, checking multiple possible key names."""
+        for key in keys:
+            if hasattr(config_obj, key):
+                value = getattr(config_obj, key)
+                if value is not None:
+                    return value
+        return default
+
+    def _setup_optimizer_scheduler(self, dataset_for_estimation=None):
+        """Setup optimizer and scheduler configuration. Returns common params for all RL algorithms."""
+        max_steps = self._get_config_value(self.config.train, 'max_steps', default=-1)
+        num_epochs = self._get_config_value(self.config.train, 'epochs', 'num_epochs', default=1)
+        warmup_steps = self._get_config_value(self.config.train, 'warmup_steps', default=0)
+        warmup_ratio = self._get_config_value(self.config.train, 'warmup_ratio', default=0.1)
+
+        return {
+            'optimizer_type': self._get_config_value(self.config.train, 'optimizer_type', default='adamw_torch'),
+            'learning_rate': self._get_config_value(self.config.train, 'learning_rate', default=5e-5),
+            'lr_scheduler_type': self._get_config_value(self.config.train, 'lr_scheduler_type', default='linear'),
+            'warmup_steps': warmup_steps,
+            'warmup_ratio': warmup_ratio,
+            'max_steps': max_steps,
+            'num_epochs': num_epochs,
+        }
+
     def setup_rewards(self) -> None:
-        """Setup reward functions and evaluators."""
-        pass
-    
+        """Prepare configured registry rewards for TRL-native online trainers."""
+        from aligntune.core.rl.reward_handler import prepare_trl_rewards
+
+        reward_specs = self.config.rewards if isinstance(self.config.rewards, list) else []
+        self.prepared_rewards = prepare_trl_rewards(reward_specs)
+        self.reward_functions = self.prepared_rewards.functions
+        
     @abstractmethod
     def train_step(self, batch: Dict[str, Any]) -> Dict[str, float]:
-        """Execute single training step."""
+        """Execute single RL training step."""
         pass
-    
-    def train(self) -> None:
-        """Main training loop with hooks."""
-        logger.info("Starting training...")
         
-        # Setup phase
+    def create_data_loader(self):
+        raise NotImplementedError("Subclasses must implement create_data_loader")
+        
+    def get_next_batch(self) -> Dict[str, Any]:
+        if self.data_loader is None:
+            raise RuntimeError("Data loader not initialized.")
+        try:
+            return next(self.data_loader)
+        except (StopIteration, TypeError):
+            self.data_loader = iter(self.create_data_loader())
+            return next(self.data_loader)
+
+    def train(self) -> None:
+        """Manual training loop for RL algorithms."""
+        logger.info("Starting RL training...")
         self.setup_model()
         self.setup_data()
         self.setup_rewards()
         
-        # CRITICAL FIX: Create data loader AFTER setup_data()
         if self.data_loader is None:
             self.data_loader = self.create_data_loader()
-        
-        # Initialize callback handler
+            
         self.callback_handler = CallbackHandler(
             self.callbacks, self.model, self.tokenizer, 
-            optimizer=None, # RL trainers usually wrap optimizer internally
-            scheduler=None
+            optimizer=None, scheduler=None
         )
-        self.callback_handler.add_callback(self)  # Add self as callback for simple hooks
-        
-        # Call on_init_end
+        self.callback_handler.add_callback(self)
         self.callback_handler.on_init_end(self.config, self.state, self.control)
         
-        # Log initial configuration
         self.logger.log_config(self.config)
         
-        # Training loop
         max_steps = self.config.train.max_steps
         if max_steps is None:
-            # Calculate steps from epochs
             if self.config.train.epochs is not None:
                 max_steps = self.config.train.epochs * len(self.data_loader)
             else:
-                raise ValueError("Either max_steps or epochs must be specified in training config")
-        
+                raise ValueError("max_steps or epochs required")
+                
         logger.info(f"Training for {max_steps} steps")
-        
         self.callback_handler.on_train_begin(self.config, self.state, self.control)
         
         for step in range(max_steps):
             self.control.should_training_stop = False
             self.callback_handler.on_step_begin(self.config, self.state, self.control)
             
-            # Get next batch
             batch = self.get_next_batch()
-            
-            # Execute training step
             metrics = self.train_step(batch)
             
-            # Update state
             self.state.update_step(step)
-            
-            # Log metrics
             self.logger.log_metrics(metrics, step)
-            
             self.callback_handler.on_log(self.config, self.state, self.control, logs=metrics)
-            
-            # Hook for step operations
-            # self.on_step(step, metrics) # Handled by callback_handler now
-            
             self.callback_handler.on_step_end(self.config, self.state, self.control)
             
-            # Evaluation
             if step % self.config.train.eval_interval == 0 and step > 0:
-                eval_metrics = self.evaluate()
-                # self.on_eval(eval_metrics) # Handled by callback_handler
-            
-            # Checkpointing
+                self.evaluate()
+                
             if step % self.config.train.save_interval == 0 and step > 0:
                 self.save_checkpoint()
                 
             if self.control.should_training_stop:
-                logger.info("Training stopped by callback")
                 break
-        
+                
         self.callback_handler.on_train_end(self.config, self.state, self.control)
-        
-        # Final evaluation and checkpoint
-        final_eval_metrics = self.evaluate()
-        # self.on_eval(final_eval_metrics)
+        self.evaluate()
         self.save_checkpoint()
-        
-        logger.info("Training completed")
+        self._auto_export()
+        logger.info("RL Training completed")
 
-
-    # def evaluate(
-    #     self,
-    #     eval_dataset=None,
-    #     metric_key_prefix: str = "eval",
-    #     **kwargs
-    # ) -> Dict[str, float]:
-    #     """Run evaluation and return metrics.
-        
-    #     Args:
-    #         eval_dataset: Dataset to evaluate on (defaults to validation set)
-    #         metric_key_prefix: Prefix for metric keys
-    #         **kwargs: Additional evaluation arguments
-        
-    #     Returns:
-    #         Dictionary of evaluation metrics
-    #     """
-    #     if not self.backend.is_rank_0():
-    #         return {}
-        
-    #     logger.info("Running evaluation...")
-        
-    #     # Use provided dataset or fall back to configured dataset
-    #     dataset_to_use = eval_dataset if eval_dataset is not None else self.dataset
-        
-    #     if dataset_to_use is None:
-    #         logger.warning("No evaluation dataset provided or configured")
-    #         return {}
-        
-    #     eval_metrics = self.evaluator.evaluate(
-    #         model=self.model,
-    #         tokenizer=self.tokenizer,
-    #         dataset=dataset_to_use,
-    #         config=self.config,
-    #         **kwargs
-    #     )
-        
-    #     # Apply metric key prefix
-    #     if metric_key_prefix:
-    #         prefixed_metrics = {f"{metric_key_prefix}/{k}": v for k, v in eval_metrics.items()}
-    #         eval_metrics = prefixed_metrics
-        
-    #     # Log evaluation metrics
-    #     self.logger.log_metrics(eval_metrics, self.state.step, prefix="eval/")
-        
-    #     self.callback_handler.on_evaluate(self.config, self.state, self.control, metrics=eval_metrics)
-        
-    #     # Update best metric
-    #     accuracy_key = f"{metric_key_prefix}/accuracy" if metric_key_prefix else "accuracy"
-    #     if accuracy_key in eval_metrics:
-    #         improved = self.state.update_best_metric(eval_metrics[accuracy_key])
-    #         if improved:
-    #             logger.info(f"New best metric: {eval_metrics[accuracy_key]:.4f}")
-        
-    #     return eval_metrics
-    
-#     def evaluate(
-#         self,
-#         eval_dataset=None,
-#         metric_key_prefix: str = "eval",
-#         use_custom_evaluator: bool = False,
-#         metrics: Optional[List] = None,
-#         **kwargs
-#     ) -> Dict[str, float]:
-#         """Run evaluation and return metrics.
-        
-#         Args:
-#             eval_dataset: Dataset to evaluate on (defaults to self.eval_dataset)
-#             metric_key_prefix: Prefix for metric keys
-#             use_custom_evaluator: If True, use BaseEvaluator/RLEvaluator. If False, use native.
-#             metrics: Metrics to compute (only for custom evaluator, overrides setup)
-#             **kwargs: Additional evaluation arguments (e.g., reference_model, reward_model for RL)
-        
-#         Returns:
-#             Dictionary of evaluation metrics
-#         """
-#         if not self.backend.is_rank_0():
-#             return {}
-        
-#         logger.info("Running evaluation...")
-        
-#         # Route to appropriate evaluator
-#         if use_custom_evaluator:
-#             eval_metrics = self._evaluate_with_custom(eval_dataset, metrics, **kwargs)
-#         else:
-#             eval_metrics = self._evaluate_native(eval_dataset, **kwargs)
-        
-#         # Apply metric key prefix
-#         if metric_key_prefix and eval_metrics:
-#             prefixed_metrics = {f"{metric_key_prefix}/{k}": v for k, v in eval_metrics.items()}
-#             eval_metrics = prefixed_metrics
-        
-#         # Log evaluation metrics
-#         if eval_metrics:
-#             self.logger.log_metrics(eval_metrics, self.state.step, prefix="eval/")
-#             self.callback_handler.on_evaluate(self.config, self.state, self.control, metrics=eval_metrics)
-            
-#             # Update best metric
-#             accuracy_key = f"{metric_key_prefix}/accuracy" if metric_key_prefix else "accuracy"
-#             if accuracy_key in eval_metrics:
-#                 improved = self.state.update_best_metric(eval_metrics[accuracy_key])
-#                 if improved:
-#                     logger.info(f"New best metric: {eval_metrics[accuracy_key]:.4f}")
-        
-#         return eval_metrics
-
-#     def _evaluate_with_custom(
-#         self, 
-#         eval_dataset, 
-#         metrics: Optional[List],
-#         **kwargs
-#     ) -> Dict[str, float]:
-#         """Evaluate using BaseEvaluator or RLEvaluator."""
-        
-#         # Auto-setup if not configured
-#         if self.custom_evaluator is None:
-#             self.setup_custom_evaluator(evaluator_type="auto", metrics=metrics)
-        
-#         # Use provided dataset or fall back to configured dataset
-#         dataset = eval_dataset or self.eval_dataset
-        
-#         if dataset is None:
-#             logger.warning("No evaluation dataset provided or configured")
-#             return {}
-        
-#         # RL Evaluation
-#         if isinstance(self.custom_evaluator, RLEvaluator):
-#             # Get reference model (defaults to policy model if not provided)
-#             reference_model = kwargs.pop('reference_model', self.model)
-#             reward_model = kwargs.pop('reward_model', None)
-            
-#             return self.custom_evaluator.evaluate_rl(
-#                 policy_model=self.model,
-#                 reference_model=reference_model,
-#                 tokenizer=self.tokenizer,
-#                 dataset=dataset,
-#                 reward_model=reward_model,
-#                 **kwargs
-#             )
-        
-#         # Base Evaluation (SFT)
-#         else:
-#             task_name = kwargs.pop('task_name', 'text_generation')
-#             return self.custom_evaluator.evaluate(
-#                 model=self.model,
-#                 tokenizer=self.tokenizer,
-#                 dataset=dataset,
-#                 task_name=task_name,
-#                 **kwargs
-#             )
-
-#     def _evaluate_native(
-#         self,
-#         eval_dataset=None,
-#         **kwargs
-#     ) -> Dict[str, float]:
-#         """Use UnifiedEvaluator (native evaluation).
-        
-#         Subclasses can override this to use their trainer-specific evaluation.
-#         """
-#         dataset = eval_dataset or self.eval_dataset
-        
-#         if dataset is None:
-#             logger.warning("No evaluation dataset provided or configured")
-#             return {}
-        
-#         return self.evaluator.evaluate(
-#             model=self.model,
-#             tokenizer=self.tokenizer,
-#             dataset=dataset,
-#             config=self.config,
-#             **kwargs
-#         )
-    def setup_custom_evaluator(
-        self, 
-        evaluator_type: str = "auto",
-        metrics: Optional[List] = None
-    ) -> None:
-        """Setup custom evaluators (BaseEvaluator/RLEvaluator).
-
-        Args:
-            evaluator_type: "base", "rl", or "auto" (auto-detects based on algorithm)
-            metrics: Optional list of metrics to use (overrides defaults)
-        """
-        try:
-            eval_batch_size = self._get_config_value(
-                self.config.train, 
-                'per_device_eval_batch_size', 
-                'per_device_batch_size',
-                default=4
-            )
-
-            # Setup BaseEvaluator for text generation metrics
-            if evaluator_type in ["base", "auto"]:
-                self.base_evaluator = BaseEvaluator(
-                    metrics=metrics or [RougeMetric(), BleuMetric(),PerplexityMetric()],
-                    batch_size=eval_batch_size,
-                    use_cache=True
-                )
-                logger.info(f"BaseEvaluator initialized (batch_size={eval_batch_size})")
-
-            # Setup RLEvaluator for RL-specific metrics
-            if evaluator_type in ["rl", "auto"]:
-                self.rl_evaluator = RLEvaluator(
-                    batch_size=eval_batch_size,
-                    use_cache=True
-                )
-                logger.info(f"RLEvaluator initialized (batch_size={eval_batch_size})")
-
-        except Exception as e:
-            logger.warning(f"Could not initialize custom evaluators: {e}")
-            self.base_evaluator = None
-            self.rl_evaluator = None
-
-    def _evaluate_with_custom_evaluator(
-        self,
-        eval_dataset=None,
-        metrics: Optional[List] = None,
-        **kwargs
-    ) -> Dict[str, float]:
-        """Custom evaluation using unified framework (BaseEvaluator + RLEvaluator)."""
-        dataset = eval_dataset or self.eval_dataset
-        if not dataset:
-            logger.warning("No eval dataset available for custom evaluation")
-            return {}
-
-        eval_results = {}
-        max_samples = kwargs.get('max_samples', None)
-
-        # 1. BaseEvaluator: Text generation metrics (ROUGE, BLEU, Perplexity)
-        if self.base_evaluator:
-            try:
-                logger.info("Running BaseEvaluator for text generation metrics...")
-                base_metrics = self.base_evaluator.evaluate(
-                    model=self.model,
-                    tokenizer=self.tokenizer,
-                    dataset=dataset,
-                    task_name=kwargs.get('task_name', 'text_generation'),
-                    max_samples=max_samples
-                )
-                eval_results.update(base_metrics)
-                logger.info(f"BaseEvaluator completed: {list(base_metrics.keys())}")
-            except Exception as e:
-                logger.warning(f"BaseEvaluator failed: {e}")
-                logger.debug("BaseEvaluator error details:", exc_info=True)
-
-        # 2. RLEvaluator: RL-specific metrics (KL Divergence, Reward Accuracy)
-        if self.rl_evaluator:
-            try:
-                logger.info("Running RLEvaluator for RL-specific metrics...")
-
-                # Get reference model and reward model from kwargs or use defaults
-                reference_model = kwargs.get('reference_model', self.model)
-                reward_model = kwargs.get('reward_model', getattr(self, '_combined_reward_function', None))
-
-                # Run RL evaluation
-                rl_metrics = self.rl_evaluator.evaluate_rl(
-                    policy_model=self.model,
-                    reference_model=reference_model,
-                    tokenizer=self.tokenizer,
-                    dataset=dataset,
-                    reward_model=reward_model,
-                    max_samples=max_samples
-                )
-                eval_results.update(rl_metrics)
-                logger.info(f"RLEvaluator completed: {list(rl_metrics.keys())}")
-
-            except Exception as e:
-                logger.warning(f"RLEvaluator failed: {e}")
-                logger.debug("RLEvaluator error details:", exc_info=True)
-
-        if not eval_results:
-            logger.warning("No evaluation metrics were computed successfully")
-
-        return eval_results
-
-    def _evaluate_native(self, eval_dataset: Optional[Any] = None, **kwargs: Any) -> Dict[str, float]:
-        """Native evaluation - uses UnifiedEvaluator or trainer's built-in evaluate.
-
-        Subclasses can override this to use their trainer-specific evaluation.
-        """
-        dataset = eval_dataset or self.eval_dataset
-
-        if dataset is None:
-            logger.warning("No evaluation dataset provided or configured")
-            return {}
-
-        # Try trainer's built-in evaluate first (if exists)
-        if hasattr(self, 'trainer') and self.trainer and hasattr(self.trainer, 'evaluate'):
-            try:
-                return self.trainer.evaluate()
-            except Exception as e:
-                logger.warning(f"Trainer evaluation failed: {e}")
-
-        # Fallback to UnifiedEvaluator
-        # return self.evaluator.evaluate(
-        #     model=self.model,
-        #     tokenizer=self.tokenizer,
-        #     dataset=dataset,
-        #     config=self.config,
-        #     **kwargs
-        # )
-        return {}
-    
-    
-    def evaluate(
-        self,
-        eval_dataset: Optional[Any] = None,
-        metric_key_prefix: str = "eval",
-        use_custom_evaluator: bool = False,
-        metrics: Optional[List] = None,
-        **kwargs: Any,
-    ) -> Dict[str, float]:
-        """
-        Evaluate the trained model with flexible evaluation strategies.
-
-        Args:
-            eval_dataset: Dataset to evaluate on (uses self.eval_dataset if None)
-            metric_key_prefix: Prefix for metric names in results
-            use_custom_evaluator: If True, use unified evaluation framework (BaseEvaluator + RLEvaluator)
-                                 If False, use native TRL trainer evaluation
-            metrics: Optional list of additional metrics to compute
-            **kwargs: Additional arguments:
-                - max_samples: Maximum number of samples to evaluate (default: 50)
-                - compute_text_metrics: Force text generation metrics (ROUGE, BLEU)
-                - compute_rl_metrics: Force RL metrics (KL, Reward Accuracy)
-
-        Returns:
-            Dictionary of evaluation metrics with the specified prefix
-        """
+    def evaluate(self, *args, **kwargs) -> Dict[str, float]:
+        """RL-specific evaluation (KL Divergence, Rewards, etc)."""
         if not self.backend.is_rank_0():
             return {}
+            
+        logger.info("Running RL Evaluation...")
         
-        
-        if self.callback_handler is None:
-            from aligntune.core.callbacks import CallbackHandler
-            self.callback_handler = CallbackHandler(
-                callbacks=self.callbacks,
-                model=self.model,
-                tokenizer=self.tokenizer
-            )
-            logger.debug("Initialized minimal callback handler for standalone evaluation")
-
-
-        logger.info("=" * 80)
-        logger.info("Starting Evaluation")
-        logger.info(f"Use custom evaluator: {use_custom_evaluator}")
-        logger.info(f"Metric prefix: {metric_key_prefix}")
-        logger.info("=" * 80)
-
         eval_results = {}
-
-        # Strategy 1: Use unified evaluation framework (BaseEvaluator + RLEvaluator)
-        if use_custom_evaluator:
-            if not self.base_evaluator and not self.rl_evaluator:
-                logger.warning("Custom evaluators not available, falling back to native evaluation")
-                use_custom_evaluator = False
-            else:
-                custom_results = self._evaluate_with_custom_evaluator(
-                    eval_dataset=eval_dataset,
-                    metrics=metrics,
-                    **kwargs
-                )
-                eval_results.update(custom_results)
-
-        # Strategy 2: Use native evaluation (fallback or if custom disabled)
-        if not use_custom_evaluator:
-            native_results = self._evaluate_native(
-                eval_dataset=eval_dataset,
-                **kwargs
+        if hasattr(self, 'rl_evaluator') and self.rl_evaluator:
+            eval_results = self.rl_evaluator.evaluate_rl(
+                policy_model=self.model,
+                reference_model=self.ref_model or self.model,
+                tokenizer=self.tokenizer,
+                dataset=self.eval_dataset or self.dataset,
+                reward_model=self.reward_model
             )
-            eval_results.update(native_results)
-
-        # Apply metric prefix to all keys
-        if metric_key_prefix and eval_results:
-            prefixed_results = {
-                f"{metric_key_prefix}/{k}" if "/" not in k else k: v
-                for k, v in eval_results.items()
-            }
-            eval_results = prefixed_results
-
-        # Log evaluation metrics
+            
         if eval_results:
             self.logger.log_metrics(eval_results, self.state.step, prefix="eval/")
-            self.callback_handler.on_evaluate(self.config, self.state, self.control, metrics=eval_results)
-
-            # Update best metric
-            accuracy_key = f"{metric_key_prefix}/accuracy" if metric_key_prefix else "accuracy"
-            if accuracy_key in eval_results:
-                improved = self.state.update_best_metric(eval_results[accuracy_key])
-                if improved:
-                    logger.info(f"New best metric: {eval_results[accuracy_key]:.4f}")
-
-        # Log summary
-        logger.info("=" * 80)
-        logger.info("Evaluation Results Summary")
-        logger.info("-" * 80)
-        for metric_name, metric_value in sorted(eval_results.items()):
-            if isinstance(metric_value, (int, float)):
-                logger.info(f"  {metric_name}: {metric_value:.4f}")
-            else:
-                logger.info(f"  {metric_name}: {metric_value}")
-        logger.info("=" * 80)
-
+            if self.callback_handler:
+                self.callback_handler.on_evaluate(self.config, self.state, self.control, metrics=eval_results)
+                
         return eval_results
-        
-    def save_checkpoint(self) -> None:
-        """Save checkpoint (rank-0 only)."""
-        if not self.backend.is_rank_0():
-            return
-        
-        checkpoint_dir = Path(self.config.logging.output_dir) / f"checkpoint-{self.state.step}"
-        checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        
-        logger.info(f"Saving checkpoint to {checkpoint_dir}")
-        
-        # Save model and tokenizer
-        if self.model is not None:
-            self.model.save_pretrained(checkpoint_dir)
-        
-        if self.tokenizer is not None:
-            self.tokenizer.save_pretrained(checkpoint_dir)
-        
-        # Save training state
-        state_path = checkpoint_dir / "training_state.json"
-        import json
-        with open(state_path, 'w') as f:
-            json.dump({
-                "step": self.state.step,
-                "epoch": self.state.epoch,
-                "best_metric": self.state.best_metric,
-                "elapsed_time": self.state.get_elapsed_time()
-            }, f, indent=2)
-        
-        # Save resolved configuration
-        from .config_loader import ConfigLoader
-        ConfigLoader.save_resolved_config(self.config, checkpoint_dir)
-        
-        self.state.checkpoint_path = str(checkpoint_dir)
-        logger.info(f"Checkpoint saved: {checkpoint_dir}")
-        
-        self.callback_handler.on_save(self.config, self.state, self.control)
-    
-    def load_checkpoint(self, checkpoint_path: Union[str, Path]) -> None:
-        """Load checkpoint and broadcast to all ranks."""
-        checkpoint_path = Path(checkpoint_path)
-        
-        if not checkpoint_path.exists():
-            raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
-        
-        logger.info(f"Loading checkpoint from {checkpoint_path}")
-        
-        # Load model and tokenizer
-        if self.model is not None:
-            self.model.load_state_dict(
-                torch.load(checkpoint_path / "pytorch_model.bin", map_location="cpu")
-            )
-        
-        if self.tokenizer is not None:
-            self.tokenizer = self.tokenizer.from_pretrained(checkpoint_path)
-        
-        # Load training state
-        state_path = checkpoint_path / "training_state.json"
-        if state_path.exists():
-            import json
-            with open(state_path, 'r') as f:
-                state_data = json.load(f)
-                self.state.step = state_data.get("step", 0)
-                self.state.epoch = state_data.get("epoch", 0)
-                self.state.best_metric = state_data.get("best_metric", 0.0)
-        
-        # Broadcast checkpoint path to all ranks
-        self.backend.broadcast_checkpoint_path(str(checkpoint_path))
-        
-        logger.info(f"Checkpoint loaded: {checkpoint_path}")
-    
-    def get_next_batch(self) -> Dict[str, Any]:
-        """Get next batch from data loader."""
-        if self.data_loader is None:
-            raise RuntimeError("Data loader not initialized. Call setup_data() first.")
-        
-        try:
-            return next(self.data_loader)
-        except (StopIteration, TypeError):
-            # Restart data loader if exhausted or not an iterator
-            self.data_loader = iter(self.create_data_loader())
-            return next(self.data_loader)
-    
-    def create_data_loader(self):
-        """Create data loader (to be implemented by subclasses)."""
-        raise NotImplementedError("Subclasses must implement create_data_loader")
-    
-    def on_step(self, step: int, metrics: Dict[str, float]) -> None:
-        """Hook for step-level operations."""
-        # Log sample outputs periodically
-        if step % (self.config.train.eval_interval * 2) == 0:
-            self.logger.log_samples(self.get_sample_outputs(), step)
-    
-    def on_eval(self, metrics: Dict[str, float]) -> None:
-        """Hook for evaluation operations."""
-        # Update learning rate scheduler if needed
-        if hasattr(self, 'scheduler'):
-            self.scheduler.step()
-    
-    def get_sample_outputs(self) -> List[Dict[str, Any]]:
-        """Get sample outputs for logging (to be implemented by subclasses)."""
-        return []
-    
-    def push_to_hub(
-        self,
-        repo_id: str,
-        private: bool = False,
-        token: Optional[str] = None,
-        commit_message: str = "Upload fine-tuned model",
-        **kwargs: Any,
-    ) -> str:
-        """Push model to HuggingFace Hub.
-        
-        Args:
-            repo_id: Repository ID on HuggingFace Hub (e.g., 'username/model-name')
-            private: Whether the repository should be private
-            token: HuggingFace token (if not provided, uses logged-in token)
-            commit_message: Commit message for the upload
-            **kwargs: Additional arguments for upload_folder
-        
-        Returns:
-            URL of the uploaded repository
-        
-        Raises:
-            RuntimeError: If model or tokenizer not loaded
-            ImportError: If huggingface_hub not installed
-        """
-        if not self.backend.is_rank_0():
-            logger.warning("push_to_hub should only be called on rank 0")
-            return ""
-        
-        if self.model is None or self.tokenizer is None:
-            raise RuntimeError("Model not loaded. Call train() first or load a model.")
-        
-        try:
-            from huggingface_hub import HfApi, login
-        except ImportError:
-            raise ImportError(
-                "huggingface_hub is required for push_to_hub. "
-                "Install with: pip install huggingface_hub"
-            )
-        
-        # Login if token provided
-        if token:
-            login(token=token)
-        
-        # Save model first (if not already saved)
-        if not hasattr(self, '_last_save_path') or self._last_save_path is None:
-            save_path = self.save_model() if hasattr(self, 'save_model') else None
-            if save_path is None:
-                # Fallback: save to temp directory
-                import tempfile
-                save_path = tempfile.mkdtemp()
-                self.model.save_pretrained(save_path)
-                self.tokenizer.save_pretrained(save_path)
-        else:
-            save_path = self._last_save_path
-        
-        # Push to hub
-        api = HfApi()
-        api.upload_folder(
-            folder_path=save_path,
-            repo_id=repo_id,
-            repo_type="model",
-            private=private,
-            commit_message=commit_message,
-            **kwargs
-        )
-        
-        repo_url = f"https://huggingface.co/{repo_id}"
-        logger.info(f"✅ Model pushed to {repo_url}")
-        return repo_url
-    
-    def predict(
-        self,
-        inputs: Union[str, List[str]],
-        max_new_tokens: int = 100,
-        temperature: float = 1.0,
-        top_p: float = 0.9,
-        do_sample: bool = True,
-        **kwargs: Any,
-    ) -> Union[str, List[str]]:
-        """Generate predictions from trained model.
-        
-        Args:
-            inputs: Input text(s) to generate from
-            max_new_tokens: Maximum number of tokens to generate
-            temperature: Sampling temperature (higher = more random)
-            top_p: Nucleus sampling parameter
-            do_sample: Whether to use sampling
-            **kwargs: Additional generation arguments
-        
-        Returns:
-            Generated text(s) - single string if input was string, list if input was list
-        
-        Raises:
-            RuntimeError: If model or tokenizer not loaded
-        """
-        if not self.backend.is_rank_0():
-            logger.warning("predict should only be called on rank 0")
-            return "" if isinstance(inputs, str) else []
-        
-        if self.model is None or self.tokenizer is None:
-            raise RuntimeError("Model not loaded. Call train() first or load a model.")
-        
-        self.model.eval()
-        
-        is_single = isinstance(inputs, str)
-        if is_single:
-            inputs = [inputs]
-        
-        # Tokenize
-        tokenized = self.tokenizer(
-            inputs,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=getattr(self.config.model, 'max_seq_length', 512),
-        )
-        
-        # Move to device
-        device = next(self.model.parameters()).device
-        tokenized = {k: v.to(device) for k, v in tokenized.items()}
-        
-        # Generate
-        with torch.no_grad():
-            outputs = self.model.generate(
-                **tokenized,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
-                top_p=top_p,
-                do_sample=do_sample,
-                pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-                **kwargs
-            )
-        
-        # Decode
-        predictions = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
-        
-        # Remove input prefix from predictions
-        for i, (input_text, prediction) in enumerate(zip(inputs, predictions)):
-            if prediction.startswith(input_text):
-                predictions[i] = prediction[len(input_text):].strip()
-            else:
-                # If input wasn't at start, just return the full prediction
-                predictions[i] = prediction.strip()
-        
-        self.callback_handler.on_prediction_step(self.config, self.state, self.control)
-        
-        return predictions[0] if is_single else predictions
-    
-    # TrainerCallback methods (can be overridden by subclasses if needed)
-    def on_init_end(self, args, state, control, **kwargs):
-        pass
-        
-    def on_train_begin(self, args, state, control, **kwargs):
-        pass
-        
-    def on_train_end(self, args, state, control, **kwargs):
-        pass
-        
-    def on_epoch_begin(self, args, state, control, **kwargs):
-        pass
-        
-    def on_epoch_end(self, args, state, control, **kwargs):
-        pass
-        
-    def on_step_begin(self, args, state, control, **kwargs):
-        pass
-        
-    def on_step_end(self, args, state, control, **kwargs):
-        # Original hook call
-        pass
-        
-    def on_evaluate(self, args, state, control, **kwargs):
-        # Original hook call
-        pass
-        
-    def on_save(self, args, state, control, **kwargs):
-        pass
-        
-    def on_log(self, args, state, control, **kwargs):
-        pass
-        
-    def on_prediction_step(self, args, state, control, **kwargs):
-        pass
 
-    def cleanup(self) -> None:
-        """Cleanup resources."""
-        if hasattr(self, 'backend'):
-            self.backend.cleanup()
-        
-        logger.info("Trainer cleanup completed")
-    
-    def __enter__(self):
-        """Context manager entry."""
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit."""
-        self.cleanup()
-        if exc_type is not None:
-            logger.error(f"Training failed with {exc_type.__name__}: {exc_val}")
-        return False
+    def save_model(self, path: Optional[str] = None) -> str:
+        """Save trained model."""
+        from pathlib import Path
+
+        save_path = Path(path or self.config.logging.output_dir)
+        save_path.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Saving to: {save_path}")
+        self.model.save_pretrained(str(save_path))
+        self.tokenizer.save_pretrained(str(save_path))
+
+        return str(save_path)
+
+    def load_model(self, path: str) -> None:
+        """Load trained model."""
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
+        logger.info(f"Loading model from: {path}")
+        self.model = AutoModelForCausalLM.from_pretrained(path)
+        self.tokenizer = AutoTokenizer.from_pretrained(path)
+        logger.info("Model loaded successfully")
+
+
+# Backward compatibility alias for Unsloth trainers that import from this module
+TrainerBase = RLTrainerBase

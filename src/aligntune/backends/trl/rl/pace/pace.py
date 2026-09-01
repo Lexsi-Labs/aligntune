@@ -38,6 +38,7 @@ import numpy as np
 from aligntune.backends.trl.rl.grpo.grpo import TRLGRPOTrainer
 from aligntune.core.rl.config import UnifiedConfig
 from aligntune.core.precision_handler import PrecisionHandler
+from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
 from .baseline import UnifiedBaseline, make_prompt_key
 from .curriculum import (
@@ -284,11 +285,15 @@ class TRLPaceTrainer(TRLGRPOTrainer):
 
         train_cfg = self.config.train
 
+        if self._get_config_value(train_cfg, "curriculum_enabled", default=False):
+            logger.warning(
+                "Curriculum sampling (the BOLT variant of PACE) is not available "
+                "in this build. Falling back to standard PACE."
+            )
+
         self.pace_config = PaceConfig(
             # Curriculum
-            curriculum_enabled=self._get_config_value(
-                train_cfg, "curriculum_enabled", default=False
-            ),
+            curriculum_enabled=False,
             curriculum_epsilon=self._get_config_value(
                 train_cfg, "curriculum_epsilon", default=0.05
             ),
@@ -378,29 +383,48 @@ class TRLPaceTrainer(TRLGRPOTrainer):
 
             self._debug_printed_first_batch = True
 
+        from aligntune.core.rl.reward_handler import resolve_reward_call_kwargs, slice_batch_kwargs_for_sample
+
         for idx, completion in enumerate(completions):
             total_reward = 0.0
             test_cases = test_lists[idx] if idx < len(test_lists) else None
+            # Slice every remaining batch-aligned kwarg (prompts,
+            # completion_ids, reference/answer columns, etc.) down to this
+            # sample instead of forwarding TRL's whole-batch lists.
+            sample_kwargs = slice_batch_kwargs_for_sample(kwargs, idx, len(completions))
 
             for rf in self.reward_functions:
                 try:
-                    reward_func = rf["function"]
-                    weight = rf["weight"]
+                    # NOTE: self.reward_functions is populated by the inherited
+                    # GRPO setup_rewards() as a plain list of callables, not
+                    # {"function":..., "weight":..., "name":...} dicts. The
+                    # dict-based access previously here was copy-pasted from
+                    # BOLT's reward handler and didn't match this trainer's
+                    # actual data, causing "TypeError: 'method' object is not
+                    # subscriptable" on every reward call - and the same error
+                    # again inside this except-handler (via rf['name']),
+                    # turning a caught exception into an unhandled crash.
+                    reward_func = rf
+                    weight = 1.0
 
-                    # Call reward function with test_cases
-                    try:
-                        reward = reward_func(completion, test_cases=test_cases)
-                    except TypeError:
-                        try:
-                            reward = reward_func(completion)
-                        except:
-                            reward = 0.0
+                    # Bind by signature instead of guessing calling patterns
+                    # (completion-only, then completion+test_cases) and
+                    # swallowing any resulting exception as reward=0 - that
+                    # masked genuine bugs inside reward functions, and never
+                    # forwarded `reference`/other dataset columns at all.
+                    call_kwargs = resolve_reward_call_kwargs(
+                        reward_func, completion, test_cases=test_cases, **sample_kwargs
+                    )
+                    reward = reward_func(**call_kwargs)
+                    if reward is None:
+                        continue
 
-                    weighted_reward = weight * reward
+                    weighted_reward = weight * float(reward)
                     total_reward += weighted_reward
 
                 except Exception as e:
-                    logger.warning(f"Error computing reward {rf['name']}: {e}")
+                    reward_name = getattr(rf, "__name__", repr(rf))
+                    logger.warning(f"Error computing reward {reward_name}: {e}")
 
             batch_rewards.append(total_reward)
 
@@ -800,8 +824,12 @@ REQUIREMENTS:
             gradient_checkpointing=gradient_checkpointing,
             # Generation parameters
             num_generations=num_generations,
+            # NOTE: max_prompt_length was removed from trl's GRPOConfig in the
+            # installed trl version (1.7.1) - only max_completion_length remains.
+            # Passing it raises "TypeError: GRPOConfig.__init__() got an unexpected
+            # keyword argument 'max_prompt_length'". We still read it from config
+            # above (used elsewhere for prompt truncation) but don't forward it here.
             max_completion_length=max_completion_length,
-            max_prompt_length=max_prompt_length,
             temperature=temperature,
             top_p=top_p,
             top_k=top_k,
@@ -827,9 +855,36 @@ REQUIREMENTS:
             load_best_model_at_end=load_best_model_at_end,
             metric_for_best_model=metric_for_best_model,
             greater_is_better=greater_is_better,
-            save_safetensors=save_safetensors,
+            # NOTE: save_safetensors was also removed from the installed trl
+            # (1.7.1) GRPOConfig - dropping it here for the same reason as
+            # max_prompt_length above.
             save_only_model=save_only_model,
         )
+
+        # Backfill anything else the caller set (e.g. warmup_ratio, epsilon_high,
+        # scale_rewards, importance_sampling_level, ...) that the explicit list
+        # above doesn't already cover. Note `epsilon` above is read via
+        # self.config.train.epsilon/cliprange, neither of which is a real
+        # RLTrainingConfig field, so it silently falls through to its 0.2
+        # default there too -- this backfill is what actually delivers it.
+        missing = extract_extra_and_missing_params(
+            backend_config=grpo_config, config=self.config, algorithm='pace'
+        )
+        for key, value in missing.items():
+            setattr(grpo_config, key, value)
+
+        # extract_extra_and_missing_params treats a field left at its config
+        # class's OWN declared default as "not explicitly set" (see
+        # get_already_set_params) and backfills it from config.train. TRL's
+        # GRPOConfig.loss_type defaults to 'dapo', so PACE (which never sets
+        # loss_type itself, leaving it at that same 'dapo' default) has it
+        # silently overwritten by config.train.loss_type -- which defaults to
+        # 'sigmoid' (a DPO-family value that leaks in from the shared
+        # training config) and isn't a valid GRPOConfig loss_type, crashing
+        # training with "Unknown loss type: sigmoid". Re-validate afterward,
+        # mirroring TRLGRPOTrainer.setup_trainer()'s own guard.
+        if grpo_config.loss_type not in ('grpo', 'dapo', 'bnpo', 'dr_grpo', 'cispo', 'sapo', 'luspo', 'vespo'):
+            grpo_config.loss_type = 'grpo'
 
         # Create trainer - use custom PaceGRPOTrainer if baseline advantages enabled
         if pace_cfg.use_baseline_advantages and self.baseline is not None:

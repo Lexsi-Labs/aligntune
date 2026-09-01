@@ -82,13 +82,33 @@ trainer.train()
 ```python
 # Train custom reward model first
 from aligntune.rewards.training import RewardModelTrainer
+from aligntune.rewards.registry import RewardRegistry
+
+# RewardModelTrainer expects RewardFunction objects, not name strings --
+# fetch them from the registry first
+registry = RewardRegistry()
+helpfulness_func = registry.get_reward_function("helpfulness")
+safety_func = registry.get_reward_function("safety")
+coherence_func = registry.get_reward_function("coherence")
 
 reward_trainer = RewardModelTrainer(
  base_model_name="Qwen/Qwen3-0.6B",
- reward_functions=["helpfulness", "safety", "coherence"],
+ reward_functions=[helpfulness_func, safety_func, coherence_func],
  composite_weights=[0.4, 0.3, 0.3]
 )
-reward_model_path = reward_trainer.train()
+
+# Generate training data, then train the reward model
+# (RewardModelTrainer has no .train() -- use generate_training_data() +
+# train_reward_model())
+training_data = reward_trainer.generate_training_data(
+ texts=your_training_texts,
+ batch_size=32
+)
+reward_model_path = reward_trainer.train_reward_model(
+ training_data=training_data,
+ output_dir="./reward_models/custom_ppo",
+ num_epochs=3
+)
 
 # Use in PPO training
 ppo_trainer = create_rl_trainer(
@@ -123,17 +143,13 @@ trainer = create_rl_trainer(
 
 ## Configuration Parameters
 
-### PPO-Specific Parameters
+Config class: `trl.experimental.ppo.PPOConfig`. PPO also accepts every
+parameter in the
+[common RL parameters](../PARAMETERS.md#rl-reinforcement-learning-common-parameters)
+reference, any `TrainingConfig` field matching a real `PPOConfig` field is
+forwarded automatically, even if not listed below.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `cliprange` | `float` | `0.2` | PPO clipping range |
-| `kl_coef` | `float` | `0.1` | KL penalty coefficient |
-| `vf_coef` | `float` | `0.1` | Value function coefficient |
-| `gamma` | `float` | `1.0` | Discount factor |
-| `lam` | `float` | `0.95` | GAE lambda parameter |
-| `num_generations` | `int` | `8` | Number of generations per prompt |
-| `num_ppo_epochs` | `int` | `4` | Number of PPO update epochs |
+--8<-- "docs/PARAMETERS.md:ppo"
 
 ### Reward Model Parameters
 

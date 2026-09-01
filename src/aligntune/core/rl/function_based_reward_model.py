@@ -157,43 +157,65 @@ class FunctionBasedRewardModel(nn.Module):
     def _compute_reward(self, text: str) -> float:
         """
         Compute total reward from all reward functions.
-        
+
         Args:
             text: Text to compute reward for
-            
+
         Returns:
-            Total reward score (sum of all reward functions)
+            Total reward score (weighted sum of all reward functions)
         """
         if not text or not isinstance(text, str):
             logger.warning(f"Invalid text input: {type(text)}, returning 0.0")
             return 0.0
-        
+
         total_reward = 0.0
-        
-        for i, reward_func in enumerate(self.reward_functions):
+
+        for i, entry in enumerate(self.reward_functions):
+            # Backends (e.g. UnslothPPOTrainer.setup_rewards) hand this class
+            # {"function": ..., "weight": ..., "name": ...} dicts, not bare
+            # callables. Unwrapping only here (the shared consumer) keeps
+            # every producer's dict-based bookkeeping intact instead of
+            # forcing each call site to flatten it - and fixes rewards
+            # silently scoring 0 because `callable(dict)` is False.
+            if isinstance(entry, dict):
+                reward_func = entry.get("function")
+                weight = entry.get("weight", 1.0)
+                name = entry.get("name", i)
+            else:
+                reward_func = entry
+                weight = 1.0
+                name = i
+
+            # Registry rewards are RewardFunction objects exposing
+            # `.compute(text, reference=None, **kwargs)` rather than being
+            # directly callable; unwrap so `reward_func(text)` below doesn't
+            # raise "object is not callable" for every single call.
+            if reward_func is not None and not callable(reward_func) and hasattr(reward_func, "compute"):
+                reward_func = reward_func.compute
+
             try:
                 if not callable(reward_func):
-                    logger.warning(f"Reward function {i} is not callable, skipping")
+                    logger.warning(f"Reward function {name} is not callable, skipping")
                     continue
-                
+
                 reward_value = reward_func(text)
-                
+
                 # Ensure reward is numeric
                 if not isinstance(reward_value, (int, float)):
                     logger.warning(
-                        f"Reward function {i} returned non-numeric value: {type(reward_value)}, "
+                        f"Reward function {name} returned non-numeric value: {type(reward_value)}, "
                         f"converting to 0.0"
                     )
                     reward_value = 0.0
-                
-                total_reward += float(reward_value)
-                
+
+                total_reward += float(reward_value) * weight
+
             except Exception as e:
                 logger.debug(
-                    f"Reward function {i} error for text '{text[:50]}...': {e}"
+                    f"Reward function {name} error for text '{text[:50]}...': {e}"
                 )
                 continue
-        
+
         return total_reward
     
     def score(self, hidden_states: torch.Tensor) -> torch.Tensor:

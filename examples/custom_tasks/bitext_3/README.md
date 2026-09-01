@@ -64,6 +64,6 @@ Optional: `--limit N` to cap the number of eval samples.
 
 3. **Compare 0-shot vs few-shot:** Run once with default (0-shot) and once with `--num_fewshot 2` (or 3), same `--limit`, and compare BLEU/ROUGE/BERTScore to see if few-shot helps on this task.
 
-4. **Model path:** Use an **absolute path** for `pretrained=` when running lm_eval (e.g. `/teamspace/studios/this_studio/output/bitext-banking-sft/sft_model`) so it works regardless of current working directory.
+4. **Model path:** Use an **absolute path** for `pretrained=` when running lm_eval (e.g. `/path/to/output/bitext-banking-sft/sft_model`) so it works regardless of current working directory.
 
 5. **Optional description:** To add a system-style instruction before few-shot examples, set `description` in the YAML (e.g. “You are a helpful retail banking assistant.”); it will be prepended to the prompt when using few-shot.

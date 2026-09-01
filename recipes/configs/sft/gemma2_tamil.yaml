@@ -1,0 +1,117 @@
+# Tamil-specific SFT configuration
+# For: google/gemma-2-9b or similar models
+# Optimized for Tamil language instruction following
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: google/gemma-2-9b
+  torch_dtype: bfloat16
+  attn_implementation: eager
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: google/gemma-2-9b
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided Tamil instruction dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    remove_columns: []
+    chat_template: null
+
+training:
+  output_dir: ./outputs/gemma2_tamil
+  overwrite_output_dir: true
+
+  # Learning hyperparameters - tuned for Tamil data
+  learning_rate: 1.5e-4
+  lr_scheduler_type: linear
+  warmup_steps: 50
+  warmup_ratio: 0.05
+
+  # Batch size
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+
+  # Training duration
+  num_train_epochs: 4
+  max_steps: -1
+
+  # Optimizer
+  optim: paged_adamw_8bit
+  weight_decay: 0.01
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 400
+  per_device_eval_batch_size: 4
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 400
+  save_total_limit: 3
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 4
+
+  # Generation
+  max_new_tokens: 512
+  temperature: 0.8
+  top_p: 0.95
+
+# LoRA configuration for Gemma-2
+peft:
+  peft_type: lora
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# Quantization
+quantization:
+  load_in_8bit: true
+  load_in_4bit: false
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# Tamil-specific guidelines
+# Character considerations:
+#   - Tamil uses unique script (distinct from other Indic scripts)
+#   - Complex vowel-consonant combinations (uyir-mei)
+#   - Classical and modern Tamil variations
+#
+# Training recommendations:
+#   1. Use Tamil-native speaker verified datasets
+#   2. Include diverse dialects (Madurai, Chennai, Jaffna styles)
+#   3. Respect Tamil cultural nuances and literary traditions
+#   4. Test on Tamil benchmarks (IndicXTREME-Tamil, MILU-Ta)
+#   5. Use Tamil alignment probes (refusal_ta, sycophancy_ta, verbosity_ta)
+#
+# Dataset format:
+#   - Instruction: Tamil instruction/query
+#   - Context: Optional Tamil context
+#   - Response: Native Tamil response
+#   - Language: Set to 'tamil' or 'ta'

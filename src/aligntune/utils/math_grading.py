@@ -1,7 +1,7 @@
 """
 Robust MATH dataset answer parsing and grading.
 
-Ported from bolt/benchmark_math_competition.py - combines:
+Combines:
 1. Official MATH dataset normalization (hendrycks/math)
 2. PRM800K grader (OpenAI) with SymPy symbolic equivalence
 3. Qwen2.5-Math extraction strategy

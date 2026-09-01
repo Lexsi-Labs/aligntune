@@ -1,41 +1,97 @@
 site_name: AlignTune
 site_description: Comprehensive fine-tuning library for SFT and RL training with multi-backend support
 site_author: AlignTune Contributors
-site_url: https://aligntune.github.io
+site_url: https://aligntune.lexsi.ai/
 
 repo_name: Lexsi-Labs/aligntune
 repo_url: https://github.com/Lexsi-Labs/aligntune
-# Disable "Edit on ..." link; keep repo link in header
-edit_uri: null
+edit_uri: edit/main/docs/
+
+# docs/README.md is a contributor-facing note about the docs tree itself; it is
+# not a site page (index.md is the landing page).
+exclude_docs: |
+  README.md
+
+copyright: >
+  Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
 
 theme:
-  name: cinder
+  name: material
   custom_dir: docs/_overrides
-  logo: assets/aligntune-logo.png
+  logo: assets/aligntune-logo-dark.png
   favicon: assets/favicon.ico
-  highlightjs: true
-  hljs_languages:
-    - python
-    - yaml
-  navigation_depth: 3
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Schibsted Grotesk
+    code: IBM Plex Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.prune
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
 
 markdown_extensions:
   - admonition
   - attr_list
+  - md_in_html
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:mermaid2.fence_mermaid
-  - pymdownx.tabbed
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.details
-  - pymdownx.emoji
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
   - toc:
       permalink: true
   - tables
 
 extra_css:
+  - assets/extra.css
   - assets/overrides.css
+
+extra_javascript:
+  - assets/extra.js
 
 nav:
   - Getting Started:
@@ -49,47 +105,71 @@ nav:
     - Overview: user-guide/overview.md
     - Supervised Fine-Tuning (SFT): user-guide/sft.md
     - Reinforcement Learning (RL): user-guide/rl.md
+    - Distillation: user-guide/distillation.md
     - Reward Functions: user-guide/reward-functions.md
     - Reward Model Training: user-guide/reward-model-training.md
     - Evaluation: user-guide/evaluation.md
     - Model Management: user-guide/model-management.md
     - Sample Logging: user-guide/sample-logging.md
     - Troubleshooting: user-guide/troubleshooting.md
-    - Algorithms:
-      - Overview: algorithms/overview.md
-      - DPO: algorithms/dpo.md
-      - PPO: algorithms/ppo.md
-      - GRPO: algorithms/grpo.md
-      - GSPO: algorithms/gspo.md
-      - DAPO: algorithms/dapo.md
-      - Dr. GRPO: algorithms/dr-grpo.md
+  - Algorithms:
+    - Overview: algorithms/overview.md
+    - DPO: algorithms/dpo.md
+    - Online-DPO: algorithms/online-dpo.md
+    - PPO: algorithms/ppo.md
+    - GRPO: algorithms/grpo.md
+    - GSPO: algorithms/gspo.md
+    - DAPO: algorithms/dapo.md
+    - Dr. GRPO: algorithms/dr-grpo.md
+    - GBMPO: algorithms/gbmpo.md
+    - Counterfactual GRPO: algorithms/counterfactual-grpo.md
+    - PACE: algorithms/pace.md
+    - ORPO: algorithms/orpo.md
+    - SPIN: algorithms/spin.md
+    - RAFT: algorithms/raft.md
+  - API Reference:
+    - Parameter Reference: PARAMETERS.md
     - Backends:
       - Overview: backends/overview.md
       - TRL Backend: backends/trl.md
       - Unsloth Backend: backends/unsloth.md
       - Comparison: backends/comparison.md
+    - API Reference:
+      - Overview: api-reference/overview.md
+      - Core API: api-reference/core.md
+      - Backend Factory: api-reference/backend-factory.md
+      - Configuration Classes: api-reference/configuration.md
+      - Trainers: api-reference/trainers.md
+      - Unified API: api-reference/unified-api.md
+      - Reward Functions Reference: api-reference/reward-functions-reference.md
+      - Reward Model Training Reference: api-reference/reward-model-training-reference.md
   - Advanced Topics:
     - Architecture: advanced/architecture.md
-    - Custom Backends: advanced/custom-backends.md
-    - Distributed Training: advanced/distributed.md
-    - Performance Optimization: advanced/performance.md
-  - API Reference:
-    - Overview: api-reference/overview.md
-    - Core API: api-reference/core.md
-    - Backend Factory: api-reference/backend-factory.md
-    - Configuration Classes: api-reference/configuration.md
-    - Trainers: api-reference/trainers.md
-  - Examples:
+    - Advanced Adapters (PEFT): advanced/adapters.md
+    - Model Merging: advanced/merging.md
+    - Long-Context & Attention: advanced/long-context.md
+    - Tokenization & Multilingual: advanced/tokenization.md
+    - Distillation Internals: advanced/distillation.md
+    - Production Compositions: advanced/composition.md
+    - Indic / Regional Post-Training: advanced/indic.md
+  - Tutorials:
     - Overview: examples/overview.md
     - SFT Examples: examples/sft.md
     - RL Examples: examples/rl.md
+    - Distillation Examples: examples/distillation.md
     - Advanced Examples: examples/advanced.md
-    - Notebooks: notebooks/index.md
+    - Notebooks Overview: notebooks.md
+    - Demo Notebooks: notebooks/demo.md
     - Lexsi SDK Notebooks: notebooks/lexsi-sdk.md
-  - Project:
-    - CLI Reference: cli-reference.md
-    - CLI Commands: cli/commands.md
-    - CLI Configuration Files: cli/configuration.md
+    - Standalone Tokenizer: notebooks/tokenizer_embedding_adaptation_experiment.ipynb
+    - Local Notebooks: notebooks/local.md
+  - Community:
+    - CLI:
+      - CLI Reference: cli-reference.md
+      - CLI Overview: cli/overview.md
+      - CLI Commands: cli/commands.md
+      - CLI Configuration Files: cli/configuration.md
+      - Raw Factory CLI Configs: cli/raw-factory-configs.md
     - Compatibility:
       - Unsloth Compatibility: unsloth_compatibility.md
       - Backend Support Matrix: compatibility/backend-matrix.md
@@ -97,6 +177,12 @@ nav:
       - Contributing Guide: contributing/guide.md
       - Code Style: contributing/code-style.md
       - Testing: contributing/testing.md
+    - FAQ: community/faq.md
+    - Roadmap: novelty_frontiers.md
+    - Changelog: CHANGELOG.md
+    - Known Issues: ISSUES.md
+    - Code of Conduct: CODE_OF_CONDUCT.md
+    - Security Policy: SECURITY.md
 
 extra:
   version:
@@ -104,16 +190,19 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/Lexsi-Labs/aligntune
+      name: AlignTune on GitHub
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/aligntune/
+      name: AlignTune on PyPI
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/ckVbEJGW
+      name: AlignTune on Discord
+    - icon: fontawesome/solid/globe
+      link: https://lexsi.ai
+      name: Lexsi Labs
 
 plugins:
   - search
-  - mermaid2:
-      javascript: https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js
-      arguments:
-        securityLevel: 'loose'
-        startOnLoad: true
   - mkdocs-jupyter
   - mkdocstrings:
       handlers:
@@ -122,6 +211,11 @@ plugins:
             - src/aligntune
           options:
             show_source: true
+            show_root_heading: true
             heading_level: 3
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+            merge_init_into_class: true
+            docstring_section_style: table
             allow_inspection: false
-

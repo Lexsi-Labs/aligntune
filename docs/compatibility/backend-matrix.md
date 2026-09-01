@@ -8,11 +8,20 @@ Complete compatibility matrix for AlignTune backends and algorithms.
 |-----------|-------------|-----------------|-------|
 | **SFT** | Yes | Yes | Both backends fully supported |
 | **DPO** | Yes | Yes | Both backends fully supported |
+| **Online-DPO** | Yes | Yes | Both backends fully supported |
 | **PPO** | Yes | Yes | Both backends fully supported |
 | **GRPO** | Yes | Yes | Both backends fully supported |
-| **GSPO** | Yes | No | TRL only, Unsloth not supported |
+| **GSPO** | Yes | Yes | Both backends fully supported |
 | **DAPO** | Yes | Yes | Both backends fully supported |
 | **Dr. GRPO** | Yes | Yes | Both backends fully supported |
+| **GBMPO** | Yes | Yes | Both backends fully supported |
+| **Counterfactual GRPO** | Yes | Yes | Both backends fully supported |
+| **PACE** | Yes | Yes | Both backends fully supported |
+| **ORPO** | Yes | Yes | Both backends fully supported |
+| **SPIN** | Yes | Yes | Both backends fully supported |
+| **RAFT** | Yes | Yes | Both backends fully supported |
+
+See [Algorithms Overview](../algorithms/overview.md) for what each algorithm does.
 
 ## Backend Comparison
 
@@ -20,13 +29,12 @@ Complete compatibility matrix for AlignTune backends and algorithms.
 
 **Advantages:**
 - Maximum compatibility
-- Supports all algorithms (including GSPO)
+- Supports all registered algorithms
 - Battle-tested reliability
 - Works on CPU and GPU
 - No special requirements
 
 **Use When:**
-- Need GSPO support
 - Maximum compatibility required
 - Working with standard models
 - CPU-only environments
@@ -40,7 +48,6 @@ Complete compatibility matrix for AlignTune backends and algorithms.
 - Automatic optimizations
 
 **Limitations:**
-- GSPO not supported
 - Requires GPU
 - CUDA compatibility needed
 
@@ -87,19 +94,16 @@ Complete compatibility matrix for AlignTune backends and algorithms.
 
 ### TRL Backend
 
-- Python 3.8+
-- PyTorch 1.13+
-- Transformers 4.35+
-- TRL 0.7+
+- Python 3.11+
+- `transformers>=4.35.0`
+- `trl==1.7.1`
 - CPU or GPU
 
 ### Unsloth Backend
 
-- Python 3.8+
-- PyTorch 2.0+ (CUDA)
-- CUDA 11.8+ or 12.1+
-- GPU required
-- Unsloth package
+- Python 3.11+
+- `unsloth` / `unsloth_zoo`: vendored inside the `aligntune` wheel — no separate install; see [Unsloth Compatibility](../unsloth_compatibility.md) for the pinned version
+- GPU required (CUDA)
 
 ## Performance Comparison
 
@@ -165,24 +169,8 @@ trainer = create_sft_trainer(
 )
 ```
 
-### GSPO with Unsloth
-
-```python
-# This will fail
-trainer = create_rl_trainer(
- algorithm="gspo",
- backend="unsloth" # Error: GSPO not supported
-)
-
-# Use TRL instead
-trainer = create_rl_trainer(
- algorithm="gspo",
- backend="trl" # Works
-)
-```
-
 ## Next Steps
 
 - [Backend Selection](../getting-started/backend-selection.md) - Choosing backends
 - [Unsloth Compatibility](../unsloth_compatibility.md) - Unsloth setup
-- [Performance](../advanced/performance.md) - Performance optimization
+- [Backend Comparison](../backends/comparison.md) - Speed and memory comparison

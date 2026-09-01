@@ -1,0 +1,86 @@
+recipe:
+  name: "qwen25-7b-128k-longcontext"
+  description: >
+    Fine-tune Qwen2.5-7B-Instruct for 128k long-context understanding using
+    YaRN RoPE scaling with flash-attention-2 and long-context packing.
+  model: "Qwen/Qwen2.5-7B-Instruct"
+  dataset:
+    - "longalpaca"
+    - "books3_chunks"
+    - "arxiv_chunks"
+  task: "instruction_following"
+  algorithm: "sft"
+  backend: "trl"
+  tags:
+    - "qwen"
+    - "qwen2.5"
+    - "long-context"
+    - "128k"
+    - "yarn"
+    - "flash-attention-2"
+    - "v3.9-long-context"
+  requires_auth: false
+  estimated_time: "6-10 hours"
+  # Memory notes:
+  #   ~80 GB GPU VRAM without packing (full 128k context per sample)
+  #   ~40 GB GPU VRAM with long_context_packing=true + 4-bit quantization
+  estimated_memory: "40-80GB VRAM (see notes)"
+  multi_gpu_recommended: true
+
+config:
+  algo: sft
+
+  model:
+    name_or_path: "Qwen/Qwen2.5-7B-Instruct"
+    precision: "bf16"
+    gradient_checkpointing: true
+    attn_implementation: "flash_attention_2"
+    trust_remote_code: true
+
+    # ── Long-context RoPE extension ──────────────────────────────────────────
+    # YaRN (Yet Another RoPE Extension) uses frequency-domain decomposition to
+    # preserve local attention patterns while extending the global context.
+    # Best quality for large extensions (≥4×) when combined with fine-tuning.
+    target_context_length: 131072          # 128k tokens  (128 * 1024)
+    rope_scaling_type: "yarn"              # Options: linear | dynamic | yarn | ntk
+    rope_scaling_factor: 4.0              # 32k base → 128k target  (4× extension)
+
+    # ── Sequence packing ─────────────────────────────────────────────────────
+    # Pack multiple short documents into each 128k window to maintain high GPU
+    # utilisation.  Set packing_stride: 0 to use contiguous (no-gap) packing.
+    long_context_packing: true
+    packing_stride: 0
+
+  datasets:
+    - name: "longalpaca"
+      split: "train"
+      # abacusai/LongAlpaca-16k — instruction-following data up to 16k tokens
+    - name: "books3_chunks"
+      split: "train"
+      # Books3 chunked to ≤32k segments for long-form reading comprehension
+    - name: "arxiv_chunks"
+      split: "train"
+      # arXiv papers chunked to ≤32k segments for scientific long-context tasks
+
+  train:
+    epochs: 1
+    per_device_batch_size: 1
+    gradient_accumulation_steps: 8
+    learning_rate: 2.0e-5
+    warmup_ratio: 0.03
+    max_grad_norm: 1.0
+    optimizer: "adamw_torch"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 200
+    eval_steps: 200
+    seed: 42
+    max_seq_length: 131072
+    # Sequence packing reduces effective batch GPU memory from ~80 GB to ~40 GB
+    # when combined with 4-bit quantization (load_in_4bit: true in model config).
+
+  logging:
+    output_dir: "./output/qwen25-7b-128k-longcontext"
+    run_name: "qwen25-7b-yarn-128k"
+    loggers: []
+    report_to: "none"

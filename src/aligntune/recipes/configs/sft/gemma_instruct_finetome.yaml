@@ -3,7 +3,7 @@ recipe:
   description: "Fine-tune Gemma 2 2B on FineTome for high-quality instruction following"
   model: "google/gemma-2-2b-it"
   dataset: "mlabonne/FineTome-100k"
-  task: "instruction_following"
+  task: "sft"
   algorithm: "sft"
   backend: "unsloth"
   tags: ["gemma", "instruction-tuning", "efficient", "quality"]

@@ -1,0 +1,119 @@
+# Llama-3.2-1B for Indian Legal + Hindi Language Understanding
+# ~1B params, bilingual model for legal documentation
+# Trained on IPC sections, contract law, and Hindi legal terminology
+# Supports both English and Hindi legal reasoning
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: meta-llama/Llama-3.2-1b
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: meta-llama/Llama-3.2-1b
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided Indian legal + Hindi dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    instruction_column: instruction
+    response_column: response
+    context_column: context
+
+training:
+  output_dir: ./outputs/llama3_2_1b_legal_indic
+  overwrite_output_dir: true
+
+  # Learning rate for legal/language blend
+  learning_rate: 2.0e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 75
+  warmup_ratio: 0.06
+
+  # Batch sizes for 1B model
+  per_device_train_batch_size: 14
+  gradient_accumulation_steps: 1
+
+  # Standard training
+  num_train_epochs: 3
+  max_steps: -1
+
+  # Optimizer
+  optim: adamw_torch
+  weight_decay: 0.005
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 350
+  per_device_eval_batch_size: 14
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 40
+  save_strategy: steps
+  save_steps: 350
+  save_total_limit: 2
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 2
+
+  # Generation parameters (longer for legal explanations)
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# LoRA for 1B model
+peft:
+  peft_type: lora
+  r: 12
+  lora_alpha: 24
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# 4-bit quantization
+quantization:
+  load_in_8bit: false
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# Legal + Hindi Task Configuration
+task:
+  task_type: instruction_following
+  instruction_column: instruction
+  response_column: response
+  context_column: context
+
+# Notes:
+# - Llama-3.2-1B supports both English and Hindi natively
+# - Training on IPC (Indian Penal Code), IBC (Insolvency Code), Contract Law
+# - Indian Kanoon Supreme Court judgment corpus for legal reasoning
+# - Mix English legal explanations with Hindi translations
+# - Inference: 60-120ms per token
+# - Recommended datasets: Supreme Court judgment summaries, legal case explanations,
+#   contract clause interpretations in English and Hindi
+# - Test on legal reasoning benchmarks (IPC section matching, contract understanding)

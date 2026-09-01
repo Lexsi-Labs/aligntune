@@ -87,9 +87,15 @@ metrics = trainer.evaluate()
 print("Evaluation metrics:", metrics)
 # Output: {'eval_loss': 2.34, 'eval_perplexity': 10.4, ...}
 
-# Make predictions
-result = trainer.predict("What is machine learning?")
-print("Prediction:", result)
+# Make predictions (load the saved model for inference)
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained("./output/my_model")
+tokenizer = AutoTokenizer.from_pretrained("./output/my_model")
+
+inputs = tokenizer("What is machine learning?", return_tensors="pt")
+outputs = model.generate(**inputs, max_new_tokens=100)
+print("Prediction:", tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
 Supported metrics include: **Loss**, **Perplexity**, **BLEU**, and **ROUGE** scores.
@@ -190,15 +196,13 @@ Then train:
 from aligntune.core.sft.config_loader import SFTConfigLoader
 from aligntune.core.backend_factory import create_sft_trainer
 
-
 # Load configuration
 config = SFTConfigLoader.load_from_yaml("config.yaml")
 
-
-# Create trainer from config
+# Create trainer
 trainer = create_sft_trainer(config=config)
 
-
+# Train
 trainer.train()
 ```
 
@@ -226,5 +230,5 @@ aligntune train \
 
 - [Configuration Guide](configuration.md) - Learn about all configuration options
 - [Backend Selection](backend-selection.md) - Choose between TRL and Unsloth
-- [SFT Guide](../user-guide/sft.md) - Deep dive into SFT training
-- [RL Guide](../user-guide/rl.md) - Deep dive into RL training
+- [SFT Guide](../user-guide/sft.md) - SFT training walkthrough
+- [RL Guide](../user-guide/rl.md) - RL training walkthrough

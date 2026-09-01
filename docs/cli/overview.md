@@ -74,9 +74,9 @@ aligntune train --model "Qwen/Qwen3-0.6B" --dataset "Anthropic/hh-rlhf" --type p
 | `--backend`, `-b` | Backend (trl, unsloth, auto) | `--backend auto` |
 | `--epochs`, `-e` | Number of epochs | `--epochs 3` |
 | `--batch-size` | Batch size | `--batch-size 4` |
-| `--learning-rate`, `--lr` | Learning rate | `--learning-rate 5e-5` |
+| `--lr` | Learning rate | `--lr 5e-5` |
 | `--max-length` | Maximum sequence length | `--max-length 512` |
-| `--output-dir`, `-o` | Output directory | `--output-dir ./output` |
+| `--output`, `-o` | Output directory | `--output ./output` |
 | `--4bit` | Load model in 4-bit quantization | `--4bit` |
 | `--8bit` | Load model in 8-bit quantization | `--8bit` |
 | `--wandb-project` | Weights & Biases project name | `--wandb-project my-project` |
@@ -118,15 +118,33 @@ aligntune train --config my_config.yaml
 ### Quick SFT Training
 
 ```bash
-aligntune train examples/sft_customer_support_unsloth/config_sft_customer_support.yaml
+aligntune train --config examples/sft_customer_support_unsloth/config_sft_customer_support.yaml
 ```
 
 ### Quick RL Training
 
 ```bash
-aligntune train examples/grpo_gsm8k_trl/config_grpo_gsm8k.yaml
+aligntune train --config examples/grpo_gsm8k_trl/config_grpo_gsm8k.yaml
 ```
 
+
+## All Command Groups
+
+`train`, `info`, and `list-backends-cmd` are only part of the CLI. AlignTune also ships these command groups (full reference: [CLI Commands](commands.md)):
+
+| Command | Purpose |
+|---------|---------|
+| `aligntune recipes` | Browse and run the built-in library of pre-tuned training recipes |
+| `aligntune validate` | Validate configs, model/dataset access, and estimate memory usage |
+| `aligntune diagnose` | System/config/training diagnostics and live monitoring |
+| `aligntune advise` | VRAM/time/cost/carbon estimation and algorithm recommendations |
+| `aligntune merge` | Merge models via linear, task arithmetic, or LoRA merge |
+| `aligntune aligner` | Interactive training session with live metric inspection |
+| `aligntune export` | Export checkpoints to GGUF, Ollama, or the HuggingFace Hub |
+| `aligntune verify-export` | Regression-test exported artifacts against a baseline |
+| `aligntune adapters` | Inspect and generate (Text2LoRA/Doc2LoRA) LoRA adapters |
+| `aligntune compose` | Run and inspect multi-stage training compositions |
+| `aligntune indic-eval` | Evaluate models on Indic-language benchmarks |
 
 ## Advanced Usage
 

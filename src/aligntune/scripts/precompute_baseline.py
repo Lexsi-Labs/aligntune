@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Precompute baseline v̂ values for BOLT warm-start.
+Precompute baseline v̂ values for PACE warm-start.
 
 Generates baseline success rates for each prompt in a dataset by:
 1. Loading a model (base or checkpoint)
@@ -8,7 +8,7 @@ Generates baseline success rates for each prompt in a dataset by:
 3. Scoring correctness of each completion
 4. Computing v̂(x) = correct/N for each prompt
 
-Output JSON can be used for warm-start in BOLT training:
+Output JSON can be used for warm-start in PACE training:
   baseline_warm_start: "./baselines/gsm8k_qwen25.json"
 
 Usage examples:
@@ -437,7 +437,7 @@ def format_mbpp(example: Dict, idx: int, tokenizer, use_chat: bool = True) -> Tu
         if match:
             func_name = match.group(1)
 
-    # Format prompt with explicit function signature (like bolt script)
+    # Format prompt with explicit function signature
     user_content = f"""{prompt_text}
 
 IMPLEMENT THE FUNCTION:
@@ -471,7 +471,7 @@ REQUIREMENTS:
     # Gold is the test cases (for reference)
     gold = json.dumps(test_cases) if isinstance(test_cases, list) else str(test_cases)
 
-    # Use task_id if available (like bolt baseline format: mbpp_train_Mbpp/{task_id})
+    # Use task_id if available (baseline format: mbpp_train_Mbpp/{task_id})
     task_id = example.get("task_id", idx)
     # evalplus task_id is already "Mbpp/102", HF uses int like 601
     if isinstance(task_id, str) and task_id.startswith("Mbpp/"):
@@ -746,7 +746,7 @@ def compute_baselines(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Precompute baseline v̂ values for BOLT warm-start",
+        description="Precompute baseline v̂ values for PACE warm-start",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__
     )
@@ -800,7 +800,7 @@ def main():
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("=" * 60)
-    logger.info("BOLT Baseline Precomputation")
+    logger.info("PACE Baseline Precomputation")
     logger.info("=" * 60)
     logger.info(f"Model: {args.model}")
     if args.lora_path:
@@ -969,7 +969,7 @@ if __name__ == "__main__":
 
 #!/usr/bin/env python3
 """
-Precompute baseline v̂ values for BOLT warm-start.
+Precompute baseline v̂ values for PACE warm-start.
 
 Generates baseline success rates for each prompt in a dataset by:
 1. Loading a model (base or checkpoint)
@@ -977,7 +977,7 @@ Generates baseline success rates for each prompt in a dataset by:
 3. Scoring correctness of each completion
 4. Computing v̂(x) = correct/N for each prompt
 
-Output JSON can be used for warm-start in BOLT training:
+Output JSON can be used for warm-start in PACE training:
   baseline_warm_start: "./baselines/gsm8k_qwen25.json"
 
 Usage examples:
@@ -1406,7 +1406,7 @@ def format_mbpp(example: Dict, idx: int, tokenizer, use_chat: bool = True) -> Tu
         if match:
             func_name = match.group(1)
 
-    # Format prompt with explicit function signature (like bolt script)
+    # Format prompt with explicit function signature
     user_content = f"""{prompt_text}
 
 IMPLEMENT THE FUNCTION:
@@ -1440,7 +1440,7 @@ REQUIREMENTS:
     # Gold is the test cases (for reference)
     gold = json.dumps(test_cases) if isinstance(test_cases, list) else str(test_cases)
 
-    # Use task_id if available (like bolt baseline format: mbpp_train_Mbpp/{task_id})
+    # Use task_id if available (baseline format: mbpp_train_Mbpp/{task_id})
     task_id = example.get("task_id", idx)
     # evalplus task_id is already "Mbpp/102", HF uses int like 601
     if isinstance(task_id, str) and task_id.startswith("Mbpp/"):
@@ -1715,7 +1715,7 @@ def compute_baselines(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Precompute baseline v̂ values for BOLT warm-start",
+        description="Precompute baseline v̂ values for PACE warm-start",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__
     )
@@ -1769,7 +1769,7 @@ def main():
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
 
     logger.info("=" * 60)
-    logger.info("BOLT Baseline Precomputation")
+    logger.info("PACE Baseline Precomputation")
     logger.info("=" * 60)
     logger.info(f"Model: {args.model}")
     if args.lora_path:

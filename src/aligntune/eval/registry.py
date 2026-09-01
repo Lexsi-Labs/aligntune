@@ -1,9 +1,10 @@
 """
 Merged Registry.
 Maps string keys to the NEW Metric classes while maintaining backward compatibility.
+Extends support for benchmark bundles and alignment-specific metrics.
 """
 
-from typing import Dict, Callable, List
+from typing import Dict, Callable, List, Optional
 import logging
 
 # Import New Metrics
@@ -12,14 +13,18 @@ from .metrics.text import RougeMetric, BleuMetric
 from .metrics.math import MathAccuracyMetric
 from .metrics.code import PassAtKMetric
 
+# Import benchmarks
+from .benchmarks.presets import BENCHMARK_BUNDLES, get_bundle as _get_bundle_tasks
+
 logger = logging.getLogger(__name__)
 
 class EvalRegistry:
     """
     Central registry.
     Adapts legacy function calls to new Class-based Metrics.
+    Manages benchmark bundles and alignment-specific metrics.
     """
-    
+
     # Cache for instantiated metric objects
     _metric_instances = {}
 
@@ -39,18 +44,36 @@ class EvalRegistry:
             elif name == "pass_at_k": cls._metric_instances[name] = PassAtKMetric()
             else:
                 raise ValueError(f"Unknown metric: {name}")
-        
+
         metric_obj = cls._metric_instances[name]
-        
+
         # Return a wrapper function to match old signature
         def wrapper(predictions, targets, **kwargs):
             result = metric_obj.safe_compute(predictions, targets, **kwargs)
             # Old API expected a single float, new API returns dict
             # We return the first value found
             return list(result.values())[0] if result else 0.0
-            
+
         return wrapper
 
     @classmethod
     def list_metrics(cls) -> List[str]:
         return ["accuracy", "perplexity", "rouge", "bleu", "math_accuracy", "pass_at_k"]
+
+    @classmethod
+    def get_bundle(cls, name: str) -> List[str]:
+        """
+        Get tasks from a benchmark bundle.
+
+        Args:
+            name: Bundle name ('alignment_core', 'safety', 'reasoning')
+
+        Returns:
+            List of task names in the bundle
+        """
+        return _get_bundle_tasks(name)
+
+    @classmethod
+    def list_bundles(cls) -> List[str]:
+        """List all available benchmark bundles."""
+        return list(BENCHMARK_BUNDLES.keys())

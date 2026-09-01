@@ -22,7 +22,7 @@ from .config import (
 from .trainer_base import SFTTrainerBase
 from .trainer_factory import SFTTrainerFactory
 from .evaluator import SFTEvaluator
-from .logging import SFTLogger
+from .logging_utils import SFTLogger
 from .config_loader import SFTConfigLoader
 
 __all__ = [

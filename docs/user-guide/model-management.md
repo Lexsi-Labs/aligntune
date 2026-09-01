@@ -97,6 +97,36 @@ url = trainer.push_to_hub(
 )
 ```
 
+### Pushing with an Auto-Generated Model Card
+
+`trainer.push_to_hub()` above works on a live trainer instance right after training. If instead
+you're publishing a checkpoint from disk (in a separate script, notebook, or after reloading a
+run), use `load_finetuned_model` and `push_model_to_hf` from `aligntune.utils`. They work with
+any checkpoint — full model or LoRA adapter, from any AlignTune backend/algorithm — and
+auto-generate a branded model card (base model, algorithm, backend, build date) instead of
+leaving `README.md` untouched.
+
+```python
+from aligntune.utils import load_finetuned_model, push_model_to_hf
+
+# Loads the checkpoint, merging a LoRA adapter into the base model if present
+model, tokenizer = load_finetuned_model(
+ output_dir="output_txgemma_trialbench_evalconfig",
+ base_model="google/txgemma-2b-predict",
+)
+
+url = push_model_to_hf(
+ model=model,
+ tokenizer=tokenizer,
+ repo_id="username/my-model",
+ base_model="google/txgemma-2b-predict",
+ algorithm="SFT", # or DPO, GRPO, PPO, DAPO, GSPO, ORPO, Distillation, ...
+ backend="TRL", # or Unsloth, ES, ...
+ private=False,
+)
+print(f"Model available at: {url}")
+```
+
 ## Generating Predictions
 
 ### Single Prediction

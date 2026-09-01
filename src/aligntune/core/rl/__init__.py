@@ -23,20 +23,22 @@ from .config import (
     DistributedConfig,
 )
 
-from .trainer_base import TrainerBase, TrainingState
+from .trainer_base import RLTrainerBase, TrainingState
+# Alias for backwards compatibility
+TrainerBase = RLTrainerBase
 from .trainer_factory import create_trainer_from_config, TrainerFactory
 from .registries import DatasetRegistry, RewardRegistry, TaskRegistry
-from .models import ModelManager, PolicyModel, ReferenceModel, ValueModel
-from .rollout import RolloutEngine
 from .evaluator import UnifiedEvaluator
-from .logging import UnifiedLogger
+from .logging_utils import UnifiedLogger
 from .config_loader import ConfigLoader
 from .function_based_reward_model import FunctionBasedRewardModel
+from .models import PolicyModel, ReferenceModel, ValueModel, ModelManager
+from .rollout import RolloutEngine
 
 __all__ = [
     # Config classes
     "UnifiedConfig",
-    "AlgorithmType", 
+    "AlgorithmType",
     "PrecisionType",
     "BackendType",
     "ModelConfig",
@@ -48,18 +50,20 @@ __all__ = [
     "DistributedConfig",
     # Core classes
     "TrainerBase",
+    "RLTrainerBase",
     "TrainingState",
     "create_trainer_from_config",
+    "TrainerFactory",
     "DatasetRegistry",
-    "RewardRegistry", 
+    "RewardRegistry",
     "TaskRegistry",
-    "ModelManager",
-    "PolicyModel",
-    "ReferenceModel",
-    "ValueModel",
-    "RolloutEngine",
     "UnifiedEvaluator",
     "UnifiedLogger",
     "ConfigLoader",
     "FunctionBasedRewardModel",
+    "PolicyModel",
+    "ReferenceModel",
+    "ValueModel",
+    "ModelManager",
+    "RolloutEngine",
 ]

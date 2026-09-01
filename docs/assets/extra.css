@@ -1,0 +1,325 @@
+/* ============================================================================
+   AlignTune — design system
+   Direction: precise, engineering-grade alignment tooling. Navy dominates
+   (the wordmark's color), amber appears only as a sharp, deliberate accent.
+   A waveform pulse — the logo's signal line — is the recurring motif.
+   Type: Schibsted Grotesk (text, via theme) · IBM Plex Mono (code, via theme)
+   ========================================================================== */
+
+:root {
+  --at-ink: #0b1f3a;           /* wordmark navy-black */
+  --at-navy: #10305c;          /* primary brand navy */
+  --at-navy-dark: #0a2347;
+  --at-navy-bright: #6fa3ef;   /* dark-scheme accent */
+  --at-amber: #e8a33d;         /* sharp accent, used sparingly */
+  --at-paper: #f7f8fa;         /* cool paper, light scheme */
+}
+
+/* ── Palette: light ─────────────────────────────────────────────────────── */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--at-navy);
+  --md-primary-fg-color--light: #2c4a7c;
+  --md-primary-fg-color--dark: var(--at-ink);
+  --md-accent-fg-color: var(--at-amber);
+  --md-typeset-a-color: var(--at-navy);
+  --md-default-bg-color: var(--at-paper);
+  --md-code-bg-color: #eef1f5;
+  --md-footer-bg-color: var(--at-ink);
+  --md-footer-bg-color--dark: #071527;
+}
+
+/* ── Palette: dark ───────────────────────────────────────────────────────── */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0a1424;
+  --md-primary-fg-color--light: #2c4a7c;
+  --md-primary-fg-color--dark: #060d18;
+  --md-accent-fg-color: var(--at-navy-bright);
+  --md-typeset-a-color: var(--at-navy-bright);
+  --md-default-bg-color: #0d1420;
+  --md-default-fg-color--lightest: rgba(200, 212, 230, 0.12);
+  --md-code-bg-color: #121b2c;
+  --md-footer-bg-color: #0a1424;
+  --md-footer-bg-color--dark: #060d18;
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset h1 {
+  color: var(--md-default-fg-color);
+  font-weight: 700;
+}
+
+/* ── Header & tabs ──────────────────────────────────────────────────────── */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.6rem;
+  width: auto;
+}
+
+/* logo artwork is solid navy line-art — invisible against the dark header,
+   so flip it to white in the slate scheme instead of shipping a second asset */
+[data-md-color-scheme="slate"] .md-header__button.md-logo img,
+[data-md-color-scheme="slate"] .at-hero img.at-hero-mark {
+  filter: brightness(0) invert(1);
+}
+
+/* brand hairline under the tab bar: navy flowing into amber */
+.md-tabs {
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, var(--at-navy) 0%, var(--at-navy) 55%, var(--at-amber) 100%) 1;
+}
+
+.md-tabs__link {
+  opacity: 0.78;
+  transition: color 125ms, opacity 125ms;
+}
+
+.md-tabs__link:hover {
+  color: var(--at-amber);
+  opacity: 1;
+}
+
+.md-tabs__link--active {
+  color: #fff;
+  opacity: 1;
+  box-shadow: 0 2px 0 0 var(--at-amber);
+}
+
+/* search field: rounder, calmer */
+.md-search__form {
+  border-radius: 0.3rem;
+}
+
+/* ── Landing hero ───────────────────────────────────────────────────────── */
+.at-hero {
+  position: relative;
+  text-align: center;
+  padding: 3.2rem 1rem 2.6rem;
+  margin: 0 0 1.6rem;
+  overflow: hidden;
+}
+
+/* waveform-pulse motif — the logo's signal line, repeated faintly */
+.at-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, transparent 46%, var(--at-navy) 46.5%, var(--at-navy) 47%, transparent 47.5%),
+    linear-gradient(90deg, transparent 74%, var(--at-navy) 74.5%, var(--at-navy) 75%, transparent 75.5%);
+  background-size: 220px 100%;
+  opacity: 0.06;
+  -webkit-mask-image: radial-gradient(ellipse 75% 90% at 50% 35%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 75% 90% at 50% 35%, black 30%, transparent 75%);
+  pointer-events: none;
+}
+
+/* one amber pulse-peak — deliberate, tiny, brand-true */
+.at-hero::after {
+  content: "";
+  position: absolute;
+  top: 2.0rem;
+  left: 50%;
+  width: 3rem;
+  height: 0.9rem;
+  transform: translateX(-50%);
+  background-image:
+    radial-gradient(circle at 50% 100%, var(--at-amber) 0 0.15rem, transparent 0.2rem);
+  clip-path: polygon(0 100%, 40% 100%, 50% 0%, 60% 100%, 100% 100%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.at-hero > * {
+  position: relative;
+}
+
+.at-hero img.at-hero-mark {
+  display: block;
+  width: 100%;
+  max-width: 38rem;
+  height: auto;
+  margin: 0 auto 0.6rem;
+}
+
+.at-hero p.at-tagline {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 36rem;
+  margin: 0 auto 1.5rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.at-hero .md-button {
+  margin: 0.2rem 0.3rem;
+}
+
+/* meta chips under the hero buttons */
+.at-chips {
+  margin-top: 1.1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--md-default-fg-color--light);
+}
+
+.at-chips span {
+  display: inline-block;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 1rem;
+  padding: 0.15rem 0.65rem;
+  margin: 0.15rem 0.15rem;
+  background: var(--md-default-bg-color);
+}
+
+.at-hero .md-button--primary {
+  background-color: var(--at-navy);
+  border-color: var(--at-navy);
+  transition: background-color 125ms, border-color 125ms, transform 125ms;
+}
+
+.at-hero .md-button--primary:hover {
+  background-color: var(--at-navy-dark);
+  border-color: var(--at-amber);
+  transform: translateY(-1px);
+}
+
+/* secondary button must stay legible on the dark scheme */
+[data-md-color-scheme="slate"] .at-hero .md-button:not(.md-button--primary) {
+  color: var(--md-default-fg-color);
+  border-color: var(--md-default-fg-color--light);
+}
+
+[data-md-color-scheme="slate"] .at-hero .md-button:not(.md-button--primary):hover {
+  color: var(--at-navy-bright);
+  border-color: var(--at-navy-bright);
+  background-color: transparent;
+}
+
+/* ── Mermaid: brand palette instead of default blue ─────────────────────── */
+:root,
+[data-md-color-scheme="default"] {
+  --md-mermaid-node-bg-color: color-mix(in srgb, var(--at-navy) 10%, #ffffff);
+  --md-mermaid-node-fg-color: var(--at-ink);
+  --md-mermaid-edge-color: #2c4a7c;
+  --md-mermaid-label-bg-color: var(--at-paper);
+  --md-mermaid-label-fg-color: var(--at-ink);
+  --md-mermaid-font-family: var(--md-text-font-family);
+}
+
+[data-md-color-scheme="slate"] {
+  --md-mermaid-node-bg-color: #16233a;
+  --md-mermaid-node-fg-color: #d7e2f4;
+  --md-mermaid-edge-color: #7d97c3;
+  --md-mermaid-label-bg-color: #0d1420;
+  --md-mermaid-label-fg-color: #d7e2f4;
+}
+
+.md-typeset .mermaid {
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Full-width tables on the landing page ──────────────────────────────── */
+.at-wide table {
+  width: 100%;
+  display: table;
+}
+
+/* staggered load reveal — respects reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  .at-hero > * {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: at-rise 480ms cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+  }
+  .at-hero > *:nth-child(1) { animation-delay: 60ms; }
+  .at-hero > *:nth-child(2) { animation-delay: 140ms; }
+  .at-hero > *:nth-child(3) { animation-delay: 220ms; }
+  .at-hero > *:nth-child(4) { animation-delay: 300ms; }
+  .at-hero > *:nth-child(5) { animation-delay: 380ms; }
+}
+
+@keyframes at-rise {
+  to { opacity: 1; transform: none; }
+}
+
+/* ── Grid cards (Material .grid.cards refinement) ───────────────────────── */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid > .card {
+  border-radius: 0.35rem;
+  border-color: var(--md-default-fg-color--lightest);
+  transition: border-color 125ms, box-shadow 125ms, transform 125ms;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  border-top: 2px solid var(--at-amber);
+  box-shadow: 0 6px 18px rgba(11, 31, 58, 0.08);
+  transform: translateY(-2px);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* icon medallion: soft navy disc behind each card icon */
+.md-typeset .grid.cards > ul > li .twemoji.lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--at-navy) 12%, transparent);
+  vertical-align: middle;
+}
+
+.md-typeset .grid.cards > ul > li .twemoji svg {
+  color: var(--at-navy);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li .twemoji.lg {
+  background: color-mix(in srgb, var(--at-navy-bright) 16%, transparent);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li .twemoji svg {
+  color: var(--at-navy-bright);
+}
+
+/* ── Content details ────────────────────────────────────────────────────── */
+.md-typeset table:not([class]) th {
+  font-weight: 600;
+  background-color: transparent;
+  border-bottom: 2px solid var(--at-navy);
+}
+
+.md-typeset code {
+  border-radius: 0.18rem;
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+  border-left-color: var(--at-navy);
+}
+
+/* footer social icons pick up the accent on hover */
+.md-social__link:hover svg {
+  fill: var(--at-amber);
+}
+
+/* ── Lexsi footer block (landing page) ──────────────────────────────────── */
+.at-lexsi-footer {
+  text-align: center;
+  margin: 2.4rem 0 0.8rem;
+}
+
+.at-lexsi-footer p {
+  margin: 0.25rem 0;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.74rem;
+}

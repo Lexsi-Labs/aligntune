@@ -1,0 +1,140 @@
+# SmolLM2-1.7B for PSU Procurement & GeM Portal Guidance
+# ~1.7B params, lightweight model for government procurement assistance
+# Trained on PSU procurement guidelines, GeM (Government e-Marketplace) procedures
+# Optimized for bidding instructions, compliance requirements, tender documentation
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: HuggingFaceTB/SmolLM2-1.7b
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: HuggingFaceTB/SmolLM2-1.7b
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided PSU procurement dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    instruction_column: instruction
+    response_column: response
+    context_column: context
+
+training:
+  output_dir: ./outputs/smollm2_1_7b_psu_procurement
+  overwrite_output_dir: true
+
+  # Learning rate for 1.7B model
+  learning_rate: 2.5e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 75
+  warmup_ratio: 0.06
+
+  # Batch sizes for 1.7B model
+  per_device_train_batch_size: 12
+  gradient_accumulation_steps: 1
+
+  # Standard training
+  num_train_epochs: 3
+  max_steps: -1
+
+  # Optimizer
+  optim: adamw_torch
+  weight_decay: 0.005
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 350
+  per_device_eval_batch_size: 12
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 40
+  save_strategy: steps
+  save_steps: 350
+  save_total_limit: 2
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 2
+
+  # Generation parameters
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# LoRA for 1.7B model
+peft:
+  peft_type: lora
+  r: 12
+  lora_alpha: 24
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# 4-bit quantization for 1.7B model
+quantization:
+  load_in_8bit: false
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# PSU Procurement Task Configuration
+task:
+  task_type: instruction_following
+  instruction_column: instruction
+  response_column: response
+  context_column: context
+
+# Notes:
+# - SmolLM2-1.7B is highly efficient for PSU/procurement guidance
+# - Training corpus: GeM portal guidelines, CPSE tendering rules, PSU procurement standards
+# - Covers bidding eligibility, document requirements, bid evaluation criteria
+# - Inference: 50-100ms per token on edge devices
+# - VRAM requirement: ~6GB (with 4-bit quantization)
+#
+# PSU Procurement Coverage:
+# - GeM (Government e-Marketplace) portal usage and bidding
+# - CPSE (Central Public Sector Enterprises) procurement guidelines
+# - DPE (Department of Public Enterprises) compliance requirements
+# - MSE (Micro and Small Enterprises) procurement preference policies
+# - Tender document interpretation and bid requirements
+#
+# Recommended datasets:
+# - GeM portal FAQs and bidder guidance documents
+# - PSU procurement policy documentation
+# - Sample tender documents and bidding instructions
+# - Compliance requirement checklists for government procurement
+#
+# Training examples:
+#   Instruction: "What are the eligibility requirements for bidding on this GeM tender?"
+#   Response: "Bidders must be registered on GeM, possess valid trade license,
+#     have 3 years of experience, and meet technical specifications outlined in the RFQ."
+#
+# Fine-tuning benefits:
+# - Lightweight model fits on edge infrastructure in government offices
+# - Fast inference for real-time procurement guidance
+# - Offline-capable (no internet dependency for BFSI-critical systems)
+# - Transparent decision-making for compliance audits

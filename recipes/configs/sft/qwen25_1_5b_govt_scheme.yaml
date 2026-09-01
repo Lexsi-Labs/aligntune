@@ -1,0 +1,117 @@
+# Qwen2.5-1.5B for Government Scheme Q&A
+# Small-to-medium model optimized for PM-KISAN, MGNREGA, PM-Mudra
+# ~1.5B params, efficient for on-prem deployment
+# Trained on government benefits, eligibility, and application processes
+
+backend: trl
+training_type: sft
+
+model:
+  model_name_or_path: Qwen/Qwen2.5-1.5B
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  device_map: auto
+
+tokenizer:
+  model_name_or_path: Qwen/Qwen2.5-1.5B
+  trust_remote_code: true
+  use_fast: true
+
+dataset:
+  type: huggingface
+  dataset_name: null  # User-provided government scheme dataset
+  dataset_config_name: null
+  split: train
+  streaming: false
+  preprocessing:
+    max_seq_length: 2048
+    padding: max_length
+    truncation: true
+    instruction_column: instruction
+    response_column: response
+    context_column: context
+
+training:
+  output_dir: ./outputs/qwen25_1_5b_govt_scheme
+  overwrite_output_dir: true
+
+  # Learning rate for 1.5B model
+  learning_rate: 2.5e-4
+  lr_scheduler_type: cosine
+  warmup_steps: 100
+  warmup_ratio: 0.08
+
+  # Batch sizes for 1.5B model
+  per_device_train_batch_size: 12
+  gradient_accumulation_steps: 1
+
+  # Standard training duration
+  num_train_epochs: 3
+  max_steps: -1
+
+  # Optimizer
+  optim: adamw_torch
+  weight_decay: 0.005
+
+  # Gradient handling
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+
+  # Evaluation
+  evaluation_strategy: steps
+  eval_steps: 400
+  per_device_eval_batch_size: 12
+
+  # Logging and saving
+  logging_dir: ./logs
+  logging_steps: 50
+  save_strategy: steps
+  save_steps: 400
+  save_total_limit: 2
+
+  # Performance
+  seed: 42
+  dataloader_drop_last: true
+  dataloader_num_workers: 2
+
+  # Generation parameters
+  max_new_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+
+# LoRA for 1.5B model
+peft:
+  peft_type: lora
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - k_proj
+    - o_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+# 4-bit quantization for memory efficiency
+quantization:
+  load_in_8bit: false
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+  bnb_4bit_compute_dtype: bfloat16
+
+# Government Scheme Task Configuration
+task:
+  task_type: instruction_following
+  instruction_column: instruction
+  response_column: response
+  context_column: context
+
+# Notes:
+# - Qwen2.5-1.5B is optimal size/performance trade-off for gov schemes
+# - Covers PM-KISAN, MGNREGA, PM-Mudra, PM-Ujjwala, PMAY, etc.
+# - Inference: 50-100ms per token on edge GPUs
+# - Recommended datasets: Scheme eligibility Q&A, application guidance, amount calculations
+# - Include examples of regional variations (state-specific scheme rates)
+# - Training on government policy documents from data.gov.in

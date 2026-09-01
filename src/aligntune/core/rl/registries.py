@@ -37,9 +37,15 @@ def _initialize_from_rewards_registry():
             except (ValueError, KeyError) as e:
                 # Handle reward type parsing errors gracefully
                 error_msg = str(e)
-                if "Unknown reward type" in error_msg or "RewardT" in error_msg or "RewardType" in error_msg:
+                if (
+                    "Unknown reward type" in error_msg
+                    or "RewardT" in error_msg
+                    or "RewardType" in error_msg
+                    or "must be a non-empty" in error_msg
+                ):
                     logger.debug(f"Could not initialize reward '{name}' from rewards registry: {e}")
-                    # Don't log as warning for parsing errors - they're expected for some reward types
+                    # Don't log as warning for parsing errors or rewards that require
+                    # caller-supplied params (e.g. rubric text) - expected for some reward types
                     continue
                 else:
                     logger.warning(f"Could not initialize reward '{name}' from rewards registry: {e}")

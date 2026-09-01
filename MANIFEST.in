@@ -1,0 +1,21 @@
+# setuptools_scm already adds every git-tracked file to the sdist, but keep the
+# critical trees explicit so an sdist built without it is still complete.
+
+# Vendored third-party packages compiled into the wheel (see setup.py):
+# mergekit, unsloth, unsloth_zoo - their sources, data files, licenses and
+# patch notes must all ship inside the sdist.
+graft third_party
+recursive-exclude third_party *.pyc
+recursive-exclude third_party __pycache__
+
+# Packaging / project metadata
+include pyproject.toml setup.py requirements.txt requirements-docs.txt
+include LICENSE.md THIRD_PARTY_LICENSES.md CHANGELOG.md CITATION.cff README.md
+include conftest.py pytest.ini
+
+# Package sources and their data files
+graft src
+recursive-exclude src *.pyc
+recursive-exclude src __pycache__
+
+global-exclude .DS_Store

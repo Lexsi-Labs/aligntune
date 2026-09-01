@@ -4,7 +4,7 @@ Complete guide to training custom reward models from rule-based reward functions
 
 ## Overview
 
-Reward models learn to score text quality based on training data generated from rule-based reward functions. AlignTune provides a complete system for training reward models and seamlessly integrating them into PPO training pipelines.
+Reward models learn to score text quality based on training data generated from rule-based reward functions. AlignTune trains them and wires them directly into PPO training pipelines, with no separate integration step.
 
 ## Quick Start
 
@@ -96,10 +96,18 @@ Train reward models independently for later use:
 
 ```python
 from aligntune.rewards.training import RewardModelTrainer
+from aligntune.rewards.registry import RewardRegistry
+
+# RewardModelTrainer expects RewardFunction objects, not name strings --
+# fetch them from the registry first
+registry = RewardRegistry()
+length_func = registry.get_reward_function("length")
+sentiment_func = registry.get_reward_function("sentiment")
+safety_func = registry.get_reward_function("safety")
 
 trainer = RewardModelTrainer(
  base_model_name="microsoft/DialoGPT-medium",
- reward_functions=["length", "sentiment", "safety"],
+ reward_functions=[length_func, sentiment_func, safety_func],
  composite_weights=[0.3, 0.4, 0.3]
 )
 
@@ -220,10 +228,18 @@ trainer = create_rl_trainer(
 
 ```python
 from aligntune.rewards.training import RewardModelTrainer
+from aligntune.rewards.registry import RewardRegistry
+
+# RewardModelTrainer expects RewardFunction objects, not name strings --
+# fetch them from the registry first
+registry = RewardRegistry()
+length_func = registry.get_reward_function("length")
+sentiment_func = registry.get_reward_function("sentiment")
+safety_func = registry.get_reward_function("safety")
 
 trainer = RewardModelTrainer(
  base_model_name="microsoft/DialoGPT-medium",
- reward_functions=["length", "sentiment", "safety"],
+ reward_functions=[length_func, sentiment_func, safety_func],
  composite_weights=[0.3, 0.4, 0.3]
 )
 
@@ -239,7 +255,7 @@ training_data = trainer.generate_training_data(
 ```python
 training_data = trainer.generate_training_data(
  texts=your_texts,
- reference_texts=reference_texts, # Optional reference texts
+ references=reference_texts, # Optional reference texts
  batch_size=32
 )
 ```
@@ -383,7 +399,7 @@ if len(training_texts) < 10:
 from aligntune.rewards.registry import RewardRegistry
 
 registry = RewardRegistry()
-available = registry.list_reward_functions()
+available = registry.list_rewards()
 
 # Check if function exists
 if "my_function" not in available:

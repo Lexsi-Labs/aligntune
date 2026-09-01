@@ -1,0 +1,88 @@
+recipe:
+  name: "llama3-gsm8k-grpo-rlvr"
+  description: "Train LLaMA 3 on GSM8K using GRPO with RLVR (verifiable math rewards)"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  dataset: "openai/gsm8k"
+  task: "math_reasoning"
+  algorithm: "grpo"
+  backend: "trl"
+  tags: ["llama", "grpo", "math", "rlvr", "verifiable"]
+  requires_auth: true
+  estimated_time: "3-4 hours"
+  estimated_memory: "28GB VRAM"
+
+config:
+  algo: grpo
+  model:
+    name_or_path: "meta-llama/Meta-Llama-3-8B-Instruct"
+    backend: "trl"
+    precision: "bf16"
+    gradient_checkpointing: true
+    max_seq_length: 1024
+    use_peft: true
+    lora_r: 32
+    lora_alpha: 64
+    lora_dropout: 0.1
+    lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+  datasets:
+    - name: "openai/gsm8k"
+      split: "train"
+      config_name: "main"
+      max_samples: 5000
+      column_mapping:
+        text: "question"
+        reference: "answer"  # GSM8K has answers we can use as references
+
+  rewards:
+    # RLVR: Math Verifiable Reward
+    # Uses symbolic simplification via sympy for deterministic correctness checking
+    # Returns 1.0 if the answer matches the expected answer, 0.0 otherwise
+    - type: "math_verifiable"
+      weight: 1.0
+      params:
+        # Enable symbolic simplification for robust comparison
+        simplify: true
+        # Timeout for answer extraction and comparison
+        timeout: 5.0
+
+  train:
+    # To enable DeepSpeed ZeRO or FSDP, uncomment one of the preset accelerate configs:
+    # accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero2.yaml
+    # accelerate_config_path: src/aligntune/recipes/accelerate/deepspeed_zero3.yaml
+    # accelerate_config_path: src/aligntune/recipes/accelerate/fsdp_full_shard.yaml
+    epochs: 1
+    max_steps: 1000
+    per_device_batch_size: 4
+    gradient_accumulation_steps: 4
+    learning_rate: 0.00001
+    warmup_steps: 50
+    max_grad_norm: 1.0
+    beta: 0.01
+    num_generations: 16
+    max_prompt_length: 512
+    max_completion_length: 512
+    temperature: 0.7
+    top_p: 0.9
+    optimizer: "adamw_8bit"
+    lr_scheduler: "cosine"
+    logging_steps: 10
+    save_steps: 500
+
+  logging:
+    output_dir: "./output/llama3-gsm8k-grpo-rlvr"
+    run_name: "llama3-math-grpo-rlvr"
+    loggers: []
+
+  distributed:
+    backend: "single"
+
+  chat_template: "llama3"
+
+# Additional notes on RLVR:
+# - Verifiable rewards use deterministic checks instead of learned models
+# - Math verification uses sympy.simplify() for symbolic comparison
+# - Falls back to normalized string matching for simple cases
+# - Returns binary reward signals (1.0 or 0.0) - perfectly interpretable
+# - No model loading overhead, deterministic and scalable
+# - Inspired by DeepSeek-R1, QwQ, and DAPO approaches

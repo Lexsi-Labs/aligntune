@@ -1,0 +1,30 @@
+name: "minimal_stack"
+description: "Minimal pipeline: SFT → DPO for quick validation"
+
+metadata:
+  version: "3.4"
+  estimated_total_time: "6-8 hours"
+  model_family: "meta-llama/Meta-Llama-3-8B"
+  recommended_vram: "16GB+"
+  tags: ["quick", "validation", "two-stage"]
+
+stages:
+  - name: "sft"
+    algo: "sft"
+    config_path: "recipes/configs/sft/llama3_supervised.yaml"
+    description: "Stage 1: Supervised Fine-Tuning"
+    target_params:
+      train:
+        epochs: 1
+        per_device_batch_size: 4
+
+  - name: "dpo"
+    algo: "dpo"
+    config_path: "recipes/configs/rl/llama3_dpo.yaml"
+    init_from: "sft"
+    description: "Stage 2: Direct Preference Optimization"
+    target_params:
+      train:
+        epochs: 2
+        learning_rate: 2e-5
+        per_device_batch_size: 4

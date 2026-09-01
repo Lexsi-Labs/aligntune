@@ -5,6 +5,7 @@ import logging
 import re
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, List, Callable
+from pathlib import Path
 
 # Import Eval Components
 from .rl_evaluator import RLEvaluator
@@ -15,6 +16,9 @@ from datasets import load_dataset, DatasetDict
 # Import Data Manager
 from ..data.manager import DataManager
 from ..data.schemas import TASK_SCHEMAS, TaskType
+
+# Import WandB logger
+from ..core.logging import WandBLogger
 
 # Import colored logging
 try:
@@ -68,6 +72,9 @@ from .metrics.dpo import (
     CalibrationMetric
 )
 
+# Reasoning and Process Reward Model metrics
+from .benchmarks.reasoning import ReasoningBenchmark
+
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +105,8 @@ class EvalConfig:
     base_model: Optional[str] = None
     reference_model_path: Optional[str] = None
     reward_model: Optional[Any] = None
+    dpo_beta: float = 0.1
+    """DPO implicit-reward temperature used for preference metrics."""
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Data configuration
@@ -118,6 +127,7 @@ class EvalConfig:
     # Advanced Data Processing Features
     system_prompt: Optional[str] = None
     enable_thinking: bool = None
+    apply_chat_template: bool = True
     processing_fn: Optional[Callable] = None  # User-defined processing function
     processing_batched: bool = False          # Whether processing_fn is batched
     auto_detect: bool = True                  # Enable auto-detection of dataset format
@@ -127,8 +137,16 @@ class EvalConfig:
     
     # Data Splitting Parameters
     val_split_ratio: float = 0.1
+    test_split_ratio: Optional[float] = None
     seed: int = 42
-    
+
+    # CuratorKIT data processing
+    curator_schema_gate: bool = True
+    curator_clean: bool = False
+    curator_dedup: str = "none"
+    curator_use_tiktoken: bool = False
+    curator_max_tokens: int = 1_000_000
+
     # Legacy fields
     domain: Optional[str] = None 
     # NOTE: sampling params only matter when do_sample=True.
@@ -156,6 +174,19 @@ class EvalConfig:
     num_print_samples: int = 3           # Number of samples to print
     print_sample_mode: str = "random"     # Options: "first", "random", "indices"
     print_sample_indices: Optional[List[int]] = None  # Specific indices if mode="indices"
+
+    # WandB integration (optional, graceful degradation)
+    wandb_project: Optional[str] = None
+    """wandb project name. If None, wandb tracking is disabled."""
+
+    wandb_entity: Optional[str] = None
+    """wandb entity (team or username). Optional."""
+
+    wandb_tags: Optional[List[str]] = None
+    """List of tags to attach to wandb run for filtering and organization."""
+
+    wandb_notes: Optional[str] = None
+    """Optional notes about the evaluation to log to wandb."""
 
 
 def get_metrics_from_names(metric_names: List[str], k_list: Optional[List[int]] = None) -> List[Any]:
@@ -199,13 +230,30 @@ def run_eval(config: EvalConfig, dataset_dict: Optional[DatasetDict] = None) -> 
     """
     Unified entry point for running evaluation using the Config object.
     """
+    # Initialize wandb logger if configured
+    wandb_logger = None
+    if hasattr(config, 'wandb_project') and config.wandb_project:
+        wandb_logger = WandBLogger(
+            project=config.wandb_project,
+            entity=getattr(config, 'wandb_entity', None),
+            config={
+                'model_path': config.model_path,
+                'task_type': config.task_type,
+                'dataset': config.dataset_name,
+                'batch_size': config.batch_size,
+                'precision': config.precision,
+            },
+            tags=getattr(config, 'wandb_tags', None),
+            notes=getattr(config, 'wandb_notes', None),
+        )
+
     # Aggressive memory cleanup before loading new models
     import gc
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
-    
+
     print_section_banner("ALIGNTUNE EVALUATION", color=Fore.CYAN if COLORED_LOGGING_AVAILABLE else "", use_ascii=True)
     aligntune_info(f"Model: {config.model_path}")
     aligntune_info(f"Eval Task (Metrics): {config.task_type}")
@@ -521,23 +569,48 @@ def run_eval(config: EvalConfig, dataset_dict: Optional[DatasetDict] = None) -> 
         column_mapping=config.column_mapping,
         tokenizer=tokenizer,
         val_split_ratio=config.val_split_ratio,
+        test_split_ratio=config.test_split_ratio,
         seed=config.seed,
         system_prompt=config.system_prompt,
         enable_thinking=config.enable_thinking,
         processing_fn=config.processing_fn,
         processing_batched=config.processing_batched,
         auto_detect=config.auto_detect,
+        max_samples=config.max_samples,
+        curator_schema_gate=config.curator_schema_gate,
+        curator_clean=config.curator_clean,
+        curator_dedup=config.curator_dedup,
+        curator_use_tiktoken=config.curator_use_tiktoken,
+        curator_max_tokens=config.curator_max_tokens,
         # trust_remote_code=config.trust_remote_code
     )
     
     try:
+        # A requested test split may be created from train/validation by
+        # DataManager. Do not ask the HF loader for a physical ``test`` split
+        # before that split policy runs.
+        # When a requested validation/test split is configured by ratio, load
+        # the source dataset first so DataManager can create that split. Do
+        # not ask the HF loader for a physical split that may not exist.
+        ratio_split_requested = (
+            config.split == "validation" and config.val_split_ratio is not None
+        ) or (
+            config.split == "test" and config.test_split_ratio is not None
+        )
+        load_split = None if ratio_split_requested else config.split
         if dataset_dict is not None:
-            logger.info("Using provided DatasetDict")
-            dataset_dict = dataset_dict
+            logger.info("Using provided dataset; processing it through DataManager")
+            # Keep in-memory and named datasets on the same CuratorKIT and
+            # normalization path. Previously this branch bypassed all data
+            # processing and handed raw columns to the evaluator.
+            dataset_dict = data_manager.load_dataset(
+                dataset_dict, split=load_split
+            )
         else:
             dataset_dict = data_manager.load_dataset(
-                config.dataset_name, 
-                config_name=config.dataset_config
+                config.dataset_name,
+                config_name=config.dataset_config,
+                split=load_split,
             )
         
 
@@ -670,7 +743,11 @@ def run_eval(config: EvalConfig, dataset_dict: Optional[DatasetDict] = None) -> 
         device=config.device,
         generation_kwargs=gen_kwargs,
         k_list=config.k_list,
-        use_unsloth=config.use_unsloth
+        use_unsloth=config.use_unsloth,
+        apply_chat_template=config.apply_chat_template,
+        enable_thinking=config.enable_thinking,
+        dpo_beta=config.dpo_beta,
+        data_task_type=final_data_task,
     )
     
     # 5. Run Evaluation
@@ -684,7 +761,9 @@ def run_eval(config: EvalConfig, dataset_dict: Optional[DatasetDict] = None) -> 
         dataset=dataset,
         reward_model=config.reward_model,
         max_samples=config.max_samples,
-        column_mapping=None  # DataManager handled mapping
+        # DataManager has normalized all supported datasets to these canonical
+        # names. Keep that contract explicit for the evaluator.
+        column_mapping={"prompt": "prompt", "completion": "completion"},
     )
     
     # 6. Save & Return
@@ -745,7 +824,219 @@ def run_eval(config: EvalConfig, dataset_dict: Optional[DatasetDict] = None) -> 
         
         print(f"{'═' * 70}\n")
 
-
     results["total"] = config.max_samples if config.max_samples else len(dataset)
-    
+
+    # Log evaluation metrics to wandb
+    if wandb_logger:
+        try:
+            # Extract metric results and log them
+            metric_results = {k: v for k, v in results.items()
+                            if k not in ['sample_queries', 'sample_predictions', 'sample_references', 'total']}
+            if metric_results:
+                wandb_logger.log_metrics(metric_results)
+
+            # Log evaluation checkpoint if output_dir exists
+            if config.output_dir and Path(config.output_dir).exists():
+                wandb_logger.log_artifact(
+                    config.output_dir,
+                    artifact_type="evaluation",
+                    name=f"eval-{config.task_type}"
+                )
+
+            wandb_logger.finalize()
+        except Exception as e:
+            logger.warning(f"Error logging evaluation to wandb: {str(e)}")
+
     return results
+
+
+def register_reasoning_metrics() -> Dict[str, Dict[str, Any]]:
+    """
+    Register reasoning metrics for process reward model evaluation.
+
+    Returns:
+        Dictionary mapping benchmark names to their metric configurations:
+        {
+            "AIME": {"metric": "exact_match", "task": "AIME"},
+            "MATH": {"metric": "exact_match", "task": "MATH"},
+            ...
+        }
+
+    Note:
+        This function prepares metric definitions for reasoning benchmarks
+        without executing any actual evaluations.
+    """
+    reasoning_metrics = {
+        "AIME": {
+            "metric": "exact_match",
+            "task": "AIME",
+            "description": "American Invitational Mathematics Examination",
+            "category": "reasoning",
+        },
+        "MATH": {
+            "metric": "exact_match",
+            "task": "MATH",
+            "description": "Diverse mathematical problem collection",
+            "category": "reasoning",
+        },
+        "GPQA": {
+            "metric": "accuracy",
+            "task": "GPQA",
+            "description": "Graduate-level Professional and Academic Questions",
+            "category": "reasoning",
+        },
+        "LiveCodeBench": {
+            "metric": "code_execution",
+            "task": "livecode",
+            "description": "Code execution benchmarks",
+            "category": "reasoning",
+        },
+        "GSM8K-CoT": {
+            "metric": "exact_match",
+            "task": "gsm8k_cot",
+            "description": "Grade school math with chain-of-thought",
+            "category": "reasoning",
+        },
+    }
+
+    logger.info(f"Registered {len(reasoning_metrics)} reasoning metrics")
+    return reasoning_metrics
+
+
+def get_reasoning_benchmark(name: str, split: str = "test") -> Optional[Dict[str, Any]]:
+    """
+    Get a reasoning benchmark for evaluation.
+
+    Args:
+        name: Benchmark name (AIME, MATH, GPQA, LiveCodeBench, GSM8K-CoT)
+        split: Dataset split (test, val, train)
+
+    Returns:
+        Dictionary with benchmark data (questions, solutions, step_labels)
+        or None if benchmark cannot be loaded
+
+    Note:
+        This is a stub for the actual benchmark loading infrastructure.
+    """
+    try:
+        benchmark = ReasoningBenchmark()
+        data = benchmark.load_benchmark(name, split=split)
+        return data.to_dict()
+    except Exception as e:
+        logger.warning(f"Failed to load reasoning benchmark {name}: {e}")
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Long-Context Benchmark Registry  (v3.9)
+# ---------------------------------------------------------------------------
+
+def register_long_context_metrics() -> Dict[str, Dict[str, Any]]:
+    """
+    Register long-context evaluation benchmarks in the metrics registry.
+
+    Two benchmarks are provided:
+
+    * **needle_in_haystack** — A retrieval probe that embeds a short "needle"
+      sentence at a random position inside a long document ("haystack") and
+      asks the model to reproduce it.  Scores are broken down by
+      ``context_length`` so you can track degradation as the window grows.
+
+    * **longbench** — A multi-task long-document understanding benchmark
+      covering multi-hop QA (``2wikimqa``, ``hotpotqa``) and summarisation
+      (``gov_report``).  Each task is evaluated separately and then averaged
+      into a composite ``longbench_avg`` score.
+
+    Returns:
+        A nested dictionary keyed by benchmark name.  Each value is a
+        configuration dictionary that downstream runners consume to set up
+        the evaluation environment.  Example structure::
+
+            {
+                "needle_in_haystack": {
+                    "metric": "retrieval_accuracy",
+                    "category": "long_context",
+                    "context_lengths": [4096, 8192, 32768],
+                    ...
+                },
+                "longbench": {
+                    "metric": "f1",
+                    "category": "long_context",
+                    "tasks": ["2wikimqa", "hotpotqa", "gov_report"],
+                    ...
+                },
+            }
+
+    Note:
+        This function only **registers** benchmark metadata; it does not
+        download datasets or run inference.  Pair it with a compatible runner
+        (e.g. ``LongContextEvaluator``) to execute evaluations.
+    """
+    long_context_metrics: Dict[str, Dict[str, Any]] = {
+        "needle_in_haystack": {
+            "metric": "retrieval_accuracy",
+            "task": "needle_in_haystack",
+            "description": (
+                "Retrieval accuracy probe: a needle sentence is inserted at a "
+                "random depth inside a long document and the model must reproduce "
+                "it verbatim.  Evaluated at multiple context lengths to expose "
+                "performance cliffs."
+            ),
+            "category": "long_context",
+            # Context lengths (in tokens) at which the probe is evaluated.
+            # Covers the short-context regime (4k), mid-range (8k), and the
+            # extended target (32k) relevant to most long-context recipes.
+            "context_lengths": [4096, 8192, 32768],
+            "scoring": "exact_match_ratio",  # fraction of needles retrieved correctly
+            "dataset": "ruler/needle",        # HF dataset identifier (stub)
+        },
+        "longbench": {
+            "metric": "f1",
+            "task": "longbench",
+            "description": (
+                "Multi-task long-document understanding benchmark covering "
+                "multi-hop question answering and long-form summarisation."
+            ),
+            "category": "long_context",
+            # Subset of LongBench tasks selected to cover QA and summarisation.
+            "tasks": ["2wikimqa", "hotpotqa", "gov_report"],
+            "scoring": "per_task_f1_and_avg",  # individual F1 + composite average
+            "dataset": "THUDM/LongBench",       # HF dataset identifier
+        },
+    }
+
+    logger.info(
+        f"Registered {len(long_context_metrics)} long-context benchmarks: "
+        + ", ".join(long_context_metrics.keys())
+    )
+    return long_context_metrics
+
+
+# Merged metrics registry — combines reasoning and long-context benchmarks
+# so callers can discover all available benchmarks from a single source.
+METRICS_REGISTRY: Dict[str, Dict[str, Any]] = {
+    **register_reasoning_metrics(),
+    **register_long_context_metrics(),
+}
+"""
+Global registry of all evaluation benchmarks supported by AlignTune.
+
+Structure::
+
+    {
+        "<benchmark_name>": {
+            "metric":      str,   # primary metric type
+            "task":        str,   # internal task identifier
+            "description": str,   # human-readable description
+            "category":    str,   # "reasoning" | "long_context"
+            ...                   # benchmark-specific keys
+        },
+        ...
+    }
+
+Reasoning benchmarks (from :func:`register_reasoning_metrics`):
+    AIME, MATH, GPQA, LiveCodeBench, GSM8K-CoT
+
+Long-context benchmarks (from :func:`register_long_context_metrics`):
+    needle_in_haystack, longbench
+"""

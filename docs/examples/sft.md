@@ -86,9 +86,34 @@ metrics = trainer.evaluate()
 print(f"Accuracy: {metrics.get('eval_accuracy', 'N/A')}")
 ```
 
+### 4. Causal Language-Model Pretraining
+
+Continue pretraining a causal language model on raw text. The dataset must
+provide a text column; `text_column` identifies that column.
+
+```python
+from aligntune.core.backend_factory import create_sft_trainer
+
+trainer = create_sft_trainer(
+    model_name="Qwen/Qwen3-0.6B",
+    dataset_name="Salesforce/wikitext",
+    backend="trl",
+    task_type="pretraining",
+    split="train",
+    text_column="text",
+    num_epochs=1,
+    batch_size=4,
+    learning_rate=2e-4,
+    max_seq_length=1024,
+    max_samples=1000,
+)
+
+trainer.train()
+```
+
 ## Advanced Examples
 
-### 4. LoRA Fine-Tuning
+### 5. LoRA Fine-Tuning
 
 Efficient fine-tuning with LoRA:
 
@@ -110,7 +135,7 @@ trainer = create_sft_trainer(
 trainer.train()
 ```
 
-### 5. Sequence Packing
+### 6. Sequence Packing
 
 Efficient training with sequence packing:
 
@@ -130,7 +155,7 @@ trainer = create_sft_trainer(
 trainer.train()
 ```
 
-### 6. Chat Completion
+### 7. Chat Completion
 
 Train conversational model:
 
@@ -157,11 +182,6 @@ trainer.train()
 
 ```python
 from aligntune.core.backend_factory import create_sft_trainer
-from datasets import load_dataset
-
-# Load dataset
-dataset = load_dataset("tatsu-lab/alpaca", split="train")
-
 # Create trainer
 trainer = create_sft_trainer(
  model_name="microsoft/DialoGPT-medium",
@@ -181,28 +201,9 @@ print("Starting training...")
 results = trainer.train()
 print(f"Training completed: {results}")
 
-# Evaluate
-print("Evaluating...")
-test_dataset = load_dataset("tatsu-lab/alpaca", split="test")
-metrics = trainer.evaluate(eval_dataset=test_dataset)
-print(f"Evaluation metrics: {metrics}")
-
 # Save model
 model_path = trainer.save_model()
 print(f"Model saved to: {model_path}")
-
-# Test predictions
-print("Testing predictions...")
-prompts = [
- "What is machine learning?",
- "Explain deep learning",
- "What is NLP?"
-]
-
-results = trainer.predict(prompts)
-for prompt, result in zip(prompts, results):
- print(f"Q: {prompt}")
- print(f"A: {result}\n")
 
 # Push to Hub (optional)
 # url = trainer.push_to_hub("username/my-model")
@@ -214,11 +215,11 @@ for prompt, result in zip(prompts, results):
 ### From Command Line
 
 ```bash
-# Basic SFT
-python examples/sft_customer_support_trl/train_sft_direct_api.py
+# Basic SFT with TRL
+python examples/sft_trl_1.py
 
-# Instruction following
-python examples/sft_financial_summarization_trl/train_sft_direct_api.py
+# SFT with Unsloth
+python examples/unsloth_sft_1.py
 
 ```
 

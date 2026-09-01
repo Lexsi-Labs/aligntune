@@ -28,6 +28,13 @@ from aligntune.core.sft.evaluator import EnhancedEvaluator
 import gc
 from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import  extract_extra_and_missing_params
+from aligntune.core.model_loader import (
+    build_model,
+    build_ref_model,
+    build_reward_model,
+    build_value_model,
+)
+from aligntune.core.registry import TaskType
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
@@ -38,6 +45,8 @@ logging.basicConfig(level=logging.WARNING)
 
 class TRLPPOTrainer(TrainerBase):
     """PPO trainer using pure TRL PPOTrainer with math, code, and enhanced rewards."""
+    TASK_TYPE = "ppo"
+    KEEP_COLUMNS = True
 
     def __init__(self, config: UnifiedConfig):
         super().__init__(config)
@@ -59,282 +68,69 @@ class TRLPPOTrainer(TrainerBase):
     def is_available(cls) -> bool:
         """Check if TRL is available."""
         try:
-            from trl import PPOTrainer, PPOConfig
+            from trl.experimental.ppo import PPOTrainer, PPOConfig
             from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
             return True
         except ImportError:
             return False
 
     def setup_model(self) -> None:
-        """Setup models (policy, reference, reward, value) using standard Transformers."""
-        # Extract model config values safely
-        policy_model_name = self._get_config_value(
-            self.config.model,
-            'name_or_path',
-            'model_name',
-            default='gpt2')
-        
-        
-       # Check if integrated reward training is configured
-        if (hasattr(self.config, 'reward_training') and 
-            self.config.reward_training is not None):
-            
-            logger.info("🏋️ Training custom reward model before PPO...")
-            reward_model_path = self._train_custom_reward_model()
-            
-            # Override reward_model_name with trained model path
-            reward_model_name = reward_model_path
-            logger.info(f"✅ Custom reward model trained and saved to: {reward_model_path}")
-        else:
-            # Extract from config as normal
-            reward_model_name = self._get_config_value(
-                self.config.model,
-                'reward_model_name',
-                'reward_path',
-                default=None)
-        
-        value_model_name = self._get_config_value(
-            self.config.model,
-            'reward_value_model',
-            default=None)
-        
-        sft_model_path = self._get_config_value(
-            self.config.model,
-            'sft_path',
-            default=None)
-        
-        trust_remote_code = self._get_config_value(
-            self.config.model, 'trust_remote_code', default=False)
-        
-        device_map = self._get_config_value(
-            self.config.model, 'device_map', default='auto')
-        
-        is_ddp = (
-            device_map in ["DDP", "ddp"] or
-            os.environ.get('ACCELERATE_USE_DDP') == 'true'
-        )
-
-        if is_ddp:
-            from accelerate import PartialState
-            device_string = PartialState().process_index
-            device_map = {'': device_string}
-            logger.info(
-                f"DDP mode detected: device_map={{'': {device_string}}}")
-
-        # === UNIFIED PRECISION HANDLING ===
-        precision = PrecisionHandler.get_precision_from_config(
-            self.config, default="auto")
-        precision = PrecisionHandler.validate_precision(precision)
-        PrecisionHandler.log_precision_info(precision, "TRL PPO")
-        dtype = PrecisionHandler.get_torch_dtype(precision)
-
-        # Quantization settings
-        load_in_4bit = self._get_config_value(
-            self.config.model, 'load_in_4bit', default=False)
-        load_in_8bit = self._get_config_value(
-            self.config.model, 'load_in_8bit', default=False)
-        use_peft = self._get_config_value(
-            self.config.model, 'use_peft', default=False)
-
-        # Auto-detect quantization from model name
-        if not load_in_4bit and not load_in_8bit:
-            model_name_lower = policy_model_name.lower()
-            if 'bnb-4bit' in model_name_lower or '4bit' in model_name_lower or 'awq' in model_name_lower:
-                logger.info(
-                    f"Auto-detected 4-bit quantization from model name: {policy_model_name}")
-                load_in_4bit = True
-            elif 'bnb-8bit' in model_name_lower or '8bit' in model_name_lower:
-                logger.info(
-                    f"Auto-detected 8-bit quantization from model name: {policy_model_name}")
-                load_in_8bit = True
-
-        # Auto-enable PEFT if using quantization
-        if (load_in_4bit or load_in_8bit) and not use_peft:
-            logger.info(
-                "Quantization detected - auto-enabling PEFT/LoRA adapters (required for training)")
-            use_peft = True
-
-        logger.info("=" * 80)
-        logger.info(f"Setting up TRL PPO models")
-        logger.info(f"Policy model: {policy_model_name}")
-        logger.info(f"SFT path: {sft_model_path or 'Same as policy'}")
-        logger.info(f"Reward model: {reward_model_name or 'Same as value model'}")
-        logger.info(f"Value model: {value_model_name}")
-        logger.info("=" * 80)
+        """Build PPO policy, reference, reward, and value models centrally."""
+        model_cfg = self.config.model
+        original_policy_name = getattr(model_cfg, "name_or_path", None)
+        original_reward_name = getattr(model_cfg, "reward_model_name", None)
+        sft_path = self._get_config_value(model_cfg, "sft_path", default=None)
+        custom_reward_path = None
 
         try:
-            from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification, AutoTokenizer
-        except ImportError as e:
-            raise ImportError(
-                "Transformers not available. Install with: pip install transformers") from e
+            if getattr(self.config, "reward_training", None) is not None:
+                logger.info("Training custom reward model before PPO...")
+                custom_reward_path = self._train_custom_reward_model()
+                logger.info("Custom reward model saved to %s", custom_reward_path)
 
-        # Load tokenizer
-        logger.info("Loading tokenizer...")
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            policy_model_name,
-            trust_remote_code=trust_remote_code,
-        )
+            # build_model reads the policy path from model.name_or_path. Keep
+            # the PPO-specific SFT override local to this setup operation.
+            if sft_path:
+                model_cfg.name_or_path = sft_path
+            if custom_reward_path:
+                model_cfg.reward_model_name = custom_reward_path
 
-        
-        if self.tokenizer.padding_side != "left":
+            use_peft = bool(self._get_config_value(model_cfg, "use_peft", default=False))
+            self.policy_model, self.tokenizer = build_model(
+                config=self.config,
+                task_type=TaskType.PPO,
+                use_unsloth=False,
+                apply_peft=use_peft,
+            )
+            self.ref_model = build_ref_model(
+                config=self.config,
+                base_model=self.policy_model,
+                use_unsloth=False,
+            )
+            self.reward_model = build_reward_model(self.config)
+            self.value_model = build_value_model(
+                config=self.config,
+                policy_model=self.policy_model,
+            )
+
+            # PPO batches prompts with left padding.
             self.tokenizer.padding_side = "left"
-
-        # Set pad token if not set
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
-            logger.info("Set pad token to eos token")
-
-        # Common model kwargs
-        base_model_kwargs = {
-            "dtype": dtype,
-            "device_map": device_map,
-            "trust_remote_code": trust_remote_code,
-        }
-
-        # Add quantization if specified for policy model
-        policy_model_kwargs = base_model_kwargs.copy()
-        if load_in_4bit:
-            logger.info("Loading policy model with 4-bit quantization...")
-            policy_model_kwargs["load_in_4bit"] = True
-            policy_model_kwargs["bnb_4bit_compute_dtype"] = torch.float16
-            policy_model_kwargs["bnb_4bit_quant_type"] = "nf4"
-            policy_model_kwargs["bnb_4bit_use_double_quant"] = True
-        elif load_in_8bit:
-            logger.info("Loading policy model with 8-bit quantization...")
-            policy_model_kwargs["load_in_8bit"] = True
-
-        # Load policy model (from SFT path if provided, else base model)
-        logger.info("Loading policy model...")
-        policy_path = sft_model_path or policy_model_name
-        self.policy_model = AutoModelForCausalLM.from_pretrained(
-            policy_path,
-            **policy_model_kwargs
-        )
-
-        # Apply PEFT if specified
-        if use_peft:
-            logger.info("Applying PEFT (LoRA) configuration to policy model...")
-            from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-
-            # Prepare model for k-bit training if using quantization
-            if load_in_4bit or load_in_8bit:
-                logger.info("Preparing policy model for k-bit training...")
-                self.policy_model = prepare_model_for_kbit_training(self.policy_model)
-
-            # Extract PEFT config values
-            lora_r = self._get_config_value(
-                self.config.model, 'lora_r', 'r', default=16)
-            lora_alpha = self._get_config_value(
-                self.config.model, 'lora_alpha', 'alpha', default=32)
-            lora_target_modules = self._get_config_value(
-                self.config.model,
-                'lora_target_modules',
-                'target_modules',
-                default=["q_proj", "k_proj", "v_proj", "o_proj"]
-            )
-            lora_dropout = self._get_config_value(
-                self.config.model, 'lora_dropout', 'dropout', default=0.05)
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            self.model = self.policy_model
 
             logger.info(
-                f"LoRA config: r={lora_r}, alpha={lora_alpha}, dropout={lora_dropout}")
-            logger.info(f"Target modules: {lora_target_modules}")
-
-            peft_config = LoraConfig(
-                r=lora_r,
-                lora_alpha=lora_alpha,
-                target_modules=lora_target_modules,
-                lora_dropout=lora_dropout,
-                bias="none",
-                task_type="CAUSAL_LM",
+                "PPO models loaded through centralized model_loader: policy=%s, ref=%s, reward=%s, value=%s",
+                type(self.policy_model).__name__,
+                type(self.ref_model).__name__ if self.ref_model is not None else "implicit PEFT reference",
+                type(self.reward_model).__name__,
+                type(self.value_model).__name__,
             )
+        finally:
+            if original_policy_name is not None:
+                model_cfg.name_or_path = original_policy_name
+            model_cfg.reward_model_name = original_reward_name
 
-            self.policy_model = get_peft_model(self.policy_model, peft_config)
-            self.policy_model.print_trainable_parameters()
-            logger.info("PEFT adapters applied to policy model successfully")
-            
-            # Reference model is None when using PEFT (TRL handles this)
-            self.ref_model = None
-            logger.info("Reference model: None (PEFT mode - TRL will handle reference)")
-        else:
-            # Load reference model (frozen copy of SFT model)
-            logger.info("Loading reference model (frozen copy)...")
-            self.ref_model = AutoModelForCausalLM.from_pretrained(
-                policy_path,
-                **base_model_kwargs
-            )
-            self.ref_model.eval()
-            for param in self.ref_model.parameters():
-                param.requires_grad = False
-            logger.info("Reference model loaded and frozen")
-
-        # Load reward and value models
-        logger.info("Loading reward and value models...")
-        
-        # Reward model quantization settings
-        reward_quant = self._get_config_value(
-            self.config.model, 'reward_model_quantization', default={})
-        reward_load_4bit = reward_quant.get('load_in_4bit', False)
-        reward_load_8bit = reward_quant.get('load_in_8bit', False)
-        
-        reward_model_kwargs = base_model_kwargs.copy()
-        if reward_load_4bit:
-            logger.info("Loading reward model with 4-bit quantization...")
-            reward_model_kwargs["load_in_4bit"] = True
-            reward_model_kwargs["bnb_4bit_compute_dtype"] = torch.float16
-            reward_model_kwargs["bnb_4bit_quant_type"] = "nf4"
-            reward_model_kwargs["bnb_4bit_use_double_quant"] = True
-        elif reward_load_8bit:
-            logger.info("Loading reward model with 8-bit quantization...")
-            reward_model_kwargs["load_in_8bit"] = True
-
-        # Value model quantization settings
-        value_quant = self._get_config_value(
-            self.config.model, 'value_model_quantization', default={})
-        value_load_4bit = value_quant.get('load_in_4bit', False)
-        value_load_8bit = value_quant.get('load_in_8bit', False)
-        
-        value_model_kwargs = base_model_kwargs.copy()
-        if value_load_4bit:
-            logger.info("Loading value model with 4-bit quantization...")
-            value_model_kwargs["load_in_4bit"] = True
-            value_model_kwargs["bnb_4bit_compute_dtype"] = torch.float16
-            value_model_kwargs["bnb_4bit_quant_type"] = "nf4"
-            value_model_kwargs["bnb_4bit_use_double_quant"] = True
-        elif value_load_8bit:
-            logger.info("Loading value model with 8-bit quantization...")
-            value_model_kwargs["load_in_8bit"] = True
-
-        # Load reward model (or use value model if not specified)
-        try:
-            reward_path = reward_model_name or value_model_name
-            self.reward_model = AutoModelForSequenceClassification.from_pretrained(
-                reward_path,
-                num_labels=1,
-                **reward_model_kwargs
-            )
-            logger.info(f"Reward model loaded from: {reward_path}")
-        except:
-            self.reward_model = AutoModelForSequenceClassification.from_pretrained(
-                policy_model_name,
-                num_labels=1,
-                **reward_model_kwargs
-            )
-
-        # Load value model
-        try:
-            
-            self.value_model = AutoModelForSequenceClassification.from_pretrained(
-                value_model_name,
-                num_labels=1,
-                **value_model_kwargs
-            )
-            logger.info(f"Value model loaded from: {value_model_name}")
-        except:
-            self.value_model = AutoModelForSequenceClassification.from_pretrained(
-                policy_model_name,
-                num_labels=1,
-                **value_model_kwargs
-            )
     def _train_custom_reward_model(self) -> str:
         """Train a custom reward model using the reward_training config."""
         from aligntune.rewards import RewardModelTrainer
@@ -439,6 +235,9 @@ class TRLPPOTrainer(TrainerBase):
         processing_batched = self._get_config_value(dataset_config, 'processing_batched', default=False)
         max_samples = self._get_config_value(dataset_config, 'max_samples', default=None)
         percent = self._get_config_value(dataset_config, 'percent', default=None)
+        val_split_ratio = self._get_config_value(dataset_config, 'val_split_ratio', default=None)
+        test_split_ratio = self._get_config_value(dataset_config, 'test_split_ratio', default=None)
+        split_seed = self._get_config_value(dataset_config, 'split_seed', default=42)
         
         logger.info(f"Loading dataset: {dataset_name} (split: {split}, config: {config_name})")
         
@@ -452,7 +251,10 @@ class TRLPPOTrainer(TrainerBase):
             enable_thinking=enable_thinking,
             column_mapping=column_mapping,
             processing_fn=processing_fn,
-            processing_batched=processing_batched
+            processing_batched=processing_batched,
+            val_split_ratio=val_split_ratio,
+            test_split_ratio=test_split_ratio,
+            seed=split_seed,
         )
         
         # Load dataset - DataManager handles everything including chat template
@@ -466,7 +268,7 @@ class TRLPPOTrainer(TrainerBase):
         self.train_dataset = dataset_dict["train"]
         self.eval_dataset = dataset_dict.get("validation", None)
         self.dataset_dict = dataset_dict
-        
+
         # Apply sampling if specified
         if max_samples:
             logger.info(f"Limiting train dataset to {max_samples} samples")
@@ -595,9 +397,15 @@ class TRLPPOTrainer(TrainerBase):
                 params = getattr(reward_config, 'params', {})
 
             try:
-                # Special case: custom reward function passed directly
-                if reward_type == 'custom' and 'reward_function' in params:
-                    reward_func = params['reward_function']
+                # Special case: custom reward function passed directly.
+                # Accepts both 'reward_function' (this backend's original
+                # convention) and 'function' (GRPO/RLOO/Unsloth-GRPO's
+                # convention) so the same reward spec is portable across
+                # backends instead of silently falling back to the default
+                # length reward below.
+                custom_fn = params.get('reward_function') or params.get('function')
+                if reward_type == 'custom' and callable(custom_fn):
+                    reward_func = custom_fn
                     logger.info(
                         f"Loaded custom reward function (weight: {weight})")
                 else:
@@ -722,7 +530,15 @@ class TRLPPOTrainer(TrainerBase):
         references = None
         for ref_key in ['answer', 'solution', 'reference', 'ground_truth', 'response', 'target']:
             if ref_key in kwargs:
-                references = kwargs[ref_key]
+                # Must pop, not just read: `references` is resolved into an
+                # explicit `reference=` kwarg below via
+                # resolve_reward_call_kwargs(..., reference=reference,
+                # **sample_kwargs). If the matched alias key is left in
+                # kwargs, it survives into sample_kwargs and collides with
+                # that explicit kwarg -- "got multiple values for keyword
+                # argument 'reference'" -- on any dataset that has a column
+                # literally named 'reference' alongside another alias.
+                references = kwargs.pop(ref_key)
                 break
 
         if references is None:
@@ -734,42 +550,44 @@ class TRLPPOTrainer(TrainerBase):
         if not isinstance(references, list):
             references = [references] * len(completions)
 
+        from aligntune.core.rl.reward_handler import resolve_reward_call_kwargs, slice_batch_kwargs_for_sample
+
         for idx, completion in enumerate(completions):
             total_reward = 0.0
 
             # Get per-sample data
             test_cases = test_lists[idx] if idx < len(test_lists) else None
             reference = references[idx] if idx < len(references) else None
+            # Slice every remaining batch-aligned kwarg (prompts,
+            # completion_ids, any other dataset column) down to this sample
+            # instead of dropping them on the floor.
+            sample_kwargs = slice_batch_kwargs_for_sample(kwargs, idx, len(completions))
 
             for rf in self.reward_functions:
                 try:
                     reward_func = rf["function"]
                     weight = rf["weight"]
 
-                    # Handle different reward function signatures
-                    if callable(reward_func):
-                        try:
-                            reward = reward_func(completion, test_cases=test_cases)
-                        except TypeError:
-                            try:
-                                reward = reward_func(completion)
-                            except TypeError:
-                                try:
-                                    reward = reward_func(completion, reference=reference)
-                                except TypeError:
-                                    try:
-                                        reward = reward_func(
-                                            completion, reference=reference, context={})
-                                    except BaseException:
-                                        logger.debug(
-                                            f"Could not call reward function {rf['name']}, returning 0")
-                                        reward = 0.0
-                    else:
+                    if not callable(reward_func):
                         logger.warning(f"Reward function {rf['name']} is not callable")
-                        reward = 0.0
+                        continue
+
+                    # Bind by signature instead of guessing through 4
+                    # calling patterns (text+test_cases, text-only,
+                    # text+reference, text+reference+context) and
+                    # swallowing whatever TypeError each mismatch raised -
+                    # that also silently ate genuine bugs raised *inside*
+                    # a correctly-called reward function as "wrong pattern,
+                    # try the next one", eventually returning 0.
+                    call_kwargs = resolve_reward_call_kwargs(
+                        reward_func, completion, test_cases=test_cases, reference=reference, **sample_kwargs
+                    )
+                    reward = reward_func(**call_kwargs)
+                    if reward is None:
+                        continue
 
                     # Apply weight
-                    weighted_reward = reward * weight
+                    weighted_reward = float(reward) * weight
                     total_reward += weighted_reward
 
                     logger.debug(
@@ -865,9 +683,15 @@ class TRLPPOTrainer(TrainerBase):
         missing_eos_penalty = self._get_config_value(
             self.config.train, 'missing_eos_penalty', default=1.0)
 
-        # Evaluation and checkpointing
+        # Evaluation and checkpointing.
+        # create_rl_trainer defaults max_steps=-1 ("use epochs"). Passing that
+        # into PPOConfig here yields global_step=0 and no updates.
         max_steps = self._get_config_value(
-            self.config.train, 'max_steps', default=1000)
+            self.config.train, 'max_steps', default=None)
+        if max_steps is None or max_steps <= 0:
+            n = len(self.train_dataset) if self.train_dataset is not None else 0
+            bsz = max(1, per_device_batch_size * gradient_accumulation_steps)
+            max_steps = max(1, int(num_epochs or 1) * max(1, (n + bsz - 1) // bsz))
         eval_strategy = self._get_config_value(
             self.config.train, 'eval_strategy', default='steps')
         eval_steps = self._get_config_value(
@@ -901,7 +725,7 @@ class TRLPPOTrainer(TrainerBase):
         Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         # Setup PPO trainer
-        from trl import PPOTrainer, PPOConfig
+        from trl.experimental.ppo import PPOTrainer, PPOConfig
 
         ppo_config = PPOConfig(
             output_dir=output_dir,
@@ -941,6 +765,14 @@ class TRLPPOTrainer(TrainerBase):
             logging_steps=logging_steps,
             report_to=report_to if report_to else [],
 
+            # NOTE: trl's experimental PPOConfig (installed version 1.7.1) has
+            # no use_vllm/vllm_gpu_memory_utilization/vllm_tensor_parallel_size
+            # fields (those exist on GRPOConfig/OnlineDPOConfig, not this
+            # experimental PPOConfig). Passing them raises "TypeError:
+            # PPOConfig.__init__() got an unexpected keyword argument
+            # 'use_vllm'". Dropped here; rollout_backend="vllm" is simply
+            # unsupported for this PPO backend right now.
+
             # Precision
             **precision_args,
 
@@ -957,10 +789,21 @@ class TRLPPOTrainer(TrainerBase):
 
         for key, value in missing.items():
             setattr(ppo_config, key, value)
+        if getattr(ppo_config, "max_steps", 0) is not None and ppo_config.max_steps <= 0:
+            ppo_config.max_steps = max_steps
 
         # Get PEFT config if using PEFT
+        # NOTE: setup_model() already calls get_peft_model() on self.policy_model
+        # when use_peft=True, turning it into a peft.PeftModel. If we also pass
+        # a peft_config here, trl's PPOTrainer.__init__ detects the model is
+        # already a PeftModel and raises "ValueError: You passed a `PeftModel`
+        # instance together with a `peft_config` to the trainer." So only
+        # build/pass peft_config when the policy model isn't already PEFT-wrapped.
         peft_config = None
         use_peft = self._get_config_value(self.config.model, 'use_peft', default=False)
+        from peft import PeftModel
+        if use_peft and isinstance(self.policy_model, PeftModel):
+            use_peft = False
         if use_peft:
             from peft import LoraConfig
             lora_r = self._get_config_value(
@@ -1001,6 +844,10 @@ class TRLPPOTrainer(TrainerBase):
             peft_config=peft_config,
         )
 
+        # PPOTrainer.model is PolicyAndValueWrapper — no push_to_hub.
+        # Hub/save use the policy (PeftModel / causal LM).
+        policy = getattr(getattr(self.trainer, "model", None), "policy", None)
+        self.model = policy if policy is not None else self.policy_model
         logger.info("PPO trainer setup completed successfully!")
 
     def train(self) -> Dict[str, Any]:
@@ -1070,6 +917,8 @@ class TRLPPOTrainer(TrainerBase):
         logger.info(f"Saving model to {output_dir}")
         self.trainer.save_model(output_dir)
         self.tokenizer.save_pretrained(output_dir)
+        policy = getattr(getattr(self.trainer, "model", None), "policy", None)
+        self.model = policy if policy is not None else self.policy_model
 
         # Compile results
         results = {

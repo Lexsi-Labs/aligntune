@@ -13,11 +13,9 @@ def maybe_enable_unsloth_inference(model: Any) -> Any:
     - If the model is incompatible, logs at debug level and returns model unchanged.
     - Uses an attribute flag to avoid double-wrapping.
     """
-    # Check if PURE_TRL_MODE or other disabling flags are set
+    # Check if PURE_TRL_MODE is set
     import os
-    if (os.environ.get('TRL_ONLY_MODE', '0') == '1' or
-        os.environ.get('DISABLE_UNSLOTH_FOR_TRL', '0') == '1' or
-        os.environ.get('PURE_TRL_MODE', '0') == '1'):
+    if os.environ.get('PURE_TRL_MODE', '0') == '1':
         return model
 
     # Avoid double-wrapping

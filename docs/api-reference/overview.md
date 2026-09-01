@@ -49,7 +49,6 @@ from aligntune.core.rl.trainer_base import TrainerBase
 - `evaluate()` - Evaluate model
 - `save_model()` - Save model
 - `load_checkpoint()` - Load checkpoint
-- `predict()` - Generate predictions
 - `push_to_hub()` - Push to HuggingFace Hub
 
 See [Trainers](trainers.md) for details.

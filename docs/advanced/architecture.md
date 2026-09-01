@@ -1,184 +1,155 @@
 # Architecture Overview
 
-Complete architecture documentation for AlignTune.
+AlignTune provides a unified configuration and factory layer over several
+training workflows. The public API keeps dataset preparation and trainer
+construction consistent while allowing each backend to use its native trainer.
 
-## System Architecture
-
-### High-Level Overview
-
-AlignTune uses a flexible backend architecture:
+## Public Entry Points
 
 ```mermaid
 flowchart TD
- Factory[Backend Factory] --> TRL[TRL Backend]
- Factory --> Unsloth[Unsloth Backend]
- TRL --> TRL_Algos[TRL Algorithms]
- Unsloth --> Unsloth_Algos[Unsloth Algorithms]
+    User[User / CLI / YAML / Python API] --> Factory[Public factory functions]
+    Factory --> SFT[create_sft_trainer]
+    Factory --> RL[create_rl_trainer]
+    Factory --> Distill[create_distill_trainer]
+    Factory --> ES[create_es_trainer]
+    Factory --> Tokenization[create_tokenization_trainer]
 ```
 
-**TRL Backend supports:**
-- SFT, DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO
+The first four factory paths are registered in `BackendFactory`. Tokenization
+is a separate specialized workflow with its own configuration and trainer; it
+does not use the TRL/Unsloth backend registration table.
 
-**Unsloth Backend supports:**
-- SFT, DPO, PPO, GRPO, DAPO, Dr. GRPO
-
-**Note:** GSPO is a TRL-only algorithm.
-
-### Complete System Architecture
+## Shared Data and Configuration Flow
 
 ```mermaid
 flowchart TD
- UI[User Interface] --> Factory[Backend Factory Layer]
- Factory --> TRL[TRL Backends]
- Factory --> Unsloth[Unsloth Backends]
- TRL --> Core[Core Training Components]
- Unsloth --> Core
- Core --> Rewards[Reward System]
- Core --> Eval[Evaluation System]
+    Input[Factory arguments or config file] --> Unified[Unified configuration]
+    Unified --> Manager[DataManager]
+    Manager --> Loader[Dataset loader and split resolver]
+    Loader --> Curator[CuratorKIT processing]
+    Curator --> Mapping[Column mapping and task schema]
+    Mapping --> Prompt[System prompt and context processing]
+    Prompt --> Dataset[Prepared DatasetDict]
+    Dataset --> Trainer[Selected trainer backend]
 ```
 
-## Core Components
+For SFT, RL, and distillation, `DataManager` is responsible for loading the
+dataset, applying CuratorKIT processing, normalizing columns, creating ratio-
+based splits, injecting system prompts, and preparing the task-specific
+schema. Distillation tasks additionally preserve `privileged_context` when it
+is required by SDFT.
 
-### 1. Backend Factory
+## Backend Routing
 
-The backend factory provides a unified interface for creating trainers:
+```mermaid
+flowchart TD
+    Dataset[Prepared configuration and DatasetDict] --> Router[BackendFactory router]
+    Router --> TRL[TRL backend]
+    Router --> Unsloth[Unsloth backend]
+    Router --> ESBackend[ES backend]
 
-- **Backend Selection**: Automatic or manual backend selection
-- **Configuration Management**: Unified configuration system
-- **Fallback Handling**: Automatic fallback to available backends
+    TRL --> SFT_T[SFT]
+    TRL --> RL_T[RL algorithms]
+    TRL --> Distill_T[Standard / SDFT]
 
-**Key Classes:**
-- `BackendFactory`: Main factory class
-- `BackendConfig`: Backend configuration
-- `create_sft_trainer()`: SFT trainer creation
-- `create_rl_trainer()`: RL trainer creation
+    Unsloth --> SFT_U[SFT]
+    Unsloth --> RL_U[Supported RL algorithms]
+    Unsloth --> Distill_U[Experimental distillation paths]
 
-### 2. Configuration System
-
-Unified configuration system with type safety:
-
-- **SFT Configuration**: `SFTConfig`, `ModelConfig`, `DatasetConfig`, `TrainingConfig`
-- **RL Configuration**: `UnifiedConfig`, algorithm-specific configs
-- **Validation**: Comprehensive validation with clear error messages
-
-### 3. Training Backends
-
-#### TRL Backends
-
-- Pure TRL implementations
-- Maximum compatibility
-- Battle-tested reliability
-- Supports all core algorithms (DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO)
-
-#### Unsloth Backends
-
-- faster training
-- Memory efficient
-- Optimized kernels
-- Supports DPO, PPO, GRPO, DAPO, Dr. GRPO (not GSPO)
-
-### 4. Reward System
-
-- **27+ Pre-built Functions**: Length, sentiment, safety, etc.
-- **Composite Rewards**: Combine multiple functions
-- **Custom Functions**: Extensible reward system
-- **Reward Model Training**: Train neural reward models
-
-### 5. Evaluation System
-
-- **Training Evaluation**: Automatic during training
-- **Standalone Evaluation**: Evaluate saved models
-- **Benchmark Integration**: lm-eval integration
-- **Custom Tasks**: Task-specific evaluation
-
-## Design Patterns
-
-### Factory Pattern
-
-Backend selection uses the factory pattern:
-
-```python
-# Factory creates appropriate trainer
-trainer = BackendFactory.create_trainer(config, backend_config)
+    ESBackend --> ES_T[Evolution Strategies]
 ```
 
-### Strategy Pattern
+See [Backends Overview](../backends/overview.md) for what each backend is
+best for, its `backend=` identifier, and usage examples, this page covers
+only how the factory routes between them.
 
-Different backends implement the same interface:
+## Tokenization and Long Context
+
+These are two related but separate capabilities.
+
+### Tokenization workflow
+
+`create_tokenization_trainer()` is a standalone vocabulary-adaptation workflow.
+It consumes a corpus and produces an adapted tokenizer; it does not run SFT or
+modify model weights itself.
+
+```mermaid
+flowchart LR
+    Corpus[Text corpus] --> TokenizerTrainer[create_tokenization_trainer]
+    TokenizerTrainer --> ExtendedTokenizer[Adapted tokenizer]
+    ExtendedTokenizer --> SFTInput[TRL SFT input]
+    BaseModel[Base model] --> SFTInput
+    SFTInput --> Embeddings[Embedding initialization / optional embedding training]
+    Embeddings --> SFT[TRL SFT backend]
+```
+
+Vocabulary extension and pruning happen in the tokenization workflow. FVT
+embedding initialization and optional embedding training happen later during
+model loading and the TRL SFT workflow.
+
+### Long-context workflow
+
+Long-context controls are currently exposed through the **TRL SFT backend**:
+
+```mermaid
+flowchart LR
+    SFTConfig[TRL SFT configuration] --> TRLSFT[TRL SFT backend]
+    TRLSFT --> RoPE[RoPE scaling]
+    TRLSFT --> S2[S2 / sliding-window attention]
+    TRLSFT --> Packing[Sequence packing]
+```
+
+These long-context controls are not general backend features. They should not
+be assumed to work for RL, distillation, ES, tokenization, or the Unsloth
+backend unless a specific algorithm page states otherwise.
+
+## Shared Services
+
+The following services support multiple workflows but are not themselves
+training backends:
+
+- **Model loading and PEFT**: model/tokenizer loading, quantization, LoRA, and
+  adapter setup.
+- **Rewards**: registry functions, custom reward functions, and the TRL reward
+  bridge used by RL.
+- **Evaluation**: generation metrics, task evaluators, and benchmark runners.
+- **Callbacks and logging**: progress, sample logging, checkpointing, and
+  reporting integrations.
+- **Export and model management**: saving adapters/models and publishing
+  artifacts.
+
+## Design Principles
+
+### Factory strategy
+
+The factory exposes a stable public API while selecting a backend-specific
+trainer implementation:
 
 ```python
-# Both backends implement TrainerBase
 class TRLSFTTrainer(SFTTrainerBase): ...
 class UnslothSFTTrainer(SFTTrainerBase): ...
 ```
 
-### Registry Pattern
+### Registry
 
-Reward functions use registry pattern:
+Backend registrations, reward functions, and other extensible components are
+resolved through registries instead of requiring callers to import individual
+implementations.
 
-```python
-# Register and retrieve functions
-RewardRegistry.register_reward("custom", CustomReward)
-func = RewardRegistry.get_reward_function("custom")
-```
+### Explicit capability boundaries
 
-## Data Flow
+A parameter is supported only where its backend and trainer explicitly wire it.
+TRL SFT tokenization/long-context options, Unsloth acceleration, and
+algorithm-specific experimental trainers should therefore be treated as
+separate capability surfaces.
 
-### Training Flow
+## Related Documentation
 
-```
-1. User creates trainer via factory
-2. Factory selects backend
-3. Backend loads model and dataset
-4. Training loop executes
-5. Metrics logged and checkpoints saved
-6. Model saved to disk
-```
-
-### Evaluation Flow
-
-```
-1. Load model and evaluation dataset
-2. Run inference on dataset
-3. Compute metrics
-4. Return results
-```
-
-## Extension Points
-
-### Custom Backends
-
-Create custom backends by implementing trainer base classes:
-
-```python
-class CustomSFTTrainer(SFTTrainerBase):
- def train(self): ...
- def evaluate(self): ...
-```
-
-### Custom Reward Functions
-
-Extend reward system with custom functions:
-
-```python
-class CustomReward(RewardFunction):
- def compute(self, text: str) -> float: ...
-```
-
-### Custom Evaluation Tasks
-
-Add custom evaluation tasks:
-
-```python
-task = EvalTask(
- name="custom",
- category=TaskCategory.CUSTOM,
- ...
-)
-```
-
-## Next Steps
-
-- [Custom Backends](custom-backends.md) - Creating custom backends
-- [Distributed Training](distributed.md) - Distributed training architecture
-- [Performance](performance.md) - Performance optimization
+- [Backends Overview](../backends/overview.md)
+- [Advanced Adapters](adapters.md)
+- [Long Context](long-context.md)
+- [Tokenization](tokenization.md)
+- [Distillation Internals](distillation.md)
+- [Production Compositions](composition.md)
+- [Model Merging](merging.md)

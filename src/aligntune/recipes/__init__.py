@@ -255,6 +255,7 @@ def _create_builtin_recipes():
 
     from .config import SFTModelConfig, SFTDatasetConfig, SFTTrainingConfig, SFTLoggingConfig
     from ..core.rl.config import ModelConfig as RLModelConfig, DatasetConfig as RLDatasetConfig, TrainingConfig as RLTrainingConfig, LoggingConfig as RLLoggingConfig
+    from ..core.sft.config import PeftConfigData
 
     # LLaMA 3 SFT Recipe
     llama3_sft_config = SFTConfig(
@@ -262,16 +263,18 @@ def _create_builtin_recipes():
             name_or_path="meta-llama/Meta-Llama-3-8B-Instruct",
             precision="bf16",
             use_unsloth=True,
-            peft_enabled=True,
-            lora_rank=16,
-            lora_alpha=32,
-            lora_dropout=0.05,
+            peft=PeftConfigData(
+                enabled=True,
+                rank=16,
+                alpha=32,
+                dropout=0.05
+            ),
             max_seq_length=4096
         ),
         dataset=SFTDatasetConfig(
             name="mlabonne/FineTome-100k",
             split="train",
-            task_type="instruction_following",
+            task_type="sft",
             chat_template="llama3"
         ),
         train=SFTTrainingConfig(
@@ -297,7 +300,7 @@ def _create_builtin_recipes():
         description="Fine-tune LLaMA 3 8B Instruct on instruction following with memory-efficient settings",
         model="meta-llama/Meta-Llama-3-8B-Instruct",
         dataset="mlabonne/FineTome-100k",
-        task="instruction_following",
+        task="sft",
         algorithm="sft",
         backend="unsloth",
         config=llama3_sft_config,
