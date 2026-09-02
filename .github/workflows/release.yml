@@ -2,11 +2,9 @@ name: Create release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Release version, e.g. 0.1.10 (leave blank to auto-bump the patch of the last release)"
-        required: false
-        default: ""
+  push:
+    branches:
+      - main
 
 jobs:
   github:
@@ -23,4 +21,3 @@ jobs:
         run: .github/scripts/release.py
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          RELEASE_VERSION: ${{ github.event.inputs.version }}
