@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block htmltitle %}
-<title>{% if page.title %}{{ page.title }} - {% endif %}{{ config.site_name }}</title>
+<title>{% if page and (page.is_homepage or (page.file and page.file.src_uri in ("index.md", "index.html"))) %}{{ config.site_name }}{% elif page and page.meta and page.meta.title %}{{ page.meta.title }} - {{ config.site_name }}{% elif page and page.title %}{{ page.title | striptags }} - {{ config.site_name }}{% else %}{{ config.site_name }}{% endif %}</title>
 {% endblock %}
 
 {% block extrahead %}
