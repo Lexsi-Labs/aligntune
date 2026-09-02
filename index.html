@@ -1,749 +1,1551 @@
-<!DOCTYPE html>
 
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<meta content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support" name="description"/>
-<meta content="AlignTune Contributors" name="author"/>
-<link href="https://aligntune.github.io/" rel="canonical"/>
-<link href="img/favicon.ico" rel="shortcut icon"/>
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+      
+      
+        <meta name="author" content="AlignTune Contributors">
+      
+      
+        <link rel="canonical" href="https://aligntune.lexsi.ai/">
+      
+      
+      
+        <link rel="next" href="getting-started/installation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
 <title>Home - AlignTune</title>
-<link href="https://use.fontawesome.com/releases/v5.12.0/css/all.css" rel="stylesheet"/>
-<link href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css" rel="stylesheet"/>
-<link href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css" rel="stylesheet"/>
-<link href="//rsms.me/inter/inter.css" rel="stylesheet" type="text/css"/>
-<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&amp;subset=latin-ext,latin" rel="stylesheet" type="text/css"/>
-<link href="css/bootstrap-custom.min.css" rel="stylesheet"/>
-<link href="css/base.min.css" rel="stylesheet"/>
-<link href="css/cinder.min.css" rel="stylesheet"/>
-<link href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css" rel="stylesheet"/>
-<link href="assets/_mkdocstrings.css" rel="stylesheet"/>
-<link href="assets/overrides.css" rel="stylesheet"/>
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-        <![endif]-->
+
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Schibsted+Grotesk:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Schibsted Grotesk";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="assets/extra.css">
+    
+      <link rel="stylesheet" href="assets/overrides.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
 <!-- Favicons -->
-<link href="assets/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
-<link href="assets/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
-<link href="assets/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
-<link href="assets/site.webmanifest" rel="manifest"/>
-<link href="assets/favicon.ico" rel="shortcut icon"/>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+<link rel="manifest" href="assets/site.webmanifest">
+<link rel="shortcut icon" href="assets/favicon.ico">
+
 <!-- Android Chrome Icons -->
-<link href="assets/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
-<link href="assets/android-chrome-512x512.png" rel="icon" sizes="512x512" type="image/png"/>
-</head>
-<body>
-<div class="navbar navbar-default navbar-fixed-top" role="navigation">
-<div class="container">
-<!-- Collapsed navigation -->
-<div class="navbar-header">
-<!-- Expander button -->
-<button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse" type="button">
-<span class="sr-only">Toggle navigation</span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-</button>
-<!-- Main title -->
-<a class="navbar-brand" href=".">AlignTune</a>
-</div>
-<!-- Expanded navigation -->
-<div class="navbar-collapse collapse">
-<!-- Main navigation -->
-<ul class="nav navbar-nav">
-<li class="dropdown active">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Getting Started <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li class="active">
-<a href=".">Home</a>
-</li>
-<li>
-<a href="getting-started/installation/">Installation</a>
-</li>
-<li>
-<a href="getting-started/quickstart/">Quick Start</a>
-</li>
-<li>
-<a href="getting-started/basic-concepts/">Basic Concepts</a>
-</li>
-<li>
-<a href="getting-started/configuration/">Configuration</a>
-</li>
-<li>
-<a href="getting-started/backend-selection/">Backend Selection</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">User Guide <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="user-guide/overview/">Overview</a>
-</li>
-<li>
-<a href="user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
-</li>
-<li>
-<a href="user-guide/rl/">Reinforcement Learning (RL)</a>
-</li>
-<li>
-<a href="user-guide/reward-functions/">Reward Functions</a>
-</li>
-<li>
-<a href="user-guide/reward-model-training/">Reward Model Training</a>
-</li>
-<li>
-<a href="user-guide/evaluation/">Evaluation</a>
-</li>
-<li>
-<a href="user-guide/model-management/">Model Management</a>
-</li>
-<li>
-<a href="user-guide/sample-logging/">Sample Logging</a>
-</li>
-<li>
-<a href="user-guide/troubleshooting/">Troubleshooting</a>
-</li>
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">Algorithms</a>
-<ul class="dropdown-menu">
-<li>
-<a href="algorithms/overview/">Overview</a>
-</li>
-<li>
-<a href="algorithms/dpo/">DPO</a>
-</li>
-<li>
-<a href="algorithms/ppo/">PPO</a>
-</li>
-<li>
-<a href="algorithms/grpo/">GRPO</a>
-</li>
-<li>
-<a href="algorithms/gspo/">GSPO</a>
-</li>
-<li>
-<a href="algorithms/dapo/">DAPO</a>
-</li>
-<li>
-<a href="algorithms/dr-grpo/">Dr. GRPO</a>
-</li>
-</ul>
-</li>
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">Backends</a>
-<ul class="dropdown-menu">
-<li>
-<a href="backends/overview/">Overview</a>
-</li>
-<li>
-<a href="backends/trl/">TRL Backend</a>
-</li>
-<li>
-<a href="backends/unsloth/">Unsloth Backend</a>
-</li>
-<li>
-<a href="backends/comparison/">Comparison</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Advanced Topics <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="advanced/architecture/">Architecture</a>
-</li>
-<li>
-<a href="advanced/custom-backends/">Custom Backends</a>
-</li>
-<li>
-<a href="advanced/distributed/">Distributed Training</a>
-</li>
-<li>
-<a href="advanced/performance/">Performance Optimization</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">API Reference <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="api-reference/overview/">Overview</a>
-</li>
-<li>
-<a href="api-reference/core/">Core API</a>
-</li>
-<li>
-<a href="api-reference/backend-factory/">Backend Factory</a>
-</li>
-<li>
-<a href="api-reference/configuration/">Configuration Classes</a>
-</li>
-<li>
-<a href="api-reference/trainers/">Trainers</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Examples <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="examples/overview/">Overview</a>
-</li>
-<li>
-<a href="examples/sft/">SFT Examples</a>
-</li>
-<li>
-<a href="examples/rl/">RL Examples</a>
-</li>
-<li>
-<a href="examples/advanced/">Advanced Examples</a>
-</li>
-<li>
-<a href="notebooks/">Notebooks</a>
-</li>
-<li>
-<a href="notebooks/lexsi-sdk/">Lexsi SDK Notebooks</a>
-</li>
-</ul>
-</li>
-<li class="dropdown">
-<a class="dropdown-toggle" data-toggle="dropdown" href="#">Project <b class="caret"></b></a>
-<ul class="dropdown-menu">
-<li>
-<a href="cli-reference/">CLI Reference</a>
-</li>
-<li>
-<a href="cli/commands/">CLI Commands</a>
-</li>
-<li>
-<a href="cli/configuration/">CLI Configuration Files</a>
-</li>
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">Compatibility</a>
-<ul class="dropdown-menu">
-<li>
-<a href="unsloth_compatibility/">Unsloth Compatibility</a>
-</li>
-<li>
-<a href="compatibility/backend-matrix/">Backend Support Matrix</a>
-</li>
-</ul>
-</li>
-<li class="dropdown-submenu">
-<a href="" tabindex="-1">Contributing</a>
-<ul class="dropdown-menu">
-<li>
-<a href="contributing/guide/">Contributing Guide</a>
-</li>
-<li>
-<a href="contributing/code-style/">Code Style</a>
-</li>
-<li>
-<a href="contributing/testing/">Testing</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-<a data-target="#mkdocs_search_modal" data-toggle="modal" href="#">
-<i class="fas fa-search"></i> Search
- </a>
-</li>
-<li>
-<a href="https://github.com/Lexsi-Labs/aligntune">Lexsi-Labs/aligntune</a>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="container">
-<div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-<ul class="nav bs-sidenav">
-<li class="first-level active"><a href="#core-features">Core Features</a></li>
-<li class="first-level"><a href="#quick-start">Quick Start</a></li>
-<li class="first-level"><a href="#supported-algorithms">Supported Algorithms</a></li>
-<li class="first-level"><a href="#key-capabilities">Key Capabilities</a></li>
-<li class="first-level"><a href="#demo-notebooks">Demo Notebooks</a></li>
-<li class="second-level"><a href="#supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)</a></li>
-<li class="second-level"><a href="#reinforcement-learning-rl">Reinforcement Learning (RL)</a></li>
-<li class="second-level"><a href="#lexsi-sdk-notebooks">Lexsi SDK Notebooks</a></li>
-<li class="first-level"><a href="#explore-the-documentation">Explore the Documentation</a></li>
-<li class="first-level"><a href="#architecture">Architecture</a></li>
-<li class="first-level"><a href="#why-aligntune">Why AlignTune?</a></li>
-<li class="first-level"><a href="#contributing">Contributing</a></li>
-<li class="first-level"><a href="#license">License</a></li>
-<li class="first-level"><a href="#citation">Citation</a></li>
-<li class="first-level"><a href="#acknowledgments">Acknowledgments</a></li>
-<li class="first-level"><a href="#support">Support</a></li>
-</ul>
-</div></div>
-<div class="col-md-9" role="main">
-<p align="center">
-<img alt="AlignTune Banner" src="assets/aligntune-banner.png" width="1000px"/>
-</p>
-<div style="text-align: center;">
-<a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg"/></a>
-<a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg"/></a>
-<a href="https://badge.fury.io/py/aligntune"><img src="https://badge.fury.io/py/aligntune.svg"/></a>
-</div>
-<hr/>
-<p><strong>AlignTune</strong> is a production-ready fine-tuning library designed to simplify training and fine-tuning of Large Language Models (LLMs) with both Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL) methods. 
-It provides a high-level, unified API that abstracts away the complexities of backend selection, algorithm configuration, and training loops, letting you focus on delivering results.
-Whether you are a practitioner aiming for production-grade pipelines or a researcher exploring advanced RLHF algorithms, AlignTune streamlines your workflow for LLM fine-tuning.</p>
-<hr/>
-<h2 id="core-features">Core Features<a class="headerlink" href="#core-features" title="Permanent link">¶</a></h2>
-<p><strong>Multi-Backend Architecture</strong>: Choose between TRL (reliable, battle-tested) and Unsloth (faster) backends with intelligent auto-selection.</p>
-<p><strong>Complete RLHF Coverage</strong>: RL algorithms including DPO, PPO, GRPO, GSPO, DAPO, and Dr. GRPO.</p>
-<p><strong>Production-Ready</strong>: No mock code, comprehensive error handling, extensive testing, and robust validation.</p>
-<hr/>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">¶</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+<link rel="icon" type="image/png" sizes="192x192" href="assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/android-chrome-512x512.png">
 
-<span class="c1"># Create and train SFT model</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
- <span class="n">model_name</span><span class="o">=</span><span class="s2">"microsoft/DialoGPT-small"</span><span class="p">,</span>
- <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"tatsu-lab/alpaca"</span><span class="p">,</span>
- <span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span><span class="p">,</span>
- <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
- <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
- <span class="n">max_steps</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
- <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span>
-<span class="p">)</span>
 
-<span class="c1"># Train the model</span>
-<span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
-<span class="c1"># Evaluate</span>
-<span class="n">metrics</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
-</code></pre></div>
-<p><a href="getting-started/installation/">Get Started →</a></p>
-<hr/>
-<h2 id="supported-algorithms">Supported Algorithms<a class="headerlink" href="#supported-algorithms" title="Permanent link">¶</a></h2>
-<table>
-<thead>
-<tr>
-<th>Algorithm</th>
-<th>TRL Backend</th>
-<th>Unsloth Backend</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>SFT</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Supervised Fine-Tuning</td>
-</tr>
-<tr>
-<td><strong>DPO</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Direct Preference Optimization</td>
-</tr>
-<tr>
-<td><strong>PPO</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Proximal Policy Optimization</td>
-</tr>
-<tr>
-<td><strong>GRPO</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Group Relative Policy Optimization</td>
-</tr>
-<tr>
-<td><strong>GSPO</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Group Sequential Policy Optimization</td>
-</tr>
-<tr>
-<td><strong>DAPO</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Decouple Clip and Dynamic sAmpling Policy Optimization</td>
-</tr>
-<tr>
-<td><strong>Dr. GRPO</strong></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>GRPO Done Right (unbiased variant)</td>
-</tr>
-</tbody>
-</table>
-<hr/>
-<h2 id="key-capabilities">Key Capabilities<a class="headerlink" href="#key-capabilities" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong>Multiple Training Paradigms</strong>: Supports SFT, DPO, PPO, GRPO, and advanced RL algorithms</li>
-<li><strong>Backend Flexibility</strong>: TRL and Unsloth backends with automatic fallback</li>
-<li><strong>Reward Model Training</strong>: Train custom reward models from rule-based functions</li>
-<li><strong>Comprehensive Evaluation</strong>: Multi-level evaluation with lm-eval integration</li>
-<li><strong>Production Ready</strong>: Model serialization, reproducible training, and deployment-ready pipelines</li>
-<li><strong>Extensible Architecture</strong>: Modular design for easy integration of custom algorithms and backends</li>
-</ul>
-<hr/>
-<h2 id="demo-notebooks">Demo Notebooks<a class="headerlink" href="#demo-notebooks" title="Permanent link">¶</a></h2>
-<p>Interactive Colab notebooks demonstrating various AlignTune workflows:</p>
-<h3 id="supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)<a class="headerlink" href="#supervised-fine-tuning-sft" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Backend</th>
-<th>Model</th>
-<th>Dataset</th>
-<th>Link</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>TRL</td>
-<td><strong>Qwen/Qwen3-4B-Instruct-2507</strong></td>
-<td>sohamb37lexsi/bitext-wealth-management-llm-chatbot-splits</td>
-<td><a href="https://colab.research.google.com/drive/1okAnfMlkch-G5Dy2dmj_dfR07rtxmYoq?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>Qwen3-4B-Instruct</strong></td>
-<td>sohamb37lexsi/bitext-retail-banking-llm-chatbot-splits</td>
-<td><a href="https://colab.research.google.com/drive/1JnFvEWZ6PDqrDAyWznCdOA9oNn8aqN2v?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>Qwen/Qwen2.5-0.5B-Instruct</strong></td>
-<td>bebechien/MobileGameNPC</td>
-<td><a href="https://colab.research.google.com/drive/15R3JOrzAUuMagCamDHsqe0wNyb44rw2j?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>google/txgemma-2b-predict</strong></td>
-<td>trialbench_adverse-event-rate-prediction</td>
-<td><a href="https://colab.research.google.com/drive/1r91SS7Lb5LjkjzWXp7uzkpR3vlWZ6gwD?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>Qwen/Qwen2.5-0.5B-Instruct</strong></td>
-<td>bebechien/MobileGameNP</td>
-<td><a href="https://colab.research.google.com/drive/11DrRbG30MUCegZTDXwR9nxEdvKaLfWCb?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-</tbody>
-</table>
-<h3 id="reinforcement-learning-rl">Reinforcement Learning (RL)<a class="headerlink" href="#reinforcement-learning-rl" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Backend</th>
-<th>Algorithm</th>
-<th>Model</th>
-<th>Dataset</th>
-<th>Link</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Unsloth</td>
-<td><strong>DPO</strong></td>
-<td>microsoft/phi-2</td>
-<td>argilla/distilabel-intel-orca-dpo-pairs</td>
-<td><a href="https://colab.research.google.com/drive/1aKdQzT7KGs0PEr7pO9rOXFkwQK6LzyRZ#scrollTo=dOnIJIAMxP9J"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>DPO</strong></td>
-<td>google/gemma-2-2b-it</td>
-<td>Anthropic/hh-rlhf</td>
-<td><a href="https://colab.research.google.com/drive/1WQhek61Z0v1zHFWT4mQwVX7n10ln-j3d?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>DPO</strong></td>
-<td>sohamb37lexsi/wealth_management_Qwen3-4B-Instruct-2507</td>
-<td>sohamb37lexsi/bitext_wealth_management_preference_data</td>
-<td><a href="https://colab.research.google.com/drive/1LR3KWcjQAFjSHf0MR9271ShchjPUVSpS?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>PPO</strong></td>
-<td>Qwen/Qwen2.5-0.5B-Instruct</td>
-<td>HuggingFaceH4/ultrachat_200k</td>
-<td><a href="https://colab.research.google.com/drive/1G4fdtO4DhBNwjOYhuaGmvIrBU_lc159H?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>PPO</strong></td>
-<td>EleutherAI/pythia-1.4b</td>
-<td>CarperAI/openai_summarize_tldr</td>
-<td><a href="https://colab.research.google.com/drive/1wlbSvQAJv8ZFM2qGD4XlUOKPzZHXstQo?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>GRPO</strong> (Coding)</td>
-<td>Qwen/Qwen3-4B</td>
-<td>google-research-datasets/mbpp</td>
-<td><a href="https://colab.research.google.com/drive/13HYZ-EkLC3-6wxJG_1NyWXPEuN9bIeM4?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>GRPO</strong> (Math)</td>
-<td>meta-llama/Llama-3.2-3B-Instruct</td>
-<td>openai/gsm8k</td>
-<td><a href="https://colab.research.google.com/drive/11tj2odJa7v55VvQkpOlm7_WBclqFdaVi?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>GRPO</strong></td>
-<td>meta-llama/Llama-3.2-3B-Instruct</td>
-<td>openai/gsm8k</td>
-<td><a href="https://colab.research.google.com/drive/14b2dt0_iSVL8Z_8mlOx--f-d_rDCqVOP?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>DRGRPO</strong></td>
-<td>Qwen/Qwen2.5-3B-Instruct</td>
-<td>yahma/alpaca-cleaned</td>
-<td><a href="https://colab.research.google.com/drive/1IzDtjONyL6CZ038faTTp8AvLfhzkqSpb?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>DRGRPO</strong></td>
-<td>Qwen/Qwen2-0.5B-Instruct</td>
-<td>AI-MO/NuminaMath-TIR</td>
-<td><a href="https://colab.research.google.com/drive/1KfrMzuGRPrZwyRuNTGep1ZL6C6h2aVjk?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>GSPO</strong></td>
-<td>Qwen/Qwen3-1.7B</td>
-<td>CyberNative/Code_Vulnerability_Security_DPO</td>
-<td><a href="https://colab.research.google.com/drive/120FjMEAZRXUoOMRsWHCn5tmpGfLTAY4g?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>GSPO</strong></td>
-<td>meta-llama/Llama-3.2-3B-Instruct</td>
-<td>HuggingFaceH4/ultrachat_200k</td>
-<td><a href="https://colab.research.google.com/drive/1vDP7ukBHWwSiD7KVSgSekCvk-x_MkWdC?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Unsloth</td>
-<td><strong>DAPO</strong></td>
-<td>microsoft/Phi-3.5-mini-instruct</td>
-<td>HuggingFaceH4/ultrachat_200k</td>
-<td><a href="https://colab.research.google.com/drive/1gAa6EPc5345XRfog1nzQIFTmp_OJqNvk?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>TRL</td>
-<td><strong>DAPO</strong></td>
-<td>meta-llama/Llama-3.2-3B-Instruct</td>
-<td>google-research-datasets/mbpp</td>
-<td><a href="https://colab.research.google.com/drive/1aF3LxEMmLl0fCyA5yVBAkU_Rgsy3dsh5?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-</tbody>
-</table>
-<h3 id="lexsi-sdk-notebooks">Lexsi SDK Notebooks<a class="headerlink" href="#lexsi-sdk-notebooks" title="Permanent link">¶</a></h3>
-<p>End-to-end workflows built with the Lexsi SDK. See <a href="notebooks/lexsi-sdk/">all Lexsi SDK notebooks →</a></p>
-<table>
-<thead>
-<tr>
-<th>Notebook</th>
-<th>Link</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Create Workspace &amp; Project</td>
-<td><a href="https://colab.research.google.com/drive/1_o3ccmDYfjM3piYpRWDdvLD5P4FCaAbJ#scrollTo=pxYu182ch5Gf"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Multilingual Chatbot</td>
-<td><a href="https://colab.research.google.com/drive/1HjLZQ-OFZaFYpMlvYFNH5FvmllYjz4zc#scrollTo=44ab6f3b"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Harper-Valley Speech Corpus</td>
-<td><a href="https://colab.research.google.com/drive/1Rb_hGjfvW1Yw5EaL-6Adr8oJeKxp8ckK"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Retail Banking</td>
-<td><a href="https://colab.research.google.com/drive/1Nv6-fFzr4Kg8UWN7JPx2HNlF9FUHRRAz"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-<tr>
-<td>Wealth Management</td>
-<td><a href="https://colab.research.google.com/drive/1samF2n-64eDKNIm-RGF9t8pbPrJczp7D?usp=sharing"><img alt="Open In Colab" src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&amp;logo=googlecolab&amp;logoColor=white"/></a></td>
-</tr>
-</tbody>
-</table>
-<hr/>
-<h2 id="explore-the-documentation">Explore the Documentation<a class="headerlink" href="#explore-the-documentation" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong><a href="getting-started/installation/">Getting Started</a></strong>: Installation, setup, and basic usage</li>
-<li><strong><a href="user-guide/overview/">User Guide</a></strong>: In-depth tutorials for SFT and RL training</li>
-<li><strong><a href="api-reference/overview/">API Reference</a></strong>: Complete Python API and class/method details</li>
-<li><strong><a href="examples/overview/">Examples</a></strong>: End-to-end code examples</li>
-<li><strong><a href="advanced/architecture/">Advanced Topics</a></strong>: Architecture, custom backends, and performance optimization</li>
-<li><strong><a href="notebooks/">Notebooks</a></strong>: Interactive Colab notebooks and local Jupyter notebooks</li>
-</ul>
-<hr/>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">¶</a></h2>
-<p>AlignTune uses a flexible backend architecture:</p>
-<div class="mermaid">flowchart TD
- Factory[Backend Factory] --&gt; TRL[TRL Backend]
- Factory --&gt; Unsloth[Unsloth Backend]
- TRL --&gt; TRL_Algos[TRL Algorithms]
- Unsloth --&gt; Unsloth_Algos[Unsloth Algorithms]
-</div>
-<p><strong>TRL Backend:</strong> SFT, DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO</p>
-<p><strong>Unsloth Backend:</strong> SFT, DPO, PPO, GRPO, DAPO, Dr. GRPO</p>
-<p>See <a href="advanced/architecture/">Architecture</a> for details.</p>
-<hr/>
-<h2 id="why-aligntune">Why AlignTune?<a class="headerlink" href="#why-aligntune" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong>No Boilerplate</strong>: Avoids repetitive code for model-specific data loading, training, and inference</li>
-<li><strong>Consistent Results</strong>: Automates best practices for RLHF research and model selection</li>
-<li><strong>Fast Iteration</strong>: Easily compare different algorithms and backends with the same consistent API</li>
-<li><strong>Production Ready</strong>: Model and config serialization for robust deployment and reproducibility</li>
-<li><strong>Community-Driven</strong>: Extensible design and open contribution policy</li>
-</ul>
-<hr/>
-<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">¶</a></h2>
-<p>We welcome contributions! See <a href="contributing/guide/">Contributing Guide</a> for details.</p>
-<hr/>
-<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">¶</a></h2>
-<p>This project is released under the MIT License. Please cite appropriately if used in academic or production projects.- see the <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE">LICENSE</a> file for details.</p>
-<hr/>
-<h2 id="citation">Citation<a class="headerlink" href="#citation" title="Permanent link">¶</a></h2>
-<p>If you use AlignTune in your research, please cite:</p>
-<p><strong>BibTeX:</strong>
-<div class="highlight"><pre><span></span><code><span class="nc">@software</span><span class="p">{</span><span class="nl">alignTune2025</span><span class="p">,</span>
-<span class="w">  </span><span class="na">title</span><span class="w">        </span><span class="p">=</span><span class="w"> </span><span class="s">{{AlignTune}: Modular Toolkit for Post-Training Alignment of Large Language Models}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">author</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="s">{Lyngkhoi, R E Zera Marveen and Chawla, Chirag and Seth, Pratinav and Avaiya, Utsav and Bhattacharjee, Soham and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">year</span><span class="w">         </span><span class="p">=</span><span class="w"> </span><span class="s">{2025}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">note</span><span class="w">         </span><span class="p">=</span><span class="w"> </span><span class="s">{Equal contribution: R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">organization</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Lexsi Labs}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">url</span><span class="w">          </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/Lexsi-Labs/aligntune}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">version</span><span class="w">      </span><span class="p">=</span><span class="w"> </span><span class="s">{0.0.0}</span>
-<span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Plain Text:</strong>
-<div class="highlight"><pre><span></span><code>Lyngkhoi, R. E. Z. M., Chawla, C., Seth, P., Avaiya, U., Bhattacharjee, S., Khandoga, M.,
-Yuan, R., &amp; Sankarapu, V. K. (2025). AlignTune: Modular Toolkit for Post-Training Alignment
-of Large Language Models. Lexsi Labs. https://github.com/Lexsi-Labs/aligntune
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sixty-seconds" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
 
-*Equal contribution: R E Zera Marveen Lyngkhoi, Chirag Chawla, Pratinav Seth
-</code></pre></div></p>
-<hr/>
-<h2 id="acknowledgments">Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permanent link">¶</a></h2>
-<p>AlignTune is built upon the excellent work of the following projects:</p>
-<ul>
-<li><strong><a href="https://github.com/huggingface/transformers">HuggingFace Transformers</a></strong> - Model architectures and tokenizers</li>
-<li><strong><a href="https://github.com/huggingface/trl">TRL</a></strong> - Transformer Reinforcement Learning library</li>
-<li><strong><a href="https://github.com/unslothai/unsloth">Unsloth</a></strong> - Fast and memory-efficient training</li>
-<li><strong><a href="https://github.com/huggingface/datasets">HuggingFace Datasets</a></strong> - Dataset loading and processing</li>
-</ul>
-<hr/>
-<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">¶</a></h2>
-<ul>
-<li><strong>Documentation</strong>: <a href="https://docs.aligntune.io">docs.aligntune.io</a></li>
-<li><strong>GitHub Issues</strong>: <a href="https://github.com/Lexsi-Labs/aligntune/issues">github.com/Lexsi-Labs/aligntune/issues</a></li>
-<li><strong>Discussions</strong>: <a href="https://github.com/Lexsi-Labs/aligntune/discussions">github.com/Lexsi-Labs/aligntune/discussions</a></li>
-</ul>
-<hr/>
-<p><strong>Get started with AlignTune and accelerate your LLM fine-tuning workflows today!</strong></p></div>
-</div>
-<footer class="col-md-12 text-center">
-<hr/>
-<p>
-<small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-</p>
-</footer>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="js/bootstrap-3.0.3.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
-<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script>var base_url = "."</script>
-<script src="js/base.js"></script>
-<script src="search/main.js"></script>
-<div aria-hidden="true" aria-labelledby="searchModalLabel" class="modal" id="mkdocs_search_modal" role="dialog" tabindex="-1">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
-<div class="modal-header">
-<button class="close" data-dismiss="modal" type="button">
-<span aria-hidden="true">×</span>
-<span class="sr-only">Close</span>
-</button>
-<h4 class="modal-title" id="searchModalLabel">Search</h4>
-</div>
-<div class="modal-body">
-<p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-<form>
-<div class="form-group">
-<input class="form-control" id="mkdocs-search-query" placeholder="Search..." title="Type search term here" type="text"/>
-</div>
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="AlignTune" class="md-header__button md-logo" aria-label="AlignTune" data-md-component="logo">
+      
+  <img src="assets/aligntune-logo-dark.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AlignTune
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AlignTune
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
 </form>
-<div id="mkdocs-search-results"></div>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="modal-footer">
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lexsi-Labs/aligntune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/aligntune
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="user-guide/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="algorithms/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Algorithms
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="PARAMETERS/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="advanced/architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Advanced Topics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="examples/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="cli-reference/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="AlignTune" class="md-nav__button md-logo" aria-label="AlignTune" data-md-component="logo">
+      
+  <img src="assets/aligntune-logo-dark.png" alt="logo">
+
+    </a>
+    AlignTune
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lexsi-Labs/aligntune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/aligntune
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="." class="md-nav__link md-nav__link--active">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link md-nav__link--active" for="__nav_1" id="__nav_1_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting-started/basic-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting-started/backend-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="user-guide/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="algorithms/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Algorithms
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="PARAMETERS/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="advanced/architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Topics
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="examples/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="cli-reference/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sixty-seconds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sixty seconds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notebook-recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notebook recipes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cite
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+
+
+
+  
+    <a href="https://github.com/Lexsi-Labs/aligntune/edit/main/docs/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>Home</h1>
+
+<div class="at-hero">
+<p><img class="at-hero-mark" src="assets/aligntune-banner.png" alt="AlignTune. Modular Toolkit for Post-Training Alignment of Large Language Models"></p>
+<p class="at-tagline">
+AlignTune is a modular post-training ecosystem for LLMs: switch between SFT,
+DPO, PPO, and 13+ RL algorithms with a single flag, route training through
+TRL, Unsloth, or gradient-free backends, and keep one config format from
+research to production.
+</p>
+<p><a class="md-button md-button--primary" href="getting-started/installation/">Get started</a>
+<a class="md-button" href="https://github.com/Lexsi-Labs/aligntune">View on GitHub</a></p>
+<p class="at-chips">
+<span>Python 3.11+</span>
+<span>TRL · Unsloth · ES backends</span>
+<span>13+ RL algorithms</span>
+<span>27+ reward functions</span>
+<span>LSAL-1.1 (source available)</span>
+</p>
+</div>
+<pre class="mermaid"><code>flowchart TD
+    User[YAML / Python API / CLI] --&gt; Factory[Backend Factory]
+    Factory --&gt; TRL[TRL: Generic/Reliable]
+    Factory --&gt; Unsloth[Unsloth: Extreme Speed]
+    Factory --&gt; ES[ES: Gradient-Free]
+
+    TRL &amp; Unsloth &amp; ES --&gt; Core[AlignTune Core]
+
+    Core --&gt; Adapters[MoA / Text2LoRA]
+    Core --&gt; Subsystems[Reasoning Forge / Long-Context]
+    Core --&gt; Pipelines[Multi-stage Compositions]</code></pre>
+<div class="grid cards">
+<ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 10v3h6v5H8v3l-6-5.5zm14-1.5L16 3v3h-6v5h6v3z"/></svg></span> <strong>Unified training API</strong></p>
+<hr />
+<p>Switch between SFT, DPO, Online-DPO, PPO, GRPO, ORPO, and more with a
+single <code>type</code> flag, no backend-specific rewrites.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 16a3 3 0 0 1-3-3c0-1.12.61-2.1 1.5-2.61l9.71-5.62-5.53 9.58c-.5.98-1.51 1.65-2.68 1.65m0-13c1.81 0 3.5.5 4.97 1.32l-2.1 1.21C14 5.19 13 5 12 5a8 8 0 0 0-8 8c0 2.21.89 4.21 2.34 5.65h.01c.39.39.39 1.02 0 1.41s-1.03.39-1.42.01A9.97 9.97 0 0 1 2 13 10 10 0 0 1 12 3m10 10c0 2.76-1.12 5.26-2.93 7.07-.39.38-1.02.38-1.41-.01a.996.996 0 0 1 0-1.41A7.95 7.95 0 0 0 20 13c0-1-.19-2-.54-2.9L20.67 8C21.5 9.5 22 11.18 22 13"/></svg></span> <strong>Extreme optimization</strong></p>
+<hr />
+<p>Native Unsloth kernels give up to 2x faster training and 60% lower memory
+use, without changing your trainer config.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1h-2V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v1H3v14h18V6m-2 12H5V8h14Z"/></svg></span> <strong>Utility ecosystem</strong></p>
+<hr />
+<p>Mixture-of-Adapters (MoA) and Text2LoRA/Doc2LoRA ship as composable
+building blocks, not separate forks.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3c-1.27 0-2.4.8-2.82 2H3v2h1.95L2 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3L6.05 7h3.12c.33.85.98 1.5 1.83 1.83V20H2v2h20v-2h-9V8.82c.85-.32 1.5-.97 1.82-1.82h3.13L15 14c-.47 2 1 3 3.5 3s4.06-1 3.5-3l-2.95-7H21V5h-6.17C14.4 3.8 13.27 3 12 3m0 2a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m-6.5 5.25L7 14H4zm13 0L20 14h-3z"/></svg></span> <strong>13+ RL algorithms</strong></p>
+<hr />
+<p>DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, SPIN, RAFT, and more,
+each with a documented config surface.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m23.5 17-5 5-3.5-3.5 1.5-1.5 2 2 3.5-3.5zM6 2a2 2 0 0 0-2 2v16c0 1.11.89 2 2 2h7.81c-.36-.62-.61-1.3-.73-2H6V4h7v5h5v4.08c.33-.05.67-.08 1-.08.34 0 .67.03 1 .08V8l-6-6M8 12v2h8v-2m-8 4v2h5v-2Z"/></svg></span> <strong>27+ reward functions</strong></p>
+<hr />
+<p>Pre-built reward functions and a production-ready evaluation system for
+RL and preference-based fine-tuning.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3C8.59 3 5.69 4.07 4.54 5.57l5.25 5.25c.71.11 1.43.18 2.21.18 4.42 0 8-1.79 8-4s-3.58-4-8-4M3.92 7.08 2.5 8.5 5 11H0v2h5l-2.5 2.5 1.42 1.42L8.84 12M20 9c0 2.21-3.58 4-8 4-.66 0-1.3-.05-1.91-.13l-2.47 2.47c1.26.41 2.76.66 4.38.66 4.42 0 8-1.79 8-4m0 2c0 2.21-3.58 4-8 4-2.28 0-4.33-.5-5.79-1.25l-1.68 1.68C5.68 19.93 8.59 21 12 21c4.42 0 8-1.79 8-4"/></svg></span> <strong>Any curated dataset</strong></p>
+<hr />
+<p>Alpaca, ShareGPT, DPO, and GRPO-formatted data load directly, including
+exports from <a href="https://github.com/Lexsi-Labs/CuratorKIT">CuratorKIT</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9zm6.82 6L12 12.72 5.18 9 12 5.28zM17 16l-5 2.72L7 16v-3.73L12 15l5-2.73z"/></svg></span> <strong>Knowledge distillation</strong></p>
+<hr />
+<p>Standard and SDFT (self-distillation) trainers compress a teacher model
+into a smaller student. See <a href="advanced/distillation/">Distillation</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m8 17 4-4h3.2c.4 1.2 1.5 2 2.8 2 1.7 0 3-1.3 3-3s-1.3-3-3-3c-1.3 0-2.4.8-2.8 2H12L8 7V3H3v5h3l4.2 4L6 16H3v5h5z"/></svg></span> <strong>Model merging</strong></p>
+<hr />
+<p>Combine trained checkpoints or LoRA adapters with linear/task-arithmetic
+merging (via <code>mergekit</code>) or a dependency-free LoRA merge. See
+<a href="advanced/merging/">Model Merging</a>.</p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 0-2 2v8h2v-4h2v4h2V9a2 2 0 0 0-2-2zm0 2h2v2H3m12-.5V9a2 2 0 0 0-2-2H9v10h4a2 2 0 0 0 2-2v-1.5a1.54 1.54 0 0 0-1.5-1.5 1.54 1.54 0 0 0 1.5-1.5M13 15h-2v-2h2zm0-4h-2V9h2m6-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-1h-2v1h-2V9h2v1h2V9a2 2 0 0 0-2-2Z"/></svg></span> <strong>Tokenizer adaptation</strong></p>
+<hr />
+<p>Extend a base model's vocabulary for a new language or domain, no
+retraining from scratch. See <a href="advanced/tokenization/">Tokenization</a>.</p>
+</li>
+</ul>
+</div>
+<h2 id="sixty-seconds">Sixty seconds<a class="headerlink" href="#sixty-seconds" title="Permanent link">&para;</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python</label><label for="__tabbed_1_2">CLI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-3.2-3B-Instruct&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>       <span class="c1"># or &quot;unsloth&quot; for faster training</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>    <span class="c1"># limit for a quick first run</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</code></pre></div>
+<p>The <a href="getting-started/quickstart/">quickstart guide</a> covers loading data,
+evaluating, and saving the trained model end to end.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>aligntune
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--dataset<span class="w"> </span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="w"> </span>--type<span class="w"> </span>sft
+</code></pre></div>
+<p>Config-driven runs are declarative YAML; the schema and full command
+reference are in the <a href="cli-reference/">CLI reference</a>.</p>
 </div>
 </div>
 </div>
-</div><div aria-hidden="true" aria-labelledby="keyboardModalLabel" class="modal" id="mkdocs_keyboard_modal" role="dialog" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-<button class="close" data-dismiss="modal" type="button"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-</div>
-<div class="modal-body">
-<table class="table">
+<h2 id="where-next">Where next<a class="headerlink" href="#where-next" title="Permanent link">&para;</a></h2>
+<div class="at-wide">
+<table>
 <thead>
 <tr>
-<th style="width: 20%;">Keys</th>
-<th>Action</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="help shortcut"><kbd>?</kbd></td>
-<td>Open this help</td>
+<td><strong><a href="getting-started/installation/">Getting started</a></strong></td>
+<td>Install, quickstart, backend selection</td>
 </tr>
 <tr>
-<td class="next shortcut"><kbd>n</kbd></td>
-<td>Next page</td>
+<td><strong><a href="user-guide/overview/">User guide</a></strong></td>
+<td>SFT and RL workflows in depth</td>
 </tr>
 <tr>
-<td class="prev shortcut"><kbd>p</kbd></td>
-<td>Previous page</td>
+<td><strong><a href="algorithms/overview/">Algorithm zoo</a></strong></td>
+<td>13+ supported RL algorithms</td>
 </tr>
 <tr>
-<td class="search shortcut"><kbd>s</kbd></td>
-<td>Search</td>
+<td><strong><a href="api-reference/overview/">API reference</a></strong></td>
+<td>Generated from the source docstrings</td>
+</tr>
+<tr>
+<td><strong><a href="examples/overview/">Examples</a></strong></td>
+<td>Runnable SFT, RL, and advanced recipes</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="modal-footer">
+<h2 id="notebook-recipes">Notebook recipes<a class="headerlink" href="#notebook-recipes" title="Permanent link">&para;</a></h2>
+<p>50+ interactive Colab notebooks covering models, backends, and dataset
+combinations live in the <a href="notebooks/">notebooks index</a>.</p>
+<hr />
+<h2 id="cite">Cite<a class="headerlink" href="#cite" title="Permanent link">&para;</a></h2>
+<p>If you use AlignTune in your research, please cite the library:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nc">@software</span><span class="p">{</span><span class="nl">aligntune2026</span><span class="p">,</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="na">author</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{Lyngkhoi, Zera and Goyal, Bhavya and Chawla, Chirag and Bhattacharjee, Soham and Avaiya, Utsav and Kadiyala, Ram Mohan Rao and Khandoga, Mykola and Yuan, Rui and Sankarapu, Vinay Kumar and Seth, Pratinav}</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="na">title</span><span class="w">     </span><span class="p">=</span><span class="w"> </span><span class="s">{AlignTune: Multi-Backend Alignment and Fine-Tuning Library for LLM Post-Training}</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="na">year</span><span class="w">      </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Lexsi Labs}</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="na">url</span><span class="w">       </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/Lexsi-Labs/aligntune}</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<div class="at-lexsi-footer">
+<p><a href="https://www.lexsi.ai">
+  <img src="assets/lexsilogowhite.png" width="240" alt="Lexsi Labs">
+</a></p>
+<p><a href="https://www.lexsi.ai">https://www.lexsi.ai</a></p>
+<p>Mumbai 🇮🇳 · London 🇬🇧 · Paris 🇫🇷</p>
 </div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+        
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+        
+          
+          <a href="getting-started/installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Installation">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Installation
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
 </div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Lexsi-Labs/aligntune" target="_blank" rel="noopener" title="AlignTune on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://pypi.org/project/aligntune/" target="_blank" rel="noopener" title="AlignTune on PyPI" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://discord.gg/ckVbEJGW" target="_blank" rel="noopener" title="AlignTune on Discord" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://lexsi.ai" target="_blank" rel="noopener" title="Lexsi Labs" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
 </div>
-</div>
-<script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script><script>mermaid.initialize({
-    securityLevel: "loose",
-    startOnLoad: true
-});</script></body>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="assets/extra.js"></script>
+      
+    
+  </body>
 </html>

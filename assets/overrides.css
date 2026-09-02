@@ -1,91 +1,70 @@
-/* Dark blue header/navbar styling */
-.navbar-default {
-    background-color: #1e3a5f !important; /* Dark blue */
-    border-color: #1e3a5f !important;
+/* Small backend-support chips used on the Algorithms overview page's card grid.
+   Semantic per-backend colors, independent of the site's primary/accent palette. */
+
+.chip-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 6px;
 }
 
-.navbar-default .navbar-brand {
-    color: #ffffff !important;
+.chip {
+    display: inline-block;
+    font-family: var(--md-code-font, monospace);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    color: #fff;
+    white-space: nowrap;
 }
 
-.navbar-default .navbar-brand:hover,
-.navbar-default .navbar-brand:focus {
-    color: #e0e0e0 !important;
+.chip-trl {
+    background-color: #2f6690;
 }
 
-.navbar-default .navbar-nav > li > a {
-    color: #ffffff !important;
+.chip-unsloth {
+    background-color: #2f7a54;
 }
 
-.navbar-default .navbar-nav > li > a:hover,
-.navbar-default .navbar-nav > li > a:focus {
-    color: #e0e0e0 !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
+.chip-es {
+    background-color: #6e4e9e;
 }
 
-.navbar-default .navbar-nav > .active > a,
-.navbar-default .navbar-nav > .active > a:hover,
-.navbar-default .navbar-nav > .active > a:focus {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
+.chip-broken {
+    background-color: transparent;
+    color: #a8433d;
+    border: 1px solid #a8433d;
 }
 
-.navbar-default .navbar-nav > .open > a,
-.navbar-default .navbar-nav > .open > a:hover,
-.navbar-default .navbar-nav > .open > a:focus {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
+[data-md-color-scheme="slate"] .chip-trl {
+    background-color: #3f7fac;
 }
 
-.navbar-default .navbar-nav .dropdown-menu {
-    background-color: #1e3a5f !important;
-    border-color: #1e3a5f !important;
+[data-md-color-scheme="slate"] .chip-unsloth {
+    background-color: #3f9469;
 }
 
-.navbar-default .navbar-nav .dropdown-menu > li > a {
-    color: #ffffff !important;
+[data-md-color-scheme="slate"] .chip-es {
+    background-color: #8266b3;
 }
 
-.navbar-default .navbar-nav .dropdown-menu > li > a:hover,
-.navbar-default .navbar-nav .dropdown-menu > li > a:focus {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.2) !important;
+[data-md-color-scheme="slate"] .chip-broken {
+    color: #e0837d;
+    border-color: #e0837d;
 }
 
-.navbar-default .navbar-toggle {
-    border-color: #ffffff !important;
+/* Tighten the algorithm-family section labels above each card grid */
+.algo-family-label {
+    font-family: var(--md-code-font, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--md-default-fg-color--light);
+    margin: 1.6rem 0 0.6rem;
 }
 
-.navbar-default .navbar-toggle .icon-bar {
-    background-color: #ffffff !important;
-}
-
-.navbar-default .navbar-toggle:hover,
-.navbar-default .navbar-toggle:focus {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Hide Previous/Next and Edit links on homepage */
-body.homepage .navbar-nav.navbar-right li:has(a[rel="prev"]),
-body.homepage .navbar-nav.navbar-right li:has(a[rel="next"]),
-body.homepage .navbar-nav.navbar-right li:has(a[href*="/edit/"]),
-body.homepage .navbar-nav.navbar-right li:has(a[href*="edit/master"]),
-body.homepage .navbar-nav.navbar-right li:has(a[href*="edit/main"]) {
-    display: none !important;
-}
-
-/* Fallback for browsers that don't support :has() - hide the links directly */
-body.homepage .navbar-nav.navbar-right a[rel="prev"],
-body.homepage .navbar-nav.navbar-right a[rel="next"],
-body.homepage .navbar-nav.navbar-right a[href*="/edit/"],
-body.homepage .navbar-nav.navbar-right a[href*="edit/master"],
-body.homepage .navbar-nav.navbar-right a[href*="edit/main"] {
-    display: none !important;
-}
-
-/* Additional fallback: hide parent li elements */
-body.homepage .navbar-nav.navbar-right li:has(a[rel="prev"]),
-body.homepage .navbar-nav.navbar-right li:has(a[rel="next"]),
-body.homepage .navbar-nav.navbar-right li:has(a[href*="edit"]) {
-    display: none !important;
+.algo-family-label:first-of-type {
+    margin-top: 0.8rem;
 }

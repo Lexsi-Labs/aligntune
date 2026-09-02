@@ -1,44 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
-    <meta name="author" content="AlignTune Contributors">
-    <link rel="canonical" href="https://aligntune.github.io/PARAMETERS/">
-    <link rel="shortcut icon" href="../img/favicon.ico">
-
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
     
-<title>AlignTune Configuration Parameters - AlignTune</title>
-
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
-    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="../css/base.min.css" rel="stylesheet">
-    <link href="../css/cinder.min.css" rel="stylesheet">
-
-    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Comprehensive fine-tuning library for SFT and RL training with multi-backend support">
+      
+      
+        <meta name="author" content="AlignTune Contributors">
+      
+      
+        <link rel="canonical" href="https://aligntune.lexsi.ai/PARAMETERS/">
+      
+      
+        <link rel="prev" href="../algorithms/raft/">
+      
+      
+        <link rel="next" href="../backends/overview/">
+      
+      
         
-        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+<title>Parameter Reference - AlignTune</title>
+
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
         
-    
-    <link href="../assets/_mkdocstrings.css" rel="stylesheet">
-    <link href="../assets/overrides.css" rel="stylesheet">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
-        <![endif]-->
 
     
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Schibsted+Grotesk:300,300i,400,400i,700,700i%7CIBM+Plex+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Schibsted Grotesk";--md-code-font:"IBM Plex Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+      <link rel="stylesheet" href="../assets/overrides.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
 
+    
     
 <!-- Favicons -->
 <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
@@ -51,501 +76,2452 @@
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/android-chrome-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="../assets/android-chrome-512x512.png">
 
- 
 
-</head>
 
-<body>
-
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
- <div class="container">
-
- <!-- Collapsed navigation -->
- <div class="navbar-header">
- <!-- Expander button -->
- <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
- <span class="sr-only">Toggle navigation</span>
- <span class="icon-bar"></span>
- <span class="icon-bar"></span>
- <span class="icon-bar"></span>
- </button>
- 
-
- <!-- Main title -->
-
- 
- <a class="navbar-brand" href="..">AlignTune</a>
- 
- </div>
-
- <!-- Expanded navigation -->
- <div class="navbar-collapse collapse">
- <!-- Main navigation -->
- <ul class="nav navbar-nav">
- 
- 
- <li class="dropdown">
- <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started <b class="caret"></b></a>
- <ul class="dropdown-menu">
- 
- 
-<li >
-    <a href="..">Home</a>
-</li>
-
- 
- 
-<li >
-    <a href="../getting-started/installation/">Installation</a>
-</li>
-
- 
- 
-<li >
-    <a href="../getting-started/quickstart/">Quick Start</a>
-</li>
-
- 
- 
-<li >
-    <a href="../getting-started/basic-concepts/">Basic Concepts</a>
-</li>
-
- 
- 
-<li >
-    <a href="../getting-started/configuration/">Configuration</a>
-</li>
-
- 
- 
-<li >
-    <a href="../getting-started/backend-selection/">Backend Selection</a>
-</li>
-
- 
- </ul>
- </li>
- 
- 
- 
- <li class="dropdown">
- <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
- <ul class="dropdown-menu">
- 
- 
-<li >
-    <a href="../user-guide/overview/">Overview</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/sft/">Supervised Fine-Tuning (SFT)</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/rl/">Reinforcement Learning (RL)</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/reward-functions/">Reward Functions</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/reward-model-training/">Reward Model Training</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/evaluation/">Evaluation</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/model-management/">Model Management</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/sample-logging/">Sample Logging</a>
-</li>
-
- 
- 
-<li >
-    <a href="../user-guide/troubleshooting/">Troubleshooting</a>
-</li>
-
- 
- 
-  <li class="dropdown-submenu">
-    <a tabindex="-1" href="">Algorithms</a>
-    <ul class="dropdown-menu">
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
         
+        <a href="#aligntune-configuration-parameters" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AlignTune" class="md-header__button md-logo" aria-label="AlignTune" data-md-component="logo">
+      
+  <img src="../assets/aligntune-logo-dark.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AlignTune
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
-<li >
-    <a href="../algorithms/overview/">Overview</a>
-</li>
-
-        
+              Parameter Reference
             
-<li >
-    <a href="../algorithms/dpo/">DPO</a>
-</li>
-
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
         
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
             
-<li >
-    <a href="../algorithms/ppo/">PPO</a>
-</li>
-
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
         
-            
-<li >
-    <a href="../algorithms/grpo/">GRPO</a>
-</li>
-
-        
-            
-<li >
-    <a href="../algorithms/gspo/">GSPO</a>
-</li>
-
-        
-            
-<li >
-    <a href="../algorithms/dapo/">DAPO</a>
-</li>
-
-        
-            
-<li >
-    <a href="../algorithms/dr-grpo/">Dr. GRPO</a>
-</li>
-
-        
-    </ul>
-  </li>
-
- 
- 
-  <li class="dropdown-submenu">
-    <a tabindex="-1" href="">Backends</a>
-    <ul class="dropdown-menu">
-        
-            
-<li >
-    <a href="../backends/overview/">Overview</a>
-</li>
-
-        
-            
-<li >
-    <a href="../backends/trl/">TRL Backend</a>
-</li>
-
-        
-            
-<li >
-    <a href="../backends/unsloth/">Unsloth Backend</a>
-</li>
-
-        
-            
-<li >
-    <a href="../backends/comparison/">Comparison</a>
-</li>
-
-        
-    </ul>
-  </li>
-
- 
- </ul>
- </li>
- 
- 
- 
- <li class="dropdown">
- <a href="#" class="dropdown-toggle" data-toggle="dropdown">Advanced Topics <b class="caret"></b></a>
- <ul class="dropdown-menu">
- 
- 
-<li >
-    <a href="../advanced/architecture/">Architecture</a>
-</li>
-
- 
- 
-<li >
-    <a href="../advanced/custom-backends/">Custom Backends</a>
-</li>
-
- 
- 
-<li >
-    <a href="../advanced/distributed/">Distributed Training</a>
-</li>
-
- 
- 
-<li >
-    <a href="../advanced/performance/">Performance Optimization</a>
-</li>
-
- 
- </ul>
- </li>
- 
- 
- 
- <li class="dropdown">
- <a href="#" class="dropdown-toggle" data-toggle="dropdown">API Reference <b class="caret"></b></a>
- <ul class="dropdown-menu">
- 
- 
-<li >
-    <a href="../api-reference/overview/">Overview</a>
-</li>
-
- 
- 
-<li >
-    <a href="../api-reference/core/">Core API</a>
-</li>
-
- 
- 
-<li >
-    <a href="../api-reference/backend-factory/">Backend Factory</a>
-</li>
-
- 
- 
-<li >
-    <a href="../api-reference/configuration/">Configuration Classes</a>
-</li>
-
- 
- 
-<li >
-    <a href="../api-reference/trainers/">Trainers</a>
-</li>
-
- 
- </ul>
- </li>
- 
- 
- 
- <li class="dropdown">
- <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
- <ul class="dropdown-menu">
- 
- 
-<li >
-    <a href="../examples/overview/">Overview</a>
-</li>
-
- 
- 
-<li >
-    <a href="../examples/sft/">SFT Examples</a>
-</li>
-
- 
- 
-<li >
-    <a href="../examples/rl/">RL Examples</a>
-</li>
-
- 
- 
-<li >
-    <a href="../examples/advanced/">Advanced Examples</a>
-</li>
-
- 
- 
-<li >
-    <a href="../notebooks/">Notebooks</a>
-</li>
-
- 
- 
-<li >
-    <a href="../notebooks/lexsi-sdk/">Lexsi SDK Notebooks</a>
-</li>
-
- 
- </ul>
- </li>
- 
- 
- 
- <li class="dropdown">
- <a href="#" class="dropdown-toggle" data-toggle="dropdown">Project <b class="caret"></b></a>
- <ul class="dropdown-menu">
- 
- 
-<li >
-    <a href="../cli-reference/">CLI Reference</a>
-</li>
-
- 
- 
-<li >
-    <a href="../cli/commands/">CLI Commands</a>
-</li>
-
- 
- 
-<li >
-    <a href="../cli/configuration/">CLI Configuration Files</a>
-</li>
-
- 
- 
-  <li class="dropdown-submenu">
-    <a tabindex="-1" href="">Compatibility</a>
-    <ul class="dropdown-menu">
-        
-            
-<li >
-    <a href="../unsloth_compatibility/">Unsloth Compatibility</a>
-</li>
-
-        
-            
-<li >
-    <a href="../compatibility/backend-matrix/">Backend Support Matrix</a>
-</li>
-
-        
-    </ul>
-  </li>
-
- 
- 
-  <li class="dropdown-submenu">
-    <a tabindex="-1" href="">Contributing</a>
-    <ul class="dropdown-menu">
-        
-            
-<li >
-    <a href="../contributing/guide/">Contributing Guide</a>
-</li>
-
-        
-            
-<li >
-    <a href="../contributing/code-style/">Code Style</a>
-</li>
-
-        
-            
-<li >
-    <a href="../contributing/testing/">Testing</a>
-</li>
-
-        
-    </ul>
-  </li>
-
- 
- </ul>
- </li>
- 
- 
- </ul>
-
- <ul class="nav navbar-nav navbar-right">
- <li>
- <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
- <i class="fas fa-search"></i> Search
- </a>
- </li>
- 
- </ul>
- </div>
- </div>
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lexsi-Labs/aligntune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/aligntune
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href=".." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
 
-    <div class="container">
+        </a>
+      </li>
+    
+  
+
+      
         
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../user-guide/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
         
-        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="first-level active"><a href="#aligntune-configuration-parameters">AlignTune Configuration Parameters</a></li>
-            <li class="second-level"><a href="#table-of-contents">Table of Contents</a></li>
-                
-            <li class="second-level"><a href="#sft-supervised-fine-tuning-parameters">SFT (Supervised Fine-Tuning) Parameters</a></li>
-                
-                <li class="third-level"><a href="#model-configuration-modelconfig">Model Configuration (ModelConfig)</a></li>
-                <li class="third-level"><a href="#dataset-configuration-datasetconfig">Dataset Configuration (DatasetConfig)</a></li>
-                <li class="third-level"><a href="#training-configuration-trainingconfig">Training Configuration (TrainingConfig)</a></li>
-                <li class="third-level"><a href="#evaluation-configuration-evaluationconfig">Evaluation Configuration (EvaluationConfig)</a></li>
-                <li class="third-level"><a href="#logging-configuration-loggingconfig">Logging Configuration (LoggingConfig)</a></li>
-            <li class="second-level"><a href="#rl-reinforcement-learning-common-parameters">RL (Reinforcement Learning) Common Parameters</a></li>
-                
-                <li class="third-level"><a href="#model-configuration-modelconfig_1">Model Configuration (ModelConfig)</a></li>
-                <li class="third-level"><a href="#dataset-configuration-datasetconfig_1">Dataset Configuration (DatasetConfig)</a></li>
-                <li class="third-level"><a href="#training-configuration-trainingconfig_1">Training Configuration (TrainingConfig)</a></li>
-                <li class="third-level"><a href="#sample-logging-configuration-sampleloggingconfig">Sample Logging Configuration (SampleLoggingConfig)</a></li>
-                <li class="third-level"><a href="#logging-configuration-loggingconfig_1">Logging Configuration (LoggingConfig)</a></li>
-                <li class="third-level"><a href="#reward-configuration-rewardconfig">Reward Configuration (RewardConfig)</a></li>
-                <li class="third-level"><a href="#reward-model-training-configuration-rewardmodeltrainingconfig">Reward Model Training Configuration (RewardModelTrainingConfig)</a></li>
-                <li class="third-level"><a href="#reward-model-source-configuration-rewardmodelsourceconfig">Reward Model Source Configuration (RewardModelSourceConfig)</a></li>
-            <li class="second-level"><a href="#algorithm-specific-rl-parameters">Algorithm-Specific RL Parameters</a></li>
-                
-                <li class="third-level"><a href="#ppo-proximal-policy-optimization">PPO (Proximal Policy Optimization)</a></li>
-                <li class="third-level"><a href="#dpo-direct-preference-optimization">DPO (Direct Preference Optimization)</a></li>
-                <li class="third-level"><a href="#grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)</a></li>
-                <li class="third-level"><a href="#dapo-drgrpo">DAPO / DRGRPO</a></li>
-                <li class="third-level"><a href="#gspo-generalized-scoring-proximal-objective">GSPO (Generalized Scoring Proximal Objective)</a></li>
-                <li class="third-level"><a href="#neural-mirror-grpo">Neural Mirror GRPO</a></li>
-                <li class="third-level"><a href="#meta-es">Meta-ES</a></li>
-            <li class="second-level"><a href="#backend-selection">Backend Selection</a></li>
-                
-            <li class="second-level"><a href="#task-types-sft">Task Types (SFT)</a></li>
-                
-            <li class="second-level"><a href="#convenience-functions">Convenience Functions</a></li>
-                
-                <li class="third-level"><a href="#sft-training">SFT Training</a></li>
-                <li class="third-level"><a href="#rl-training">RL Training</a></li>
-            <li class="second-level"><a href="#notes">Notes</a></li>
-                
-            <li class="second-level"><a href="#additional-resources">Additional Resources</a></li>
-                
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../algorithms/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Algorithms
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../advanced/architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Advanced Topics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../cli-reference/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
     </ul>
-</div></div>
-        <div class="col-md-9" role="main">
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AlignTune" class="md-nav__button md-logo" aria-label="AlignTune" data-md-component="logo">
+      
+  <img src="../assets/aligntune-logo-dark.png" alt="logo">
+
+    </a>
+    AlignTune
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lexsi-Labs/aligntune" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lexsi-Labs/aligntune
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href=".." class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../user-guide/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../algorithms/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Algorithms
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parameter Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parameter Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sft-supervised-fine-tuning-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SFT (Supervised Fine-Tuning) Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SFT (Supervised Fine-Tuning) Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-configuration-modelconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Configuration (ModelConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataset-configuration-datasetconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset Configuration (DatasetConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-configuration-trainingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Configuration (TrainingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-configuration-evaluationconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation Configuration (EvaluationConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration-loggingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Configuration (LoggingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rl-reinforcement-learning-common-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RL (Reinforcement Learning) Common Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RL (Reinforcement Learning) Common Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-configuration-modelconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Configuration (ModelConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataset-configuration-datasetconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset Configuration (DatasetConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-configuration-trainingconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Configuration (TrainingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-logging-configuration-sampleloggingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample Logging Configuration (SampleLoggingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration-loggingconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Configuration (LoggingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-configuration-rewardconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward Configuration (RewardConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-model-training-configuration-rewardmodeltrainingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward Model Training Configuration (RewardModelTrainingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-model-source-configuration-rewardmodelsourceconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward Model Source Configuration (RewardModelSourceConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm-specific-rl-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Algorithm-Specific RL Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Algorithm-Specific RL Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ppo-proximal-policy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PPO (Proximal Policy Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dpo-direct-preference-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DPO (Direct Preference Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orpo-odds-ratio-preference-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ORPO (Odds Ratio Preference Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#online-dpo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Online-DPO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spin-self-play-fine-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPIN (Self-Play Fine-Tuning)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grpo-base-gspo-dapo-dr-grpo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GRPO (base) / GSPO / DAPO / Dr. GRPO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gbmpo-group-based-mirror-po" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GBMPO (Group-Based Mirror PO)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#counterfactual-grpo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Counterfactual GRPO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PACE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-evolution-strategies-non-meta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ES (Evolution Strategies, non-meta)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#distillation-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distillation Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Distillation Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-offline-distillation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard / Offline Distillation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdft-self-distillation-fine-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SDFT (Self-Distillation Fine-Tuning)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raft-retrieval-augmented-fine-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RAFT (Retrieval Augmented Fine-Tuning)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-types-sft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Types (SFT)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convenience-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Convenience Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Convenience Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sft-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SFT Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rl-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RL Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backends
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backends
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/trl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TRL Backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/unsloth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unsloth Backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backends/comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/backend-factory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend Factory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Classes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/trainers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trainers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/unified-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unified API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/reward-functions-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward Functions Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/reward-model-training-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward Model Training Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../advanced/architecture/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Topics
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../examples/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../cli-reference/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sft-supervised-fine-tuning-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SFT (Supervised Fine-Tuning) Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SFT (Supervised Fine-Tuning) Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-configuration-modelconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Configuration (ModelConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataset-configuration-datasetconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset Configuration (DatasetConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-configuration-trainingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Configuration (TrainingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-configuration-evaluationconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation Configuration (EvaluationConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration-loggingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Configuration (LoggingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rl-reinforcement-learning-common-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RL (Reinforcement Learning) Common Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RL (Reinforcement Learning) Common Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-configuration-modelconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Configuration (ModelConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dataset-configuration-datasetconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset Configuration (DatasetConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-configuration-trainingconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Configuration (TrainingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-logging-configuration-sampleloggingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample Logging Configuration (SampleLoggingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration-loggingconfig_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Configuration (LoggingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-configuration-rewardconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward Configuration (RewardConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-model-training-configuration-rewardmodeltrainingconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward Model Training Configuration (RewardModelTrainingConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reward-model-source-configuration-rewardmodelsourceconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward Model Source Configuration (RewardModelSourceConfig)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm-specific-rl-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Algorithm-Specific RL Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Algorithm-Specific RL Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ppo-proximal-policy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PPO (Proximal Policy Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dpo-direct-preference-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DPO (Direct Preference Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orpo-odds-ratio-preference-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ORPO (Odds Ratio Preference Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#online-dpo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Online-DPO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spin-self-play-fine-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SPIN (Self-Play Fine-Tuning)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grpo-base-gspo-dapo-dr-grpo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GRPO (base) / GSPO / DAPO / Dr. GRPO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gbmpo-group-based-mirror-po" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GBMPO (Group-Based Mirror PO)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#counterfactual-grpo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Counterfactual GRPO
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PACE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#es-evolution-strategies-non-meta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ES (Evolution Strategies, non-meta)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#distillation-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distillation Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Distillation Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-offline-distillation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard / Offline Distillation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdft-self-distillation-fine-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SDFT (Self-Distillation Fine-Tuning)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raft-retrieval-augmented-fine-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RAFT (Retrieval Augmented Fine-Tuning)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-types-sft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Types (SFT)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convenience-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Convenience Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Convenience Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sft-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SFT Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rl-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RL Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Lexsi-Labs/aligntune/edit/main/docs/PARAMETERS.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
 
 <h1 id="aligntune-configuration-parameters">AlignTune Configuration Parameters<a class="headerlink" href="#aligntune-configuration-parameters" title="Permanent link">&para;</a></h1>
 <p>This document provides a comprehensive reference for all configuration parameters available in AlignTune, organized by training type (SFT vs RL) and algorithm-specific settings.</p>
+<p>Rows marked ⚠️ call out fields whose effective default or valid values depend on the specific algorithm, read the row's note before relying on that field's listed default.</p>
 <hr />
 <h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
 <ol>
 <li><a href="#sft-supervised-fine-tuning-parameters">SFT (Supervised Fine-Tuning) Parameters</a></li>
 <li><a href="#rl-reinforcement-learning-common-parameters">RL (Reinforcement Learning) Common Parameters</a></li>
 <li><a href="#algorithm-specific-rl-parameters">Algorithm-Specific RL Parameters</a></li>
-<li><a href="#ppo-proximal-policy-optimization">PPO (Proximal Policy Optimization)</a></li>
-<li><a href="#dpo-direct-preference-optimization">DPO (Direct Preference Optimization)</a></li>
-<li><a href="#grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)</a></li>
-<li><a href="#dapo-drgrpo">DAPO / DRGRPO</a></li>
-<li><a href="#gspo-generalized-scoring-proximal-objective">GSPO (Generalized Scoring Proximal Objective)</a></li>
-<li><a href="#neural-mirror-grpo">Neural Mirror GRPO</a></li>
-<li><a href="#meta-es">Meta-ES</a></li>
+<li><a href="#ppo-proximal-policy-optimization">PPO</a></li>
+<li><a href="#dpo-direct-preference-optimization">DPO</a></li>
+<li><a href="#online-dpo">Online-DPO</a></li>
+<li><a href="#spin-self-play-fine-tuning">SPIN</a></li>
+<li><a href="#grpo-base-gspo-dapo-dr-grpo">GRPO (base) / GSPO / DAPO / Dr. GRPO</a></li>
+<li><a href="#gbmpo-group-based-mirror-po">GBMPO</a></li>
+<li><a href="#counterfactual-grpo">Counterfactual GRPO</a></li>
+<li><a href="#pace-bolt">PACE</a></li>
+<li><a href="#es-evolution-strategies-non-meta">ES (non-meta)</a></li>
+<li><a href="#distillation-parameters">Distillation Parameters</a></li>
+<li><a href="#standard-offline-distillation">Standard / Offline Distillation</a></li>
+<li><a href="#sdft-self-distillation-fine-tuning">SDFT</a></li>
+<li><a href="#raft-retrieval-augmented-fine-tuning">RAFT</a></li>
 </ol>
 <hr />
 <h2 id="sft-supervised-fine-tuning-parameters">SFT (Supervised Fine-Tuning) Parameters<a class="headerlink" href="#sft-supervised-fine-tuning-parameters" title="Permanent link">&para;</a></h2>
@@ -569,7 +2545,7 @@
 <tr>
 <td><code>precision</code></td>
 <td>PrecisionType</td>
-<td><code>bf16</code></td>
+<td><code>auto</code></td>
 <td>Model precision (<code>bf16</code>, <code>fp16</code>, <code>fp32</code>, <code>auto</code>)</td>
 </tr>
 <tr>
@@ -615,13 +2591,13 @@
 <td>Maximum sequence length</td>
 </tr>
 <tr>
-<td><code>peft_enabled</code></td>
+<td><code>use_peft</code></td>
 <td>bool</td>
 <td><code>False</code></td>
 <td>Enable PEFT/LoRA</td>
 </tr>
 <tr>
-<td><code>lora_rank</code></td>
+<td><code>lora_r</code></td>
 <td>int</td>
 <td><code>16</code></td>
 <td>LoRA rank</td>
@@ -639,16 +2615,148 @@
 <td>LoRA dropout rate</td>
 </tr>
 <tr>
-<td><code>target_modules</code></td>
+<td><code>lora_target_modules</code></td>
 <td>List[str]</td>
 <td><code>None</code></td>
 <td>LoRA target modules (e.g., <code>["q_proj", "v_proj"]</code>)</td>
 </tr>
 <tr>
-<td><code>bias</code></td>
+<td><code>lora_bias</code></td>
 <td>str</td>
 <td><code>"none"</code></td>
 <td>Bias training (<code>none</code>, <code>all</code>, <code>lora_only</code>)</td>
+</tr>
+<tr>
+<td><code>trust_remote_code</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Allow custom model/tokenizer code from the model repository</td>
+</tr>
+<tr>
+<td><code>tokenizer_name_or_path</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Optional tokenizer path; defaults to the model path</td>
+</tr>
+<tr>
+<td><code>rope_type</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> RoPE scaling type; required when other RoPE options are set</td>
+</tr>
+<tr>
+<td><code>rope_target_max_seq_length</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Target context length for RoPE scaling</td>
+</tr>
+<tr>
+<td><code>rope_factor</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> RoPE scaling factor</td>
+</tr>
+<tr>
+<td><code>rope_theta</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Advanced RoPE theta override</td>
+</tr>
+<tr>
+<td><code>rope_original_max_position_embeddings</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Original context length for RoPE scaling</td>
+</tr>
+<tr>
+<td><code>rope_partial_rotary_factor</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Partial rotary factor</td>
+</tr>
+<tr>
+<td><code>rope_attention_factor</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> RoPE attention scaling factor</td>
+</tr>
+<tr>
+<td><code>rope_beta_fast</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Fast beta parameter for YARN-style RoPE</td>
+</tr>
+<tr>
+<td><code>rope_beta_slow</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Slow beta parameter for YARN-style RoPE</td>
+</tr>
+<tr>
+<td><code>rope_short_factor</code></td>
+<td>float/list</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Short-context RoPE factor</td>
+</tr>
+<tr>
+<td><code>rope_long_factor</code></td>
+<td>float/list</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Long-context RoPE factor</td>
+</tr>
+<tr>
+<td><code>rope_low_freq_factor</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Low-frequency RoPE factor</td>
+</tr>
+<tr>
+<td><code>rope_high_freq_factor</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> High-frequency RoPE factor</td>
+</tr>
+<tr>
+<td><code>sliding_window</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td><strong>TRL-only</strong> Sliding-window attention size</td>
+</tr>
+<tr>
+<td><code>s2_group_size_ratio</code></td>
+<td>float</td>
+<td><code>0.25</code></td>
+<td><strong>TRL-only</strong> S2 attention group-size ratio</td>
+</tr>
+<tr>
+<td><code>s2_min_seq_length</code></td>
+<td>int</td>
+<td><code>64</code></td>
+<td><strong>TRL-only</strong> Minimum length before S2 attention is applied</td>
+</tr>
+<tr>
+<td><code>s2_shift_ratio</code></td>
+<td>float</td>
+<td><code>0.5</code></td>
+<td><strong>TRL-only</strong> S2 attention shift ratio</td>
+</tr>
+<tr>
+<td><code>train_embeddings</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td><strong>TRL backend only for now</strong>, train input embeddings instead of or alongside adapter weights</td>
+</tr>
+<tr>
+<td><code>embedding_init_method</code></td>
+<td>str</td>
+<td><code>"random"</code></td>
+<td><strong>TRL backend only for now</strong>, new embedding initialization (<code>random</code>, <code>mean</code>, <code>mean_of_constituents</code>)</td>
+</tr>
+<tr>
+<td><code>embedding_pad_to_multiple_of</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td><strong>TRL backend only for now</strong>, pad embedding vocabulary to a multiple of this value</td>
 </tr>
 <tr>
 <td><code>use_gradient_checkpointing</code></td>
@@ -670,6 +2778,9 @@
 </tr>
 </tbody>
 </table>
+<p><strong>Backend note:</strong> The advanced RoPE, S2/sliding-window, and embedding controls
+listed above are supported by the <strong>TRL SFT backend only for now</strong>. The
+Unsloth SFT backend does not provide equivalent wiring for these options.</p>
 <h3 id="dataset-configuration-datasetconfig">Dataset Configuration (<code>DatasetConfig</code>)<a class="headerlink" href="#dataset-configuration-datasetconfig" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -690,161 +2801,138 @@
 <tr>
 <td><code>split</code></td>
 <td>str</td>
-<td><code>"train"</code></td>
-<td>Dataset split to use</td>
+<td><code>None</code></td>
+<td>Source split to select. Use a plain split name such as <code>"train"</code>; HF slice syntax such as <code>"train[:16]"</code> is unsupported. Use <code>max_samples</code> for row limits. When omitted, all available splits are processed.</td>
 </tr>
 <tr>
-<td><code>subset</code> / <code>config</code></td>
+<td><code>config_name</code> / <code>subset</code> / <code>config</code></td>
 <td>str</td>
 <td><code>None</code></td>
-<td>Dataset subset/config name</td>
-</tr>
-<tr>
-<td><code>percent</code></td>
-<td>float</td>
-<td><code>None</code></td>
-<td>Percentage of data to use (0-100)</td>
+<td>Hugging Face dataset configuration/subset. <code>subset</code> is normalized to <code>config_name</code> by the loader.</td>
 </tr>
 <tr>
 <td><code>max_samples</code></td>
 <td>int</td>
 <td><code>None</code></td>
-<td>Maximum number of samples</td>
+<td>Maximum rows per split, applied before CuratorKIT processing. This is not a global limit across all splits.</td>
 </tr>
 <tr>
 <td><code>column_mapping</code></td>
-<td>Dict</td>
+<td>Dict[str, str]</td>
 <td><code>{}</code></td>
-<td>Column name mappings</td>
-</tr>
-<tr>
-<td><code>task_type</code></td>
-<td>TaskType</td>
-<td><code>SUPERVISED_FINE_TUNING</code></td>
-<td>Task type enum</td>
-</tr>
-<tr>
-<td><code>auto_detect_fields</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Auto-detect dataset fields</td>
+<td>Map source columns to the canonical columns required by the selected task.</td>
 </tr>
 <tr>
 <td><code>format_type</code></td>
 <td>str</td>
 <td><code>None</code></td>
-<td>Dataset format (<code>alpaca</code>, <code>dolly</code>, etc.)</td>
+<td>Expected CuratorKIT format (for example, <code>alpaca</code>, <code>sharegpt</code>, <code>dpo</code>, or <code>grpo</code>). <code>None</code> enables format detection/fallback handling.</td>
 </tr>
 <tr>
-<td><code>text_column</code></td>
-<td>str</td>
-<td><code>"text"</code></td>
-<td>Text column name</td>
-</tr>
-<tr>
-<td><code>instruction_column</code></td>
-<td>str</td>
-<td><code>"instruction"</code></td>
-<td>Instruction column name</td>
-</tr>
-<tr>
-<td><code>response_column</code></td>
-<td>str</td>
-<td><code>"response"</code></td>
-<td>Response column name</td>
-</tr>
-<tr>
-<td><code>output_column</code></td>
-<td>str</td>
-<td><code>"output"</code></td>
-<td>Output column name</td>
-</tr>
-<tr>
-<td><code>input_column</code></td>
-<td>str</td>
-<td><code>"input"</code></td>
-<td>Input column name</td>
-</tr>
-<tr>
-<td><code>context_column</code></td>
-<td>str</td>
-<td><code>"context"</code></td>
-<td>Context column name</td>
-</tr>
-<tr>
-<td><code>label_column</code></td>
-<td>str</td>
-<td><code>"label"</code></td>
-<td>Label column (classification)</td>
-</tr>
-<tr>
-<td><code>tokens_column</code></td>
-<td>str</td>
-<td><code>"tokens"</code></td>
-<td>Tokens column (token classification)</td>
-</tr>
-<tr>
-<td><code>tags_column</code></td>
-<td>str</td>
-<td><code>"ner_tags"</code></td>
-<td>Tags column (NER)</td>
-</tr>
-<tr>
-<td><code>messages_column</code></td>
-<td>str</td>
-<td><code>"messages"</code></td>
-<td>Messages column (chat)</td>
-</tr>
-<tr>
-<td><code>dataset_text_field</code></td>
-<td>str</td>
-<td><code>"text"</code></td>
-<td>Dataset text field for trainers</td>
-</tr>
-<tr>
-<td><code>chat_template</code></td>
+<td><code>system_prompt</code></td>
 <td>str</td>
 <td><code>None</code></td>
-<td>Chat template string</td>
-</tr>
-<tr>
-<td><code>dataset_num_proc</code></td>
-<td>int</td>
-<td><code>None</code></td>
-<td>Number of parallel processes</td>
-</tr>
-<tr>
-<td><code>pad_token</code></td>
-<td>str</td>
-<td><code>None</code></td>
-<td>Padding token</td>
-</tr>
-<tr>
-<td><code>preserve_columns</code></td>
-<td>List[str]</td>
-<td><code>None</code></td>
-<td>Columns to preserve during processing</td>
+<td>Optional system prompt injected after curation and column normalization.</td>
 </tr>
 <tr>
 <td><code>processing_fn</code></td>
 <td>Callable</td>
 <td><code>None</code></td>
-<td>Custom processing function</td>
+<td>Custom row preprocessing function run during the CuratorKIT stage. Return <code>None</code> to reject a row.</td>
 </tr>
 <tr>
 <td><code>processing_batched</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Whether processing is batched</td>
+<td>Whether <code>processing_fn</code> receives a batch instead of one row at a time.</td>
 </tr>
 <tr>
-<td><code>processing_fn_kwargs</code></td>
-<td>Dict</td>
-<td><code>{}</code></td>
-<td>Arguments for processing function</td>
+<td><code>keep_columns</code></td>
+<td>bool</td>
+<td>Task-dependent</td>
+<td>Preserve source columns in addition to CuratorKIT canonical columns. Defaults to enabled for GRPO and distillation tasks.</td>
+</tr>
+<tr>
+<td><code>val_split_ratio</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Create a <code>validation</code> split from the source data. Must be between 0 and 1.</td>
+</tr>
+<tr>
+<td><code>test_split_ratio</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Create a <code>test</code> split from the source data. Must be between 0 and 1; the two ratios must sum to less than 1.</td>
+</tr>
+<tr>
+<td><code>split_seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Seed used for deterministic ratio-based splitting.</td>
+</tr>
+<tr>
+<td><code>privileged_context_column</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Distillation-only source column for hints/feedback. Aliases such as <code>hint</code>, <code>feedback</code>, <code>context</code>, and <code>reference</code> are also recognized.</td>
+</tr>
+<tr>
+<td><code>curator_schema_gate</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable CuratorKIT row-level schema validation.</td>
+</tr>
+<tr>
+<td><code>curator_clean</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable CuratorKIT text cleaning.</td>
+</tr>
+<tr>
+<td><code>curator_dedup</code></td>
+<td>str</td>
+<td><code>"none"</code></td>
+<td>CuratorKIT deduplication mode: <code>none</code>, <code>exact</code>, or <code>minhash</code>.</td>
+</tr>
+<tr>
+<td><code>curator_use_tiktoken</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use tiktoken for CuratorKIT token counting.</td>
+</tr>
+<tr>
+<td><code>curator_max_tokens</code></td>
+<td>int</td>
+<td><code>1_000_000</code></td>
+<td>Maximum token count used by CuratorKIT schema checks.</td>
 </tr>
 </tbody>
 </table>
+<p><strong>SFT column-mapping example:</strong> mappings use the form <code>source_column</code> to
+canonical SFT column. For instruction data, the source dataset can map
+<code>prompt</code>, <code>context</code>, and <code>response</code> to <code>instruction</code>, <code>input</code>, and <code>output</code>.
+For conversational data, map a conversation column to <code>messages</code> instead.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen2.5-0.5B-Instruct&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;your-org/your-dataset&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">system_prompt</span><span class="o">=</span><span class="s2">&quot;Answer accurately and concisely.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">column_mapping</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="s2">&quot;instruction&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="s2">&quot;input&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="s2">&quot;output&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="c1"># Use this for conversational rows shaped as role/content messages.</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="c1"># &quot;conversation&quot;: &quot;messages&quot;,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="p">},</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">)</span>
+</code></pre></div>
+<p><strong>DataManager flow:</strong> the loader first normalizes the source into a
+<code>DatasetDict</code>, normalizes split aliases (<code>dev</code>/<code>valid</code> to <code>validation</code>), applies
+<code>max_samples</code> and requested split ratios, then runs CuratorKIT independently on
+each final split. AlignTune subsequently applies column mapping, adds
+distillation privileged context, injects the system prompt, and returns the
+processed <code>DatasetDict</code> to the trainer.</p>
 <h3 id="training-configuration-trainingconfig">Training Configuration (<code>TrainingConfig</code>)<a class="headerlink" href="#training-configuration-trainingconfig" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -863,6 +2951,12 @@
 <td>Batch size per device</td>
 </tr>
 <tr>
+<td><code>per_device_eval_batch_size</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Evaluation batch size per device; defaults to the training batch size in the factory</td>
+</tr>
+<tr>
 <td><code>gradient_accumulation_steps</code></td>
 <td>int</td>
 <td><code>1</code></td>
@@ -877,8 +2971,8 @@
 <tr>
 <td><code>epochs</code></td>
 <td>int</td>
-<td><code>3</code></td>
-<td>Number of training epochs (if max_steps not set)</td>
+<td><code>None</code></td>
+<td>Number of training epochs; defaults to <code>3</code> when <code>max_steps</code> is unset</td>
 </tr>
 <tr>
 <td><code>learning_rate</code></td>
@@ -961,7 +3055,7 @@
 <tr>
 <td><code>group_by_length</code></td>
 <td>bool</td>
-<td><code>False</code></td>
+<td><code>False</code> (<code>True</code> in factory)</td>
 <td>Group sequences by length</td>
 </tr>
 <tr>
@@ -1011,24 +3105,6 @@
 <td>bool</td>
 <td><code>False</code></td>
 <td>Whether higher metric is better</td>
-</tr>
-<tr>
-<td><code>use_trl</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Use TRL backend</td>
-</tr>
-<tr>
-<td><code>dataset_num_proc</code></td>
-<td>int</td>
-<td><code>None</code></td>
-<td>Dataset processing processes</td>
-</tr>
-<tr>
-<td><code>dataset_kwargs</code></td>
-<td>Dict</td>
-<td><code>{}</code></td>
-<td>Additional dataset arguments</td>
 </tr>
 <tr>
 <td><code>packing</code></td>
@@ -1101,6 +3177,36 @@
 <td>Dict</td>
 <td><code>{}</code></td>
 <td>Gradient checkpointing arguments</td>
+</tr>
+<tr>
+<td><code>enable_thinking</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable model thinking/reasoning mode when supported by the tokenizer/model</td>
+</tr>
+<tr>
+<td><code>use_liger_kernel</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable Liger kernels when supported by the TRL backend</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Training and split reproducibility seed</td>
+</tr>
+<tr>
+<td><code>data_seed</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Optional separate data-loader seed</td>
+</tr>
+<tr>
+<td><code>extra_params</code></td>
+<td>Dict</td>
+<td><code>{}</code></td>
+<td>Additional factory keyword arguments forwarded to backend configuration</td>
 </tr>
 </tbody>
 </table>
@@ -1234,7 +3340,7 @@
 <td><code>eval_strategy</code></td>
 <td>str</td>
 <td><code>"steps"</code></td>
-<td>Evaluation strategy</td>
+<td>Evaluation strategy passed to the trainer.</td>
 </tr>
 <tr>
 <td><code>report_to</code></td>
@@ -1291,7 +3397,7 @@
 <td><code>precision</code></td>
 <td>PrecisionType</td>
 <td><code>AUTO</code></td>
-<td>Model precision</td>
+<td>Model precision, <code>"auto"</code> resolves per-GPU via <code>PrecisionHandler.get_training_args_precision()</code>, which checks <code>torch.cuda.is_bf16_supported()</code> and falls back to <code>fp16</code> on non-Ampere GPUs (T4, V100, etc.)</td>
 </tr>
 <tr>
 <td><code>quantization</code></td>
@@ -1390,6 +3496,24 @@
 <td>LoRA target modules</td>
 </tr>
 <tr>
+<td><code>rslora_enabled</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable rank-stabilized LoRA</td>
+</tr>
+<tr>
+<td><code>loftq_init</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Initialize LoRA weights with LoftQ when supported by the installed PEFT version</td>
+</tr>
+<tr>
+<td><code>pissa_init</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Initialize LoRA weights with PiSSA</td>
+</tr>
+<tr>
 <td><code>trust_remote_code</code></td>
 <td>bool</td>
 <td><code>True</code></td>
@@ -1465,146 +3589,104 @@
 <tr>
 <td><code>split</code></td>
 <td>str</td>
-<td><code>"train"</code></td>
-<td>Dataset split</td>
-</tr>
-<tr>
-<td><code>percent</code></td>
-<td>float</td>
 <td><code>None</code></td>
-<td>Percentage of data (0-100)</td>
-</tr>
-<tr>
-<td><code>max_samples</code></td>
-<td>int</td>
-<td><code>None</code></td>
-<td>Maximum samples</td>
-</tr>
-<tr>
-<td><code>field_mappings</code></td>
-<td>Dict</td>
-<td><code>{}</code></td>
-<td>Field name mappings</td>
-</tr>
-<tr>
-<td><code>format_type</code></td>
-<td>str</td>
-<td><code>None</code></td>
-<td>Dataset format type</td>
-</tr>
-<tr>
-<td><code>auto_detect_fields</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-<td>Auto-detect fields</td>
-</tr>
-<tr>
-<td><code>column_mapping</code></td>
-<td>Dict</td>
-<td><code>{}</code></td>
-<td>Column mappings (legacy)</td>
-</tr>
-<tr>
-<td><code>task_type</code></td>
-<td>str</td>
-<td><code>"conversation"</code></td>
-<td>Task type</td>
-</tr>
-<tr>
-<td><code>weight</code></td>
-<td>float</td>
-<td><code>1.0</code></td>
-<td>Dataset weight</td>
-</tr>
-<tr>
-<td><code>chat_template</code></td>
-<td>str</td>
-<td><code>None</code></td>
-<td>Chat template</td>
-</tr>
-<tr>
-<td><code>system_prompt</code></td>
-<td>str</td>
-<td><code>None</code></td>
-<td>System prompt</td>
-</tr>
-<tr>
-<td><code>dataset_num_proc</code></td>
-<td>int</td>
-<td><code>None</code></td>
-<td>Processing processes</td>
-</tr>
-<tr>
-<td><code>pad_token</code></td>
-<td>str</td>
-<td><code>None</code></td>
-<td>Padding token</td>
-</tr>
-<tr>
-<td><code>label_pad_token_id</code></td>
-<td>int</td>
-<td><code>-100</code></td>
-<td>Label padding token ID</td>
-</tr>
-<tr>
-<td><code>truncation_mode</code></td>
-<td>str</td>
-<td><code>"keep_end"</code></td>
-<td>Truncation mode</td>
-</tr>
-<tr>
-<td><code>padding_free</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Padding-free training</td>
-</tr>
-<tr>
-<td><code>precompute_ref_log_probs</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Precompute reference log probs</td>
-</tr>
-<tr>
-<td><code>precompute_ref_batch_size</code></td>
-<td>int</td>
-<td><code>None</code></td>
-<td>Batch size for precomputation</td>
-</tr>
-<tr>
-<td><code>tools</code></td>
-<td>Any</td>
-<td><code>None</code></td>
-<td>Tools configuration</td>
-</tr>
-<tr>
-<td><code>preserve_columns</code></td>
-<td>List[str]</td>
-<td><code>None</code></td>
-<td>Columns to preserve</td>
-</tr>
-<tr>
-<td><code>processing_fn</code></td>
-<td>Callable</td>
-<td><code>None</code></td>
-<td>Custom processing function</td>
-</tr>
-<tr>
-<td><code>processing_batched</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Batched processing</td>
-</tr>
-<tr>
-<td><code>processing_fn_kwargs</code></td>
-<td>Dict</td>
-<td><code>{}</code></td>
-<td>Processing function arguments</td>
+<td>Source split to select. Use a plain split name such as <code>"train"</code>; HF slice syntax such as <code>"train[:16]"</code> is unsupported. When omitted, all available splits are processed.</td>
 </tr>
 <tr>
 <td><code>config_name</code></td>
 <td>str</td>
 <td><code>None</code></td>
-<td>Dataset config name</td>
+<td>Hugging Face dataset configuration/subset name</td>
+</tr>
+<tr>
+<td><code>max_samples</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Maximum rows per split, applied before CuratorKIT processing</td>
+</tr>
+<tr>
+<td><code>column_mapping</code></td>
+<td>Dict[str, str]</td>
+<td><code>{}</code></td>
+<td>Map source columns to canonical columns. Prompt-only/GRPO-style tasks map a source question to <code>prompt</code>; preference tasks map fields to <code>prompt</code>, <code>chosen</code>, and <code>rejected</code>.</td>
+</tr>
+<tr>
+<td><code>format_type</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Expected CuratorKIT format, such as <code>dpo</code>, <code>grpo</code>, or <code>alpaca</code></td>
+</tr>
+<tr>
+<td><code>system_prompt</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td>Optional system prompt injected after curation and column normalization</td>
+</tr>
+<tr>
+<td><code>processing_fn</code></td>
+<td>Callable</td>
+<td><code>None</code></td>
+<td>Custom row preprocessing function run during curation</td>
+</tr>
+<tr>
+<td><code>processing_batched</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whether <code>processing_fn</code> receives batches</td>
+</tr>
+<tr>
+<td><code>keep_columns</code></td>
+<td>bool</td>
+<td>Task-dependent</td>
+<td>Preserve source columns in addition to canonical columns</td>
+</tr>
+<tr>
+<td><code>val_split_ratio</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Create a validation split; must be between 0 and 1</td>
+</tr>
+<tr>
+<td><code>test_split_ratio</code></td>
+<td>float</td>
+<td><code>None</code></td>
+<td>Create a test split; must be between 0 and 1, with both ratios summing to less than 1</td>
+</tr>
+<tr>
+<td><code>split_seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Seed for deterministic ratio-based splitting</td>
+</tr>
+<tr>
+<td><code>curator_schema_gate</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable CuratorKIT's row-level format/schema validation gate. Set <code>False</code> only for datasets already in exact canonical shape that CuratorKIT's format-detector doesn't yet recognize (see <a href="../ISSUES/">Known Issues</a>): most format gaps have a proper fallback-schema fix instead, so this is a last resort.</td>
+</tr>
+<tr>
+<td><code>curator_clean</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable CuratorKIT text cleaning</td>
+</tr>
+<tr>
+<td><code>curator_dedup</code></td>
+<td>str</td>
+<td><code>"none"</code></td>
+<td>CuratorKIT dedup mode</td>
+</tr>
+<tr>
+<td><code>curator_use_tiktoken</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use tiktoken for CuratorKIT token counting</td>
+</tr>
+<tr>
+<td><code>curator_max_tokens</code></td>
+<td>int</td>
+<td><code>1_000_000</code></td>
+<td>Max tokens for CuratorKIT schema length checks</td>
 </tr>
 </tbody>
 </table>
@@ -1640,13 +3722,13 @@
 <tr>
 <td><code>max_steps</code></td>
 <td>int</td>
-<td><code>None</code></td>
-<td>Maximum training steps</td>
+<td><code>-1</code></td>
+<td>Maximum training steps; <code>-1</code> means train for the configured epochs</td>
 </tr>
 <tr>
 <td><code>epochs</code></td>
 <td>int</td>
-<td><code>None</code></td>
+<td><code>3</code></td>
 <td>Number of epochs</td>
 </tr>
 <tr>
@@ -1678,6 +3760,12 @@
 <td>float</td>
 <td><code>0.01</code></td>
 <td>Weight decay</td>
+</tr>
+<tr>
+<td><code>use_cache</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enable model key/value cache when supported by the trainer</td>
 </tr>
 <tr>
 <td><code>optimizer</code></td>
@@ -1809,7 +3897,7 @@
 <td><code>max_prompt_length</code></td>
 <td>int</td>
 <td><code>512</code></td>
-<td>Max prompt length</td>
+<td>Max prompt length. <strong>Removed from <code>GRPOConfig</code>/<code>DPOConfig</code>/<code>ORPOConfig</code>/<code>CPOConfig</code> in the pinned <code>trl==1.7.1</code></strong>, still read for logging/internal truncation in every GRPO-family and DPO trainer, but never forwarded to the underlying TRL config object; passing it directly (bypassing the wrapper) raises <code>TypeError: ...__init__() got an unexpected keyword argument 'max_prompt_length'</code>.</td>
 </tr>
 <tr>
 <td><code>max_target_length</code></td>
@@ -1839,19 +3927,19 @@
 <td><code>truncation_mode</code></td>
 <td>str</td>
 <td><code>"keep_end"</code></td>
-<td>Truncation mode</td>
+<td>Truncation mode, <strong>also removed from <code>ORPOConfig</code>/<code>CPOConfig</code></strong> in trl 1.7.1, same fate as <code>max_prompt_length</code> for those two algorithms only</td>
 </tr>
 <tr>
 <td><code>beta</code></td>
 <td>float</td>
 <td><code>0.1</code></td>
-<td>DPO beta parameter</td>
+<td>DPO/GRPO-family beta parameter (KL coefficient / inverse temperature depending on algorithm)</td>
 </tr>
 <tr>
 <td><code>loss_type</code></td>
 <td>str</td>
 <td><code>None</code></td>
-<td>Loss type</td>
+<td>Loss type. This single field means different valid value-sets for different algorithms (DPO: <code>sigmoid</code>/<code>hinge</code>/<code>ipo</code>/... as a <code>list[str]</code>; GRPO-family: <code>grpo</code>/<code>dapo</code>/<code>bnpo</code>/<code>dr_grpo</code>/<code>cispo</code>/<code>sapo</code>/<code>luspo</code>/<code>vespo</code>): setting a value valid for one algorithm but not another gets silently discarded/reset by that algorithm's post-backfill guard, if it has one.</td>
 </tr>
 <tr>
 <td><code>loss_weights</code></td>
@@ -1962,6 +4050,30 @@
 <td>Evaluation strategy</td>
 </tr>
 <tr>
+<td><code>dpo_eval_enabled</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable preference/DPO evaluation for supported preference trainers</td>
+</tr>
+<tr>
+<td><code>dpo_eval_max_samples</code></td>
+<td>int</td>
+<td><code>None</code></td>
+<td>Maximum samples used by DPO evaluation</td>
+</tr>
+<tr>
+<td><code>dpo_zero_shot_max_samples</code></td>
+<td>int</td>
+<td><code>50</code></td>
+<td>Maximum zero-shot DPO evaluation samples</td>
+</tr>
+<tr>
+<td><code>dpo_few_shot_max_samples</code></td>
+<td>int</td>
+<td><code>30</code></td>
+<td>Maximum few-shot DPO evaluation samples</td>
+</tr>
+<tr>
 <td><code>save_steps</code></td>
 <td>int</td>
 <td><code>500</code></td>
@@ -2018,14 +4130,14 @@
 <tr>
 <td><code>mask_truncated_completions</code></td>
 <td>bool</td>
-<td><code>True</code></td>
-<td>Mask truncated completions</td>
+<td><strong><code>False</code></strong></td>
+<td>Whether TRL should mask out any sample that didn't emit EOS before hitting <code>max_completion_length</code>. <strong>Changed from <code>True</code> to <code>False</code> (matching TRL's own <code>GRPOConfig</code> default)</strong>, the old <code>True</code> default caused TRL to zero out the <em>entire</em> completion mask (not just the overflow tokens) for any such sample, which drove loss and every parameter's gradient to exactly <code>0.0</code> whenever a chunk of a batch didn't finish within <code>max_completion_length</code>: very common for undertrained models on a short completion budget.</td>
 </tr>
 <tr>
 <td><code>scale_rewards</code></td>
 <td>str</td>
 <td><code>"group"</code></td>
-<td>Reward scaling (<code>group</code>, <code>batch</code>)</td>
+<td>Reward scaling (<code>group</code>, <code>batch</code>). <strong>Not exposed by the TRL backend at all</strong> for GRPO/GSPO/DAPO/Dr.GRPO, only Unsloth reads/forwards this field for those four algorithms.</td>
 </tr>
 <tr>
 <td><code>reward_weights</code></td>
@@ -2084,7 +4196,7 @@
 <tr>
 <td><code>group_by_length</code></td>
 <td>bool</td>
-<td><code>True</code></td>
+<td><code>False</code></td>
 <td>Group sequences by length</td>
 </tr>
 </tbody>
@@ -2438,9 +4550,41 @@
 <td><code>False</code></td>
 <td>Whiten advantages/rewards</td>
 </tr>
+<tr>
+<td><code>response_length</code></td>
+<td>int</td>
+<td><code>128</code></td>
+<td>Maximum generated response length for PPO rollouts</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>0.6</code></td>
+<td>Rollout sampling temperature</td>
+</tr>
+<tr>
+<td><code>stop_token</code></td>
+<td>str</td>
+<td><code>"eos"</code></td>
+<td>Stop-token behavior for rollout generation</td>
+</tr>
+<tr>
+<td><code>missing_eos_penalty</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Penalty applied when a rollout does not emit EOS</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Note</strong>: For optimal performance, ensure policy_model, reward_model, and value_model are from the same model family.</p>
+<p><strong>Reward requirement:</strong> PPO requires either a configured reward model, registered/custom
+reward functions, or an enabled custom reward-model training configuration. The
+policy, reference, reward, and value models should normally use compatible model
+families and tokenizers.</p>
+<p><strong>Rollout backend limitation:</strong> the installed <code>trl.experimental.ppo.PPOConfig</code>
+does not define <code>use_vllm</code>, <code>rollout_backend</code>, <code>vllm_gpu_memory_utilization</code>, or
+<code>vllm_tensor_parallel_size</code>. PPO therefore uses the Transformers rollout path;
+the shared vLLM settings used by GRPO-family trainers do not enable vLLM for PPO.</p>
+<p><strong>Unsloth-specific fixes/quirks</strong>: <code>first_true_indices</code>/<code>SIMPLE_CHAT_TEMPLATE</code> (used internally for reward-model sequence-length detection and chat-template fallback) were removed from <code>trl.trainer.utils</code> in trl&gt;=1.0, the Unsloth backend now has local fallback implementations for both. Precision selection now correctly checks <code>torch.cuda.is_bf16_supported()</code> (via <code>PrecisionHandler</code>) instead of assuming <code>bf16</code> whenever <code>precision="auto"</code>, which previously crashed on non-Ampere GPUs (e.g. Tesla T4). The <code>apply_qkv</code>/<code>apply_o</code> attention monkey-patch (needed for some architectures under Unsloth) now covers <code>Qwen2Attention</code> in addition to <code>Qwen3Attention</code>.</p>
 <hr />
 <h3 id="dpo-direct-preference-optimization">DPO (Direct Preference Optimization)<a class="headerlink" href="#dpo-direct-preference-optimization" title="Permanent link">&para;</a></h3>
 <p>DPO uses the common RL parameters plus:</p>
@@ -2462,21 +4606,21 @@
 </tr>
 <tr>
 <td><code>loss_type</code></td>
-<td>str</td>
+<td>str or <code>list[str]</code></td>
 <td><code>"sigmoid"</code></td>
-<td>Loss type (<code>sigmoid</code>, <code>hinge</code>, <code>ipo</code>, <code>kto</code>)</td>
+<td>DPO loss type(s). TRL accepts a string or list and normalizes a string to a list. Valid values: <code>sigmoid</code>, <code>hinge</code>, <code>ipo</code>, <code>exo_pair</code>, <code>nca_pair</code>, <code>robust</code>, <code>bco_pair</code>, <code>sppo_hard</code>, <code>aot</code>, <code>aot_unpaired</code>, <code>apo_zero</code>, <code>apo_down</code>, <code>discopop</code>, <code>sft</code>, <code>sigmoid_norm</code>.</td>
+</tr>
+<tr>
+<td><code>loss_weights</code></td>
+<td>list[float]</td>
+<td><code>None</code></td>
+<td>Optional weights for combined loss types; length must match <code>loss_type</code>.</td>
 </tr>
 <tr>
 <td><code>label_smoothing</code></td>
 <td>float</td>
 <td><code>0.0</code></td>
 <td>Label smoothing factor</td>
-</tr>
-<tr>
-<td><code>reference_free</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Reference-free DPO</td>
 </tr>
 <tr>
 <td><code>precompute_ref_log_probs</code></td>
@@ -2547,300 +4691,1219 @@
 </tr>
 </tbody>
 </table>
+<p><strong>Dataset note</strong>: for preference datasets that only ship full <code>chosen</code>/<code>rejected</code> conversation strings with no separate <code>prompt</code> column (e.g. <code>Anthropic/hh-rlhf</code>), aligntune derives <code>prompt</code> automatically by splitting at the last <code>"\n\nAssistant:"</code> turn marker, the standard hh-rlhf preprocessing recipe.</p>
 <hr />
-<h3 id="grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)<a class="headerlink" href="#grpo-group-relative-policy-optimization" title="Permanent link">&para;</a></h3>
+<h3 id="orpo-odds-ratio-preference-optimization">ORPO (Odds Ratio Preference Optimization)<a class="headerlink" href="#orpo-odds-ratio-preference-optimization" title="Permanent link">&para;</a></h3>
+<p>Config: <code>ORPOConfig</code>. ORPO folds preference optimization into a single SFT-style
+pass — no separate reference model and no reward model. It trains on
+<code>chosen</code>/<code>rejected</code> pairs, adding an odds-ratio penalty on the rejected response
+to the standard next-token loss. Available through both the TRL and Unsloth
+backends.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Weight of the odds-ratio preference term added to the SFT loss</td>
+</tr>
+<tr>
+<td><code>max_seq_length</code></td>
+<td>int</td>
+<td><code>1024</code></td>
+<td>Total sequence limit; mapped to TRL's <code>max_length</code></td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>int</td>
+<td><code>8</code></td>
+<td>Per-device train batch size</td>
+</tr>
+<tr>
+<td><code>gradient_accumulation_steps</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Gradient accumulation steps</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>5e-6</code></td>
+<td>Optimizer learning rate</td>
+</tr>
+<tr>
+<td><code>num_epochs</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Number of training epochs</td>
+</tr>
+<tr>
+<td><code>max_steps</code></td>
+<td>int</td>
+<td><code>-1</code></td>
+<td>Hard cap on optimizer steps; takes precedence over <code>num_epochs</code> when positive</td>
+</tr>
+</tbody>
+</table>
+<p>The installed TRL <code>ORPOConfig</code> (<code>trl==1.7.1</code>) does <strong>not</strong> accept
+<code>max_prompt_length</code> or <code>truncation_mode</code>; set the overall limit with
+<code>max_seq_length</code> only. Passing either directly (bypassing the wrapper) raises
+<code>TypeError</code>.</p>
+<hr />
+<h3 id="online-dpo">Online-DPO<a class="headerlink" href="#online-dpo" title="Permanent link">&para;</a></h3>
+<p>Config: <code>OnlineDPOConfig</code> (<code>trl.experimental.online_dpo</code>). Structurally different from DPO, uses <strong>prompt-only</strong> data (<code>task_type="grpo"</code>) and generates completions live during training, requiring reward functions/reward models rather than precomputed preference pairs.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>epochs</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Training epochs (higher default than other algorithms)</td>
+</tr>
+<tr>
+<td><code>gradient_accumulation_steps</code></td>
+<td>int</td>
+<td><code>2</code></td>
+<td>Grad accumulation (higher default than other algorithms)</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>5e-7</code></td>
+<td>LR, much lower than other algorithms' <code>5e-5</code>, appropriate for online RL</td>
+</tr>
+<tr>
+<td><code>max_new_tokens</code></td>
+<td>int</td>
+<td><code>64</code></td>
+<td>Tokens to generate per completion</td>
+</tr>
+<tr>
+<td><code>max_length</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Max total sequence length</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>0.9</code></td>
+<td>Generation temperature</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Nucleus sampling</td>
+</tr>
+<tr>
+<td><code>top_k</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>Top-k sampling</td>
+</tr>
+<tr>
+<td><code>repetition_penalty</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Repetition penalty</td>
+</tr>
+<tr>
+<td><code>beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>KL/temperature coefficient</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str</td>
+<td><code>'sigmoid'</code></td>
+<td>Online DPO loss variant</td>
+</tr>
+<tr>
+<td><code>missing_eos_penalty</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Penalty for completions missing EOS</td>
+</tr>
+<tr>
+<td><code>eval_steps</code></td>
+<td>int</td>
+<td><code>500</code></td>
+<td>Higher default than other algorithms' <code>100</code></td>
+</tr>
+<tr>
+<td><code>save_steps</code></td>
+<td>int</td>
+<td><code>500</code></td>
+<td>Higher default than other algorithms' <code>100</code></td>
+</tr>
+<tr>
+<td><code>save_total_limit</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Different default than other algorithms' <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>TRL-backend-only bug</strong>: <code>OnlineDPOConfig</code> defaults <code>bf16=True</code> unconditionally unless <code>fp16</code> is explicitly set, the <strong>Unsloth backend already fixes this</strong> (resolves the actual flags via <code>PrecisionHandler</code> for the detected GPU), but the <strong>TRL backend does not</strong>, so Online-DPO via the TRL backend can crash on pre-Ampere GPUs (V100, T4, etc.).</p>
+<p><strong>Unsloth-only fixes</strong>: generalizes the <code>apply_qkv</code>/<code>apply_o</code> attention patch to <code>Qwen2Attention</code> (fixes <code>'Qwen2Attention' object has no attribute 'apply_qkv'</code> during generation) and wraps Unsloth-loaded causal-LM reward models with a pooling <code>.score</code> head, since <code>FastLanguageModel.from_pretrained</code> doesn't wire one up automatically (governed by <code>config.model.reward_value_loading_type</code>).</p>
+<hr />
+<h3 id="spin-self-play-fine-tuning">SPIN (Self-Play Fine-Tuning)<a class="headerlink" href="#spin-self-play-fine-tuning" title="Permanent link">&para;</a></h3>
+<p>Config: <code>DPOConfig</code>. SPIN starts from an SFT-style dataset, generates synthetic rejected responses, uses the dataset completion as the chosen response, and runs DPO training each round. It is available through both the TRL and Unsloth backends.</p>
+<p>SPIN expects data that can be normalized to a prompt and a reference/completion; it does not require pre-built <code>chosen</code>/<code>rejected</code> pairs.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>num_rounds</code></td>
+<td>int</td>
+<td><code>2</code></td>
+<td>Number of self-play rounds</td>
+</tr>
+<tr>
+<td><code>samples_per_round</code></td>
+<td>int/None</td>
+<td><code>None</code></td>
+<td>Number of training rows used in each round. Each round consumes a non-overlapping slice; the dataset must contain at least <code>num_rounds * samples_per_round</code> rows.</td>
+</tr>
+<tr>
+<td><code>generation_batch_size</code></td>
+<td>int</td>
+<td><code>per_device_batch_size</code> (or <code>8</code>)</td>
+<td>Batch size used for synthetic response generation</td>
+</tr>
+<tr>
+<td><code>generation_temperature</code></td>
+<td>float</td>
+<td><code>0.7</code></td>
+<td>Temperature for opponent-response generation</td>
+</tr>
+<tr>
+<td><code>generation_max_length</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Max new tokens for opponent generation</td>
+</tr>
+<tr>
+<td><code>generation_max_prompt_length</code></td>
+<td>int/None</td>
+<td><code>max_prompt_length</code> (or <code>512</code>)</td>
+<td>Prompt token limit during generation</td>
+</tr>
+<tr>
+<td><code>generation_top_p</code></td>
+<td>float</td>
+<td><code>top_p</code> (or <code>0.95</code>)</td>
+<td>Nucleus-sampling parameter</td>
+</tr>
+<tr>
+<td><code>generation_top_k</code></td>
+<td>int</td>
+<td><code>top_k</code> (or <code>0</code>)</td>
+<td>Top-k sampling parameter</td>
+</tr>
+<tr>
+<td><code>generation_repetition_penalty</code></td>
+<td>float</td>
+<td><code>repetition_penalty</code> (or <code>1.0</code>)</td>
+<td>Repetition penalty during generation</td>
+</tr>
+<tr>
+<td><code>generation_do_sample</code></td>
+<td>bool/None</td>
+<td><code>None</code></td>
+<td>Sampling override; when unset, sampling follows whether temperature is positive</td>
+</tr>
+<tr>
+<td><code>generation_kwargs</code></td>
+<td>dict</td>
+<td><code>{}</code></td>
+<td>Additional generation arguments; these override SPIN defaults</td>
+</tr>
+<tr>
+<td><code>enable_thinking</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enables thinking mode when supported by the tokenizer/chat template</td>
+</tr>
+<tr>
+<td><code>dpo_steps_per_round</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>DPO training steps per round. A positive <code>max_steps</code> takes precedence.</td>
+</tr>
+<tr>
+<td><code>max_length</code>/<code>max_seq_length</code></td>
+<td>int</td>
+<td><code>2048</code></td>
+<td>Total sequence length</td>
+</tr>
+<tr>
+<td><code>beta</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>DPO KL-regularization strength</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str/list</td>
+<td><code>'sigmoid'</code> (wrapped in a list)</td>
+<td>Same list-wrapping requirement as DPO</td>
+</tr>
+<tr>
+<td><code>label_smoothing</code></td>
+<td>float</td>
+<td><code>0.0</code></td>
+<td>DPO label-smoothing value</td>
+</tr>
+<tr>
+<td><code>eval_samples</code></td>
+<td>int/None</td>
+<td><code>None</code></td>
+<td>Maximum validation rows used for response generation and DPO evaluation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evaluation:</strong> Set <code>eval_strategy="no"</code> to disable validation-pair generation and DPO evaluation. Otherwise, validation pairs are generated from a fixed validation subset each round; <code>eval_samples</code> can cap its size.</p>
+<p><strong>Performance:</strong> Synthetic responses are generated in batches at the start of each round. Runtime is primarily determined by the number of rows per round, generation batch size, number of rounds, and generation length. Use a small <code>samples_per_round</code> and completion length for smoke tests.</p>
+<hr />
+<h3 id="grpo-base-gspo-dapo-dr-grpo">GRPO (base) / GSPO / DAPO / Dr. GRPO<a class="headerlink" href="#grpo-base-gspo-dapo-dr-grpo" title="Permanent link">&para;</a></h3>
+<p>GSPO, DAPO, and Dr. GRPO are <strong>not independent implementations</strong>, both backends implement them as thin subclasses of the GRPO trainer that only override one or two config defaults (if not already set by the caller) before calling the GRPO parent unchanged. Their full hyperparameter surface <strong>is</strong> GRPO's surface below, plus:</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Override(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GSPO</strong></td>
+<td><code>importance_sampling_level</code> → <code>'sequence'</code>; <code>loss_type</code> → <code>'dapo'</code></td>
+</tr>
+<tr>
+<td><strong>DAPO</strong></td>
+<td><code>loss_type</code> → <code>'dapo'</code></td>
+</tr>
+<tr>
+<td><strong>Dr. GRPO</strong></td>
+<td><code>loss_type</code> → <code>'dr_grpo'</code></td>
+</tr>
+</tbody>
+</table>
 <p>GRPO uses the common RL parameters plus:</p>
 <table>
 <thead>
 <tr>
 <th>Parameter</th>
 <th>Type</th>
-<th>Default</th>
+<th>TRL Default</th>
+<th>Unsloth Default</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>grpo_alpha</code></td>
+<td><code>learning_rate</code></td>
 <td>float</td>
-<td><code>0.1</code></td>
-<td>GRPO alpha parameter</td>
+<td><code>1e-6</code></td>
+<td><code>2e-4</code></td>
+<td>Optimizer LR</td>
 </tr>
 <tr>
-<td><code>grpo_beta</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>GRPO beta parameter</td>
-</tr>
-<tr>
-<td><code>num_generations</code></td>
+<td><code>per_device_batch_size</code></td>
 <td>int</td>
-<td><code>batch_size</code></td>
-<td>Generations per prompt</td>
+<td><code>1</code></td>
+<td><code>4</code></td>
+<td>Per-device train batch size</td>
 </tr>
 <tr>
-<td><code>scale_rewards</code></td>
-<td>str</td>
-<td><code>"group"</code></td>
-<td>Reward scaling (<code>group</code>, <code>batch</code>)</td>
-</tr>
-<tr>
-<td><code>kl_coef</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>KL penalty coefficient</td>
-</tr>
-<tr>
-<td><code>cliprange</code></td>
-<td>float</td>
-<td><code>0.2</code></td>
-<td>Policy clip range</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h3 id="dapo-drgrpo">DAPO / DRGRPO<a class="headerlink" href="#dapo-drgrpo" title="Permanent link">&para;</a></h3>
-<p><strong>DAPO</strong> (Direct Advantage Policy Optimization) and <strong>DRGRPO</strong> (Distributional Robust GRPO) share identical parameters with GRPO:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>grpo_alpha</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>Alpha parameter</td>
-</tr>
-<tr>
-<td><code>grpo_beta</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>Beta parameter</td>
-</tr>
-<tr>
-<td><code>num_generations</code></td>
+<td><code>gradient_accumulation_steps</code></td>
 <td>int</td>
-<td><code>batch_size</code></td>
-<td>Generations per prompt</td>
+<td><code>32</code></td>
+<td><code>1</code></td>
+<td>Grad accumulation</td>
 </tr>
 <tr>
-<td><code>scale_rewards</code></td>
-<td>str</td>
-<td><code>"group"</code></td>
-<td>Reward scaling</td>
-</tr>
-<tr>
-<td><code>kl_coef</code></td>
+<td><code>max_grad_norm</code></td>
 <td>float</td>
-<td><code>0.1</code></td>
-<td>KL penalty coefficient</td>
+<td><code>1.0</code></td>
+<td><code>0.5</code></td>
+<td>Gradient clipping</td>
 </tr>
 <tr>
-<td><code>cliprange</code></td>
-<td>float</td>
-<td><code>0.2</code></td>
-<td>Policy clip range</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h3 id="gspo-generalized-scoring-proximal-objective">GSPO (Generalized Scoring Proximal Objective)<a class="headerlink" href="#gspo-generalized-scoring-proximal-objective" title="Permanent link">&para;</a></h3>
-<p>GSPO uses scoring-based policy optimization:</p>
-<p><strong>Note</strong>: GSPO is only supported by TRL backend, not Unsloth.</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>gspo_gamma</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>GSPO gamma parameter</td>
-</tr>
-<tr>
-<td><code>gspo_delta</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>GSPO delta parameter</td>
-</tr>
-<tr>
-<td><code>num_generations</code></td>
-<td>int</td>
-<td><code>batch_size</code></td>
-<td>Generations per prompt</td>
-</tr>
-<tr>
-<td><code>scale_rewards</code></td>
-<td>str</td>
-<td><code>"group"</code></td>
-<td>Reward scaling strategy</td>
-</tr>
-<tr>
-<td><code>kl_coef</code></td>
-<td>float</td>
-<td><code>0.1</code></td>
-<td>KL penalty coefficient</td>
-</tr>
-<tr>
-<td><code>cliprange</code></td>
-<td>float</td>
-<td><code>0.2</code></td>
-<td>Policy clip range</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h3 id="neural-mirror-grpo">Neural Mirror GRPO<a class="headerlink" href="#neural-mirror-grpo" title="Permanent link">&para;</a></h3>
-<p>Neural Mirror GRPO combines GRPO with neural mirror descent for improved optimization:</p>
-<p><strong>Base GRPO Parameters</strong> plus neural mirror-specific optimizations.</p>
-<p>Uses standard GRPO parameters with enhanced optimization through mirror descent. No additional unique parameters.</p>
-<hr />
-<h3 id="meta-es">Meta-ES<a class="headerlink" href="#meta-es" title="Permanent link">&para;</a></h3>
-<p>Meta-ES uses evolution strategies for meta-learning the reward function:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>meta_iterations</code></td>
-<td>int</td>
-<td><code>15</code></td>
-<td>Number of meta-iterations</td>
-</tr>
-<tr>
-<td><code>patience</code></td>
-<td>int</td>
-<td><code>5</code></td>
-<td>Early stopping patience</td>
-</tr>
-<tr>
-<td><code>min_delta</code></td>
-<td>float</td>
-<td><code>0.001</code></td>
-<td>Minimum improvement for early stopping</td>
-</tr>
-<tr>
-<td><code>init_scale</code></td>
-<td>float</td>
-<td><code>0.01</code></td>
-<td>Initial parameter scale</td>
-</tr>
-<tr>
-<td><code>N</code></td>
+<td><code>warmup_steps</code></td>
 <td>int</td>
 <td><code>10</code></td>
-<td>Population size (must be even)</td>
+<td><code>0</code></td>
+<td>LR warmup steps</td>
 </tr>
 <tr>
-<td><code>T</code></td>
+<td><code>beta</code> / <code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td><code>0.1</code></td>
+<td>KL coefficient</td>
+</tr>
+<tr>
+<td><code>epsilon</code> / <code>cliprange</code></td>
+<td>float</td>
+<td><code>0.2</code></td>
+<td><code>0.2</code></td>
+<td>Clip range</td>
+</tr>
+<tr>
+<td><code>epsilon_high</code></td>
+<td>float or <code>None</code></td>
+<td><code>None</code></td>
+<td><code>None</code></td>
+<td>Optional asymmetric upper clip bound; available through generic config backfill</td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str</td>
+<td><code>'grpo'</code></td>
+<td><code>'grpo'</code></td>
+<td>Exactly one of <code>grpo</code>, <code>dapo</code>, <code>bnpo</code>, <code>dr_grpo</code>, <code>cispo</code>, <code>sapo</code>, <code>luspo</code>, <code>vespo</code>; unsupported values (including DPO <code>'sigmoid'</code>) reset to <code>'grpo'</code></td>
+</tr>
+<tr>
+<td><code>importance_sampling_level</code></td>
+<td>str</td>
+<td><code>'token'</code></td>
+<td><code>'token'</code></td>
+<td><code>'token'</code> or <code>'sequence'</code> (GSPO sets <code>'sequence'</code>)</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
 <td>int</td>
-<td><code>100</code></td>
-<td>Training steps per evaluation</td>
+<td><code>4</code></td>
+<td><code>= per_device_batch_size</code></td>
+<td>Generations per prompt</td>
+</tr>
+<tr>
+<td><code>max_completion_length</code></td>
+<td>int</td>
+<td><code>256</code></td>
+<td>derived: 40% of <code>max_seq_length</code></td>
+<td>Max completion tokens</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>0.7</code></td>
+<td><code>0.7</code></td>
+<td>Sampling temperature</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td><code>0.9</code></td>
+<td>Nucleus sampling</td>
+</tr>
+<tr>
+<td><code>top_k</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td><code>0</code></td>
+<td>Top-k sampling; <code>0</code> disables it</td>
+</tr>
+<tr>
+<td><code>reward_weights</code></td>
+<td>list[float]</td>
+<td><code>None</code></td>
+<td><code>None</code></td>
+<td>One weight per configured reward function</td>
+</tr>
+<tr>
+<td><code>max_steps</code></td>
+<td>int</td>
+<td><code>500</code></td>
+<td><code>500</code></td>
+<td>Max training steps</td>
+</tr>
+<tr>
+<td><code>rollout_backend</code></td>
+<td>str</td>
+<td><code>'hf'</code></td>
+<td><em>(not exposed)</em></td>
+<td><code>'hf'</code> or <code>'vllm'</code>: <strong>TRL-only</strong></td>
+</tr>
+<tr>
+<td><code>vllm_gpu_memory_utilization</code></td>
+<td>float</td>
+<td><code>0.7</code></td>
+<td><em>(not exposed)</em></td>
+<td>vLLM GPU mem fraction. <strong>TRL-only</strong></td>
+</tr>
+<tr>
+<td><code>vllm_tensor_parallel_size</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td><em>(not exposed)</em></td>
+<td>vLLM tensor-parallel degree. <strong>TRL-only</strong></td>
+</tr>
+<tr>
+<td><code>scale_rewards</code></td>
+<td>str</td>
+<td><code>'group'</code></td>
+<td><code>'group'</code></td>
+<td>Reward normalization scope; Unsloth forwards explicitly, TRL receives it through generic backfill</td>
+</tr>
+<tr>
+<td><code>mask_truncated_completions</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td><code>True</code></td>
+<td>Whether to mask truncated completions; Unsloth forwards explicitly, TRL receives it through generic backfill</td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>TRL-vs-Unsloth capability gap</strong>: Unsloth reads <code>scale_rewards</code> and <code>mask_truncated_completions</code> explicitly, while TRL relies on generic config backfill for these fields. <code>epsilon_high</code> is also available through that backfill path rather than the explicit constructor arguments.</p>
+<hr />
+<h3 id="gbmpo-group-based-mirror-po">GBMPO (Group-Based Mirror PO)<a class="headerlink" href="#gbmpo-group-based-mirror-po" title="Permanent link">&para;</a></h3>
+<p>Both backends <strong>subclass the full GRPO trainer</strong> and patch <code>_compute_loss</code>: GBMPO inherits every GRPO parameter above, plus:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gbmpo_divergence_type</code> / <code>divergence_type</code></td>
+<td>str</td>
+<td><code>'l2'</code> at the trainer level, but <strong><code>create_rl_trainer(algorithm="gbmpo")</code> defaults it to <code>'l2kl'</code></strong></td>
+<td>One of <code>l2</code>, <code>l2kl</code>, <code>prob_l2</code>, <code>prob_l2kl</code></td>
+</tr>
+<tr>
+<td><code>gbmpo_l2_coefficient</code> / <code>l2_coefficient</code></td>
+<td>float</td>
+<td><code>0.0001</code></td>
+<td>λ coefficient for the added L2 penalty term</td>
+</tr>
+</tbody>
+</table>
+<p>If <code>divergence_type</code> is L2-only (<code>l2</code>/<code>prob_l2</code>) and <code>beta==0.0</code>, <code>beta</code> is silently bumped to <code>1e-10</code> for TRL compatibility.</p>
+<hr />
+<h3 id="counterfactual-grpo">Counterfactual GRPO<a class="headerlink" href="#counterfactual-grpo" title="Permanent link">&para;</a></h3>
+<p>Config: <code>GRPOConfig</code>. This has the largest TRL/Unsloth backend divergence of any algorithm in this doc, <strong>learning rate, gradient accumulation, precision-auto-mapping, and max_completion_length/max_prompt_length defaults all differ between backends</strong>; check the table below carefully before assuming parity.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>TRL Default</th>
+<th>Unsloth Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>1e-7</code></td>
+<td><code>5e-5</code></td>
+</tr>
+<tr>
+<td><code>gradient_accumulation_steps</code></td>
+<td>int</td>
+<td><code>32</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>max_grad_norm</code></td>
+<td>float</td>
+<td><code>0.0</code> (disables clipping)</td>
+<td><code>0.0</code></td>
+</tr>
+<tr>
+<td><code>beta</code> / <code>kl_coef</code></td>
+<td>float</td>
+<td><code>0.005</code></td>
+<td><code>0.005</code></td>
+</tr>
+<tr>
+<td><code>loss_type</code></td>
+<td>str</td>
+<td><code>'dapo'</code> (sigmoid backfill guarded)</td>
+<td><code>'dapo'</code> (sigmoid backfill guarded)</td>
+</tr>
+<tr>
+<td><code>max_completion_length</code></td>
+<td>int</td>
+<td><code>256</code></td>
+<td><code>768</code></td>
+</tr>
+<tr>
+<td><code>max_prompt_length</code></td>
+<td>int</td>
+<td><code>512</code> (not forwarded)</td>
+<td><code>256</code> (not forwarded)</td>
+</tr>
+<tr>
+<td><code>precision="auto"</code> maps to</td>
+<td>n/a</td>
+<td><code>bf16</code></td>
+<td><code>fp16</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Counterfactual-importance-weighting parameters</strong> (identical names/defaults in both backends):</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>boost_factor</code></td>
+<td>float</td>
+<td><code>2.0</code></td>
+<td>Max importance-weight multiplier for high-importance tokens</td>
+</tr>
+<tr>
+<td><code>min_weight</code></td>
+<td>float</td>
+<td><code>0.5</code></td>
+<td>Minimum importance-weight multiplier</td>
+</tr>
+<tr>
+<td><code>answer_weight</code></td>
+<td>float</td>
+<td><code>1.5</code></td>
+<td>Weight applied to the "answer region" of the completion</td>
+</tr>
+<tr>
+<td><code>max_spans</code></td>
+<td>int</td>
+<td><code>10</code></td>
+<td>Max spans considered per completion for span-based importance detection</td>
+</tr>
+<tr>
+<td><code>method_name</code></td>
+<td>str</td>
+<td><code>'counterfactual'</code></td>
+<td><code>"baseline"</code> maps to vanilla GRPO weighting</td>
+</tr>
+<tr>
+<td><code>random_importance</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use random (not counterfactual) importance weights</td>
+</tr>
+<tr>
+<td><code>invert_importance</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Invert importance direction</td>
+</tr>
+<tr>
+<td><code>enable_gradient_conservation</code></td>
+<td>bool</td>
+<td><code>True</code> via <code>create_rl_trainer()</code>/the trainer class default (⚠️ the trainer's own config-read fallback is <code>False</code>: only matters if going around the factory)</td>
+<td>Normalize weights to mean=1.0 to conserve total gradient magnitude</td>
+</tr>
+<tr>
+<td><code>weight_debug</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Print detailed per-step weight-computation debug info</td>
+</tr>
+<tr>
+<td><code>weighting_mode</code></td>
+<td>str</td>
+<td>derived from the legacy flags above if unset</td>
+<td><code>"counterfactual"</code>, <code>"random"</code>, <code>"inverted"</code>, or <code>"vanilla"</code></td>
+</tr>
+<tr>
+<td><code>extra_verbose</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Per-sample JSONL logging (not exposed by <code>create_rl_trainer()</code>'s own signature)</td>
+</tr>
+<tr>
+<td><code>extra_verbose_sample_rate</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Fraction of samples logged when <code>extra_verbose=True</code></td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>Unsloth backend does not read <code>random_importance</code>/<code>invert_importance</code> at all</strong> in <code>setup_trainer()</code>: setting either directly has no effect there unless <code>weighting_mode</code> is set explicitly.</p>
+<p>⚠️ <strong>Design note, not a bug</strong>: <code>TRLCounterFactGRPOTrainer</code>'s reward computation is hardcoded to domain-specific math/code-execution logic and never uses <code>self.reward_functions</code>/user-configured rewards at all, regardless of what's passed via <code>rewards=[...]</code>.</p>
+<hr />
+<h3 id="pace">PACE<a class="headerlink" href="#pace" title="Permanent link">&para;</a></h3>
+<p>PACE subclasses the GRPO trainer.</p>
+<p><strong>PACE-specific parameters</strong> (identical in both backends):</p>
+<p>Curriculum sampling (<code>curriculum_enabled</code>) is not available in this build; it is
+always forced to <code>False</code> regardless of what's passed. Set <code>baseline_enabled</code>
+and/or <code>use_baseline_advantages</code> instead.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>baseline_enabled</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enables persistent per-prompt baseline tracking</td>
+</tr>
+<tr>
+<td><code>baseline_rho_min</code></td>
+<td>float</td>
+<td><code>0.875</code></td>
+<td>Min EMA forgetting factor</td>
+</tr>
+<tr>
+<td><code>baseline_rho_max</code></td>
+<td>float</td>
+<td><code>0.96</code></td>
+<td>Max EMA forgetting factor</td>
+</tr>
+<tr>
+<td><code>baseline_D_half</code></td>
+<td>float</td>
+<td><code>0.5</code></td>
+<td>KL half-life for adaptive forgetting</td>
+</tr>
+<tr>
+<td><code>baseline_warm_start</code></td>
+<td>str/None</td>
+<td><code>None</code></td>
+<td>Path to a JSON/PKL warm-start file for the baseline table</td>
+</tr>
+<tr>
+<td><code>use_baseline_advantages</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>If <code>True</code>, replaces <code>A = r - mean(r_group)</code> with <code>A = r - v̂(x)</code> (SPO-style)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Generic GRPO-family parameters, TRL backend</strong>: <code>max_steps</code> (<strong>10</strong>, unusually low), <code>num_generations</code> (<strong>8</strong>), <code>max_completion_length</code> (<strong>512</strong>), <code>save_safetensors</code> (<code>True</code>, <strong>not forwarded</strong>, removed from the installed <code>GRPOConfig</code>, same fate as <code>max_prompt_length</code>): remaining fields match base GRPO's TRL defaults.</p>
+<p><strong>Generic GRPO-family parameters, Unsloth backend</strong>: reads a smaller subset than TRL (no <code>save_strategy</code>/<code>save_total_limit</code>/<code>load_best_model_at_end</code>/<code>save_safetensors</code> forwarding), and <code>max_steps</code> defaults to <strong>1</strong> (not 10, differs from TRL PACE). Does <strong>not</strong> call the config-backfill mechanism at all (unlike TRL PACE), so no implicit <code>config.train</code> field gap-filling happens for Unsloth PACE.</p>
+<hr />
+<h3 id="es-evolution-strategies-non-meta">ES (Evolution Strategies, non-meta)<a class="headerlink" href="#es-evolution-strategies-non-meta" title="Permanent link">&para;</a></h3>
+<p>A from-scratch black-box optimizer over LoRA weights, no TRL trainer class is involved at all (directly perturbs <code>peft</code> LoRA A/B matrices and evaluates via a vLLM rollout backend).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>population_size</code></td>
+<td>int</td>
+<td><code>64</code></td>
+<td>Perturbed LoRA variants generated per iteration</td>
 </tr>
 <tr>
 <td><code>sigma</code></td>
 <td>float</td>
-<td><code>0.01</code></td>
-<td>ES noise standard deviation</td>
+<td><code>0.5</code></td>
+<td>Std-dev of Gaussian noise added to LoRA A/B matrices</td>
 </tr>
 <tr>
-<td><code>sigma_decay</code></td>
-<td>float</td>
-<td><code>0.99</code></td>
-<td>ES sigma decay per iteration</td>
-</tr>
-<tr>
-<td><code>alpha</code></td>
+<td><code>learning_rate</code></td>
 <td>float</td>
 <td><code>0.01</code></td>
-<td>ES learning rate</td>
+<td>ES weight-update learning rate</td>
 </tr>
 <tr>
-<td><code>mirror_coefficient</code></td>
+<td><code>prompt_batch_size</code></td>
+<td>int</td>
+<td><code>4</code></td>
+<td>Prompts sampled per iteration</td>
+</tr>
+<tr>
+<td><code>max_new_tokens</code></td>
+<td>int</td>
+<td><code>256</code></td>
+<td>Max generation length</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
 <td>float</td>
-<td><code>0.0001</code></td>
-<td>Mirror descent coefficient</td>
+<td><code>0.7</code></td>
+<td>Sampling temperature</td>
 </tr>
 <tr>
-<td><code>debug_mode</code></td>
-<td>bool</td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><code>top_p</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td>Nucleus sampling</td>
 </tr>
 <tr>
-<td><code>eval_timeout</code></td>
+<td><code>top_k</code></td>
 <td>int</td>
-<td><code>5</code></td>
-<td>Evaluation timeout (seconds)</td>
+<td><code>-1</code></td>
+<td>Top-k sampling; <code>-1</code> disables</td>
 </tr>
 <tr>
-<td><code>eval_max_tokens</code></td>
-<td>int</td>
-<td><code>512</code></td>
-<td>Max tokens for evaluation</td>
-</tr>
-<tr>
-<td><code>eval_k</code></td>
+<td><code>num_return_sequences</code></td>
 <td>int</td>
 <td><code>1</code></td>
-<td>Top-k sampling for evaluation</td>
+<td>Generations per prompt per adapter</td>
 </tr>
 <tr>
-<td><code>eval_temperature</code></td>
-<td>float</td>
-<td><code>0.8</code></td>
-<td>Temperature for evaluation</td>
+<td><code>num_iterations</code></td>
+<td>int</td>
+<td><code>1000</code></td>
+<td>Total ES iterations</td>
 </tr>
 <tr>
-<td><code>num_workers</code></td>
+<td><code>save_freq</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Checkpoint save interval (iterations)</td>
+</tr>
+<tr>
+<td><code>tensor_parallel_size</code></td>
 <td>int</td>
 <td><code>1</code></td>
-<td>Number of parallel workers</td>
+<td>vLLM tensor parallelism</td>
 </tr>
 <tr>
-<td><code>no_wandb</code></td>
+<td><code>dtype</code></td>
+<td>str</td>
+<td><code>"auto"</code></td>
+<td>vLLM model dtype</td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>int</td>
+<td><code>42</code></td>
+<td>Reproducibility seed</td>
+</tr>
+<tr>
+<td><code>reward_type</code></td>
+<td>str</td>
+<td><code>"math_correctness"</code></td>
+<td>Default reward fn if <code>config.rewards</code> isn't provided</td>
+</tr>
+<tr>
+<td><code>use_unsloth</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Disable Weights &amp; Biases logging</td>
-</tr>
-<tr>
-<td><code>wandb_project</code></td>
-<td>str</td>
-<td><code>"neural-mirror-es"</code></td>
-<td>W&amp;B project name</td>
-</tr>
-<tr>
-<td><code>resume</code></td>
-<td>str</td>
-<td><code>None</code></td>
-<td>Path to checkpoint for resuming</td>
+<td>Load the base model backbone via Unsloth</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Usage Notes:</strong>
-- Meta-ES optimizes the reward function itself through evolution
-- Population size <code>N</code> must be even for symmetric perturbations
-- <code>T</code> controls how long each candidate is trained before evaluation
-- <code>sigma</code> controls exploration; decay helps convergence
-- Suitable for scenarios where reward design is critical</p>
+<p>Related nested configs via <code>create_es_trainer(...)</code>: <code>ESPeftConfig</code> (<code>rank=8, alpha=16, dropout=0.05, peft_type="lora"</code>), <code>ESModelConfig</code> (<code>dtype="auto", max_seq_length=2048, use_peft=True</code>), <code>ESDatasetConfig</code> (standard dataset/curator params, same shape as the RL common Dataset Configuration above).</p>
+<hr />
+<h2 id="distillation-parameters">Distillation Parameters<a class="headerlink" href="#distillation-parameters" title="Permanent link">&para;</a></h2>
+<p>Both distillation methods share a base config resolution: Standard Distillation always routes through the <code>"distillation_offline"</code> task type regardless of <code>on_policy</code>; SDFT uses its own fixed task type. Every method's underlying TRL config class is in <code>trl.experimental.*</code>.</p>
+<p>Distillation data always uses the <code>distillation_offline</code> task schema so TRL's collator receives the required <code>messages</code> structure. When no validation dataset is available, the distillation backends automatically set <code>eval_strategy="no"</code> and disable evaluation.</p>
+<h3 id="standard-offline-distillation">Standard / Offline Distillation<a class="headerlink" href="#standard-offline-distillation" title="Permanent link">&para;</a></h3>
+<p>Config: <code>trl.experimental.distillation.DistillationConfig</code>.</p>
+<p><strong>Backend status:</strong> use <code>backend="trl"</code> as the recommended Standard Distillation path. <code>backend="unsloth"</code> is experimental and intended for acceleration; review the Unsloth-specific teacher-loading and on-policy generation caveats below before using it in production.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>learning_rate</code></td>
+<td>float</td>
+<td><code>5e-5</code> (overrides TRL's own default of <code>1e-6</code>)</td>
+<td>LR</td>
+</tr>
+<tr>
+<td><code>on_policy</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td><code>False</code> = offline teacher/data completions; <code>True</code> = online student samples. This is the recommended binary API.</td>
+</tr>
+<tr>
+<td><code>lmbda</code></td>
+<td>float</td>
+<td>derived from <code>on_policy</code> (<code>0.0</code> offline, <code>1.0</code> online)</td>
+<td>Explicit <code>lmbda</code> takes precedence; values between 0 and 1 mix offline and on-policy batches</td>
+</tr>
+<tr>
+<td><code>beta</code></td>
+<td>float</td>
+<td><code>1.0</code> (overrides TRL's own default, also <code>1.0</code> coincidentally)</td>
+<td>Divergence type: 0=forward KL, 0.5=JSD, 1=reverse KL</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>3.0</code> (via config-backfill; overrides TRL's own default of <code>1.0</code>)</td>
+<td>KD softmax temperature</td>
+</tr>
+<tr>
+<td><code>reverse_kl_top_1_mode</code></td>
+<td>str</td>
+<td><code>'sampled'</code></td>
+<td>Reverse-KL top-1 selection: <code>'sampled'</code> or <code>'argmax'</code>; applies when <code>beta &gt; 0</code> and <code>loss_top_k == 1</code></td>
+</tr>
+<tr>
+<td><code>loss_top_k</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Number of top tokens used for the KL/JSD support; <code>0</code> uses the full vocabulary</td>
+</tr>
+<tr>
+<td><code>loss_add_tail</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Include the remaining probability mass outside the selected top-k support</td>
+</tr>
+<tr>
+<td><code>max_length</code></td>
+<td>int</td>
+<td><code>1024</code> (TRL)</td>
+<td>Total prompt plus completion length; AlignTune's model default is commonly <code>512</code></td>
+</tr>
+<tr>
+<td><code>max_prompt_length</code></td>
+<td>int or <code>None</code></td>
+<td><code>None</code></td>
+<td>Prompt truncation limit; auto-derived from <code>max_length - max_completion_length</code> when unset</td>
+</tr>
+<tr>
+<td><code>max_completion_length</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Maximum generated completion length for on-policy training</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Completions generated per prompt in on-policy mode</td>
+</tr>
+<tr>
+<td><code>generation_batch_size</code></td>
+<td>int or <code>None</code></td>
+<td><code>None</code></td>
+<td>Unique prompts generated per optimizer step; auto-derived when unset</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>float</td>
+<td><code>0.95</code></td>
+<td>Nucleus sampling for on-policy generation</td>
+</tr>
+<tr>
+<td><code>top_k</code></td>
+<td>int</td>
+<td><code>0</code></td>
+<td>Top-k sampling for on-policy generation; <code>0</code> disables it</td>
+</tr>
+<tr>
+<td><code>disable_dropout</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Disable dropout in student and teacher models</td>
+</tr>
+<tr>
+<td><code>use_vllm</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use vLLM for on-policy student generation</td>
+</tr>
+<tr>
+<td><code>vllm_mode</code></td>
+<td>str</td>
+<td><code>'colocate'</code></td>
+<td>vLLM mode: <code>'colocate'</code> or <code>'server'</code></td>
+</tr>
+<tr>
+<td><code>vllm_gpu_memory_utilization</code></td>
+<td>float</td>
+<td><code>0.3</code></td>
+<td>GPU memory fraction for colocated vLLM</td>
+</tr>
+<tr>
+<td><code>vllm_tensor_parallel_size</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>vLLM tensor-parallel degree</td>
+</tr>
+<tr>
+<td><code>vllm_server_base_url</code></td>
+<td>str or <code>None</code></td>
+<td><code>None</code></td>
+<td>External vLLM server URL when <code>vllm_mode='server'</code></td>
+</tr>
+<tr>
+<td><code>vllm_max_model_length</code></td>
+<td>int or <code>None</code></td>
+<td><code>None</code></td>
+<td>Maximum sequence length for the vLLM engine</td>
+</tr>
+<tr>
+<td><code>vllm_sync_frequency</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Student-weight synchronization frequency</td>
+</tr>
+<tr>
+<td><code>vllm_enable_sleep_mode</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Offload vLLM weights during optimizer steps</td>
+</tr>
+<tr>
+<td><code>log_completions</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Log generated prompt/completion samples</td>
+</tr>
+<tr>
+<td><code>log_completions_steps</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Logging interval for generated samples</td>
+</tr>
+<tr>
+<td><code>num_completions_to_print</code></td>
+<td>int or <code>None</code></td>
+<td><code>None</code></td>
+<td>Number of generated samples to print</td>
+</tr>
+<tr>
+<td><code>alpha</code></td>
+<td>n/a</td>
+<td><strong>not forwarded</strong>. <code>DistillationConfig</code> has no <code>alpha</code> field, so this is validated by aligntune's own dataclass but always dropped as an invalid param</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Off-policy vs on-policy:</strong></p>
+<ul>
+<li><strong>Off-policy (default):</strong> <code>on_policy=False</code> resolves to <code>lmbda=0.0</code> and trains from dataset/teacher completions.</li>
+<li><strong>On-policy:</strong> <code>on_policy=True</code> resolves to <code>lmbda=1.0</code> and generates completions from the student during training.</li>
+<li><strong>Mixed:</strong> pass an explicit <code>lmbda</code> between <code>0.0</code> and <code>1.0</code>; an explicit value takes precedence over <code>on_policy</code>.</li>
+</ul>
+<p><strong>Unsloth-only</strong>: <code>max_length</code> pinned equal to <code>config.model.max_seq_length</code> (avoids a logits/labels length desync); <code>max_completion_length</code> capped to <code>min(configured value or 256, max_seq_length // 2)</code>; precision resolved via <code>PrecisionHandler</code> for pre-Ampere safety.</p>
+<p><strong>Teacher-loading quirk (Unsloth backend only)</strong>: the teacher is loaded through Unsloth too (auto-detected via matching <code>AutoConfig.model_type</code> with the student): loading the student through Unsloth first monkey-patches that architecture's attention/norm classes process-wide, so a plain-HF-loaded teacher of the <em>same</em> architecture family would crash (<code>'Qwen2Attention' object has no attribute 'apply_qkv'</code>). Different-family pairs default to plain HF loading; override via <code>config.model.teacher_use_unsloth</code>.</p>
+<p><strong>Online distillation (<code>on_policy=True</code>), Unsloth backend only, fixed</strong>: Unsloth's patched <code>model.generate()</code> forces <code>torch.inference_mode()</code> internally for speed, so the generated completion tokens come back as inference tensors. Any later autograd op that touches them, the student log-probs gather in TRL's on-policy divergence loss, crashed with <code>RuntimeError: Inference tensors cannot be saved for backward</code>. Unsloth's own RL integration works around this for its supported trainers (GRPO etc.) by cloning the <code>generate()</code> output before use; <code>DistillationTrainer</code> isn't one of those, so it never got the fix. <code>UnslothDistillationTrainer.train()</code> now wraps <code>self.student_model.generate</code> with the same clone-on-output pattern for online mode.</p>
+<h3 id="sdft-self-distillation-fine-tuning">SDFT (Self-Distillation Fine-Tuning)<a class="headerlink" href="#sdft-self-distillation-fine-tuning" title="Permanent link">&para;</a></h3>
+<p>Config: <code>trl.experimental.sdft.SDFTConfig</code>: its own experimental trainer, not <code>SFTConfig</code>-based despite the name.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>teacher_model_kind</code></td>
+<td>str</td>
+<td><code>"base"</code></td>
+<td><code>"base"</code> = frozen base checkpoint as teacher; <code>"live"</code>/<code>"ema"</code> = EMA of current student</td>
+</tr>
+<tr>
+<td><code>distillation_mode</code></td>
+<td>str</td>
+<td><code>"topk_logits"</code></td>
+<td>One of <code>"sampled_token"</code>, <code>"topk_logits"</code>, <code>"full_logits"</code></td>
+</tr>
+<tr>
+<td><code>distillation_alpha</code></td>
+<td>float</td>
+<td><code>0.5</code></td>
+<td>Weight blending CE loss vs. distillation loss</td>
+</tr>
+<tr>
+<td><code>distillation_topk</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Number of teacher logits retained for <code>topk_logits</code> mode</td>
+</tr>
+<tr>
+<td><code>teacher_update_rate</code></td>
+<td>float</td>
+<td><code>0.05</code></td>
+<td>EMA teacher update rate for live/EMA teacher modes</td>
+</tr>
+<tr>
+<td><code>teacher_sync_steps</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Optimizer-step interval for synchronizing the live/EMA teacher</td>
+</tr>
+<tr>
+<td><code>generate_from_teacher</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Use the privileged-context teacher prompt for rollout generation instead of the plain student prompt</td>
+</tr>
+<tr>
+<td><code>num_generations</code></td>
+<td>int</td>
+<td><code>8</code></td>
+<td>Sampled generations per example</td>
+</tr>
+<tr>
+<td><code>max_prompt_length</code></td>
+<td>int</td>
+<td><code>512</code></td>
+<td>Maximum prompt length used for SDFT rollouts</td>
+</tr>
+<tr>
+<td><code>max_completion_length</code></td>
+<td>int</td>
+<td><code>256</code></td>
+<td>Max generated completion length</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Rollout sampling temperature</td>
+</tr>
+<tr>
+<td><code>top_p</code> / <code>top_k</code></td>
+<td>float / int</td>
+<td><code>1.0</code> / <code>0</code></td>
+<td>Rollout sampling controls</td>
+</tr>
+<tr>
+<td><code>repetition_penalty</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Rollout repetition penalty</td>
+</tr>
+<tr>
+<td><code>generation_batch_size</code></td>
+<td>int/None</td>
+<td><code>None</code></td>
+<td>Batch size used for rollout generation</td>
+</tr>
+<tr>
+<td><code>steps_per_generation</code></td>
+<td>int/None</td>
+<td><code>None</code></td>
+<td>Reuse a rollout batch for this many optimizer steps</td>
+</tr>
+</tbody>
+</table>
+<p>When no validation dataset is supplied, the SDFT backends force
+<code>eval_strategy="no"</code> and disable evaluation. Set an evaluation strategy only
+when a validation split is available.</p>
+<p>Any other <code>SDFTConfig</code> field (e.g. <code>distillation_topk</code>, <code>teacher_update_rate</code>, <code>teacher_sync_steps</code>, <code>max_prompt_length</code>) is only reachable via the generic backfill mechanism or <code>extra_params</code>.</p>
+<p>SDFT requires a <code>privileged_context</code> column after DataManager processing. For
+datasets using another name, set <code>privileged_context_column</code> to the raw hint,
+feedback, explanation, or retrieval-context column (for example, <code>"input"</code> for
+an Alpaca-shaped dataset).</p>
+<hr />
+<h2 id="raft-retrieval-augmented-fine-tuning">RAFT (Retrieval Augmented Fine-Tuning)<a class="headerlink" href="#raft-retrieval-augmented-fine-tuning" title="Permanent link">&para;</a></h2>
+<p>Config: <code>RaftTrainerConfig</code>, subclassing <code>trl.SFTTrainer</code> directly. ⚠️ <strong>Not wired into <code>BackendFactory</code></strong>, only reachable via the standalone <code>create_raft_trainer()</code> function, unlike every other algorithm in this doc.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_golden_docs</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Max relevant documents included per example</td>
+</tr>
+<tr>
+<td><code>max_distractor_docs</code></td>
+<td>int</td>
+<td><code>5</code></td>
+<td>Max irrelevant distractor documents included per example</td>
+</tr>
+<tr>
+<td><code>doc_context_template</code></td>
+<td>str</td>
+<td><code>"[DOC {idx}] {title}: {text}"</code></td>
+<td>Format string for each document block</td>
+</tr>
+<tr>
+<td><code>use_citation_loss</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>⚠️ Enables citation tracking, but <strong>the citation loss term itself is a documented placeholder</strong>, not numerically implemented (requires generation during training)</td>
+</tr>
+<tr>
+<td><code>citation_loss_weight</code></td>
+<td>float</td>
+<td><code>0.1</code></td>
+<td>Weight for citation loss (currently unused since the loss is a stub)</td>
+</tr>
+<tr>
+<td><code>use_doc_ranking_loss</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Enable auxiliary document-ranking loss, declared but not referenced in the loss computation</td>
+</tr>
+<tr>
+<td><code>include_doc_ids_in_output</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Whether answers are expected to contain <code>[DOC X]</code> citations</td>
+</tr>
+<tr>
+<td><code>track_citation_quality</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Enables a string-matching citation-quality metric</td>
+</tr>
+</tbody>
+</table>
+<p><code>create_raft_trainer()</code> also accepts standard <code>TrainingArguments</code>/<code>SFTConfig</code>-style kwargs (<code>num_epochs</code>, <code>batch_size</code>, <code>learning_rate</code>, <code>warmup_steps</code>, <code>weight_decay</code>, <code>logging_steps</code>, <code>eval_strategy</code>, <code>save_strategy</code>, <code>save_steps</code>, <code>gradient_accumulation_steps</code>, <code>max_grad_norm</code>).</p>
+<p><strong>Unsloth-only quirks</strong>: forces <code>packing=True, packing_strategy="bfd"</code> (Unsloth's compiled <code>SFTTrainer</code> otherwise raises "max_length is not enforced" whenever <code>packing=False</code>); builds an <code>SFTConfig</code> rather than plain <code>TrainingArguments</code> (a plain one carries fields that don't exist on this trl version's <code>SFTConfig</code>).</p>
 <hr />
 <h2 id="backend-selection">Backend Selection<a class="headerlink" href="#backend-selection" title="Permanent link">&para;</a></h2>
 <p>AlignTune supports two backends with automatic fallback:</p>
@@ -2869,14 +5932,14 @@
 - SFT: Unsloth → TRL
 - RL: Unsloth → TRL</p>
 <p><strong>Setting Backend:</strong>
-<div class="highlight"><pre><span></span><code><span class="c1"># Auto-select best available</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
-
-<span class="c1"># Explicit selection</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">)</span>
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Auto-select best available</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Explicit selection</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">)</span>
 </code></pre></div></p>
-<p><strong>Note</strong>: When TRL is selected, Unsloth is disabled to prevent interference. GSPO algorithm is TRL-only.</p>
+<p><strong>Note</strong>: When TRL is selected, Unsloth is disabled to prevent interference. GSPO algorithm is TRL-only. See <a href="../unsloth_compatibility/">Unsloth Compatibility</a> for a full per-algorithm breakdown of TRL-vs-Unsloth issues found and fixed against the currently pinned <code>trl==1.7.1</code> + <code>unsloth==2026.7.2</code>.</p>
 <hr />
 <h2 id="task-types-sft">Task Types (SFT)<a class="headerlink" href="#task-types-sft" title="Permanent link">&para;</a></h2>
 <table>
@@ -2916,34 +5979,34 @@
 <hr />
 <h2 id="convenience-functions">Convenience Functions<a class="headerlink" href="#convenience-functions" title="Permanent link">&para;</a></h2>
 <h3 id="sft-training">SFT Training<a class="headerlink" href="#sft-training" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
-
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
- <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
- <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
- <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
- <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
- <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
- <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
- <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
- <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
- <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a> <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a> <span class="n">max_seq_length</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a> <span class="n">max_samples</span><span class="o">=</span><span class="mi">1000</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="rl-training">RL Training<a class="headerlink" href="#rl-training" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
-
-<span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
- <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
- <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
- <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
- <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
- <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
- <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
- <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
- <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
- <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;OpenAssistant/reward-model-deberta-v3-large-v2&quot;</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a> <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-2-7b-hf&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a> <span class="n">reward_model_name</span><span class="o">=</span><span class="s2">&quot;OpenAssistant/reward-model-deberta-v3-large-v2&quot;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p">)</span>
 </code></pre></div>
 <hr />
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
@@ -2955,115 +6018,165 @@
 <li>Reward model configuration supports three modes: pretrained HF, pretrained local, or custom trained</li>
 <li>DPO evaluation is optional and controlled by <code>dpo_eval_enabled</code></li>
 <li>Sample logging is optional for monitoring generation quality during training</li>
+<li><strong>Split strings must be plain split names</strong> (<code>"train"</code>), not HF slice notation (<code>"train[:N]"</code>): use <code>max_samples</code> for row limits instead</li>
+<li>Many algorithm-specific "advanced" knobs are only reachable via <code>config.train.extra_params={...}</code> rather than a first-class <code>TrainingConfig</code> field, this doc flags every case found so far, but if a parameter you expect to work silently has no effect, check whether it needs <code>extra_params</code> instead</li>
 </ul>
 <hr />
 <h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="#">aligntune Documentation</a></li>
-<li><a href="#">Backend Comparison Guide</a></li>
-<li><a href="#">Algorithm Selection Guide</a></li>
-</ul></div>
-        
-        
-    </div>
+<li><a href="../unsloth_compatibility/">Unsloth Compatibility Guide</a>: per-algorithm TRL/Unsloth version-specific issues</li>
+<li><a href="../ISSUES/">Known Issues</a>: common problems and their solutions</li>
+<li><a href="../CHANGELOG/">Changelog</a>: detailed, PR-by-PR change history</li>
+<li><a href="../algorithms/overview/">Algorithm Zoo</a>: conceptual overview and selection guide</li>
+</ul>
 
-    
-      <footer class="col-md-12 text-center">
-          
-          
-            <hr>
-            <p>
-            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
-            </p>
-          
 
-          
-          
-      </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="../js/bootstrap-3.0.3.min.js"></script>
 
-    
-    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
-        
-                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/python.min.js"></script>
-                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/yaml.min.js"></script>
-        
-    <script>hljs.initHighlightingOnLoad();</script>
-    
 
-    <script>var base_url = ".."</script>
-    
-    <script src="../js/base.js"></script>
-    <script src="../search/main.js"></script>
 
-    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+
+
+
+
+
+
+
+                
+              </article>
             </div>
-            <div class="modal-body">
-                <p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
-            </div>
-            <div class="modal-footer">
-            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../algorithms/raft/" class="md-footer__link md-footer__link--prev" aria-label="Previous: RAFT">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                RAFT
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../backends/overview/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 <a href="https://lexsi.ai" target="_blank" rel="noopener">Lexsi Labs</a>
+
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
 </div>
-    </body>
-
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Lexsi-Labs/aligntune" target="_blank" rel="noopener" title="AlignTune on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://pypi.org/project/aligntune/" target="_blank" rel="noopener" title="AlignTune on PyPI" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://discord.gg/ckVbEJGW" target="_blank" rel="noopener" title="AlignTune on Discord" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://lexsi.ai" target="_blank" rel="noopener" title="Lexsi Labs" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../assets/extra.js"></script>
+      
+    
+  </body>
 </html>
