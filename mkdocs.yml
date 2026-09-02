@@ -94,8 +94,8 @@ extra_javascript:
   - assets/extra.js
 
 nav:
+  - Home: index.md
   - Getting Started:
-    - Home: index.md
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
     - Basic Concepts: getting-started/basic-concepts.md
