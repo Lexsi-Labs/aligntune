@@ -142,22 +142,6 @@
   pointer-events: none;
 }
 
-/* one amber pulse-peak — deliberate, tiny, brand-true */
-.at-hero::after {
-  content: "";
-  position: absolute;
-  top: 2.0rem;
-  left: 50%;
-  width: 3rem;
-  height: 0.9rem;
-  transform: translateX(-50%);
-  background-image:
-    radial-gradient(circle at 50% 100%, var(--at-amber) 0 0.15rem, transparent 0.2rem);
-  clip-path: polygon(0 100%, 40% 100%, 50% 0%, 60% 100%, 100% 100%);
-  opacity: 0.9;
-  pointer-events: none;
-}
-
 .at-hero > * {
   position: relative;
 }
