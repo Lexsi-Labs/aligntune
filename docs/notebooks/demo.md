@@ -38,18 +38,18 @@
 
 ## Long-context and Tokenization
 
-| Use case | Backend/API | Model | Colab |
-| --- | --- | --- | --- |
-| Tokenization (continued BPE + naive extension) | Tokenization API | `gpt2` | [Open in Colab](https://colab.research.google.com/drive/1RxBVqXgfcp8UzdNE27XZQpknwOmG2qGS?usp=sharing) |
-| Embedding training pipeline | Tokenization API + TRL SFT | LiquidAI/LFM2.5-1.2B-Instruct | [Open in Colab](https://colab.research.google.com/drive/1Fccrynx2lifVDjTycifYMQ4PjEtqvXQA?usp=sharing) |
-| RoPE scaling | TRL SFT | HuggingFaceTB/SmolLM-1.7B-Instruct | [Open in Colab](https://colab.research.google.com/drive/1d-3HCq4H9mY6jDg5ezr4k34XypNdR66t?usp=sharing) |
-| S2 Attention | TRL SFT | meta-llama/Llama-3.2-3B-Instruct | [Open in Colab](https://colab.research.google.com/drive/1ZtshdGOMC4ON1I3d-uy-_PI0_ENp6k_h?usp=sharing) |
-| Sliding Window Attention | TRL SFT | Qwen/Qwen2.5-3B | [Open in Colab](https://colab.research.google.com/drive/1TgEb40JU43oAiZKdH3wgiJVUpnbk74IC?usp=sharing) |
+| Use case | Backend/API | Model | Dataset | Colab |
+| --- | --- | --- | --- | --- |
+| Tokenization (continued BPE + naive extension, Arabic) | Tokenization API | `gpt2` | M-A-D/Mixed-Arabic-Datasets-Repo | [Open in Colab](https://colab.research.google.com/drive/1RxBVqXgfcp8UzdNE27XZQpknwOmG2qGS?usp=sharing) |
+| Embedding training pipeline (Marathi adaptation) | Tokenization API + TRL SFT | LiquidAI/LFM2.5-1.2B-Instruct | ai4bharat/sangraha + saillab/alpaca-marathi-cleaned | [Open in Colab](https://colab.research.google.com/drive/1Fccrynx2lifVDjTycifYMQ4PjEtqvXQA?usp=sharing) |
+| RoPE scaling | TRL SFT | HuggingFaceTB/SmolLM-1.7B-Instruct | bavest/fin-llama-dataset | [Open in Colab](https://colab.research.google.com/drive/1d-3HCq4H9mY6jDg5ezr4k34XypNdR66t?usp=sharing) |
+| S2 Attention | TRL SFT | meta-llama/Llama-3.2-3B-Instruct | mrSoul7766/ECTSum + ChanceFocus/flare-edtsum | [Open in Colab](https://colab.research.google.com/drive/1ZtshdGOMC4ON1I3d-uy-_PI0_ENp6k_h?usp=sharing) |
+| Sliding Window Attention | TRL SFT | Qwen/Qwen2.5-3B | Sakshi1307/FindSUM | [Open in Colab](https://colab.research.google.com/drive/1TgEb40JU43oAiZKdH3wgiJVUpnbk74IC?usp=sharing) |
 
 ## Distillation
 
-| Notebook | Backend | Student | Teacher | Link |
-| --- | --- | --- | --- | --- |
-| Offline Distillation | TRL | Qwen/Qwen3-1.7B | OpenDataArena/ODA-Fin-SFT-8B | [Open in Colab](https://colab.research.google.com/drive/1PB3jBKoc1bKi5_8qB3KgKCedMqA1P-rT?usp=sharing) |
-| Online Distillation | TRL | google/gemma-3-1b-it | sarvamai/sarvam-translate | [Open in Colab](https://colab.research.google.com/drive/1ge7mE9o1MwYM-2I8oflSlZJcDfJS38bq?usp=sharing) |
-| SDFT | TRL | LiquidAI/LFM2.5-2.6B | Base self-teacher | [Open in Colab](https://colab.research.google.com/drive/1_P98jmisLxJSsnEpNcOuoV4ERjt9Sqz2?usp=sharing) |
+| Notebook | Backend | Student | Teacher | Dataset | Link |
+| --- | --- | --- | --- | --- | --- |
+| Offline Distillation | TRL | Qwen/Qwen3-1.7B | OpenDataArena/ODA-Fin-SFT-8B | bhavyagoyal-lexsi/FINANCE-offline-online-distillation-data | [Open in Colab](https://colab.research.google.com/drive/1PB3jBKoc1bKi5_8qB3KgKCedMqA1P-rT?usp=sharing) |
+| Online Distillation | TRL | tencent/Hy-MT2-1.8B | nvidia/Riva-Translate-4B-Instruct-v2 | Helsinki-NLP/opus-100 (en-hi) | [Open in Colab](https://colab.research.google.com/drive/1ge7mE9o1MwYM-2I8oflSlZJcDfJS38bq?usp=sharing) |
+| SDFT | TRL | LiquidAI/LFM2.5-2.6B | Base self-teacher | — | [Open in Colab](https://colab.research.google.com/drive/1_P98jmisLxJSsnEpNcOuoV4ERjt9Sqz2?usp=sharing) |

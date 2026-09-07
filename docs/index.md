@@ -5,6 +5,8 @@ hide:
   - toc
 ---
 
+# AlignTune { .at-page-title--hidden }
+
 <div class="at-hero" markdown>
 
 <img class="at-hero-mark" src="assets/aligntune-banner.png" alt="AlignTune. Modular Toolkit for Post-Training Alignment of Large Language Models">
@@ -185,7 +187,8 @@ If you use AlignTune in your research, please cite the library:
 
 <div class="at-lexsi-footer" markdown>
 <a href="https://www.lexsi.ai">
-  <img src="assets/lexsilogowhite.png" width="240" alt="Lexsi Labs">
+  <img class="at-lexsi-logo at-lexsi-logo--light" src="assets/lexsilogodark.png" width="240" alt="Lexsi Labs">
+  <img class="at-lexsi-logo at-lexsi-logo--dark" src="assets/lexsilogowhite.png" width="240" alt="Lexsi Labs">
 </a>
 <p><a href="https://www.lexsi.ai">https://www.lexsi.ai</a></p>
 <p>Mumbai 🇮🇳 · London 🇬🇧 · Paris 🇫🇷</p>

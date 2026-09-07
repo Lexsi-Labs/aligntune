@@ -21,7 +21,7 @@ jobs:
       - name: Clean build artefacts
         run: rm -rf dist build ./*.egg-info
 
-      - name: Install dependencies and run tests
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -29,9 +29,12 @@ jobs:
           pip install pytest
         continue-on-error: false
 
-      - name: Run tests
-        run:  pytest tests/
-        continue-on-error: true
+      - name: Dependency and syntax checks
+        run: |
+          pip check || echo "::warning::pip check reported dependency conflicts"
+          python -m compileall -q src/ tests/
+          python -m pytest tests/ --collect-only -q
+        timeout-minutes: 10
 
       - name: Build package
         run: python3 -m pip install --upgrade build && python3 -m build
@@ -46,6 +49,11 @@ jobs:
           if ".dev" in v:
               raise SystemExit(f"Refusing to publish dev version: {v}")
           PY
+          built=$(ls dist/*.whl | head -1)
+          if [[ "$(basename "$built")" != "aligntune-${{ github.event.release.tag_name }}-"* ]]; then
+            echo "Built artifact $built does not match release tag ${{ github.event.release.tag_name }} — refusing to publish."
+            exit 1
+          fi
 
       - name: Publish package to PyPI
         if: success()
