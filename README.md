@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
+  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
 </p>
 
 <div align="center">
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg"/></a>
   <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-LSAL--1.1-lightgrey.svg"/></a>
-  <a href="https://badge.fury.io/py/aligntune"><img src="https://badge.fury.io/py/aligntune.svg"/></a>
+  <a href="https://pypi.org/project/aligntune/"><img src="https://img.shields.io/pypi/v/aligntune.svg"/></a>
 </div>
 
 ---
@@ -346,7 +346,7 @@ AlignTune is built upon the excellent work of the following projects:
 
 <div align="center">
   <a href="https://lexsi.ai/">
-    <img src="assets/lexsilogowhite.png" width="300">
+    <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/lexsilogowhite.png" width="300">
   </a>
   <br>
   <a href="https://lexsi.ai/">https://www.lexsi.ai</a>
