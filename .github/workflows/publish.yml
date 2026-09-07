@@ -28,6 +28,12 @@ jobs:
           pip install .
         continue-on-error: false
 
+      - name: Dependency and syntax checks
+        run: |
+          pip check || echo "::warning::pip check reported dependency conflicts"
+          python -m compileall -q src/ tests/
+        timeout-minutes: 5
+
       - name: Build package
         run: python3 -m pip install --upgrade build && python3 -m build
 
