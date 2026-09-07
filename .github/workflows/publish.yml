@@ -26,13 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install .
+          pip install pytest
         continue-on-error: false
 
       - name: Dependency and syntax checks
         run: |
           pip check || echo "::warning::pip check reported dependency conflicts"
           python -m compileall -q src/ tests/
-        timeout-minutes: 5
+          python -m pytest tests/ --collect-only -q
+        timeout-minutes: 10
 
       - name: Build package
         run: python3 -m pip install --upgrade build && python3 -m build
