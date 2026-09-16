@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/aligntune-banner.png" alt="AlignTune Banner" width="1000px"/>
+  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/aligntune-banner-adaptive.png" alt="AlignTune Banner" width="1000px"/>
 </p>
 
 <div align="center">
@@ -20,9 +20,9 @@ The **Backend Factory** routes each training call to whichever backend (TRL, Uns
 
 **Complete RLHF Coverage**: 13+ SFT/RL algorithms including SFT, DPO, Online-DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, PACE, ORPO, and SPIN — plus RAFT and Distillation (Standard/SDFT).
 
-**Full CLI Surface**: A `typer`-based CLI covering training, recipes, config validation, system diagnostics, cost/VRAM advising, model merging, an interactive training inspector, export/quantization verification, LoRA adapter management, multi-stage compositions, and Indic-language evaluation. See [CLI Reference](docs/cli-reference.md).
+**Full CLI Surface**: A `typer`-based CLI covering training, recipes, config validation, system diagnostics, cost/VRAM advising, model merging, an interactive training inspector, export/quantization verification, LoRA adapter management, multi-stage compositions, and Indic-language evaluation. See [CLI Reference](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/cli-reference.md).
 
-**Production-Ready**: every algorithm has been run end-to-end on real models and datasets (see [Changelog](docs/CHANGELOG.md) for specifics), config values are validated before a run starts, and failures raise specific errors instead of failing silently.
+**Production-Ready**: every algorithm has been run end-to-end on real models and datasets (see [Changelog](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/CHANGELOG.md) for specifics), config values are validated before a run starts, and failures raise specific errors instead of failing silently.
 
 ### 🏛️ The 9 pillars of AlignTune Utility
 
@@ -136,7 +136,7 @@ AlignTune supports **13+ state-of-the-art SFT/RL algorithms** with intelligent b
 | **RAFT** | ✅ | ✅ | Retrieval Augmented Fine-Tuning (document-grounded SFT) |
 | **Distillation** | ✅ | ✅ | Knowledge Distillation (Standard, SDFT) |
 
-See the [Algorithm Zoo](docs/algorithms/overview.md) for the full comparison table and selection guide.
+See the [Algorithm Zoo](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/algorithms/overview.md) for the full comparison table and selection guide.
 
 ## Installation
 
@@ -185,7 +185,7 @@ Beyond the Colab demos below, `notebooks/` ships **46 local runnable notebooks**
 jupyter notebook notebooks/
 ```
 
-Full breakdown by number range: **[docs/notebooks.md](docs/notebooks.md)**.
+Full breakdown by number range: **[docs/notebooks.md](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/notebooks.md)**.
 
 ## Demo Notebooks
 
@@ -225,22 +225,22 @@ Interactive Colab notebooks covering SFT, RL, distillation, tokenization, embedd
 
 ### Further Resources
 
-*   **[CLI Reference](docs/cli-reference.md)**: All 12 command groups, `train`, `recipes`, `validate`, `diagnose`, `advise`, `merge`, `aligner`, `export`, `verify-export`, `adapters`, `compose`, `indic-eval`.
-*   **[Algorithm Zoo](docs/algorithms/overview.md)**: full comparison table and selection guide for every supported alignment method.
-*   **[Novelty Frontiers](docs/novelty_frontiers.md)**: 2026 research roadmap (forward-looking, not yet implemented).
+*   **[CLI Reference](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/cli-reference.md)**: All 12 command groups, `train`, `recipes`, `validate`, `diagnose`, `advise`, `merge`, `aligner`, `export`, `verify-export`, `adapters`, `compose`, `indic-eval`.
+*   **[Algorithm Zoo](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/algorithms/overview.md)**: full comparison table and selection guide for every supported alignment method.
+*   **[Novelty Frontiers](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/novelty_frontiers.md)**: 2026 research roadmap (forward-looking, not yet implemented).
 
 ## Documentation
 
-- **[Getting Started](docs/getting-started/installation.md)**: Installation, setup, and basic usage
-- **[User Guide](docs/user-guide/overview.md)**: In-depth tutorials for SFT and RL training
-- **[API Reference](docs/api-reference/overview.md)**: Complete Python API and class/method details
-- **[CLI Reference](docs/cli-reference.md)**: Full command-line interface reference
-- **[Examples](docs/examples/overview.md)**: End-to-end code examples
-- **[Advanced Topics](docs/advanced/architecture.md)**: Architecture, custom backends, and performance optimization
-- **[Notebooks](docs/notebooks/local.md)**: Interactive Colab notebooks and local Jupyter notebooks
-- **[Hyperparameter Reference](docs/PARAMETERS.md)**: Every configuration parameter, organized by training type and algorithm
-- **[Unsloth Compatibility](docs/unsloth_compatibility.md)**: Supported versions, known per-algorithm issues, and troubleshooting
-- **[Changelog](docs/CHANGELOG.md)**: Detailed, PR-by-PR change history
+- **[Getting Started](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/getting-started/installation.md)**: Installation, setup, and basic usage
+- **[User Guide](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/user-guide/overview.md)**: In-depth tutorials for SFT and RL training
+- **[API Reference](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/api-reference/overview.md)**: Complete Python API and class/method details
+- **[CLI Reference](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/cli-reference.md)**: Full command-line interface reference
+- **[Examples](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/examples/overview.md)**: End-to-end code examples
+- **[Advanced Topics](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/advanced/architecture.md)**: Architecture, custom backends, and performance optimization
+- **[Notebooks](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/notebooks/local.md)**: Interactive Colab notebooks and local Jupyter notebooks
+- **[Hyperparameter Reference](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/PARAMETERS.md)**: Every configuration parameter, organized by training type and algorithm
+- **[Unsloth Compatibility](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/unsloth_compatibility.md)**: Supported versions, known per-algorithm issues, and troubleshooting
+- **[Changelog](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/CHANGELOG.md)**: Detailed, PR-by-PR change history
 
 ## Key Capabilities
 
@@ -258,38 +258,30 @@ AlignTune is uniquely architected for South Asian linguistic utility, moving bey
 *   **Tokenizer Extender**: Native extension of base model vocabularies (Llama-3/Mistral) using **script-aware BPE merges** for Devanagari, Tamil, Bengali, Telugu, Kannada, and Malayalam.
 *   **Utility Benchmarks**: Post-training validation via `aligntune indic-eval` against MILU, IndicXTREME, and IndicGenBench.
 
-See [Indic / Regional Post-Training](docs/advanced/indic.md) for details.
+See [Indic / Regional Post-Training](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/advanced/indic.md) for details.
 
 ## Architecture
 
 AlignTune uses a flexible backend architecture:
 
-```mermaid
-flowchart TD
-    Factory[Backend Factory] --> TRL[TRL Backend]
-    Factory --> Unsloth[Unsloth Backend]
-    Factory --> ES[ES Backend]
-    TRL --> TRL_Algos[13+ SFT/RL Algorithms]
-    Unsloth --> Unsloth_Algos[13+ SFT/RL Algorithms]
-    ES --> ES_Algos[Gradient-free Adapter Search]
-    Factory --> Compose[Composition Runner]
-    Compose --> Stage1[Stage: SFT] --> Stage2[Stage: Adapters/MoA] --> Stage3[Stage: RL/ES] --> Stage4[Stage: Audit]
-```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/architecture-flow.png" alt="AlignTune backend architecture: the Backend Factory routes to TRL, Unsloth, and ES backends, and to the Composition Runner which chains SFT, Adapters/MoA, RL/ES, and Audit stages" width="900px"/>
+</p>
 
 **TRL Backend:** SFT, DPO, Online-DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, Counterfactual GRPO, PACE, ORPO, SPIN, RAFT, Distillation
 
 **Unsloth Backend:** SFT, DPO, Online-DPO, PPO, GRPO, GSPO, DAPO, Dr. GRPO, GBMPO, PACE, ORPO, SPIN, RAFT (see [Supported Algorithms](#supported-algorithms))
 
-See [Architecture](docs/advanced/architecture.md) for details.
+See [Architecture](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/advanced/architecture.md) for details.
 
 ## Contributing
 
-We welcome contributions! See our [Contributing Guide](docs/contributing/guide.md) for details.
+We welcome contributions! See our [Contributing Guide](https://github.com/Lexsi-Labs/aligntune/blob/main/docs/contributing/guide.md) for details.
 
 ## License
 
 This project is released under the **Lexsi Labs Source Available License (LSAL) v1.1**. Please cite appropriately if used in academic or production projects.
-See the [LICENSE.md](LICENSE.md) file for details, and [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for vendored/third-party components (mergekit, CuratorKIT, Unsloth, etc.).
+See the [LICENSE.md](https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md) file for details, and [THIRD_PARTY_LICENSES.md](https://github.com/Lexsi-Labs/aligntune/blob/main/THIRD_PARTY_LICENSES.md) for vendored/third-party components (mergekit, CuratorKIT, Unsloth, etc.).
 
 **Key Points:**
 - **Free for Research & Learning**: Use, modify, and study for personal, academic, or research purposes
@@ -346,7 +338,7 @@ AlignTune is built upon the excellent work of the following projects:
 
 <div align="center">
   <a href="https://lexsi.ai/">
-    <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/lexsilogowhite.png" width="300">
+    <img src="https://raw.githubusercontent.com/Lexsi-Labs/aligntune/main/assets/lexsilogo-adaptive.png" width="300">
   </a>
   <br>
   <a href="https://lexsi.ai/">https://www.lexsi.ai</a>
