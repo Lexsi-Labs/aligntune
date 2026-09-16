@@ -64,7 +64,7 @@ Fixes #(issue number)
 
 ### License Agreement
 
-- [ ] I agree that my contributions will be licensed under the Lexsi Labs Source Available License (LSAL) v1.1
+- [ ] I agree that my contributions will be licensed under the MIT License
 - [ ] I grant Lexsi Labs the right to use, modify, distribute, and license my contributions under any terms, including commercial ones
 - [ ] I have the right to submit this contribution
 

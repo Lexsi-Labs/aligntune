@@ -1,7 +1,6 @@
 # Third-Party Licenses
 
-AlignTune is distributed under the Lexsi Labs Source Available License (LSAL)
-v1.1 (see [LICENSE.md](LICENSE.md)). It vendors four third-party projects directly
+AlignTune's own code is distributed under the MIT License (see [LICENSE](LICENSE)). It vendors four third-party projects directly
 and depends on several others at install/runtime. Each remains under its own
 license; the ones with non-permissive or otherwise notable terms are detailed
 below.
@@ -26,7 +25,7 @@ below.
 
 Because mergekit is compiled into the AlignTune wheel rather than kept as a
 separate installed distribution, the combined distribution includes LGPL-3.0
-code alongside AlignTune's own LSAL-1.1 code. LGPL-3.0 permits this as long as
+code alongside AlignTune's own MIT-licensed code. LGPL-3.0 permits this as long as
 the LGPL-covered portion remains available under its own license (satisfied
 here — the vendored copy keeps its own `LICENSE`) and users retain the ability
 to obtain, inspect, and relink a modified version of the LGPL component.
@@ -80,11 +79,13 @@ terms worth knowing about specifically:
   — https://github.com/Lexsi-Labs/CuratorKIT
   Installed automatically as a hard dependency (`curatorkit[connectors]`, see
   `pyproject.toml`) for AlignTune's data-loading/curation pipeline. Same
-  noncommercial-without-a-separate-license terms as AlignTune itself (Section
-  2 of `LICENSE.md`) — using CuratorKIT through AlignTune does not add a
-  *new* restriction on top of AlignTune's own license, but it is a distinct
-  legal work with its own license file, so it's listed here explicitly rather
-  than assumed.
+  noncommercial-without-a-separate-license terms (Section 2 of CuratorKIT's
+  own `LICENSE.md`). NOTE: AlignTune's own code is MIT-licensed, but CuratorKIT
+  is a hard runtime dependency under the LSAL v1.1, so its noncommercial
+  restriction applies in practice to AlignTune's data-loading/curation
+  pipeline — commercial use requires a separate CuratorKIT license from Lexsi
+  Labs, independent of AlignTune's MIT license. It is listed here explicitly
+  because it materially affects the terms under which AlignTune can be used.
 
 See each project's repository for full license text. This file covers
 license terms only and is not legal advice; contact **support@lexsi.ai** with

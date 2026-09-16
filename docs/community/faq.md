@@ -29,9 +29,9 @@ See the [Cite](../index.md#cite) section on the home page, or the
 file at the repository root.
 
 **Is AlignTune free to use?**
-It's free for research, evaluation, education, and non-revenue-generating use
-under the Lexsi Labs Source Available License (LSAL) v1.1 — not an OSI open-source
-license. Commercial use (selling, hosting as a paid/SaaS product, or embedding
-in revenue-generating software) requires a separate commercial license from
-Lexsi Labs. See [LICENSE.md](https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md),
-or contact support@lexsi.ai for commercial licensing.
+AlignTune's own code is released under the MIT License — a permissive,
+OSI-approved license allowing use, modification, and distribution, including
+commercially. Some vendored components under `third_party/` (e.g. unsloth,
+mergekit) carry their own copyleft licenses (AGPL-3.0 / LGPL-3.0) whose terms
+continue to apply to those components; see
+[THIRD_PARTY_LICENSES.md](https://github.com/Lexsi-Labs/aligntune/blob/main/THIRD_PARTY_LICENSES.md).

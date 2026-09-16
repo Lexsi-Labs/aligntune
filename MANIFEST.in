@@ -10,7 +10,7 @@ recursive-exclude third_party __pycache__
 
 # Packaging / project metadata
 include pyproject.toml setup.py requirements.txt requirements-docs.txt
-include LICENSE.md THIRD_PARTY_LICENSES.md CHANGELOG.md CITATION.cff README.md
+include LICENSE THIRD_PARTY_LICENSES.md CHANGELOG.md CITATION.cff README.md
 include conftest.py pytest.ini
 
 # Package sources and their data files

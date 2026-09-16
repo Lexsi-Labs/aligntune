@@ -20,9 +20,9 @@ dynamic = ["version"]
 description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "LicenseRef-LSAL-1.1"
+license = "MIT"
 license-files = [
-    "LICENSE.md",
+    "LICENSE",
     "THIRD_PARTY_LICENSES.md",
     # mergekit is vendored and compiled into this wheel (see setup.py); its
     # own LGPL-3.0 license and patch notes must ship inside the built
@@ -145,7 +145,7 @@ dependencies = [
     # unsloth and unsloth_zoo (2026.7.2) are vendored in-tree - see
     # third_party/unsloth/PATCH_NOTES.md and
     # third_party/unsloth_zoo/PATCH_NOTES.md (both include AGPL-3.0-licensed
-    # files alongside this project's own LSAL-1.1 code; see those files and
+    # files alongside this project's own MIT-licensed code; see those files and
     # THIRD_PARTY_LICENSES.md for what's AGPL-licensed and why) - rather
     # than installed as separate distributions, so a plain
     # `pip install aligntune` is enough. The entries below are their own
