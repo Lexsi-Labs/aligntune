@@ -39,8 +39,8 @@ version: 0.1.10
 date-released: 2026-08-05
 url: "https://github.com/Lexsi-Labs/aligntune"
 repository-code: "https://github.com/Lexsi-Labs/aligntune"
-license: LicenseRef-LSAL-1.1
-license-url: "https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md"
+license: MIT
+license-url: "https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE"
 contact:
   - family-names: "Seth"
     given-names: "Pratinav"

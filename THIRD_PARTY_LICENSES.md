@@ -1,7 +1,21 @@
 # Third-Party Licenses
 
-AlignTune is distributed under the Lexsi Labs Source Available License (LSAL)
-v1.1 (see [LICENSE.md](LICENSE.md)). It vendors four third-party projects directly
+AlignTune's own code is distributed under the MIT License (see [LICENSE](LICENSE)).
+The published `aligntune` wheel bundles third-party packages under their own
+licenses, so its PEP 639 license expression is
+`MIT AND Apache-2.0 AND AGPL-3.0-only AND LGPL-3.0-only`. License map:
+
+| Path | License | Notes |
+|---|---|---|
+| `src/aligntune/` | MIT | AlignTune's own code |
+| `third_party/unsloth/`, `third_party/unsloth_zoo/` | Apache-2.0 with AGPL-3.0 components | vendored unmodified; used only by the optional `unsloth` backend |
+| `third_party/mergekit/` | LGPL-3.0 | vendored with two compatibility patches (see its PATCH_NOTES) |
+| `third_party/tokenizer-extension/` | Apache-2.0 | vendored |
+| CuratorKIT (`aligntune[curation]`, not bundled) | Lexsi Labs Source Available License v1.1 | optional; noncommercial |
+
+**If you use the `unsloth` backend, AGPL-3.0 applies to that component**, including
+its network-service source-availability clause (AGPL §13). The default `trl`
+backend does not execute any AGPL-licensed code. It vendors four third-party projects directly
 and depends on several others at install/runtime. Each remains under its own
 license; the ones with non-permissive or otherwise notable terms are detailed
 below.
@@ -26,7 +40,7 @@ below.
 
 Because mergekit is compiled into the AlignTune wheel rather than kept as a
 separate installed distribution, the combined distribution includes LGPL-3.0
-code alongside AlignTune's own LSAL-1.1 code. LGPL-3.0 permits this as long as
+code alongside AlignTune's own MIT-licensed code. LGPL-3.0 permits this as long as
 the LGPL-covered portion remains available under its own license (satisfied
 here — the vendored copy keeps its own `LICENSE`) and users retain the ability
 to obtain, inspect, and relink a modified version of the LGPL component.
@@ -78,13 +92,14 @@ terms worth knowing about specifically:
 
 - **CuratorKIT** — [Lexsi Labs Source Available License (LSAL) v1.1](https://github.com/Lexsi-Labs/CuratorKIT/blob/main/LICENSE.md)
   — https://github.com/Lexsi-Labs/CuratorKIT
-  Installed automatically as a hard dependency (`curatorkit[connectors]`, see
-  `pyproject.toml`) for AlignTune's data-loading/curation pipeline. Same
-  noncommercial-without-a-separate-license terms as AlignTune itself (Section
-  2 of `LICENSE.md`) — using CuratorKIT through AlignTune does not add a
-  *new* restriction on top of AlignTune's own license, but it is a distinct
-  legal work with its own license file, so it's listed here explicitly rather
-  than assumed.
+  Optional dependency (`aligntune[curation]`, see `pyproject.toml`) for
+  AlignTune's data-loading/curation pipeline. Same
+  noncommercial-without-a-separate-license terms (Section 2 of CuratorKIT's own
+  `LICENSE.md`). It is **not** bundled in the wheel and is **not** a required
+  dependency: install it via the `aligntune[curation]` extra. AlignTune's own
+  code is MIT; installing CuratorKIT means accepting its noncommercial terms
+  for that component. It is listed here because it materially changes what
+  the curation pipeline may be used for.
 
 See each project's repository for full license text. This file covers
 license terms only and is not legal advice; contact **support@lexsi.ai** with

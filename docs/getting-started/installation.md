@@ -6,7 +6,8 @@ This guide will help you install AlignTune and set up your environment.
 
 - Python 3.11 or higher
 - PyTorch 2.0 or higher
-- Git (required, `pip install aligntune` resolves direct `git+https` dependencies such as `tokenizer-extension` and `curatorkit`, so `git` must be installed and on your `PATH`)
+- Git (required, `pip install aligntune` resolves direct `git+https` dependencies such as `tokenizer-extension`, so `git` must be installed and on your `PATH`)
+- Optional: dataset curation via CuratorKIT — `pip install "aligntune[curation]"` (CuratorKIT is under the Lexsi Labs Source Available License, noncommercial)
 - CUDA-capable GPU (recommended for training, optional for inference)
 
 ## Installation Methods

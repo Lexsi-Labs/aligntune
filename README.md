@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg"/></a>
-  <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-LSAL--1.1-lightgrey.svg"/></a>
+  <a href="https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg"/></a>
   <a href="https://pypi.org/project/aligntune/"><img src="https://img.shields.io/pypi/v/aligntune.svg"/></a>
 </div>
 
@@ -280,16 +280,13 @@ We welcome contributions! See our [Contributing Guide](https://github.com/Lexsi-
 
 ## License
 
-This project is released under the **Lexsi Labs Source Available License (LSAL) v1.1**. Please cite appropriately if used in academic or production projects.
-See the [LICENSE.md](https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE.md) file for details, and [THIRD_PARTY_LICENSES.md](https://github.com/Lexsi-Labs/aligntune/blob/main/THIRD_PARTY_LICENSES.md) for vendored/third-party components (mergekit, CuratorKIT, Unsloth, etc.).
+This project's own code is released under the **MIT License**. See the [LICENSE](https://github.com/Lexsi-Labs/aligntune/blob/main/LICENSE) file for details, and [THIRD_PARTY_LICENSES.md](https://github.com/Lexsi-Labs/aligntune/blob/main/THIRD_PARTY_LICENSES.md) for vendored/third-party components (mergekit, CuratorKIT, Unsloth, etc.).
 
 **Key Points:**
-- **Free for Research & Learning**: Use, modify, and study for personal, academic, or research purposes
-- **Source Available**: Full access to source code
-- **Commercial Use Restricted**: Requires separate commercial license
-- **Contact**: For commercial licensing, partnership, or redistribution rights, contact [support@lexsi.ai](mailto:support@lexsi.ai)
-
-This is **not** an open-source license as defined by OSI, but provides broad access for non-commercial use.
+- **Permissive**: Use, modify, and distribute freely, including commercially, under the MIT terms.
+- **Attribution**: Retain the copyright and permission notice in copies.
+- **Bundled third-party components**: the wheel ships **unsloth / unsloth_zoo** (Apache-2.0 with AGPL-3.0 components) and **mergekit** (LGPL-3.0) unmodified under their own licenses — PEP 639 expression `MIT AND Apache-2.0 AND AGPL-3.0-only AND LGPL-3.0-only`. **Using the `unsloth` backend means AGPL-3.0 applies to that component** (including its network-service clause); the default `trl` backend runs no AGPL code.
+- **CuratorKIT** (dataset curation) is optional — `pip install "aligntune[curation]"` — and is under the Lexsi Labs Source Available License (noncommercial). See [THIRD_PARTY_LICENSES.md](https://github.com/Lexsi-Labs/aligntune/blob/main/THIRD_PARTY_LICENSES.md) for the full license map.
 
 ## Citation
 

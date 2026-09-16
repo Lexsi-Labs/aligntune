@@ -26,7 +26,7 @@ research to production.
 <span>TRL · Unsloth · ES backends</span>
 <span>13+ RL algorithms</span>
 <span>27+ reward functions</span>
-<span>LSAL-1.1 (source available)</span>
+<span>MIT</span>
 </p>
 
 </div>
