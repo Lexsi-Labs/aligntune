@@ -2108,13 +2108,13 @@
 <h3 id="aligntune-train"><code>aligntune train</code><a class="headerlink" href="#aligntune-train" title="Permanent link">&para;</a></h3>
 <p>Train a model with specified parameters.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># SFT Training</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="w"> </span>--dataset<span class="w"> </span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="w"> </span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">"microsoft/DialoGPT-small"</span><span class="w"> </span>--dataset<span class="w"> </span><span class="s2">"tatsu-lab/alpaca"</span><span class="w"> </span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># DPO Training</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="w"> </span>--dataset<span class="w"> </span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="w"> </span>--type<span class="w"> </span>dpo<span class="w"> </span>--backend<span class="w"> </span>trl
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">"microsoft/DialoGPT-small"</span><span class="w"> </span>--dataset<span class="w"> </span><span class="s2">"Anthropic/hh-rlhf"</span><span class="w"> </span>--type<span class="w"> </span>dpo<span class="w"> </span>--backend<span class="w"> </span>trl
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># PPO Training</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="w"> </span>--dataset<span class="w"> </span><span class="s2">&quot;Anthropic/hh-rlhf&quot;</span><span class="w"> </span>--type<span class="w"> </span>ppo<span class="w"> </span>--backend<span class="w"> </span>unsloth
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">"microsoft/DialoGPT-small"</span><span class="w"> </span>--dataset<span class="w"> </span><span class="s2">"Anthropic/hh-rlhf"</span><span class="w"> </span>--type<span class="w"> </span>ppo<span class="w"> </span>--backend<span class="w"> </span>unsloth
 </code></pre></div>
 <h3 id="training-options">Training Options<a class="headerlink" href="#training-options" title="Permanent link">&para;</a></h3>
 <table>
@@ -2177,18 +2177,18 @@
 <p>The CLI supports YAML configuration files for complex setups:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">algo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dpo</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">model</span><span class="p">:</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w"> </span><span class="nt">name_or_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;microsoft/DialoGPT-small&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w"> </span><span class="nt">name_or_path</span><span class="p">:</span><span class="w"> </span><span class="s">"microsoft/DialoGPT-small"</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w"> </span><span class="nt">max_seq_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">512</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nt">datasets</span><span class="p">:</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Anthropic/hh-rlhf&quot;</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"Anthropic/hh-rlhf"</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w"> </span><span class="nt">max_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nt">train</span><span class="p">:</span>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w"> </span><span class="nt">max_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w"> </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-5</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w"> </span><span class="nt">per_device_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="nt">logging</span><span class="p">:</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w"> </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./output&quot;</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w"> </span><span class="nt">run_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my_experiment&quot;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w"> </span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="s">"./output"</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w"> </span><span class="nt">run_name</span><span class="p">:</span><span class="w"> </span><span class="s">"my_experiment"</span>
 </code></pre></div>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <h3 id="quick-sft-training">Quick SFT Training<a class="headerlink" href="#quick-sft-training" title="Permanent link">&para;</a></h3>

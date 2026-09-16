@@ -2351,11 +2351,11 @@ can consume registry rewards or custom callables directly.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;openai/gsm8k&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>  <span class="c1"># also works for other GRPO-family trainers and Online-DPO</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a> <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;math_correctness&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"openai/gsm8k"</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a> <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>  <span class="c1"># also works for other GRPO-family trainers and Online-DPO</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a> <span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a> <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"math_correctness"</span><span class="p">],</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a> <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a> <span class="n">num_generations</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a> <span class="n">max_completion_length</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
@@ -2369,14 +2369,14 @@ can consume registry rewards or custom callables directly.</p>
 The factory converts it to the canonical <code>rewards</code> configuration. You can
 also pass that configuration directly:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;openai/gsm8k&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"openai/gsm8k"</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">rewards</span><span class="o">=</span><span class="p">[</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="p">{</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;math_correctness&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{},</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"math_correctness"</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>            <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>            <span class="s2">"params"</span><span class="p">:</span> <span class="p">{},</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="p">}</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="p">],</span>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">)</span>
@@ -2387,11 +2387,11 @@ spec. It must return one numeric score per completion in the batch:</p>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">return</span> <span class="p">[</span><span class="mf">1.0</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">100</span> <span class="k">else</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;openai/gsm8k&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"openai/gsm8k"</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">rewards</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;custom&quot;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="n">short_answer_reward</span><span class="p">},</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"custom"</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"function"</span><span class="p">:</span> <span class="n">short_answer_reward</span><span class="p">},</span> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="p">],</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">)</span>
 </code></pre></div>
@@ -2403,23 +2403,23 @@ reference columns in the dataset when the reward needs them.</p>
 for every completion in the batch:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">my_reward</span><span class="p">(</span><span class="n">prompts</span><span class="p">,</span> <span class="n">completions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">return</span> <span class="p">[</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="mf">1.0</span> <span class="k">if</span> <span class="s2">&quot;final answer&quot;</span> <span class="ow">in</span> <span class="n">completion</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="mf">1.0</span> <span class="k">if</span> <span class="s2">"final answer"</span> <span class="ow">in</span> <span class="n">completion</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="k">for</span> <span class="n">completion</span> <span class="ow">in</span> <span class="n">completions</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="p">]</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;openai/gsm8k&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"openai/gsm8k"</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">rewards</span><span class="o">=</span><span class="p">[</span><span class="n">my_reward</span><span class="p">],</span>
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p">)</span>
 </code></pre></div>
 <p>You can also pass the callable using an explicit custom reward specification:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">rewards</span><span class="o">=</span><span class="p">[</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="p">{</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;custom&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="n">my_reward</span><span class="p">},</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"custom"</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"function"</span><span class="p">:</span> <span class="n">my_reward</span><span class="p">},</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="p">}</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">]</span>
 </code></pre></div>
@@ -2432,9 +2432,9 @@ and accept it as a batch argument:</p>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="p">]</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;your-dataset&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"your-dataset"</span><span class="p">,</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>
 <a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">rewards</span><span class="o">=</span><span class="p">[</span><span class="n">exact_match_reward</span><span class="p">],</span>
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="p">)</span>
 </code></pre></div>
@@ -2448,27 +2448,27 @@ to TRL's batch interface automatically.</p>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Get reward functions from registry</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">registry</span> <span class="o">=</span> <span class="n">RewardRegistry</span><span class="p">()</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">sentiment_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;sentiment&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">safety_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;safety&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"length"</span><span class="p">)</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">sentiment_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"sentiment"</span><span class="p">)</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">safety_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"safety"</span><span class="p">)</span>
 <a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
 <a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Create trainer with reward functions</span>
 <a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">RewardModelTrainer</span><span class="p">(</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a> <span class="n">base_model_name</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a> <span class="n">base_model_name</span><span class="o">=</span><span class="s2">"microsoft/DialoGPT-medium"</span><span class="p">,</span>
 <a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a> <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="n">length_func</span><span class="p">,</span> <span class="n">sentiment_func</span><span class="p">,</span> <span class="n">safety_func</span><span class="p">],</span>
 <a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a> <span class="n">composite_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
 <a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="p">)</span>
 <a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
 <a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="c1"># Generate training data</span>
 <a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="n">training_data</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">generate_training_data</span><span class="p">(</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;This is a good response.&quot;</span><span class="p">,</span> <span class="s2">&quot;This is a bad response.&quot;</span><span class="p">],</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s2">"This is a good response."</span><span class="p">,</span> <span class="s2">"This is a bad response."</span><span class="p">],</span>
 <a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span>
 <a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="p">)</span>
 <a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>
 <a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="c1"># Train reward model</span>
 <a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="n">model_path</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_reward_model</span><span class="p">(</span>
 <a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a> <span class="n">training_data</span><span class="o">=</span><span class="n">training_data</span><span class="p">,</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a> <span class="n">output_dir</span><span class="o">=</span><span class="s2">"./reward_models/custom"</span><span class="p">,</span>
 <a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span>
 <a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="p">)</span>
 </code></pre></div>
@@ -2476,109 +2476,109 @@ to TRL's batch interface automatically.</p>
 <h3 id="basic-quality-rewards">Basic Quality Rewards<a class="headerlink" href="#basic-quality-rewards" title="Permanent link">&para;</a></h3>
 <h4 id="length-reward">Length Reward<a class="headerlink" href="#length-reward" title="Permanent link">&para;</a></h4>
 <p>Encourages appropriate response length.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]</span>
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># With parameters</span>
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;length&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;min_length&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;max_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">},</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"length"</span><span class="p">,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"min_length"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">"max_length"</span><span class="p">:</span> <span class="mi">500</span><span class="p">},</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span>
 <a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="coherence-reward">Coherence Reward<a class="headerlink" href="#coherence-reward" title="Permanent link">&para;</a></h4>
 <p>Measures logical flow and coherence.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;coherence&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"coherence"</span><span class="p">]</span>
 </code></pre></div>
 <h4 id="fluency-reward">Fluency Reward<a class="headerlink" href="#fluency-reward" title="Permanent link">&para;</a></h4>
 <p>Measures grammatical correctness.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fluency&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"fluency"</span><span class="p">]</span>
 </code></pre></div>
 <h3 id="task-specific-rewards">Task-Specific Rewards<a class="headerlink" href="#task-specific-rewards" title="Permanent link">&para;</a></h3>
 <h4 id="sentiment-reward">Sentiment Reward<a class="headerlink" href="#sentiment-reward" title="Permanent link">&para;</a></h4>
 <p>Encourages specific sentiment.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sentiment&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"sentiment"</span><span class="p">]</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># With target sentiment</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;target_sentiment&quot;</span><span class="p">:</span> <span class="s2">&quot;positive&quot;</span><span class="p">},</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"sentiment"</span><span class="p">,</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"target_sentiment"</span><span class="p">:</span> <span class="s2">"positive"</span><span class="p">},</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span>
 <a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="safety-reward">Safety Reward<a class="headerlink" href="#safety-reward" title="Permanent link">&para;</a></h4>
 <p>Detects and penalizes harmful content.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;safety&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"safety"</span><span class="p">]</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="c1"># With strict mode</span>
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;safety&quot;</span><span class="p">,</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;strict&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">2.0</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"safety"</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"strict"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">2.0</span>
 <a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="factuality-reward">Factuality Reward<a class="headerlink" href="#factuality-reward" title="Permanent link">&para;</a></h4>
 <p>Measures factual accuracy.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;factuality&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"factuality"</span><span class="p">]</span>
 </code></pre></div>
 <h3 id="generation-quality-metrics">Generation Quality Metrics<a class="headerlink" href="#generation-quality-metrics" title="Permanent link">&para;</a></h3>
 <h4 id="bleu-reward">BLEU Reward<a class="headerlink" href="#bleu-reward" title="Permanent link">&para;</a></h4>
 <p>Measures n-gram overlap with reference.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bleu&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"bleu"</span><span class="p">]</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;bleu&quot;</span><span class="p">,</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;n_gram&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">0.8</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"bleu"</span><span class="p">,</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"n_gram"</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">0.8</span>
 <a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="rouge-reward">ROUGE Reward<a class="headerlink" href="#rouge-reward" title="Permanent link">&para;</a></h4>
 <p>Measures recall-oriented evaluation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;rouge&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"rouge"</span><span class="p">]</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;rouge&quot;</span><span class="p">,</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;rouge_type&quot;</span><span class="p">:</span> <span class="s2">&quot;rouge-l&quot;</span><span class="p">},</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"rouge"</span><span class="p">,</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"rouge_type"</span><span class="p">:</span> <span class="s2">"rouge-l"</span><span class="p">},</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span>
 <a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="code-quality-rewards">Code Quality Rewards<a class="headerlink" href="#code-quality-rewards" title="Permanent link">&para;</a></h3>
 <h4 id="code-syntax-reward">Code Syntax Reward<a class="headerlink" href="#code-syntax-reward" title="Permanent link">&para;</a></h4>
 <p>Validates code syntax correctness.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;code_syntax&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"code_syntax"</span><span class="p">]</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;code_syntax&quot;</span><span class="p">,</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;language&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">},</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"code_syntax"</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"language"</span><span class="p">:</span> <span class="s2">"python"</span><span class="p">},</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span>
 <a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="code-execution-reward">Code Execution Reward<a class="headerlink" href="#code-execution-reward" title="Permanent link">&para;</a></h4>
 <p>Tests if code runs without errors.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;code_execution&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"code_execution"</span><span class="p">]</span>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;code_execution&quot;</span><span class="p">,</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;safe_mode&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.5</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"code_execution"</span><span class="p">,</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"timeout"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">"safe_mode"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.5</span>
 <a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="math-and-reasoning-rewards">Math and Reasoning Rewards<a class="headerlink" href="#math-and-reasoning-rewards" title="Permanent link">&para;</a></h3>
 <h4 id="math-correctness-reward">Math Correctness Reward<a class="headerlink" href="#math-correctness-reward" title="Permanent link">&para;</a></h4>
 <p>Validates mathematical correctness.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;math_correctness&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"math_correctness"</span><span class="p">]</span>
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;math_correctness&quot;</span><span class="p">,</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tolerance&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">},</span>
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"math_correctness"</span><span class="p">,</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"tolerance"</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">},</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span>
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="logical-consistency-reward">Logical Consistency Reward<a class="headerlink" href="#logical-consistency-reward" title="Permanent link">&para;</a></h4>
 <p>Measures logical consistency.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;logical_consistency&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"logical_consistency"</span><span class="p">]</span>
 </code></pre></div>
 <h2 id="composite-rewards">Composite Rewards<a class="headerlink" href="#composite-rewards" title="Permanent link">&para;</a></h2>
 <p>Combine multiple registry rewards with weights:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a> <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;openai/gsm8k&quot;</span><span class="p">,</span>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a> <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a> <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a> <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"openai/gsm8k"</span><span class="p">,</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a> <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>
 <a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a> <span class="n">rewards</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>  <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;math_correctness&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{}},</span>
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>  <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
-<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>   <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;min_length&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;max_length&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">}},</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>  <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"math_correctness"</span><span class="p">,</span> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{}},</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>  <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"length"</span><span class="p">,</span> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>   <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"min_length"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"max_length"</span><span class="p">:</span> <span class="mi">256</span><span class="p">}},</span>
 <a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a> <span class="p">],</span>
 <a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="p">)</span>
 </code></pre></div>
@@ -2593,8 +2593,8 @@ to TRL's batch interface automatically.</p>
 <a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">available</span><span class="p">)</span>
 <a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
 <a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="c1"># Get specific function</span>
-<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">)</span>
-<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="n">sentiment_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;sentiment&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"length"</span><span class="p">)</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="n">sentiment_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"sentiment"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="train-a-neural-reward-model-separate-workflow">Train a Neural Reward Model (separate workflow)<a class="headerlink" href="#train-a-neural-reward-model-separate-workflow" title="Permanent link">&para;</a></h3>
 <p><code>RewardModelTrainer</code> trains a model from text and reward features. It is not
@@ -2608,15 +2608,15 @@ trainer that supports <code>reward_model_name</code> or <code>reward_model_path<
 <a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
 <a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">custom_reward</span><span class="p">(</span><span class="n">completions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="c1"># Return exactly one numeric score per completion.</span>
-<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="k">return</span> <span class="p">[</span><span class="mf">1.0</span> <span class="k">if</span> <span class="s2">&quot;final answer&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="k">return</span> <span class="p">[</span><span class="mf">1.0</span> <span class="k">if</span> <span class="s2">"final answer"</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">else</span> <span class="mf">0.0</span>
 <a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>            <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">completions</span><span class="p">]</span>
 <a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>
 <a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;Qwen/Qwen3-0.6B&quot;</span><span class="p">,</span>
-<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;openai/gsm8k&quot;</span><span class="p">,</span>
-<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"Qwen/Qwen3-0.6B"</span><span class="p">,</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"openai/gsm8k"</span><span class="p">,</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">"grpo"</span><span class="p">,</span>
 <a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    <span class="n">rewards</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;custom&quot;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="n">custom_reward</span><span class="p">},</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>        <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"custom"</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"function"</span><span class="p">:</span> <span class="n">custom_reward</span><span class="p">},</span> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
 <a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    <span class="p">],</span>
 <a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="p">)</span>
 </code></pre></div>
@@ -2640,50 +2640,50 @@ its name in <code>reward_functions</code> or <code>rewards</code>.</p>
 <h3 id="3-start-simple">3. Start Simple<a class="headerlink" href="#3-start-simple" title="Permanent link">&para;</a></h3>
 <p>Begin with a few key rewards, then expand:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Start with basics</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">]</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"length"</span><span class="p">,</span> <span class="s2">"safety"</span><span class="p">]</span>
 <a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
 <a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># Add more as needed</span>
-<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">,</span> <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="s2">&quot;coherence&quot;</span><span class="p">]</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"length"</span><span class="p">,</span> <span class="s2">"safety"</span><span class="p">,</span> <span class="s2">"sentiment"</span><span class="p">,</span> <span class="s2">"coherence"</span><span class="p">]</span>
 </code></pre></div>
 <h3 id="4-test-reward-functions">4. Test Reward Functions<a class="headerlink" href="#4-test-reward-functions" title="Permanent link">&para;</a></h3>
 <p>Test rewards independently before combining:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.rewards.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardRegistry</span>
 <a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
 <a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="n">registry</span> <span class="o">=</span> <span class="n">RewardRegistry</span><span class="p">()</span>
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">)</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="n">length_func</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_reward_function</span><span class="p">(</span><span class="s2">"length"</span><span class="p">)</span>
 <a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>
 <a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="c1"># Test on sample text</span>
-<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="n">test_text</span> <span class="o">=</span> <span class="s2">&quot;This is a test response.&quot;</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="n">test_text</span> <span class="o">=</span> <span class="s2">"This is a test response."</span>
 <a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="n">score</span> <span class="o">=</span> <span class="n">length_func</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">test_text</span><span class="p">)</span>
-<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Length reward: </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Length reward: </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="complete-example">Complete Example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rl_trainer</span>
 <a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
 <a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_training_texts</span><span class="p">():</span>
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Load training texts for reward model.&quot;&quot;&quot;</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span><span class="sd">"""Load training texts for reward model."""</span>
 <a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>    <span class="k">return</span> <span class="p">[</span>
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>    <span class="s2">&quot;This is a helpful and informative response.&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>    <span class="s2">&quot;I&#39;m not sure, but here&#39;s what I think.&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>    <span class="s2">&quot;That&#39;s a great question! Let me explain.&quot;</span><span class="p">,</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>    <span class="s2">"This is a helpful and informative response."</span><span class="p">,</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>    <span class="s2">"I'm not sure, but here's what I think."</span><span class="p">,</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>    <span class="s2">"That's a great question! Let me explain."</span><span class="p">,</span>
 <a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>    <span class="c1"># ... more texts</span>
 <a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>    <span class="p">]</span>
 <a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>
 <a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="c1"># Create trainer with custom reward model</span>
 <a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
-<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;HuggingFaceH4/ultrafeedback_binarized&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span><span class="p">,</span>
+<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"unsloth/Llama-3.2-1B-Instruct-bnb-4bit"</span><span class="p">,</span>
+<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"HuggingFaceH4/ultrafeedback_binarized"</span><span class="p">,</span>
+<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a>    <span class="n">algorithm</span><span class="o">=</span><span class="s2">"ppo"</span><span class="p">,</span>
+<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">"unsloth"</span><span class="p">,</span>
 <a id="__codelineno-25-18" name="__codelineno-25-18" href="#__codelineno-25-18"></a>    <span class="c1"># Custom reward model with multiple functions</span>
 <a id="__codelineno-25-19" name="__codelineno-25-19" href="#__codelineno-25-19"></a>    <span class="n">train_custom_reward_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-25-20" name="__codelineno-25-20" href="#__codelineno-25-20"></a>    <span class="n">reward_training_texts</span><span class="o">=</span><span class="n">load_training_texts</span><span class="p">(),</span>
 <a id="__codelineno-25-21" name="__codelineno-25-21" href="#__codelineno-25-21"></a>    <span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-25-22" name="__codelineno-25-22" href="#__codelineno-25-22"></a>    <span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="c1"># Appropriate length</span>
-<a id="__codelineno-25-23" name="__codelineno-25-23" href="#__codelineno-25-23"></a>    <span class="s2">&quot;sentiment&quot;</span><span class="p">,</span> <span class="c1"># Positive sentiment</span>
-<a id="__codelineno-25-24" name="__codelineno-25-24" href="#__codelineno-25-24"></a>    <span class="s2">&quot;safety&quot;</span><span class="p">,</span> <span class="c1"># Safety (high priority)</span>
-<a id="__codelineno-25-25" name="__codelineno-25-25" href="#__codelineno-25-25"></a>    <span class="s2">&quot;coherence&quot;</span><span class="p">,</span> <span class="c1"># Logical flow</span>
-<a id="__codelineno-25-26" name="__codelineno-25-26" href="#__codelineno-25-26"></a>    <span class="s2">&quot;helpfulness&quot;</span> <span class="c1"># Helpful responses</span>
+<a id="__codelineno-25-22" name="__codelineno-25-22" href="#__codelineno-25-22"></a>    <span class="s2">"length"</span><span class="p">,</span> <span class="c1"># Appropriate length</span>
+<a id="__codelineno-25-23" name="__codelineno-25-23" href="#__codelineno-25-23"></a>    <span class="s2">"sentiment"</span><span class="p">,</span> <span class="c1"># Positive sentiment</span>
+<a id="__codelineno-25-24" name="__codelineno-25-24" href="#__codelineno-25-24"></a>    <span class="s2">"safety"</span><span class="p">,</span> <span class="c1"># Safety (high priority)</span>
+<a id="__codelineno-25-25" name="__codelineno-25-25" href="#__codelineno-25-25"></a>    <span class="s2">"coherence"</span><span class="p">,</span> <span class="c1"># Logical flow</span>
+<a id="__codelineno-25-26" name="__codelineno-25-26" href="#__codelineno-25-26"></a>    <span class="s2">"helpfulness"</span> <span class="c1"># Helpful responses</span>
 <a id="__codelineno-25-27" name="__codelineno-25-27" href="#__codelineno-25-27"></a>    <span class="p">],</span>
 <a id="__codelineno-25-28" name="__codelineno-25-28" href="#__codelineno-25-28"></a>    <span class="n">reward_function_weights</span><span class="o">=</span><span class="p">[</span>
 <a id="__codelineno-25-29" name="__codelineno-25-29" href="#__codelineno-25-29"></a>    <span class="mf">0.15</span><span class="p">,</span> <span class="c1"># length</span>
@@ -2692,8 +2692,8 @@ its name in <code>reward_functions</code> or <code>rewards</code>.</p>
 <a id="__codelineno-25-32" name="__codelineno-25-32" href="#__codelineno-25-32"></a>    <span class="mf">0.20</span><span class="p">,</span> <span class="c1"># coherence</span>
 <a id="__codelineno-25-33" name="__codelineno-25-33" href="#__codelineno-25-33"></a>    <span class="mf">0.15</span> <span class="c1"># helpfulness</span>
 <a id="__codelineno-25-34" name="__codelineno-25-34" href="#__codelineno-25-34"></a>    <span class="p">],</span>
-<a id="__codelineno-25-35" name="__codelineno-25-35" href="#__codelineno-25-35"></a>    <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">&quot;microsoft/DialoGPT-medium&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-36" name="__codelineno-25-36" href="#__codelineno-25-36"></a>    <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">&quot;./reward_models/custom&quot;</span><span class="p">,</span>
+<a id="__codelineno-25-35" name="__codelineno-25-35" href="#__codelineno-25-35"></a>    <span class="n">reward_training_base_model</span><span class="o">=</span><span class="s2">"microsoft/DialoGPT-medium"</span><span class="p">,</span>
+<a id="__codelineno-25-36" name="__codelineno-25-36" href="#__codelineno-25-36"></a>    <span class="n">reward_training_output_dir</span><span class="o">=</span><span class="s2">"./reward_models/custom"</span><span class="p">,</span>
 <a id="__codelineno-25-37" name="__codelineno-25-37" href="#__codelineno-25-37"></a>    <span class="c1"># PPO configuration</span>
 <a id="__codelineno-25-38" name="__codelineno-25-38" href="#__codelineno-25-38"></a>    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <a id="__codelineno-25-39" name="__codelineno-25-39" href="#__codelineno-25-39"></a>    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>

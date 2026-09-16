@@ -1219,7 +1219,7 @@ research to production.
 <span>TRL · Unsloth · ES backends</span>
 <span>13+ RL algorithms</span>
 <span>27+ reward functions</span>
-<span>LSAL-1.1 (source available)</span>
+<span>MIT</span>
 </p>
 </div>
 <pre class="mermaid"><code>flowchart TD
@@ -1299,9 +1299,9 @@ retraining from scratch. See <a href="advanced/tokenization/">Tokenization</a>.<
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aligntune.core.backend_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_sft_trainer</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;meta-llama/Llama-3.2-3B-Instruct&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;trl&quot;</span><span class="p">,</span>       <span class="c1"># or &quot;unsloth&quot; for faster training</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">model_name</span><span class="o">=</span><span class="s2">"meta-llama/Llama-3.2-3B-Instruct"</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">dataset_name</span><span class="o">=</span><span class="s2">"tatsu-lab/alpaca"</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span><span class="p">,</span>       <span class="c1"># or "unsloth" for faster training</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">,</span>
@@ -1316,8 +1316,8 @@ evaluating, and saving the trained model end to end.</p>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>aligntune
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">&quot;microsoft/DialoGPT-small&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--dataset<span class="w"> </span><span class="s2">&quot;tatsu-lab/alpaca&quot;</span><span class="w"> </span>--type<span class="w"> </span>sft
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>aligntune<span class="w"> </span>train<span class="w"> </span>--model<span class="w"> </span><span class="s2">"microsoft/DialoGPT-small"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--dataset<span class="w"> </span><span class="s2">"tatsu-lab/alpaca"</span><span class="w"> </span>--type<span class="w"> </span>sft
 </code></pre></div>
 <p>Config-driven runs are declarative YAML; the schema and full command
 reference are in the <a href="cli-reference/">CLI reference</a>.</p>

@@ -2671,10 +2671,10 @@ below for a narrower ORPO/Unsloth issue found and fixed).</p>
 <p>Unsloth is bundled with AlignTune, so this is almost always a GPU/CUDA problem at
 import time rather than a missing package.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Check the vendored Unsloth imports on this machine</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import unsloth; print(&#39;Unsloth available&#39;)&quot;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import unsloth; print('Unsloth available')"</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># If it errors, check CUDA compatibility</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import torch; print(f&#39;PyTorch: {torch.__version__}, CUDA: {torch.version.cuda}&#39;)&quot;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.version.cuda}')"</span>
 </code></pre></div>
 <h4 id="cuda-symbol-errors">CUDA Symbol Errors<a class="headerlink" href="#cuda-symbol-errors" title="Permanent link">&para;</a></h4>
 <ul>

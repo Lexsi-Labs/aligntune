@@ -1952,14 +1952,14 @@
 <p><strong>Current</strong>: TRL backend, OOM errors<br />
 <strong>Goal</strong>: Reduce memory footprint<br />
 <strong>Solution</strong>: 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;unsloth&quot;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;unsloth/Llama-3.2-1B-Instruct-bnb-4bit&quot;</span> <span class="c1"># 4-bit quantized</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">backend</span><span class="o">=</span><span class="s2">"unsloth"</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">model_name</span><span class="o">=</span><span class="s2">"unsloth/Llama-3.2-1B-Instruct-bnb-4bit"</span> <span class="c1"># 4-bit quantized</span>
 </code></pre></div></p>
 <h3 id="scenario-2-non-differentiable-rewards">Scenario 2: Non-Differentiable Rewards<a class="headerlink" href="#scenario-2-non-differentiable-rewards" title="Permanent link">&para;</a></h3>
 <p><strong>Current</strong>: Reward function has discontinuities making gradients noisy.<br />
 <strong>Goal</strong>: Optimize without backpropagation.<br />
 <strong>Solution</strong>: Switch to ES backend<br />
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;es&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">backend</span><span class="o">=</span><span class="s2">"es"</span>
 </code></pre></div></p>
 
 
