@@ -20,9 +20,12 @@ dynamic = ["version"]
 description = "AlignTune: Multi-backend alignment and fine-tuning library. Features TRL and Unsloth backends with complete RL coverage (DPO, PPO, GRPO, BOLT), 27+ reward functions, production-ready evaluation system, and unified configuration interface for LLM alignment."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "LicenseRef-LSAL-1.1"
+# AlignTune's own code is MIT. The wheel also bundles unmodified third-party
+# packages under their own licenses (unsloth/unsloth_zoo: Apache-2.0 with
+# AGPL-3.0 components; mergekit: LGPL-3.0). PEP 639 expression for the whole.
+license = "MIT AND Apache-2.0 AND AGPL-3.0-only AND LGPL-3.0-only"
 license-files = [
-    "LICENSE.md",
+    "LICENSE",
     "THIRD_PARTY_LICENSES.md",
     # mergekit is vendored and compiled into this wheel (see setup.py); its
     # own LGPL-3.0 license and patch notes must ship inside the built
@@ -145,7 +148,7 @@ dependencies = [
     # unsloth and unsloth_zoo (2026.7.2) are vendored in-tree - see
     # third_party/unsloth/PATCH_NOTES.md and
     # third_party/unsloth_zoo/PATCH_NOTES.md (both include AGPL-3.0-licensed
-    # files alongside this project's own LSAL-1.1 code; see those files and
+    # files alongside this project's own MIT-licensed code; see those files and
     # THIRD_PARTY_LICENSES.md for what's AGPL-licensed and why) - rather
     # than installed as separate distributions, so a plain
     # `pip install aligntune` is enough. The entries below are their own
@@ -187,7 +190,6 @@ dependencies = [
     "python-docx",
 
     # Dataset curation and HF/Parquet connectors (published on PyPI)
-    "curatorkit[all]",
 
     # Required for SentencePiece tokenizer support (Llama, Mistral, Gemma, etc.)
     # PyICU provides Unicode script detection for merge rule validation
@@ -213,6 +215,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# CuratorKIT (dataset curation) is licensed under the Lexsi Labs Source Available
+# License (noncommercial); it is opt-in so the MIT core has no restrictive hard dep.
+curation = ["curatorkit[all]"]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",

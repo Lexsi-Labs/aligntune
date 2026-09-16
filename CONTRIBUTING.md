@@ -225,7 +225,7 @@ def test_feature_description():
 
 By contributing to AlignTune, you agree that:
 
-1. **Your contributions** will be licensed under the Lexsi Labs Source Available License (LSAL) v1.1
+1. **Your contributions** will be licensed under the MIT License
 2. **You have the right** to submit the contribution
 3. **You grant** Lexsi Labs a perpetual, worldwide, royalty-free license to use, modify, distribute, and license your contributions under any terms, including commercial ones
 4. **You understand** that your contributions may be used in commercial products or services offered by Lexsi Labs

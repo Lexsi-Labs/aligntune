@@ -95,7 +95,8 @@ def curate_split(
     except ImportError as exc:
         raise ImportError(
             "CuratorKIT is required for dataset curation. "
-            "Install it with `pip install curatorkit`."
+            "Install it with `pip install \"aligntune[curation]\"` (CuratorKIT is under the "
+            "Lexsi Labs Source Available License, noncommercial)."
         ) from exc
 
     if preprocessing_batched:
