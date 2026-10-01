@@ -86,7 +86,8 @@ classifiers = [
 
 dependencies = [
     # Core ML dependencies
-    "transformers==5.14.1",
+    # >=5.15 is needed for North Micro Vision (cohere_compass); <6 until verified.
+    "transformers>=5.15,<6",
     # unsloth/unsloth_zoo's own metadata caps this at <4.4.0, but that's
     # incompatible with trl==1.7.1 below (needs datasets>=4.7.0) - trl's
     # requirement wins since it's a hard pin already in use elsewhere in
