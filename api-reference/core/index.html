@@ -4494,11 +4494,7 @@ Example: "numeric_math:weight=1.0:tolerance=1e-6"</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/aligntune/core/backend_factory.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-423">423</a></span>
-<span class="normal"><a href="#__codelineno-0-424">424</a></span>
-<span class="normal"><a href="#__codelineno-0-425">425</a></span>
-<span class="normal"><a href="#__codelineno-0-426">426</a></span>
-<span class="normal"><a href="#__codelineno-0-427">427</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-427">427</a></span>
 <span class="normal"><a href="#__codelineno-0-428">428</a></span>
 <span class="normal"><a href="#__codelineno-0-429">429</a></span>
 <span class="normal"><a href="#__codelineno-0-430">430</a></span>
@@ -4518,31 +4514,35 @@ Example: "numeric_math:weight=1.0:tolerance=1e-6"</p>
 <span class="normal"><a href="#__codelineno-0-444">444</a></span>
 <span class="normal"><a href="#__codelineno-0-445">445</a></span>
 <span class="normal"><a href="#__codelineno-0-446">446</a></span>
-<span class="normal"><a href="#__codelineno-0-447">447</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_backend_selection</span><span class="p">(</span><span class="n">backend</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">training_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"RL"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BackendType</span><span class="p">:</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="w">    </span><span class="sd">"""Validate backend selection and provide helpful error messages."""</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">):</span>  <span class="c1"># BackendType enum</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>            <span class="n">backend_type</span> <span class="o">=</span> <span class="n">backend</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="k">else</span><span class="p">:</span>  <span class="c1"># string</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>            <span class="n">backend_type</span> <span class="o">=</span> <span class="n">BackendType</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="n">available_backends</span> <span class="o">=</span> <span class="p">[</span><span class="n">bt</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">bt</span> <span class="ow">in</span> <span class="n">BackendType</span><span class="p">]</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid backend '</span><span class="si">{</span><span class="n">backend</span><span class="si">}</span><span class="s2">'. Available backends: </span><span class="si">{</span><span class="n">available_backends</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="c1"># Check availability</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_backend_availability</span><span class="p">(</span><span class="n">backend_type</span><span class="p">):</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="k">if</span> <span class="n">backend_type</span> <span class="o">==</span> <span class="n">BackendType</span><span class="o">.</span><span class="n">TRL</span><span class="p">:</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>                <span class="s2">"TRL backend not available. Install with: pip install trl</span><span class="se">\n</span><span class="s2">"</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>                <span class="s2">"Alternatively, use Unsloth backend: --backend unsloth"</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>            <span class="p">)</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>        <span class="k">elif</span> <span class="n">backend_type</span> <span class="o">==</span> <span class="n">BackendType</span><span class="o">.</span><span class="n">UNSLOTH</span><span class="p">:</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>                <span class="s2">"Unsloth backend not available. Install with: pip install unsloth</span><span class="se">\n</span><span class="s2">"</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>                <span class="s2">"Alternatively, use TRL backend: --backend trl"</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="p">)</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">return</span> <span class="n">backend_type</span>
+<span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_backend_selection</span><span class="p">(</span><span class="n">backend</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">training_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"RL"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BackendType</span><span class="p">:</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="w">    </span><span class="sd">"""Validate backend selection and provide helpful error messages."""</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">):</span>  <span class="c1"># BackendType enum</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="n">backend_type</span> <span class="o">=</span> <span class="n">backend</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="k">else</span><span class="p">:</span>  <span class="c1"># string</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="n">backend_type</span> <span class="o">=</span> <span class="n">BackendType</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="n">available_backends</span> <span class="o">=</span> <span class="p">[</span><span class="n">bt</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">bt</span> <span class="ow">in</span> <span class="n">BackendType</span><span class="p">]</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid backend '</span><span class="si">{</span><span class="n">backend</span><span class="si">}</span><span class="s2">'. Available backends: </span><span class="si">{</span><span class="n">available_backends</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="c1"># Check availability</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">_check_backend_availability</span><span class="p">(</span><span class="n">backend_type</span><span class="p">):</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="k">if</span> <span class="n">backend_type</span> <span class="o">==</span> <span class="n">BackendType</span><span class="o">.</span><span class="n">TRL</span><span class="p">:</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>                <span class="s2">"TRL backend not available. Install with: pip install trl</span><span class="se">\n</span><span class="s2">"</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>                <span class="s2">"Alternatively, use Unsloth backend: --backend unsloth"</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="p">)</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>        <span class="k">elif</span> <span class="n">backend_type</span> <span class="o">==</span> <span class="n">BackendType</span><span class="o">.</span><span class="n">UNSLOTH</span><span class="p">:</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>                <span class="s2">"Unsloth backend not available. Install with: pip install unsloth</span><span class="se">\n</span><span class="s2">"</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>                <span class="s2">"Alternatively, use TRL backend: --backend trl"</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>            <span class="p">)</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="k">return</span> <span class="n">backend_type</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
