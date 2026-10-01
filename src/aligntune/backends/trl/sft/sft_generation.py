@@ -212,7 +212,7 @@ class TRLSFTTrainer(SFTTrainerBase):
             try:
                 final_metrics = {
                     'training_time': training_duration,
-                    'final_loss': getattr(train_result, 'train_loss', 0.0),
+                    'final_loss': getattr(train_result, 'training_loss', 0.0),
                     'epochs': getattr(train_result, 'epoch', 0),
                 }
                 self.wandb_logger.log_metrics(final_metrics, step=getattr(train_result, 'global_step', 0))
@@ -229,7 +229,7 @@ class TRLSFTTrainer(SFTTrainerBase):
 
         return {
             'training_time': training_duration,
-            'final_loss': getattr(train_result, 'train_loss', 0.0),
+            'final_loss': getattr(train_result, 'training_loss', 0.0),
             'model_path': self.config.logging.output_dir,
             'steps': getattr(train_result, 'global_step', 0),
             'epochs': getattr(train_result, 'epoch', 0),
