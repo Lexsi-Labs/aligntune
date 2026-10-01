@@ -206,6 +206,7 @@ class TRLGBMPOTrainer(TRLGRPOTrainer):
         # Save model
         logger.info(f"Saving model to {output_dir}")
         self.trainer.save_model(output_dir)
+        self.write_provenance(output_dir)
         self.tokenizer.save_pretrained(output_dir)
 
         # Compile results

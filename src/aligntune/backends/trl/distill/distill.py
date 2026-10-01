@@ -479,8 +479,7 @@ class TRLDistillTrainer(TrainerBase):
                 gradient_accumulation_steps=self.distill_config.gradient_accumulation_steps,
                 learning_rate=self.distill_config.learning_rate,
                 weight_decay=self.distill_config.weight_decay,
-                warmup_steps=self.distill_config.warmup_steps,
-                warmup_ratio=self.distill_config.warmup_ratio,
+                warmup_steps=self.distill_config.warmup_steps if self.distill_config.warmup_ratio is None else self.distill_config.warmup_ratio,
                 logging_steps=self.distill_config.logging_steps,
                 save_steps=self.distill_config.save_steps,
                 eval_steps=self.distill_config.eval_steps,
@@ -583,6 +582,7 @@ class TRLDistillTrainer(TrainerBase):
 
         if self.trainer:
             self.trainer.save_model(output_dir)
+            self.write_provenance(output_dir)
 
         if self.tokenizer:
             self.tokenizer.save_pretrained(output_dir)

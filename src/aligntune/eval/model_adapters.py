@@ -220,7 +220,7 @@ class VLLMModelAdapter(ModelAdapter):
         except ImportError:
             raise ImportError(
                 "vllm is not installed. Install with:\n"
-                "  pip install vllm\n"
+                "  pip install \"aligntune[vllm]\"  (Linux + CUDA only)\n"
                 "For GGUF support, also install:\n"
                 "  pip install vllm[gguf]"
             )
@@ -608,16 +608,19 @@ def build_adapter(
 
     elif format_type == "hf_4bit":
         # Load HF 4-bit quantized (bitsandbytes)
-        from transformers import AutoTokenizer, AutoModelForCausalLM
+        import torch
+        from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
         try:
             tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True)
             model = AutoModelForCausalLM.from_pretrained(
                 path,
                 trust_remote_code=True,
-                load_in_4bit=True,
+                quantization_config=BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_compute_dtype=torch.float16,
+                ),
                 device_map="auto",
-                bnb_4bit_compute_dtype="float16",
             )
             return HFModelAdapter(model, tokenizer, **kwargs)
         except Exception as e:
@@ -626,14 +629,14 @@ def build_adapter(
 
     elif format_type == "hf_8bit":
         # Load HF 8-bit quantized (bitsandbytes)
-        from transformers import AutoTokenizer, AutoModelForCausalLM
+        from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
         try:
             tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True)
             model = AutoModelForCausalLM.from_pretrained(
                 path,
                 trust_remote_code=True,
-                load_in_8bit=True,
+                quantization_config=BitsAndBytesConfig(load_in_8bit=True),
                 device_map="auto",
             )
             return HFModelAdapter(model, tokenizer, **kwargs)

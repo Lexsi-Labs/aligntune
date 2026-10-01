@@ -189,6 +189,46 @@ class UnifiedTrainerBase(ABC):
         )
         return [hf_callback]
         
+    def provenance(self, inputs: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+        """The ``lexsi.provenance/1`` object for this run.
+
+        Inputs default to the base model and the configured dataset(s); each
+        embeds its own ``lexsi_provenance.json`` when it is a local folder
+        that has one (e.g. a CuratorKIT export).
+        """
+        from aligntune.utils.provenance import build_provenance, provenance_input
+
+        cfg = self.config
+        model_cfg = getattr(cfg, "model", None)
+        base_model = getattr(model_cfg, "name_or_path", None) or getattr(model_cfg, "student_model", None)
+        if inputs is None:
+            datasets = getattr(cfg, "datasets", None) or [getattr(cfg, "dataset", None)]
+            inputs = [provenance_input(base_model, "model")] if base_model else []
+            inputs += [
+                provenance_input(
+                    getattr(d, "name", None),
+                    "dataset",
+                    getattr(d, "config_name", None) or getattr(d, "subset", None),
+                )
+                for d in datasets
+                if getattr(d, "name", None) is not None
+            ]
+        task = self._get_task_type() if hasattr(self, "_get_task_type") else None
+        return build_provenance(
+            method=str(getattr(task, "value", task) or type(self).__name__),
+            base_model=base_model,
+            inputs=inputs,
+            params={"trainer": type(self).__name__},
+        )
+
+    def write_provenance(self, output_dir: Union[str, Path], **kwargs: Any) -> Optional[Path]:
+        """Write ``lexsi_provenance.json`` into ``output_dir`` (rank 0 only)."""
+        if self.backend and not self.backend.is_rank_0():
+            return None
+        from aligntune.utils.provenance import write_provenance
+
+        return write_provenance(output_dir, self.provenance(**kwargs))
+
     def save_checkpoint(self) -> None:
         """Standard HF checkpoint saving."""
         if self.backend and not self.backend.is_rank_0():
@@ -204,6 +244,7 @@ class UnifiedTrainerBase(ABC):
             self.model.save_pretrained(checkpoint_dir)
         if self.tokenizer is not None:
             self.tokenizer.save_pretrained(checkpoint_dir)
+        self.write_provenance(checkpoint_dir)
             
         state_path = checkpoint_dir / "training_state.json"
         with open(state_path, 'w') as f:
@@ -249,6 +290,8 @@ class UnifiedTrainerBase(ABC):
         if self.model is None or self.tokenizer is None:
             raise RuntimeError("Model not loaded.")
             
+        from aligntune.utils.provenance import PROVENANCE_FILE
+
         try:
             from huggingface_hub import HfApi, login
         except ImportError:
@@ -260,6 +303,12 @@ class UnifiedTrainerBase(ABC):
         try:
             repo_url = self.model.push_to_hub(repo_id, private=private, commit_message=commit_message)
             self.tokenizer.push_to_hub(repo_id, private=private, commit_message=commit_message)
+            HfApi().upload_file(
+                path_or_fileobj=json.dumps(self.provenance(), indent=2, default=str).encode(),
+                path_in_repo=PROVENANCE_FILE,
+                repo_id=repo_id,
+                commit_message=commit_message,
+            )
             logger.info(f"Model pushed to hub successfully: {repo_url}")
         except Exception as e:
             logger.error(f"Failed to push to hub: {e}")
@@ -551,13 +600,22 @@ class UnifiedTrainerBase(ABC):
             # Use current model
             base_model = self.model
 
+        # The merged model's input is the adapter: the given checkpoint, or the
+        # run's output dir, whose lexsi_provenance.json chains back to the data.
+        from aligntune.utils.provenance import provenance_input
+
+        adapter_ref = adapter_path or getattr(getattr(self.config, 'logging', None), 'output_dir', None)
+        provenance = self.provenance(inputs=[provenance_input(adapter_ref, "adapter")])
+        provenance["method"] = "merge_lora"
+
         # Use PEFTMerger
         merger = PEFTMerger()
         return merger.merge_lora(
             base_model=base_model,
             output_path=str(output_path),
             adapter_path=adapter_path,
-            tokenizer=self.tokenizer
+            tokenizer=self.tokenizer,
+            provenance=provenance,
         )
 
     def _auto_export(self) -> None:

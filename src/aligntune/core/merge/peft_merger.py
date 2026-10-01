@@ -17,6 +17,8 @@ import logging
 from pathlib import Path
 from typing import Optional, Union
 
+from aligntune.utils.provenance import build_provenance, provenance_input, write_provenance
+
 from .base import BaseMerger
 
 logger = logging.getLogger(__name__)
@@ -49,6 +51,43 @@ def _require_transformers():
         ) from exc
 
 
+def _adapter_vocab_size(adapter_path: str, tokenizer: Optional[object]) -> Optional[int]:
+    """Vocabulary size an adapter was trained with, or None if it cannot be determined.
+
+    Adapters trained after a vocabulary extension carry resized embedding
+    weights (``modules_to_save``); their row count is authoritative. Falls back
+    to the adapter directory's tokenizer length.
+    """
+    adapter_dir = Path(adapter_path)
+    weights_file = adapter_dir / "adapter_model.safetensors"
+    if weights_file.exists():
+        try:
+            from safetensors import safe_open
+
+            with safe_open(str(weights_file), framework="pt") as f:
+                for key in f.keys():
+                    if "embed_tokens" in key or "wte" in key:
+                        shape = f.get_slice(key).get_shape()
+                        if len(shape) == 2 and "lora_" not in key:
+                            return int(shape[0])
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.debug(f"Could not inspect adapter embeddings: {exc}")
+    if tokenizer is not None and (adapter_dir / "tokenizer_config.json").exists():
+        return len(tokenizer)
+    return None
+
+
+def _grow_embeddings_for_adapter(model, adapter_path: str, tokenizer: Optional[object]) -> None:
+    """Resize the base model's embeddings up to the adapter's vocabulary size."""
+    target = _adapter_vocab_size(adapter_path, tokenizer)
+    if target is None:
+        return
+    current = model.get_input_embeddings().weight.shape[0]
+    if target > current:
+        logger.info(f"Resizing base embeddings {current} -> {target} to match adapter vocabulary")
+        model.resize_token_embeddings(target)
+
+
 class PEFTMerger(BaseMerger):
     """
     Merges a LoRA adapter into its base model using ``peft.PeftModel.merge_and_unload()``.
@@ -67,6 +106,7 @@ class PEFTMerger(BaseMerger):
         adapter_path: Optional[str] = None,
         tokenizer: Optional[object] = None,
         torch_dtype: str = "auto",
+        provenance: Optional[dict] = None,
     ) -> str:
         """
         Merge a LoRA adapter into a base model.
@@ -77,6 +117,9 @@ class PEFTMerger(BaseMerger):
             adapter_path: Path to LoRA adapter checkpoint. If None, base_model must be PeftModel
             tokenizer: Optional tokenizer to save alongside model
             torch_dtype: torch dtype (auto, float16, bfloat16, float32)
+            provenance: ``lexsi_provenance.json`` object for the merged dir.
+                Defaults to one whose input is the adapter (and its own
+                provenance, when the adapter dir has one).
 
         Returns:
             Absolute path to the merged model directory
@@ -121,8 +164,25 @@ class PEFTMerger(BaseMerger):
                 torch_dtype=dtype_arg,
             )
 
+            # Prefer the adapter directory's tokenizer: it carries the chat
+            # template and any added tokens used during training.
+            if tokenizer is None:
+                tokenizer_sources = []
+                if adapter_path is not None and any(
+                    (Path(adapter_path) / n).exists() for n in ("tokenizer.json", "tokenizer_config.json")
+                ):
+                    tokenizer_sources.append(adapter_path)
+                tokenizer_sources.append(base_model_path)
+                for source in tokenizer_sources:
+                    try:
+                        tokenizer = transformers.AutoTokenizer.from_pretrained(source)
+                        break
+                    except Exception as e:
+                        logger.warning(f"Could not load tokenizer from {source}: {e}")
+
             # Load adapter if provided
             if adapter_path is not None:
+                _grow_embeddings_for_adapter(base_model_obj, adapter_path, tokenizer)
                 logger.info(f"Loading LoRA adapter from: {adapter_path}")
                 model = peft.PeftModel.from_pretrained(base_model_obj, adapter_path)
             else:
@@ -130,12 +190,8 @@ class PEFTMerger(BaseMerger):
                 logger.info(f"Loading {base_model_path} as PEFT model")
                 model = peft.PeftModel.from_pretrained(base_model_obj, base_model_path)
 
-            # Load tokenizer if not provided
-            if tokenizer is None:
-                try:
-                    tokenizer = transformers.AutoTokenizer.from_pretrained(base_model_path)
-                except Exception as e:
-                    logger.warning(f"Could not load tokenizer: {e}")
+            if tokenizer is not None and getattr(tokenizer, "pad_token", None) is None:
+                tokenizer.pad_token = tokenizer.eos_token
 
         else:
             # Already loaded model
@@ -146,12 +202,21 @@ class PEFTMerger(BaseMerger):
                 logger.info(f"Loading adapter from: {adapter_path}")
                 model = peft.PeftModel.from_pretrained(model, adapter_path)
 
+        if provenance is None:
+            adapter_ref = adapter_path or base_model_path
+            provenance = build_provenance(
+                "merge_lora",
+                base_model=base_model_path,
+                inputs=[provenance_input(adapter_ref, "adapter")] if adapter_ref else [],
+            )
+
         # Check if model is PEFT model
         if not isinstance(model, peft.PeftModel):
             logger.warning("Model is not a PEFT model. Saving without merging.")
             model.save_pretrained(str(output_path))
             if tokenizer:
                 tokenizer.save_pretrained(str(output_path))
+            write_provenance(output_path, provenance)
             return str(output_path.resolve())
 
         # Keep the original Hub id on the merged config so Hub cards can
@@ -181,6 +246,7 @@ class PEFTMerger(BaseMerger):
         if tokenizer:
             tokenizer.save_pretrained(str(output_path))
             logger.info("Tokenizer saved")
+        write_provenance(output_path, provenance)
 
         logger.info(f"✓ LoRA merge complete: {output_path}")
         return str(output_path.resolve())

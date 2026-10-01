@@ -24,6 +24,12 @@ import signal
 from contextlib import contextmanager
 
 from .core import RewardFunction, RewardConfig
+from ._answers import (
+    answers_match,
+    clean_answer,
+    extract_completion_answer,
+    extract_reference_answer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +77,7 @@ class VerifiableReward(RewardFunction, ABC):
             result = self.verify(text, reference)
             return 1.0 if result else 0.0
         except Exception as e:
-            logger.debug(f"Verification failed: {e}")
+            logger.warning(f"Verification failed for {type(self).__name__}: {e}")
             return 0.0
 
 
@@ -109,17 +115,21 @@ class MathVerifiableReward(VerifiableReward):
         if not reference:
             return False
 
-        # Extract answer from completion
+        reference = extract_reference_answer(reference)
         answer = self._extract_answer(completion)
         if not answer:
             return False
+        answer = clean_answer(answer)
 
-        # Try symbolic comparison first if sympy available
+        # Numeric / normalized string comparison handles "48." vs "48", "1,234", fractions
+        if answers_match(answer, reference):
+            return True
+
+        # Symbolic comparison for non-numeric expressions
         if self.sympy and self.simplify:
             return self._symbolic_compare(answer, reference)
 
-        # Fall back to normalized string comparison
-        return self._normalize_compare(answer, reference)
+        return False
 
     def _extract_answer(self, text: str) -> Optional[str]:
         """Extract final answer from text.
@@ -130,6 +140,10 @@ class MathVerifiableReward(VerifiableReward):
         - Therefore, the answer is X
         - \boxed{X}
         """
+        shared = extract_completion_answer(text)
+        if shared:
+            return shared
+
         patterns = [
             r'(?:The )?answer (?:is|=)\s*:?\s*([^\n]+?)(?:\n|$)',
             r'(?:Final|final) (?:answer|Answer)\s*:?\s*([^\n]+?)(?:\n|$)',
@@ -156,9 +170,9 @@ class MathVerifiableReward(VerifiableReward):
     def _symbolic_compare(self, answer1: str, answer2: str) -> bool:
         """Compare answers using sympy symbolic comparison."""
         try:
-            expr1 = self.sympy.simplify(answer1)
-            expr2 = self.sympy.simplify(answer2)
-            return expr1 == expr2
+            expr1 = self.sympy.sympify(answer1)
+            expr2 = self.sympy.sympify(answer2)
+            return bool(self.sympy.simplify(expr1 - expr2) == 0)
         except Exception as e:
             logger.debug(f"Symbolic comparison failed: {e}")
             return False

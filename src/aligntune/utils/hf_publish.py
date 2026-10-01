@@ -22,6 +22,7 @@ from typing import Any, Iterable, Optional, Tuple
 from huggingface_hub import HfApi
 
 from .auth import get_hf_token
+from .provenance import PROVENANCE_FILE, build_provenance, read_provenance
 
 logger = logging.getLogger(__name__)
 
@@ -351,13 +352,48 @@ def push_model_to_hf(
     private: bool = False,
     token: Optional[str] = None,
     extra_notes: str = "",
+    provenance: Optional[dict] = None,
 ) -> str:
-    """Push a full HF model + tokenizer, then apply AlignTune branding."""
+    """
+    Push any HF-compatible model + tokenizer to the Hub and auto-generate a
+    Lexsi Labs / AlignTune-branded model card.
+
+    Works with any HF-compatible model/tokenizer, any AlignTune algorithm
+    (SFT/DPO/GRPO/PPO/ORPO/DAPO/GSPO/Distillation/...), and any
+    backend AlignTune drives underneath (TRL, Unsloth, ES, ...).
+
+    Args:
+        model: A model with a `.push_to_hub()` method (any transformers /
+            PEFT model).
+        tokenizer: A tokenizer with a `.push_to_hub()` method.
+        repo_id: Target repo, e.g. "username/model-name".
+        base_model: HF repo id of the base model this was fine-tuned from.
+        algorithm: Training algorithm name, e.g. "SFT", "DPO", "GRPO".
+        backend: Backend used, e.g. "TRL", "Unsloth", "ES".
+        private: Whether to create the repo as private.
+        token: HF token; falls back to HF_TOKEN env var / cached CLI login.
+        extra_notes: Extra markdown appended to the model card (e.g. eval
+            results, dataset notes).
+        provenance: ``lexsi_provenance.json`` object uploaded with the model.
+            Defaults to the one in the model's local folder, else a new one.
+
+    Returns:
+        URL of the pushed model on the Hub.
+    """
     token = _resolve_token(token)
     api = HfApi(token=token)
     api.create_repo(repo_id, private=private, exist_ok=True, token=token)
     model.push_to_hub(repo_id, token=token, private=private)
     tokenizer.push_to_hub(repo_id, token=token, private=private)
+    provenance = provenance or read_provenance(getattr(model, "name_or_path", None)) or build_provenance(
+        algorithm, base_model=base_model, params={"backend": backend}
+    )
+    api.upload_file(
+        path_or_fileobj=json.dumps(provenance, indent=2, default=str).encode(),
+        path_in_repo=PROVENANCE_FILE,
+        repo_id=repo_id,
+        token=token,
+    )
     return brand_hf_repo(
         repo_id,
         kind="model",

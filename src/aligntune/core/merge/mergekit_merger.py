@@ -29,13 +29,32 @@ logger = logging.getLogger(__name__)
 SUPPORTED_METHODS = [
     # Basic methods
     "linear",           # Simple weighted average
+    "slerp",            # Spherical interpolation (2 models only)
 
     # Task vector methods
     "task_arithmetic",  # Basic task vector merging
+    "ties",             # Task vectors + sparsification + sign consensus
+    "dare_ties",        # DARE random pruning + TIES
+    "della",            # Adaptive magnitude-based pruning
 
     # RL-optimized methods (for PPO/DPO agents)
     "ram",              # Reinforced Agent Merging (sparse RL task vectors)
+    "ramplus_tl",       # RAM+ with adaptive rescaling
 ]
+
+
+# Listed for forward compatibility, but mergekit does not ship them (yet).
+_UNIMPLEMENTED_UPSTREAM_METHODS = ("ram", "ramplus_tl")
+
+
+def _mergekit_has_method(method: str) -> bool:
+    """Return True if the installed mergekit registers ``method``."""
+    try:
+        from mergekit.merge_methods import REGISTERED_MERGE_METHODS
+    except ImportError:
+        # Cannot introspect; let mergekit-yaml report any problem itself.
+        return True
+    return method in REGISTERED_MERGE_METHODS
 
 
 def _require_mergekit() -> None:
@@ -91,10 +110,9 @@ class MergekitMerger(BaseMerger):
             method: One of SUPPORTED_METHODS.
             base_model: Base model path (required for task_arithmetic / ram).
             weights: Per-model weight list (must align with *models*).
-            density: Unused by the supported methods (kept for API compatibility).
-            epsilon: Unused by the supported methods (kept for API compatibility, except
-                RAM's global_params, see below).
-            t: Unused by the supported methods (kept for API compatibility).
+            density: Sparsity density for TIES / DARE-TIES / DELLA (0.0 – 1.0).
+            epsilon: Per-model epsilon for DELLA adaptive pruning range (density ± epsilon).
+            t: SLERP interpolation factor (0.0 – 1.0).
             dtype: Target dtype for the merged model.
             global_params: Additional global parameters:
                 - For RAM: {"epsilon": 1e-5} - threshold for unchanged parameters
@@ -110,6 +128,12 @@ class MergekitMerger(BaseMerger):
                 f"Supported: {SUPPORTED_METHODS}"
             )
 
+        if method in _UNIMPLEMENTED_UPSTREAM_METHODS and not _mergekit_has_method(method):
+            raise ValueError(
+                f"Merge method '{method}' is not implemented by the installed mergekit. "
+                "Use 'della', 'ties' or 'dare_ties' instead."
+            )
+
         if weights is None:
             n = len(models)
             weights = [round(1.0 / n, 6)] * n
@@ -121,7 +145,7 @@ class MergekitMerger(BaseMerger):
             )
 
         # Validate base_model requirements
-        methods_requiring_base = ("task_arithmetic", "ram")
+        methods_requiring_base = ("slerp", "task_arithmetic", "ties", "dare_ties", "della", "ram", "ramplus_tl")
         if method in methods_requiring_base:
             if base_model is None:
                 logger.warning(
@@ -234,6 +258,38 @@ class MergekitMerger(BaseMerger):
     # Merge execution
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _check_adapter_vocab_sizes(models: list, lora_adapters: list) -> None:
+        """Fail early when an adapter was trained on a larger (extended) vocabulary.
+
+        mergekit loads each adapter into its unmodified base model, so an
+        adapter whose embeddings were resized for new tokens cannot be applied
+        and otherwise fails deep inside mergekit with a tensor size mismatch.
+        """
+        try:
+            from transformers import AutoConfig
+            from .peft_merger import _adapter_vocab_size
+        except ImportError:
+            return
+        for model, adapter in zip(models, lora_adapters):
+            if not adapter or not Path(str(adapter)).exists():
+                continue
+            adapter_vocab = _adapter_vocab_size(str(adapter), None)
+            if adapter_vocab is None:
+                continue
+            try:
+                base_vocab = AutoConfig.from_pretrained(model).vocab_size
+            except Exception:
+                continue
+            if adapter_vocab > base_vocab:
+                raise ValueError(
+                    f"LoRA adapter '{adapter}' was trained with a vocabulary of {adapter_vocab} "
+                    f"tokens but base model '{model}' has {base_vocab}. mergekit cannot apply "
+                    "an adapter trained on an extended vocabulary to the original base. Merge the "
+                    "adapter first with PEFTMerger.merge_lora(), which resizes the base embeddings, "
+                    "or extend the base model's embeddings before using mergekit."
+                )
+
     def merge(
         self,
         models: list[str],
@@ -307,6 +363,9 @@ class MergekitMerger(BaseMerger):
 
         self.validate_models(models)
 
+        if lora_adapters:
+            self._check_adapter_vocab_sizes(models, lora_adapters)
+
         output_path = Path(output_path)
         output_path.mkdir(parents=True, exist_ok=True)
 
@@ -338,6 +397,9 @@ class MergekitMerger(BaseMerger):
             cmd = ["mergekit-yaml", config_path, str(output_path)]
             if extra_mergekit_args:
                 cmd.extend(extra_mergekit_args)
+            if lora_adapters and any(lora_adapters) and not any(a.startswith("--lora-merge-cache") for a in cmd):
+                # mergekit needs a cache dir to merge LoRA adapters into the models
+                cmd.extend(["--lora-merge-cache", str(output_path / ".lora_merge_cache")])
 
             logger.info("Running: %s", " ".join(cmd))
             result = subprocess.run(

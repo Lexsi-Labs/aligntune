@@ -38,9 +38,16 @@ class TokenizationModelConfig:
 
     # Model loading
     precision: str = "bf16"  # bf16, fp16, fp32, auto
-    device_map: str = "auto"
+    device_map: Optional[str] = "auto"  # None: load without a device map (CPU)
     trust_remote_code: bool = False
     model_init_kwargs: Dict[str, Any] = field(default_factory=dict)
+
+    # Save the base model with its embeddings resized to the extended vocabulary,
+    # so later steps (per-language LoRA training, merge_models) share one base.
+    save_extended_model: bool = False
+    embedding_init_method: str = "mean_of_constituents"  # random | mean | mean_of_constituents (FVT)
+    embedding_pad_to_multiple_of: Optional[int] = None
+    extended_model_subdir: str = "model"  # written to {output_dir}/{extended_model_subdir}
 
     def __post_init__(self):
         """Validate model configuration."""
@@ -48,6 +55,14 @@ class TokenizationModelConfig:
             raise ValueError("base_model is required")
         if self.new_tokens_count <= 0:
             raise ValueError("new_tokens_count must be positive")
+        if self.embedding_init_method not in {"random", "mean", "mean_of_constituents"}:
+            raise ValueError(
+                "embedding_init_method must be 'random', 'mean', or 'mean_of_constituents'"
+            )
+        if self.embedding_pad_to_multiple_of is not None and self.embedding_pad_to_multiple_of <= 0:
+            raise ValueError("embedding_pad_to_multiple_of must be positive")
+        if not self.extended_model_subdir:
+            raise ValueError("extended_model_subdir must be a non-empty folder name")
 
 
 @dataclass

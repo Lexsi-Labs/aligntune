@@ -67,6 +67,7 @@ class DistillTrainerBase(UnifiedTrainerBase):
         model.save_pretrained(str(save_path))
         if self.tokenizer is not None:
             self.tokenizer.save_pretrained(str(save_path))
+        self.write_provenance(save_path)
 
         logger.info(f"Distilled student saved to {save_path}")
         return str(save_path)

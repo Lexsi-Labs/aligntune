@@ -41,6 +41,14 @@ if os.environ.get("ALIGNTUNE_ENABLE_VLLM", "0") != "1":
     except Exception:
         pass
 
+# Cohere/Cohere2 have no AutoModelForSequenceClassification class upstream;
+# register one so reward/value models (PPO, Online-DPO, reward training) load.
+try:
+    from .core.hf_compat import register_missing_sequence_classification
+    register_missing_sequence_classification()
+except Exception:
+    pass
+
 # Import colored logging utilities
 try:
     from .utils.colored_logging import (

@@ -154,6 +154,7 @@ class RewardBridge:
             return rewards
 
         trl_reward.__name__ = f"registry_{reward_name}"
+        trl_reward._aligntune_batch_reward = True
         return trl_reward
 
     @staticmethod
@@ -322,6 +323,50 @@ def resolve_reward_call_kwargs(reward_func: Callable, completion: Any, **kwargs)
         safe_kwargs = {k: v for k, v in kwargs.items() if k in params and k != text_param}
 
     return {text_param: completion, **safe_kwargs}
+
+
+def is_batch_reward(reward_func: Callable) -> bool:
+    """True if ``reward_func`` follows TRL's batch contract ``(prompts, completions, **kw)``.
+
+    Registry rewards wrapped by ``RewardBridge.wrap_registry_reward`` are marked
+    explicitly: ``functools.wraps`` makes ``inspect.signature`` report the
+    wrapped per-sample scorer's signature, which must not be used to decide how
+    to call them.
+    """
+    if getattr(reward_func, "_aligntune_batch_reward", False):
+        return True
+    try:
+        params = inspect.signature(reward_func, follow_wrapped=False).parameters
+    except (TypeError, ValueError):
+        return False
+    return "completions" in params
+
+
+def call_trl_reward_batch(reward_func: Callable, completions: List[Any], **kwargs) -> List[Optional[float]]:
+    """Score every completion with ``reward_func`` and return one score per completion.
+
+    Trainers that score a whole batch at once (for example PACE) use this.
+    Batch-contract rewards are called once with ``completions=[...]``; plain
+    per-sample callables ``(text, reference=None, ...)`` are called once per
+    completion with their batch-aligned kwargs sliced to that sample.
+    """
+    if is_batch_reward(reward_func):
+        scores = reward_func(completions=completions, **kwargs)
+        if scores is None or len(scores) != len(completions):
+            raise RuntimeError(
+                f"Reward function {getattr(reward_func, '__name__', repr(reward_func))} returned "
+                f"{0 if scores is None else len(scores)} scores for {len(completions)} completions."
+            )
+        return list(scores)
+
+    batch_size = len(completions)
+    scores: List[Optional[float]] = []
+    for index, completion in enumerate(completions):
+        sample_kwargs = slice_batch_kwargs_for_sample(kwargs, index, batch_size)
+        call_kwargs = resolve_reward_call_kwargs(reward_func, completion, **sample_kwargs)
+        score = reward_func(**call_kwargs)
+        scores.append(None if score is None else float(score))
+    return scores
 
 
 def call_reward_safely(reward_func: Callable, completion: str, **kwargs) -> Any:

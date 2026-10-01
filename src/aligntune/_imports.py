@@ -24,7 +24,11 @@ UNSLOTH_ERROR_INFO = None  # Will store detailed error information
 # Check if we should prevent Unsloth from loading at all
 def _should_prevent_unsloth():
     """Check if Unsloth should be prevented from loading."""
-    return os.environ.get('PURE_TRL_MODE', '0') == '1'
+    return (
+        os.environ.get('TRL_ONLY_MODE', '0') == '1' or
+        os.environ.get('DISABLE_UNSLOTH_FOR_TRL', '0') == '1' or
+        os.environ.get('PURE_TRL_MODE', '0') == '1'
+    )
 
 # Set PURE_TRL_MODE at module level to prevent Unsloth import
 if os.environ.get('PURE_TRL_MODE', '0') == '1':

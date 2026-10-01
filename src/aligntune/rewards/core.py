@@ -568,7 +568,15 @@ class MathCorrectnessReward(RewardFunction):
         if not isinstance(text, str):
             logger.warning(f"MathCorrectnessReward got non-string text ({type(text)}); scoring 0.0")
             return 0.0
-        # Extract mathematical expressions
+        # With a reference, correctness means the final answer matches it.
+        if reference:
+            from ._answers import answers_match, extract_completion_answer, extract_reference_answer
+            answer = extract_completion_answer(text)
+            if not answer:
+                return 0.0
+            return 1.0 if answers_match(answer, extract_reference_answer(reference)) else 0.0
+
+        # Without a reference, fall back to checking arithmetic self-consistency
         math_expressions = self._extract_math_expressions(text)
         if not math_expressions:
             return 0.0

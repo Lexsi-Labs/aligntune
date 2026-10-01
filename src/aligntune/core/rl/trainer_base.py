@@ -296,6 +296,7 @@ class RLTrainerBase(UnifiedTrainerBase):
         logger.info(f"Saving to: {save_path}")
         self.model.save_pretrained(str(save_path))
         self.tokenizer.save_pretrained(str(save_path))
+        self.write_provenance(save_path)
 
         return str(save_path)
 

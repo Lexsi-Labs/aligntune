@@ -54,11 +54,11 @@ def generate_and_log_samples(
     log: Optional[logging.Logger] = None,
 ) -> List[Dict[str, Any]]:
     """Generate qualitative samples and log them."""
+    log = log or logger
     if not sample_cfg.enabled:
         log.debug("Sample logging disabled; skipping qualitative sample generation.")
         return []
     
-    log = log or logger
     prompts = sample_cfg.prompts or DEFAULT_PROMPTS
     if not prompts:
         log.debug("Sample logging enabled but no prompts provided.")

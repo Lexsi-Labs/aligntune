@@ -2182,6 +2182,7 @@ class UnslothPPOTrainer(TrainerBase):
             output_dir = self._get_config_value(self.config.logging, 'output_dir', './output/ppo')
             logger.info(f"Saving to: {output_dir}")
             self.trainer.save_model(output_dir)
+            self.write_provenance(output_dir)
             self.tokenizer.save_pretrained(output_dir)
             
             training_time = time.time() - start_time
@@ -2314,6 +2315,7 @@ class UnslothPPOTrainer(TrainerBase):
             logger.info(f"Saving to: {save_path}")
             self.policy_model.save_pretrained(save_path)
             self.tokenizer.save_pretrained(save_path)
+            self.write_provenance(save_path)
             
             config_path = Path(save_path) / "training_config.yaml"
             with open(config_path, "w") as f:

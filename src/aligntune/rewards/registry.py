@@ -105,6 +105,23 @@ class RewardRegistry:
     @classmethod
     def get_reward_function(cls, name: str, config: Optional[Union[RewardConfig, dict]] = None) -> RewardFunction:
         """Get a reward function by name with flexible config support."""
+        # Custom rewards carry their own RewardConfig from registration; a dict
+        # spec (``{"type": <custom name>, "weight": ..., "params": ...}``, as
+        # built from ``reward_functions=[...]``) only overrides weight/params.
+        if isinstance(config, dict) and name in cls._custom_rewards:
+            base = cls._reward_configs.get(name)
+            if base is not None:
+                config = RewardConfig(
+                    reward_type=base.reward_type,
+                    weight=config.get('weight', base.weight),
+                    params={**(base.params or {}), **(config.get('params') or {})},
+                    model_name=config.get('model_name', base.model_name),
+                    device=base.device,
+                    cache_dir=base.cache_dir,
+                )
+            else:
+                config = None
+
         # Convert dict config to RewardConfig if needed
         if isinstance(config, dict):
             config = cls._dict_to_config(config)

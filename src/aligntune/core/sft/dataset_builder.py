@@ -155,7 +155,7 @@ def _format_dataset_for_task(
 
 def _apply_document_packing(dataset: Dataset, tokenizer: Any, config: SFTConfig) -> Dataset:
     """Pack short documents into fixed-length sequences for long-context SFT."""
-    from ....core.long_context.packing import DocumentPacker
+    from ..long_context.packing import DocumentPacker
 
     context_length: int = getattr(config.model, "max_seq_length", 32_768)
     text_column: str = getattr(config.dataset, "text_column", None) or "text"

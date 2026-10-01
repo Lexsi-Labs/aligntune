@@ -336,6 +336,7 @@ class SFTTrainerBase(UnifiedTrainerBase):
         config_path = save_path / "training_config.yaml"
         with open(config_path, "w") as f:
             yaml.dump(config_dict, f)
+        self.write_provenance(save_path)
 
         logger.info(f"Model saved to {save_path}")
         return str(save_path)

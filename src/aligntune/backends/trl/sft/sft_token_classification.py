@@ -95,7 +95,7 @@ class TokenClassificationTrainer(SFTTrainerBase):
             "gradient_accumulation_steps": self.config.train.gradient_accumulation_steps,
             "learning_rate": self.config.train.learning_rate,
             "weight_decay": self.config.train.weight_decay,
-            "warmup_ratio": self.config.train.warmup_ratio,
+            "warmup_steps": self.config.train.warmup_ratio or 0,
             "eval_strategy": "steps",
             "eval_steps": self.config.train.eval_interval,
             "save_strategy": "steps",

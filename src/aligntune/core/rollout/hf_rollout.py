@@ -7,6 +7,7 @@ vLLM Rollout Backend
 """
 
 import logging
+import sys
 from typing import List, Optional, Dict, Any
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -80,10 +81,26 @@ class HFRolloutBackend(BaseRolloutBackend):
         elif self.dtype == "bfloat16":
             model_kwargs["torch_dtype"] = torch.bfloat16
 
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_name_or_path,
-            **model_kwargs
-        )
+        if "unsloth" in sys.modules:
+            # Importing Unsloth patches the attention classes' forward for the whole
+            # process, and the patched forward needs attributes (apply_qkv,
+            # max_seq_length, rotary_emb, ...) that only FastLanguageModel sets.
+            # A plain AutoModelForCausalLM would fail with
+            # "'Qwen2Attention' object has no attribute 'apply_qkv'".
+            from unsloth import FastLanguageModel
+
+            self.model, _ = FastLanguageModel.from_pretrained(
+                model_name=self.model_name_or_path,
+                max_seq_length=self.config.get("max_seq_length", 2048),
+                dtype=model_kwargs.get("torch_dtype"),
+                load_in_4bit=False,
+            )
+            FastLanguageModel.for_inference(self.model)
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_name_or_path,
+                **model_kwargs
+            )
 
         # Enable gradient checkpointing if requested
         if self.config.get("gradient_checkpointing", False):

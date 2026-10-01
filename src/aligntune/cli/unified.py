@@ -21,6 +21,8 @@ from ..core.backend_factory import (
     list_backends,
 )
 
+logger = logging.getLogger(__name__)
+
 # Evaluation imports are optional; command will error clearly if unavailable
 try:
     from ..eval.lm_eval_integration import (
@@ -39,7 +41,8 @@ except Exception:  # ImportError or runtime issues
 try:
     from .recipes import app as recipes_app
     RECIPES_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "recipes", e)
     recipes_app = None
     RECIPES_AVAILABLE = False
 
@@ -47,7 +50,8 @@ except ImportError:
 try:
     from .validate import app as validate_app
     VALIDATE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "validate", e)
     validate_app = None
     VALIDATE_AVAILABLE = False
 
@@ -55,7 +59,8 @@ except ImportError:
 try:
     from .diagnose import app as diagnose_app
     DIAGNOSE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "diagnose", e)
     diagnose_app = None
     DIAGNOSE_AVAILABLE = False
 
@@ -63,7 +68,8 @@ except ImportError:
 try:
     from .advise import app as advise_app
     ADVISE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "advise", e)
     advise_app = None
     ADVISE_AVAILABLE = False
 
@@ -71,7 +77,8 @@ except ImportError:
 try:
     from .export import app as export_app
     EXPORT_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "export", e)
     export_app = None
     EXPORT_AVAILABLE = False
 
@@ -79,7 +86,8 @@ except ImportError:
 try:
     from .merge import app as merge_app
     MERGE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "merge", e)
     merge_app = None
     MERGE_AVAILABLE = False
 
@@ -87,7 +95,8 @@ except ImportError:
 try:
     from .aligner import app as aligner_app
     ALIGNER_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "aligner", e)
     aligner_app = None
     ALIGNER_AVAILABLE = False
 
@@ -95,7 +104,8 @@ except ImportError:
 try:
     from .verify_export import app as verify_export_app
     VERIFY_EXPORT_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "verify-export", e)
     verify_export_app = None
     VERIFY_EXPORT_AVAILABLE = False
 
@@ -103,7 +113,8 @@ except ImportError:
 try:
     from .adapters import app as adapters_app
     ADAPTERS_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "adapters", e)
     adapters_app = None
     ADAPTERS_AVAILABLE = False
 
@@ -111,7 +122,8 @@ except ImportError:
 try:
     from .compose import app as compose_app
     COMPOSE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "compose", e)
     compose_app = None
     COMPOSE_AVAILABLE = False
 
@@ -119,7 +131,8 @@ except ImportError:
 try:
     from .indic_eval import app as indic_eval_app
     INDIC_EVAL_AVAILABLE = True
-except ImportError:
+except ImportError as e:
+    logger.warning("'%s' commands unavailable: %s", "indic-eval", e)
     indic_eval_app = None
     INDIC_EVAL_AVAILABLE = False
 
@@ -129,7 +142,6 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-logger = logging.getLogger(__name__)
 
 
 
@@ -1125,13 +1137,13 @@ def train(
     
     # ========== PACE Parameters ==========
     curriculum_enabled: Optional[bool] = typer.Option(
-        None, "--curriculum-enabled", help="Not available in this build; always forced to False"
+        None, "--curriculum-enabled", help="Enable PACE curriculum sampling"
     ),
     curriculum_epsilon: Optional[float] = typer.Option(
-        None, "--curriculum-epsilon", help="Not available in this build"
+        None, "--curriculum-epsilon", help="PACE curriculum epsilon (sampling weight floor)"
     ),
     curriculum_update_freq: Optional[int] = typer.Option(
-        None, "--curriculum-update-freq", help="Not available in this build"
+        None, "--curriculum-update-freq", help="PACE curriculum update frequency (steps)"
     ),
     baseline_enabled: Optional[bool] = typer.Option(
         None, "--baseline-enabled", help="Enable PACE per-prompt baseline"
@@ -1811,7 +1823,7 @@ if EXPORT_AVAILABLE and export_app:
 
 # Add merge subcommand if available
 if MERGE_AVAILABLE and merge_app:
-    app.add_typer(merge_app, name="merge", help="Merge models via linear, task_arithmetic, ram, or LoRA merge")
+    app.add_typer(merge_app, name="merge", help="Merge models via SLERP, TIES, DARE-TIES, linear, or LoRA merge")
 
 # Add aligner subcommand if available
 if ALIGNER_AVAILABLE and aligner_app:
