@@ -8,7 +8,7 @@ import logging
 import os
 from pathlib import Path
 from typing import Optional, Union
-from huggingface_hub import HfApi, HfFolder
+from huggingface_hub import HfApi, get_token
 from .base import BaseExporter
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class HFHubExporter(BaseExporter):
         self.repo_id = repo_id
         self.adapter_only = adapter_only
         self.private = private
-        self.token = token or os.environ.get("HF_TOKEN") or HfFolder.get_token()
+        self.token = token or os.environ.get("HF_TOKEN") or get_token()
 
         if not self.token:
             logger.warning(
@@ -66,7 +66,7 @@ class HFHubExporter(BaseExporter):
 
         # Check for adapter_config.json and adapter weights
         required_files = ["adapter_config.json"]
-        optional_files = ["adapter_model.bin", "adapter_model.safetensors"]
+        optional_files = ["adapter_model.bin", "adapter_model.safetensors", "lexsi_provenance.json"]
 
         for file in required_files + optional_files:
             file_path = checkpoint_path / "model" / file

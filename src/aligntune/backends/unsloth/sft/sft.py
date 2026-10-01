@@ -290,6 +290,7 @@ class UnslothSFTTrainer(SFTTrainerBase):
             # Save model
             output_dir = self.config.logging.output_dir if hasattr(self.config, 'logging') else './output'
             self.trainer.save_model(output_dir)
+            self.write_provenance(output_dir)
             self.tokenizer.save_pretrained(output_dir)
             
             training_time = time.time() - start_time

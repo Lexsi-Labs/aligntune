@@ -200,6 +200,7 @@ MODEL_SIZES_PARAMS: Dict[str, int] = {
 ALGORITHM_MULTIPLIERS: Dict[str, Dict[str, float]] = {
     "sft": {"vram": 1.0, "throughput": 1.0},
     "dpo": {"vram": 1.3, "throughput": 0.8},
+    "orpo": {"vram": 1.1, "throughput": 0.9},
     "ppo": {"vram": 2.5, "throughput": 0.4},
     "grpo": {"vram": 2.0, "throughput": 0.5},
     "gspo": {"vram": 1.8, "throughput": 0.55},
@@ -478,6 +479,7 @@ def recommend_algorithm(
     scores = {
         "sft": 0.70,
         "dpo": 0.75,
+        "orpo": 0.68,
         "ppo": 0.65,
         "grpo": 0.70,
         "gspo": 0.68,
@@ -488,6 +490,7 @@ def recommend_algorithm(
     reasons = {
         "sft": "General-purpose fine-tuning",
         "dpo": "Best for alignment, direct preference optimization",
+        "orpo": "Alignment alternative, good speed tradeoff",
         "ppo": "Powerful RL approach, requires more compute",
         "grpo": "Group-relative policy optimization, good efficiency",
         "gspo": "Sequence-level policy optimization, balanced alignment method",
@@ -498,6 +501,7 @@ def recommend_algorithm(
     # Boost scores based on task keywords
     if "alignment" in task_lower or "dpo" in task_lower:
         scores["dpo"] += 0.10
+        scores["orpo"] += 0.06
 
     if "speed" in task_lower or "fast" in task_lower:
         scores["lora"] += 0.10

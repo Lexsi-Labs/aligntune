@@ -396,11 +396,15 @@ class BackendConfig:
 def _enable_unsloth_backend():
     """Enable Unsloth backend by clearing TRL-only mode."""
     os.environ.pop('PURE_TRL_MODE', None)
+    os.environ.pop('TRL_ONLY_MODE', None)
+    os.environ.pop('DISABLE_UNSLOTH_FOR_TRL', None)
     logger.info("🦥 Unsloth backend enabled - cleared TRL-only mode")
 
 def _disable_unsloth_backend():
     """Disable Unsloth backend by setting TRL-only mode."""
     os.environ['PURE_TRL_MODE'] = '1'
+    os.environ['TRL_ONLY_MODE'] = '1'
+    os.environ['DISABLE_UNSLOTH_FOR_TRL'] = '1'
     logger.info("🚫 Unsloth backend disabled - set TRL-only mode")
 
 def _check_backend_availability(backend_type: BackendType) -> bool:
@@ -450,6 +454,8 @@ def get_backend_status() -> Dict[str, Any]:
     """Get current backend status and environment variables."""
     return {
         "pure_trl_mode": os.environ.get('PURE_TRL_MODE', '0'),
+        "trl_only_mode": os.environ.get('TRL_ONLY_MODE', '0'),
+        "disable_unsloth_for_trl": os.environ.get('DISABLE_UNSLOTH_FOR_TRL', '0'),
         "trl_available": TRL_AVAILABLE,
         "unsloth_available": _check_backend_availability(BackendType.UNSLOTH),
         "es_available": _check_backend_availability(BackendType.ES),
@@ -1993,10 +1999,20 @@ def create_raft_trainer(
 
     if backend_type == BackendType.UNSLOTH:
         aligntune_info(f"Loading RAFT backbone via Unsloth: {model_name}")
+        # Unsloth loads 4-bit by default, which cannot be fine-tuned without
+        # adapters; load in the requested precision and attach LoRA instead.
+        load_in_4bit = kwargs.pop('load_in_4bit', False)
+        use_lora = kwargs.pop('use_lora', True)
+        lora_r = kwargs.pop('lora_r', 16)
+        lora_alpha = kwargs.pop('lora_alpha', 32)
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=model_name,
             max_seq_length=kwargs.get('max_seq_length', 2048),
+            load_in_4bit=load_in_4bit,
         )
+        if use_lora or load_in_4bit:
+            from aligntune.backends.unsloth.raft.raft_trainer import _attach_unsloth_lora
+            model = _attach_unsloth_lora(model, r=lora_r, lora_alpha=lora_alpha)
     else:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
@@ -2095,6 +2111,17 @@ def create_tokenization_trainer(
             - pruning_ratio: Ratio to prune (default: 0.1)
             - pruning_method: "leaf_frequency", "frequency", or "last_n"
             - hub_model_id: Push to HF Hub (e.g., "username/model-name")
+            - save_extended_model: Also save the base model with its embeddings
+              resized to the extended tokenizer, to ``{output_dir}/model/``
+              (default: False). Use it when several runs must share one base,
+              e.g. per-language LoRAs merged afterwards with ``merge_models``.
+            - embedding_init_method: How new rows are initialised when saving the
+              extended model: "mean_of_constituents" (FVT, default), "mean" or
+              "random"
+            - embedding_pad_to_multiple_of: Pad the resized embedding matrix
+              (default: None)
+            - extended_model_subdir: Folder name under ``output_dir`` for the
+              extended model (default: "model")
 
     Returns:
         TokenizationTrainer instance
@@ -2120,6 +2147,17 @@ def create_tokenization_trainer(
         ...     prune=True,
         ...     pruning_ratio=0.1,
         ... )
+
+        >>> # Save the resized base model too, then train LoRAs on it and merge
+        >>> trainer = create_tokenization_trainer(
+        ...     base_model="meta-llama/Llama-2-7b-hf",
+        ...     target_languages=["hi"],
+        ...     dataset_name="wikimedia/wikipedia",
+        ...     config_name="20231101.hi",
+        ...     output_dir="./llama2-hi",
+        ...     save_extended_model=True,  # -> ./llama2-hi/model
+        ... )
+        >>> extended_base = trainer.train()["extended_model_dir"]
 
         >>> # Push to HuggingFace Hub
         >>> trainer = create_tokenization_trainer(
@@ -2179,6 +2217,10 @@ def create_tokenization_trainer(
             precision=kwargs.get('precision', "bf16"),
             device_map=kwargs.get('device_map', "auto"),
             trust_remote_code=kwargs.get('trust_remote_code', False),
+            save_extended_model=kwargs.get('save_extended_model', False),
+            embedding_init_method=kwargs.get('embedding_init_method', "mean_of_constituents"),
+            embedding_pad_to_multiple_of=kwargs.get('embedding_pad_to_multiple_of', None),
+            extended_model_subdir=kwargs.get('extended_model_subdir', "model"),
         ),
         vocab_extension=VocabExtensionConfig(
             target_languages=target_languages,

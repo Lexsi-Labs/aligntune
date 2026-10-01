@@ -916,6 +916,7 @@ class TRLPPOTrainer(TrainerBase):
         # Save model
         logger.info(f"Saving model to {output_dir}")
         self.trainer.save_model(output_dir)
+        self.write_provenance(output_dir)
         self.tokenizer.save_pretrained(output_dir)
         policy = getattr(getattr(self.trainer, "model", None), "policy", None)
         self.model = policy if policy is not None else self.policy_model
@@ -1045,6 +1046,7 @@ class TRLPPOTrainer(TrainerBase):
 
             # Save using trainer
             self.trainer.save_model(save_path)
+            self.write_provenance(save_path)
             self.tokenizer.save_pretrained(save_path)
 
             # Save training configuration

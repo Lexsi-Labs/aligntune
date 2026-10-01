@@ -83,8 +83,7 @@ def _apply_qkv(self, *args):
         hidden_states = args[1]  # Skip the explicit self
     else:
         raise ValueError(
-            f"apply_qkv called with {
-                len(args)} arguments, expected 1 or 2")
+            f"apply_qkv called with {len(args)} arguments, expected 1 or 2")
 
     Q = self.q_proj(hidden_states)
     K = self.k_proj(hidden_states)
@@ -103,8 +102,7 @@ def _apply_o(self, *args):
         attn_output = args[1]  # Skip the explicit self
     else:
         raise ValueError(
-            f"apply_o called with {
-                len(args)} arguments, expected 1 or 2")
+            f"apply_o called with {len(args)} arguments, expected 1 or 2")
 
     return self.o_proj(attn_output)
 
@@ -203,8 +201,7 @@ def patch_attention_apply_qkv(model):
     attention_modules = 0
 
     logger.info(
-        f"🔍 Starting patch_attention_apply_qkv on model type: {
-            type(model).__name__}")
+        f"🔍 Starting patch_attention_apply_qkv on model type: {type(model).__name__}")
 
     # Print model structure for debugging
     print_model_structure(model, max_depth=2)
@@ -277,9 +274,7 @@ def patch_attention_apply_qkv(model):
                             hidden_states = args[-1]
 
                         logger.debug(
-                            f"apply_qkv called on {module_name} with {
-                                len(args)} args, hidden_states shape: {
-                                hidden_states.shape}")
+                            f"apply_qkv called on {module_name} with {len(args)} args, hidden_states shape: {hidden_states.shape}")
 
                         # Apply QKV projections
                         Q = attn_module.q_proj(hidden_states)
@@ -314,13 +309,10 @@ def patch_attention_apply_qkv(model):
                             attn_output = args[2]
                         else:
                             raise ValueError(
-                                f"apply_o called with {
-                                    len(args)} arguments, expected 2 or 3")
+                                f"apply_o called with {len(args)} arguments, expected 2 or 3")
 
                         logger.debug(
-                            f"apply_o called on {module_name} with attn_output shape: {
-                                attn_output.shape}, dtype: {
-                                attn_output.dtype}")
+                            f"apply_o called on {module_name} with attn_output shape: {attn_output.shape}, dtype: {attn_output.dtype}")
 
                         # Apply output projection
                         output = attn_module.o_proj(attn_output)

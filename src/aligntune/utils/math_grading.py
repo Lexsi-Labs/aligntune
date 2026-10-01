@@ -640,6 +640,15 @@ def extract_math_gold(answer_data) -> str:
         except:
             return boxed_str
 
+    # GSM8K-style "#### N" marker
+    if "####" in solution:
+        return extract_gsm8k_answer(solution)
+
+    # A bare numeric answer such as "48" or "1,234"
+    stripped = solution.strip().replace(",", "")
+    if re.fullmatch(r"-?\d+(?:\.\d+)?(?:/\d+)?", stripped):
+        return stripped
+
     return ""
 
 

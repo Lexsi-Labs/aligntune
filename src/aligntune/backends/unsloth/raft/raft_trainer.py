@@ -273,11 +273,40 @@ class UnslothRaftTrainer(HubPushMixin, SFTTrainer if TRL_AVAILABLE else object):
         super()._log_metrics(metrics)
 
 
+def _attach_unsloth_lora(
+    model,
+    r: int = 16,
+    lora_alpha: int = 32,
+    lora_dropout: float = 0.0,
+    target_modules: Optional[list] = None,
+):
+    """Attach LoRA adapters to an Unsloth-loaded model.
+
+    Quantized (4/8-bit) models cannot be fine-tuned without adapters, and a
+    full fine-tune of an 8B model does not fit on a single 48 GB GPU.
+    """
+    from unsloth import FastLanguageModel
+
+    return FastLanguageModel.get_peft_model(
+        model,
+        r=r,
+        lora_alpha=lora_alpha,
+        lora_dropout=lora_dropout,
+        bias="none",
+        target_modules=target_modules
+        or ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        use_gradient_checkpointing="unsloth",
+    )
+
+
 def _build_unsloth_raft_model(
     model_name_or_path: str,
     max_seq_length: int = 2048,
     load_in_4bit: bool = False,
     dtype: Optional[Any] = None,
+    use_lora: bool = True,
+    lora_r: int = 16,
+    lora_alpha: int = 32,
 ):
     """
     Load the RAFT backbone through Unsloth, mirroring the loading path used by
@@ -297,6 +326,7 @@ def _build_unsloth_raft_model(
         max_seq_length: Maximum sequence length for the Unsloth model
         load_in_4bit: Whether to load the base model in 4-bit precision
         dtype: Optional explicit torch dtype (None lets Unsloth auto-detect)
+        use_lora: Attach LoRA adapters (required when the model is quantized)
 
     Returns:
         (model, tokenizer) tuple, with the tokenizer's pad token set.
@@ -319,6 +349,9 @@ def _build_unsloth_raft_model(
         dtype=dtype,
         load_in_4bit=load_in_4bit,
     )
+
+    if use_lora or load_in_4bit:
+        model = _attach_unsloth_lora(model, r=lora_r, lora_alpha=lora_alpha)
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -363,6 +396,9 @@ def unsloth_raft_trainer_from_config(
             model_name_or_path=config.get("model_name_or_path") or config.get("model_name"),
             max_seq_length=config.get("max_seq_length", 2048),
             load_in_4bit=config.get("load_in_4bit", False),
+            use_lora=config.get("use_lora", True),
+            lora_r=config.get("lora_r", 16),
+            lora_alpha=config.get("lora_alpha", 32),
         )
 
     # Extract RAFT config

@@ -285,15 +285,11 @@ class TRLPaceTrainer(TRLGRPOTrainer):
 
         train_cfg = self.config.train
 
-        if self._get_config_value(train_cfg, "curriculum_enabled", default=False):
-            logger.warning(
-                "Curriculum sampling (the BOLT variant of PACE) is not available "
-                "in this build. Falling back to standard PACE."
-            )
-
         self.pace_config = PaceConfig(
             # Curriculum
-            curriculum_enabled=False,
+            curriculum_enabled=self._get_config_value(
+                train_cfg, "curriculum_enabled", default=False
+            ),
             curriculum_epsilon=self._get_config_value(
                 train_cfg, "curriculum_epsilon", default=0.05
             ),
@@ -383,49 +379,35 @@ class TRLPaceTrainer(TRLGRPOTrainer):
 
             self._debug_printed_first_batch = True
 
-        from aligntune.core.rl.reward_handler import resolve_reward_call_kwargs, slice_batch_kwargs_for_sample
+        from aligntune.core.rl.reward_handler import call_trl_reward_batch
 
-        for idx, completion in enumerate(completions):
+        # self.reward_functions holds TRL batch reward callables (see
+        # setup_rewards() in the GRPO base), so score the whole batch per
+        # function rather than binding a per-sample signature.
+        batch_kwargs = {k: v for k, v in kwargs.items() if k != "test_cases"}
+        per_function_scores = []
+        failed_functions = 0
+        for rf in self.reward_functions:
+            try:
+                per_function_scores.append(
+                    call_trl_reward_batch(rf, completions, test_cases=test_lists, **batch_kwargs)
+                )
+            except Exception as e:
+                failed_functions += 1
+                reward_name = getattr(rf, "__name__", repr(rf))
+                logger.warning(f"Error computing reward {reward_name}: {e}")
+
+        if self.reward_functions and failed_functions == len(self.reward_functions):
+            raise RuntimeError(
+                "Every PACE reward function failed; refusing to train with all-zero rewards. "
+                "See the warnings above for the underlying errors."
+            )
+
+        for idx in range(len(completions)):
             total_reward = 0.0
-            test_cases = test_lists[idx] if idx < len(test_lists) else None
-            # Slice every remaining batch-aligned kwarg (prompts,
-            # completion_ids, reference/answer columns, etc.) down to this
-            # sample instead of forwarding TRL's whole-batch lists.
-            sample_kwargs = slice_batch_kwargs_for_sample(kwargs, idx, len(completions))
-
-            for rf in self.reward_functions:
-                try:
-                    # NOTE: self.reward_functions is populated by the inherited
-                    # GRPO setup_rewards() as a plain list of callables, not
-                    # {"function":..., "weight":..., "name":...} dicts. The
-                    # dict-based access previously here was copy-pasted from
-                    # BOLT's reward handler and didn't match this trainer's
-                    # actual data, causing "TypeError: 'method' object is not
-                    # subscriptable" on every reward call - and the same error
-                    # again inside this except-handler (via rf['name']),
-                    # turning a caught exception into an unhandled crash.
-                    reward_func = rf
-                    weight = 1.0
-
-                    # Bind by signature instead of guessing calling patterns
-                    # (completion-only, then completion+test_cases) and
-                    # swallowing any resulting exception as reward=0 - that
-                    # masked genuine bugs inside reward functions, and never
-                    # forwarded `reference`/other dataset columns at all.
-                    call_kwargs = resolve_reward_call_kwargs(
-                        reward_func, completion, test_cases=test_cases, **sample_kwargs
-                    )
-                    reward = reward_func(**call_kwargs)
-                    if reward is None:
-                        continue
-
-                    weighted_reward = weight * float(reward)
-                    total_reward += weighted_reward
-
-                except Exception as e:
-                    reward_name = getattr(rf, "__name__", repr(rf))
-                    logger.warning(f"Error computing reward {reward_name}: {e}")
-
+            for scores in per_function_scores:
+                if scores[idx] is not None:
+                    total_reward += float(scores[idx])
             batch_rewards.append(total_reward)
 
         # Print batch summary with MORE details
@@ -722,7 +704,6 @@ REQUIREMENTS:
         # report_to = self._get_config_value(self.config.logging, 'report_to', default='none')
         report_to = self.config.logging.loggers if self.config.logging.loggers else []
         run_name = self._get_config_value(self.config.logging, 'run_name', default=None)
-        logging_dir = self._get_config_value(self.config.logging, 'logging_dir', default=None)
         logging_first_step = self._get_config_value(self.config.train, 'logging_first_step', default=False)
         logging_nan_inf_filter = self._get_config_value(self.config.train, 'logging_nan_inf_filter', default=True)
 
@@ -845,7 +826,8 @@ REQUIREMENTS:
             # Logging
             report_to=report_to,
             run_name=run_name,
-            logging_dir=logging_dir,
+            # logging_dir dropped: trl==1.7.1's GRPOConfig doesn't accept it
+            # (same removal as max_prompt_length/save_safetensors above).
             logging_first_step=logging_first_step,
             logging_nan_inf_filter=logging_nan_inf_filter,
             
@@ -985,6 +967,7 @@ REQUIREMENTS:
         # Save model
         logger.info(f"Saving model to {self.output_dir}")
         self.trainer.save_model(self.output_dir)
+        self.write_provenance(self.output_dir)
         self.tokenizer.save_pretrained(self.output_dir)
 
         # Get BOLT config for results

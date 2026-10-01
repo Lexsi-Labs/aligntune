@@ -10,6 +10,7 @@ from typing import Optional, Union
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 from .base import BaseExporter
+from aligntune.utils.provenance import build_provenance, provenance_input, write_provenance
 
 logger = logging.getLogger(__name__)
 
@@ -40,25 +41,51 @@ class MergeAdapterExporter(BaseExporter):
         logger.info(f"Loading model from {model_dir}")
 
         try:
-            # Load base model
+            adapter_config_path = model_dir / "adapter_config.json"
+            if adapter_config_path.exists():
+                # Adapter-only checkpoint: load the base model it was trained on
+                # and attach the adapter so merge_and_unload() has something to merge.
+                import json
+
+                with open(adapter_config_path) as f:
+                    base_name = json.load(f).get("base_model_name_or_path")
+                base_name = kwargs.get("base_model") or base_name
+                if not base_name:
+                    raise ValueError(
+                        f"{adapter_config_path} has no base_model_name_or_path; "
+                        "pass base_model=... to merge this adapter."
+                    )
+                logger.info(f"Loading base model {base_name} for adapter {model_dir}")
+                base_model = AutoModelForCausalLM.from_pretrained(
+                    base_name,
+                    trust_remote_code=True,
+                    torch_dtype="auto",
+                )
+                tokenizer_source = (
+                    model_dir
+                    if any((model_dir / n).exists() for n in ("tokenizer.json", "tokenizer_config.json"))
+                    else base_name
+                )
+                tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, trust_remote_code=True)
+                # Adapters trained after a vocabulary extension need the base
+                # embeddings resized before their weights can be loaded.
+                from aligntune.core.merge.peft_merger import _grow_embeddings_for_adapter
+
+                _grow_embeddings_for_adapter(base_model, str(model_dir), tokenizer)
+                model = PeftModel.from_pretrained(base_model, str(model_dir))
+                logger.info("Model has PEFT adapters, will merge them")
+                return model, tokenizer
+
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
                 trust_remote_code=True,
                 torch_dtype="auto",
             )
-
-            # Load tokenizer
             tokenizer = AutoTokenizer.from_pretrained(
                 model_dir,
                 trust_remote_code=True,
             )
-
-            # Check if this is a PEFT model (has adapters)
-            if hasattr(model, "peft_config"):
-                logger.info("Model has PEFT adapters, will merge them")
-            else:
-                logger.warning("Model does not have PEFT adapters, returning as-is")
-
+            logger.warning("Model does not have PEFT adapters, returning as-is")
             return model, tokenizer
 
         except Exception as e:
@@ -137,6 +164,10 @@ class MergeAdapterExporter(BaseExporter):
 
         # Export (merge and save)
         merged_path = self.export_model((model, tokenizer), output_path, **kwargs)
+        write_provenance(
+            merged_path,
+            build_provenance("merge_lora", inputs=[provenance_input(str(checkpoint_path), "adapter")]),
+        )
 
         logger.info(f"Merge completed: {merged_path}")
         return merged_path

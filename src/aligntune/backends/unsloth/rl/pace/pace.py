@@ -86,15 +86,11 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
 
         train_cfg = self.config.train
 
-        if self._get_config_value(train_cfg, "curriculum_enabled", default=False):
-            logger.warning(
-                "Curriculum sampling (the BOLT variant of PACE) is not available "
-                "in this build. Falling back to standard PACE."
-            )
-
         self.pace_config = PaceConfig(
             # Curriculum
-            curriculum_enabled=False,
+            curriculum_enabled=self._get_config_value(
+                train_cfg, "curriculum_enabled", default=False
+            ),
             curriculum_epsilon=self._get_config_value(
                 train_cfg, "curriculum_epsilon", default=0.05
             ),
@@ -126,27 +122,20 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         logger.info("=" * 60)
         logger.info("BOLT Configuration (Unsloth):")
         logger.info(
-            f"  Curriculum enabled: {
-                self.pace_config.curriculum_enabled}")
+            f"  Curriculum enabled: {self.pace_config.curriculum_enabled}")
         logger.info(f"  Baseline enabled: {self.pace_config.baseline_enabled}")
         logger.info(
-            f"  Use baseline advantages: {
-                self.pace_config.use_baseline_advantages}")
+            f"  Use baseline advantages: {self.pace_config.use_baseline_advantages}")
         if self.pace_config.curriculum_enabled:
             logger.info(
-                f"  Curriculum epsilon: {
-                    self.pace_config.curriculum_epsilon}")
+                f"  Curriculum epsilon: {self.pace_config.curriculum_epsilon}")
             logger.info(
-                f"  Curriculum update freq: {
-                    self.pace_config.curriculum_update_freq}")
+                f"  Curriculum update freq: {self.pace_config.curriculum_update_freq}")
         if self.pace_config.baseline_enabled:
             logger.info(
-                f"  Baseline rho: [{
-                    self.pace_config.baseline_rho_min}, {
-                    self.pace_config.baseline_rho_max}]")
+                f"  Baseline rho: [{self.pace_config.baseline_rho_min}, {self.pace_config.baseline_rho_max}]")
             logger.info(
-                f"  Baseline D_half: {
-                    self.pace_config.baseline_D_half}")
+                f"  Baseline D_half: {self.pace_config.baseline_D_half}")
             if self.pace_config.baseline_warm_start:
                 logger.info(
                     f"  Baseline warm-start: {self.pace_config.baseline_warm_start}")
@@ -269,49 +258,35 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         if not isinstance(prompts, list):
             prompts = [prompts] * len(completions)
 
-        from aligntune.core.rl.reward_handler import resolve_reward_call_kwargs, slice_batch_kwargs_for_sample
+        from aligntune.core.rl.reward_handler import call_trl_reward_batch
 
-        for idx, completion in enumerate(completions):
+        # self.reward_functions holds TRL batch reward callables (see
+        # setup_rewards() in the GRPO base), so score the whole batch per
+        # function rather than binding a per-sample signature.
+        batch_kwargs = {k: v for k, v in kwargs.items() if k != "test_cases"}
+        per_function_scores = []
+        failed_functions = 0
+        for rf in self.reward_functions:
+            try:
+                per_function_scores.append(
+                    call_trl_reward_batch(rf, completions, test_cases=test_lists, **batch_kwargs)
+                )
+            except Exception as e:
+                failed_functions += 1
+                reward_name = getattr(rf, "__name__", repr(rf))
+                logger.warning(f"Error computing reward {reward_name}: {e}")
+
+        if self.reward_functions and failed_functions == len(self.reward_functions):
+            raise RuntimeError(
+                "Every PACE reward function failed; refusing to train with all-zero rewards. "
+                "See the warnings above for the underlying errors."
+            )
+
+        for idx in range(len(completions)):
             total_reward = 0.0
-            test_cases = test_lists[idx] if idx < len(test_lists) else None
-            # Slice every remaining batch-aligned kwarg (prompts,
-            # completion_ids, reference/answer columns, etc.) down to this
-            # sample instead of forwarding TRL's whole-batch lists.
-            sample_kwargs = slice_batch_kwargs_for_sample(kwargs, idx, len(completions))
-
-            for rf in self.reward_functions:
-                try:
-                    # NOTE: self.reward_functions is populated by the inherited
-                    # GRPO setup_rewards() as a plain list of callables, not
-                    # {"function":..., "weight":..., "name":...} dicts. The
-                    # dict-based access previously here was copy-pasted from
-                    # BOLT's reward handler and didn't match this trainer's
-                    # actual data, causing "TypeError: 'function' object is not
-                    # subscriptable" on every reward call - and the same error
-                    # again inside this except-handler (via rf['name']),
-                    # turning a caught exception into an unhandled crash.
-                    reward_func = rf
-                    weight = 1.0
-
-                    # Bind by signature instead of guessing calling patterns
-                    # (completion-only, then completion+test_cases) and
-                    # swallowing any resulting exception as reward=0 - that
-                    # masked genuine bugs inside reward functions, and never
-                    # forwarded `reference`/other dataset columns at all.
-                    call_kwargs = resolve_reward_call_kwargs(
-                        reward_func, completion, test_cases=test_cases, **sample_kwargs
-                    )
-                    reward = reward_func(**call_kwargs)
-                    if reward is None:
-                        continue
-
-                    weighted_reward = weight * float(reward)
-                    total_reward += weighted_reward
-
-                except Exception as e:
-                    reward_name = getattr(rf, "__name__", repr(rf))
-                    logger.warning(f"Error computing reward {reward_name}: {e}")
-
+            for scores in per_function_scores:
+                if scores[idx] is not None:
+                    total_reward += float(scores[idx])
             batch_rewards.append(total_reward)
 
         return batch_rewards
@@ -399,8 +374,7 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
                 self.train_dataset = wrapped_dataset
 
             logger.info(
-                f"Curriculum dataset size: {
-                    len(wrapped_dataset)} (2x oversampled)")
+                f"Curriculum dataset size: {len(wrapped_dataset)} (2x oversampled)")
 
     def setup_trainer(self) -> None:
         """
@@ -597,8 +571,7 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
                 update_freq=pace_cfg.curriculum_update_freq,
             ))
             logger.info(
-                f"Added CurriculumCallback (update every {
-                    pace_cfg.curriculum_update_freq} steps)")
+                f"Added CurriculumCallback (update every {pace_cfg.curriculum_update_freq} steps)")
 
         # Store output_dir for use in train()
         self.output_dir = output_dir
@@ -661,6 +634,7 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
         # Save model
         logger.info(f"Saving model to {self.output_dir}")
         self.trainer.save_model(self.output_dir)
+        self.write_provenance(self.output_dir)
         self.tokenizer.save_pretrained(self.output_dir)
 
         # Compile results

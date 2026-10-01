@@ -239,6 +239,21 @@ class RegressionReport:
         print("\n" + tabulate(rows, headers=headers, tablefmt="grid"))
 
 
+def _scalar_metrics(results) -> Dict[str, float]:
+    """Keep only scalar numeric metrics from an eval result.
+
+    Deltas, verdicts and the report table only make sense for scalars, but
+    ``run_eval`` also returns per-sample lists (predictions, queries, ...).
+    """
+    if not isinstance(results, dict):
+        return {}
+    return {
+        name: value
+        for name, value in results.items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+
+
 class QuantRegressionRunner:
     """
     Run quantization regression tests on exported artifacts.
@@ -413,7 +428,7 @@ class QuantRegressionRunner:
         try:
             results = run_eval(config)
             logger.info(f"Eval results for {artifact_name}: {results}")
-            return results if isinstance(results, dict) else {}
+            return _scalar_metrics(results)
         except Exception as e:
             logger.warning(f"Eval failed for {artifact_name}: {e}")
             return {}
@@ -437,7 +452,7 @@ class QuantRegressionRunner:
         try:
             results = run_eval(config)
             logger.info(f"Eval results for {artifact.name}: {results}")
-            return results if isinstance(results, dict) else {}
+            return _scalar_metrics(results)
         except Exception as e:
             logger.warning(f"Eval failed for {artifact.name}: {e}")
             return {}

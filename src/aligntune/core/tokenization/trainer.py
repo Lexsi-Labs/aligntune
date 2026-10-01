@@ -65,11 +65,14 @@ class TokenizationTrainer:
             1. Load base tokenizer
             2. Extend vocabulary (naive or continued BPE)
             3. Prune vocabulary (optional)
-            4. Save adapted tokenizer
+            4. Save the extended model (optional, ``save_extended_model=True``)
+            5. Save adapted tokenizer
 
         Note:
-            Model loading and embedding initialization is handled by model_loader.py
-            when using the extended tokenizer for training.
+            Without ``save_extended_model``, the embeddings are resized only in
+            memory, by model_loader.py, each time the extended tokenizer is used
+            for training. Save the extended model when several runs (for example
+            per-language LoRAs that are merged afterwards) must share one base.
         """
         logger.info("="*80)
         logger.info("Starting Tokenization Training")
@@ -85,7 +88,11 @@ class TokenizationTrainer:
         if self.config.pruning.enabled:
             self._run_pruning()
 
-        # Step 4: Save tokenizer
+        # Step 4: Save the base model resized to the extended vocabulary (optional)
+        if self.config.model.save_extended_model:
+            self._save_extended_model()
+
+        # Step 5: Save tokenizer
         self._save_tokenizer()
 
         logger.info("="*80)
@@ -165,6 +172,95 @@ class TokenizationTrainer:
         logger.info(f"✓ Pruned to {result['new_vocab_size']} tokens")
         self.results['pruning'] = result
 
+    def _save_extended_model(self):
+        """Save the base model with embeddings resized to the extended tokenizer.
+
+        Uses the same ``adapt_token_embeddings`` call the SFT loader makes in
+        memory, so a model trained on this folder (``model_name=<this folder>``)
+        sees no further resize, and LoRA adapters trained on it merge back onto
+        it with ``merge_models``.
+        """
+        import gc
+
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+
+        from .embedding_adaptation import adapt_token_embeddings
+
+        logger.info("\n" + "-"*80)
+        logger.info("Step: Saving Extended Model")
+        logger.info("-"*80)
+
+        model_cfg = self.config.model
+        model_dir = Path(self.config.logging.output_dir) / model_cfg.extended_model_subdir
+        model_dir.mkdir(parents=True, exist_ok=True)
+
+        dtypes = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32, "auto": "auto"}
+        if model_cfg.precision not in dtypes:
+            raise ValueError(f"precision must be one of {sorted(dtypes)}, got {model_cfg.precision!r}")
+        load_kwargs = {"dtype": dtypes[model_cfg.precision], "trust_remote_code": model_cfg.trust_remote_code}
+        if model_cfg.device_map is not None:
+            load_kwargs["device_map"] = model_cfg.device_map
+        load_kwargs.update(model_cfg.model_init_kwargs)
+
+        logger.info(f"Loading base model from: {model_cfg.base_model}")
+        model = AutoModelForCausalLM.from_pretrained(model_cfg.base_model, **load_kwargs)
+        # The model's embedding rows follow its own tokenizer, the same reference
+        # the SFT loader resizes from.
+        original_tokenizer = AutoTokenizer.from_pretrained(
+            model_cfg.base_model, trust_remote_code=model_cfg.trust_remote_code
+        )
+
+        report = adapt_token_embeddings(
+            model=model,
+            old_tokenizer=original_tokenizer,
+            new_tokenizer=self.base_tokenizer,
+            method=model_cfg.embedding_init_method,
+            pad_to_multiple_of=model_cfg.embedding_pad_to_multiple_of,
+        )
+        logger.info(f"✓ Resized embeddings: {report}")
+
+        model.save_pretrained(model_dir)
+        # The folder is self-contained: from_pretrained(model_dir) gets both halves.
+        self.base_tokenizer.save_pretrained(model_dir)
+        logger.info(f"✓ Saved extended model to {model_dir}")
+
+        try:
+            from aligntune.utils.provenance import build_provenance, write_provenance
+
+            write_provenance(
+                model_dir,
+                build_provenance(
+                    method="tokenization.extended_model",
+                    base_model=model_cfg.base_model,
+                    params={
+                        "embedding_init_method": model_cfg.embedding_init_method,
+                        "embedding_pad_to_multiple_of": model_cfg.embedding_pad_to_multiple_of,
+                        "extension_method": self.config.vocab_extension.method.value,
+                        "vocab_size": len(self.base_tokenizer),
+                    },
+                ),
+            )
+        except Exception as e:  # provenance is a record, never a reason to fail the save
+            logger.warning(f"Could not write provenance for {model_dir}: {e}")
+
+        self.results["extended_model_dir"] = str(model_dir)
+        self.results["embedding_adaptation"] = report
+
+        hub_model_id = self.config.logging.hub_model_id
+        if hub_model_id:
+            logger.info(f"Pushing extended model to HuggingFace Hub: {hub_model_id}")
+            try:
+                model.push_to_hub(hub_model_id, commit_message="Base model resized to the extended tokenizer")
+            except Exception as e:
+                logger.warning(f"Failed to push the extended model to the Hub: {e}")
+                self.results["hub_model_push_error"] = str(e)
+
+        del model
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
     def _save_tokenizer(self):
         """Save adapted tokenizer."""
         logger.info("\n" + "-"*80)
@@ -220,7 +316,7 @@ class TokenizationTrainer:
             )
         else:
             logger.info(f"Loading corpus: {self.config.dataset.name}")
-            return load_corpus(
+            corpus = load_corpus(
                 dataset_name=self.config.dataset.name,
                 text_column=self.config.dataset.text_column,
                 split=self.config.dataset.split,
@@ -228,6 +324,11 @@ class TokenizationTrainer:
                 streaming=self.config.dataset.streaming,
                 config_name=self.config.dataset.config_name,
             )
+            # A bounded streamed corpus is materialized: pruning and the
+            # fertility evaluation need len() and several passes over it.
+            if self.config.dataset.max_samples and not isinstance(corpus, list):
+                corpus = list(corpus)
+            return corpus
 
     def evaluate(self, corpus=None, eval_samples: int = 500) -> Dict[str, Any]:
         """

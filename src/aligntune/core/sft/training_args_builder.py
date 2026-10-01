@@ -108,8 +108,8 @@ def build_sft_config(
         "save_steps": save_steps,
         "eval_strategy": eval_strategy,
         "eval_steps": eval_steps,
-        "warmup_ratio": warmup_ratio,
-        "warmup_steps": getattr(train_cfg, 'warmup_steps', 0) if train_cfg else 0,
+        # transformers>=5.2 dropped `warmup_ratio`; a float < 1 in `warmup_steps` is a ratio.
+        "warmup_steps": warmup_ratio if warmup_ratio is not None else (getattr(train_cfg, 'warmup_steps', 0) if train_cfg else 0),
         "lr_scheduler_type": getattr(train_cfg, 'lr_scheduler', 'cosine') if train_cfg else "cosine",
         "weight_decay": getattr(train_cfg, 'weight_decay', 0.01) if train_cfg else 0.01,
         "max_grad_norm": getattr(train_cfg, 'max_grad_norm', 1.0) if train_cfg else 1.0,

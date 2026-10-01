@@ -82,6 +82,35 @@ class LoraAdapter:
 
         return sorted(leaf_names)
 
+    def _scope_to_language_model(self, model: Any, target_modules: List[str]) -> Any:
+        """
+        For vision-language models (image-text-to-text heads such as aya_vision
+        or cohere_compass), return a PEFT regex restricting ``target_modules`` to
+        the language model, so the vision tower and projector get no adapters.
+        Other models get ``target_modules`` back unchanged. Disable with
+        ``language_model_only=False`` in the PEFT config.
+        """
+        import re
+        from transformers.models.auto.modeling_auto import (
+            MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
+            MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES,
+        )
+
+        model_type = getattr(model.config, "model_type", None)
+        if (
+            not get_peft_value(self.config, "language_model_only", default=True)
+            or model_type in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
+            or model_type not in MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES
+            or not callable(getattr(model, "get_decoder", None))
+        ):
+            return target_modules
+        decoder = model.get_decoder()
+        prefix = next((name for name, module in model.named_modules() if module is decoder and name), None)
+        if prefix is None:
+            return target_modules
+        names = "|".join(re.escape(m) for m in target_modules)
+        return rf"{re.escape(prefix)}\..*\.(?:{names})"
+
     def _auto_detect_target_modules(self, available_modules: List[str], model_type: str) -> List[str]:
         patterns = [
             ("c_attn", "c_proj"),  # GPT-2 style
@@ -187,6 +216,7 @@ class LoraAdapter:
                 modules_to_save,
             )
 
+        valid_modules = self._scope_to_language_model(model, valid_modules)
         logger.info(f"Building LoRA config: r={lora_r}, alpha={lora_alpha}, targets={valid_modules}")
 
         config = LoraConfig(

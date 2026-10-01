@@ -13,8 +13,26 @@ from .sft.config import SFTConfig
 from .registry import TaskType
 from .precision_handler import PrecisionHandler
 from .long_context.rope_config import extract_rope_parameters
+from .hf_compat import register_missing_sequence_classification
 
 logger = logging.getLogger(__name__)
+
+
+
+def _require_existing_local_path(ref, what: str) -> None:
+    """Fail clearly when a path-like model/tokenizer reference does not exist.
+
+    Hugging Face treats a missing local path as a Hub repo id and reports
+    "Repo id must use alphanumeric chars ...", which hides the real problem
+    (typically a folder produced by an earlier step that was never created).
+    """
+    import os
+
+    if isinstance(ref, str) and ref.startswith(("./", "../", "/", "~")) and not os.path.exists(os.path.expanduser(ref)):
+        raise FileNotFoundError(
+            f"The {what} path '{ref}' does not exist. If it is produced by an earlier "
+            "step (for example a tokenizer-extension run), run that step first."
+        )
 
 
 def setup_tokenizer(tokenizer: Any, config: SFTConfig, task_type: TaskType) -> Any:
@@ -51,13 +69,25 @@ def setup_tokenizer(tokenizer: Any, config: SFTConfig, task_type: TaskType) -> A
             except Exception as e:
                 logger.debug(f"Failed to apply named Unsloth chat template: {e}")
 
+    # Base checkpoints (e.g. CohereLabs/tiny-aya-base) ship no chat template, and
+    # TRL's DistillationTrainer applies one to every conversation.
+    if task_type == TaskType.DISTILLATION and getattr(tokenizer, "chat_template", None) is None:
+        tokenizer.chat_template = (
+            "{% for message in messages %}"
+            "{{ message['role'] }}: {{ message['content'] }}\n"
+            "{% endfor %}"
+            "{% if add_generation_prompt %}assistant:{% endif %}"
+        )
+        logger.info("Added basic manual chat template to tokenizer for distillation")
+
     # Fallbacks for SFT tasks
     if task_type == TaskType.SFT:
         if not hasattr(tokenizer, 'chat_template') or tokenizer.chat_template is None:
             tokenizer.chat_template = (
                 "{% for message in messages %}"
                 "{{ message['role'] }}: {{ message['content'] }}\n"
-                "{% endfor %}Assistant:"
+                "{% endfor %}"
+                "{% if add_generation_prompt %}assistant:{% endif %}"
             )
             logger.info("Added basic manual chat template to tokenizer")
 
@@ -203,11 +233,17 @@ def build_model(
                 AutoModelForTokenClassification,
                 AutoTokenizer
             )
+            from transformers.models.auto.modeling_auto import (
+                MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
+                MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES,
+            )
         except ImportError as e:
             raise ImportError("Transformers not available.") from e
 
         # Load tokenizer (use tokenizer_name_or_path if provided, else model path)
         tokenizer_path = getattr(config.model, 'tokenizer_name_or_path', None) or config.model.name_or_path
+        _require_existing_local_path(tokenizer_path, "tokenizer")
+        _require_existing_local_path(config.model.name_or_path, "model")
         tokenizer = AutoTokenizer.from_pretrained(
             tokenizer_path,
             trust_remote_code=True,
@@ -215,6 +251,7 @@ def build_model(
         tokenizer = setup_tokenizer(tokenizer, config, task_type)
 
         if task_type == TaskType.TEXT_CLASSIFICATION:
+            register_missing_sequence_classification()
             num_labels = getattr(config.model, 'num_labels', 2)
             model = AutoModelForSequenceClassification.from_pretrained(
                 config.model.name_or_path,
@@ -344,9 +381,21 @@ def build_model(
                     logger.warning(f"Failed to configure RoPE scaling: {e}. Continuing without RoPE scaling.")
                     rope_params = None
 
+            # Vision-language configs (e.g. aya_vision, cohere_compass) have no
+            # causal-LM head; load them with their image-text-to-text class so
+            # their language model can be trained on text-only data.
+            model_cls = AutoModelForCausalLM
+            if (
+                model_config.model_type not in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
+                and model_config.model_type in MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES
+            ):
+                from transformers import AutoModelForImageTextToText
+                model_cls = AutoModelForImageTextToText
+                logger.info(f"Loading {model_config.model_type} with AutoModelForImageTextToText")
+
             # Try to load model with RoPE, fall back without it if it fails
             try:
-                model = AutoModelForCausalLM.from_pretrained(
+                model = model_cls.from_pretrained(
                     config.model.name_or_path,
                     **model_kwargs
                 )
@@ -358,7 +407,7 @@ def build_model(
                     )
                     # Remove rope_scaling and retry
                     model_kwargs.pop('rope_scaling', None)
-                    model = AutoModelForCausalLM.from_pretrained(
+                    model = model_cls.from_pretrained(
                         config.model.name_or_path,
                         **model_kwargs
                     )
@@ -366,7 +415,9 @@ def build_model(
                     # Not a RoPE issue, re-raise
                     raise
             
-            if not quantization_config and torch.cuda.is_available() and model_kwargs.get('device_map') != 'auto':
+            # Only auto-move when no placement was requested: an explicit device_map
+            # ("cpu", "cuda:1", a dict, or "auto") has already been honoured by from_pretrained.
+            if not quantization_config and torch.cuda.is_available() and model_kwargs.get('device_map') is None:
                 model = model.cuda()
                 
             # Reference models are quantized for inference only. They must remain
@@ -617,6 +668,7 @@ def build_reward_model(config: Any) -> Any:
             
     if loading_type == 'standard':
         from transformers import AutoModelForSequenceClassification
+        register_missing_sequence_classification()
         reward_quantization_config = _build_bnb_quantization_config(quantization)
         reward_model_kwargs = {
             'num_labels': 1,
@@ -663,6 +715,7 @@ def build_value_model(config: Any, policy_model: Any = None) -> Any:
     logger.info("Loading PPO value model from: %s", model_name)
 
     from transformers import AutoModelForSequenceClassification
+    register_missing_sequence_classification()
 
     precision = PrecisionHandler.get_precision_from_config(config, default="auto")
     dtype = PrecisionHandler.get_torch_dtype(precision)

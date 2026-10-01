@@ -58,6 +58,10 @@ class BaseExporter(ABC):
         if (checkpoint_path / "config.json").exists():
             return True
 
+        # LoRA adapter-only checkpoints carry adapter_config.json instead
+        if (checkpoint_path / "adapter_config.json").exists():
+            return True
+
         logger.error(f"Invalid checkpoint: missing model files in {checkpoint_path}")
         return False
 

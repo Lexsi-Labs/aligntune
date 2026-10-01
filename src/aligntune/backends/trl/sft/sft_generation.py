@@ -193,6 +193,7 @@ class TRLSFTTrainer(SFTTrainerBase):
             self.logging_manager.log_metrics(train_result.metrics)
 
         self.trainer.save_model()
+        self.write_provenance(self.trainer.args.output_dir)
         self._auto_export()
 
         self.training_history.append({

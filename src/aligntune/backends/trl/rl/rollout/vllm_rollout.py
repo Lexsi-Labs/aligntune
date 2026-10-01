@@ -77,7 +77,7 @@ class VLLMRolloutBackend(BaseRolloutBackend):
             from vllm import LLM, SamplingParams
         except ImportError:
             raise ImportError(
-                "vLLM is not installed. Install it with: pip install vllm"
+                'vLLM is not installed. Install it with: pip install "aligntune[vllm]" (Linux + CUDA only)'
             )
 
         # Suppress vLLM verbose output

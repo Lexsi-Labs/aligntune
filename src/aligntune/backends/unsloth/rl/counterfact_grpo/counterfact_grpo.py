@@ -38,6 +38,14 @@ def apply_chat_template_safe(
         add_generation_prompt: bool = True,
         enable_thinking: bool = False) -> str:
     """Apply chat template with optional enable_thinking support."""
+    # Base checkpoints (e.g. CohereLabs/tiny-aya-base) ship no chat template.
+    if getattr(tokenizer, "chat_template", None) is None:
+        tokenizer.chat_template = (
+            "{% for message in messages %}"
+            "{{ message['role'] }}: {{ message['content'] }}\n"
+            "{% endfor %}"
+            "{% if add_generation_prompt %}assistant:{% endif %}"
+        )
     return tokenizer.apply_chat_template(
         messages,
         tokenize=tokenize,
@@ -274,9 +282,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                     })
                 except Exception as e:
                     logger.warning(
-                        f"Failed to load reward function '{
-                            reward_config.get(
-                                'type', 'unknown')}': {e}")
+                        f"Failed to load reward function '{reward_config.get('type', 'unknown')}': {e}")
                     continue
 
             logger.info(
@@ -552,10 +558,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
 
         accuracy = correct_count / len(rewards) if rewards else 0.0
         print(
-            f"\n[Unsloth CounterFact GRPO] Reward (step {
-                self._reward_step}): {
-                accuracy:.2%} ({correct_count}/{
-                len(rewards)})")
+            f"\n[Unsloth CounterFact GRPO] Reward (step {self._reward_step}): {accuracy:.2%} ({correct_count}/{len(rewards)})")
         import sys
         sys.stdout.flush()
 
@@ -640,7 +643,9 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 self.config.train, 'epsilon', 'cliprange', default=0.2)
             loss_type = self._get_config_value(
                 self.config.train, 'loss_type', default='dapo')
-            if loss_type == "sigmoid":
+            # An explicit loss_type=None on the config reaches Unsloth's compiled
+            # trainer as None and crashes on loss_type.lower(); treat it as unset.
+            if loss_type is None or loss_type == "sigmoid":
                 loss_type = "dapo"
             scale_rewards = self._get_config_value(
                 self.config.train, 'scale_rewards', default='group')
@@ -718,7 +723,10 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 precision = precision.value
             # Ensure 'auto' defaults to 'bf16' for better memory efficiency
             if precision == 'auto':
-                precision = 'fp16'
+                precision = (
+                    'bf16'
+                    if torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+                    else 'fp16')
             
             if not hasattr(self, 'eval_dataset'):
                 self.eval_dataset = None
@@ -741,8 +749,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 # don't forward it to GRPOConfig.
                 max_completion_length=max_completion_length,
                 learning_rate=learning_rate,
-                warmup_steps=warmup_steps,
-                warmup_ratio=warmup_ratio,
+                warmup_steps=warmup_steps if warmup_ratio is None else warmup_ratio,
                 max_grad_norm=max_grad_norm,
                 logging_steps=logging_steps,
                 save_steps=save_steps,
@@ -784,6 +791,12 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             # Patch GRPOTrainer.compute_loss to use our counterfactual weighting
             # Unsloth returns hidden states, but we compute log probs from them
             from trl import GRPOTrainer
+            # The patch below is class-wide; remember what it replaces so train()
+            # can undo it and other GRPO-family trainers keep their own loss.
+            self._grpo_patch_backup = (
+                GRPOTrainer,
+                {name: GRPOTrainer.__dict__.get(name)
+                 for name in ("compute_loss", "_compute_loss")})
             GRPOTrainer.compute_loss = CounterfactualGRPOTrainer.compute_loss
             GRPOTrainer._compute_loss = CounterfactualGRPOTrainer._compute_loss_impl
             print(
@@ -863,6 +876,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
 
             # Save model
             self.trainer.save_model(output_dir)
+            self.write_provenance(output_dir)
             self.tokenizer.save_pretrained(output_dir)
 
             training_time = time.time() - start_time
@@ -890,8 +904,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
 
             logger.info("=" * 80)
             logger.info(
-                f"Unsloth Counterfactual GRPO training completed in {
-                    training_time:.2f} seconds")
+                f"Unsloth Counterfactual GRPO training completed in {training_time:.2f} seconds")
             if hasattr(training_result, 'training_loss'):
                 logger.info(f"Final loss: {training_result.training_loss:.4f}")
             logger.info(f"Model saved to: {output_dir}")
@@ -902,6 +915,24 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
         except Exception as e:
             logger.error(f"Counterfactual GRPO training failed: {e}")
             raise
+
+        finally:
+            self._restore_grpo_patch()
+
+    def _restore_grpo_patch(self) -> None:
+        """Undo the class-wide GRPOTrainer loss patch applied in setup_trainer()."""
+        backup = getattr(self, "_grpo_patch_backup", None)
+        if backup is None:
+            return
+        trainer_cls, originals = backup
+        for name, original in originals.items():
+            if original is None:
+                # Inherited, not defined on this class: drop our override.
+                if name in trainer_cls.__dict__:
+                    delattr(trainer_cls, name)
+            else:
+                setattr(trainer_cls, name, original)
+        self._grpo_patch_backup = None
 
     # def evaluate(self) -> Dict[str, Any]:
     #     """Evaluate the trained model."""
@@ -941,6 +972,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
 
             self.unsloth_model.save_pretrained(save_path)
             self.tokenizer.save_pretrained(save_path)
+            self.write_provenance(save_path)
 
             # Save training configuration
             config_path = Path(save_path) / \

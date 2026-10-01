@@ -448,7 +448,7 @@ class UnslothClassificationTrainer:
             "per_device_eval_batch_size": self.config.train.per_device_batch_size,
             "learning_rate": self.config.train.learning_rate,
             "weight_decay": self.config.train.weight_decay,
-            "warmup_ratio": self.config.train.warmup_ratio,
+            "warmup_steps": self.config.train.warmup_ratio or 0,
             "eval_strategy": "steps",
             "eval_steps": self.config.train.eval_interval,
             "save_strategy": "steps",

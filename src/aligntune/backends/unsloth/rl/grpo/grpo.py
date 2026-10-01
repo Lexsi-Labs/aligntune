@@ -297,8 +297,7 @@ class UnslothGRPOTrainer(TrainerBase):
                 per_device_train_batch_size=per_device_batch_size,
                 gradient_accumulation_steps=gradient_accumulation_steps,
                 learning_rate=learning_rate,
-                warmup_ratio=warmup_ratio,
-                warmup_steps=warmup_steps,
+                warmup_steps=warmup_steps if warmup_ratio is None else warmup_ratio,
                 weight_decay=weight_decay,
                 max_grad_norm=0.5,
 
@@ -418,6 +417,7 @@ class UnslothGRPOTrainer(TrainerBase):
 
             # Save model
             self.trainer.save_model(output_dir)
+            self.write_provenance(output_dir)
             self.tokenizer.save_pretrained(output_dir)
 
             training_time = time.time() - start_time

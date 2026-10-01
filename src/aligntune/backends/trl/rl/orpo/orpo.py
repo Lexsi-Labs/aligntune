@@ -145,8 +145,7 @@ class TRLORPOTrainer(TrainerBase):
                 ),
                 gradient_accumulation_steps=self.config.train.gradient_accumulation_steps,
                 learning_rate=learning_rate,
-                warmup_steps=warmup_steps,
-                warmup_ratio=warmup_ratio,
+                warmup_steps=warmup_steps if warmup_ratio is None else warmup_ratio,
 
                 eval_strategy=eval_strategy,
                 eval_steps=eval_steps,

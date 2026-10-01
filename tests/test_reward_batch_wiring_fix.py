@@ -197,14 +197,14 @@ class TestPaceRewardWiring:
 
     def test_genuine_bug_inside_reward_is_still_caught_not_propagated(self):
         """The fix removes wrong-pattern guessing, not error handling: a
-        reward that genuinely raises must still be caught at the outer level
-        (logged, contributes 0) rather than crashing the whole batch."""
+        reward that genuinely raises is caught per function (logged), but when
+        every reward function fails PACE refuses to train on all-zero rewards."""
         def buggy_reward(text, **kw):
             raise ZeroDivisionError("boom")
 
         trainer = self._pace_trl([buggy_reward])
-        rewards = trainer._combined_reward_function(["c0"], prompts=["p0"])
-        assert rewards == [0.0]
+        with pytest.raises(RuntimeError, match="Every PACE reward function failed"):
+            trainer._combined_reward_function(["c0"], prompts=["p0"])
 
 
 # ===========================================================================

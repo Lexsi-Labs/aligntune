@@ -1,5 +1,6 @@
 import json
 import logging
+import warnings
 from typing import Optional, Dict, Union, Any, Callable
 from datasets import Dataset, DatasetDict
 from aligntune.data.loaders.resolver import LoaderResolver
@@ -462,6 +463,31 @@ class DataManager:
 
         return DatasetDict(splits)
     
+    # Offline GRPO columns written by CuratorKIT's grpo export. AlignTune's
+    # GRPO trainers generate completions online and score them with the
+    # configured reward functions, so these columns are never trained on.
+    GRPO_PRECOMPUTED_COLUMNS = ("responses", "rewards")
+
+    @classmethod
+    def _warn_ignored_grpo_columns(cls, dataset_dict: DatasetDict) -> None:
+        """Warn when a GRPO dataset carries precomputed responses/rewards."""
+        found = sorted({
+            column
+            for dataset in dataset_dict.values()
+            for column in cls.GRPO_PRECOMPUTED_COLUMNS
+            if column in dataset.column_names
+        })
+        if found:
+            warnings.warn(
+                f"GRPO dataset has precomputed column(s) {found}; they are ignored. "
+                "GRPO trains only on the prompts: it samples new completions and "
+                "scores them with the configured reward functions. To learn from "
+                "the precomputed responses, train DPO on CuratorKIT's `dpo` export "
+                "or SFT on the best response.",
+                UserWarning,
+                stacklevel=3,
+            )
+
     def load_dataset(
         self,
         dataset_name_or_path: Union[str, Dataset, DatasetDict],
@@ -483,16 +509,22 @@ class DataManager:
 
         # A loader returns a single Dataset when ``split`` is specified. Keep
         # that name instead of silently relabeling it as ``train``.
-        raw_data = self._as_dataset_dict(raw_data, single_split_name=split or "train")
+        # HF slice syntax such as "train[:16]" selects rows of the "train" split;
+        # the resulting dataset must still be named after the base split.
+        split_name = split.split("[", 1)[0].strip() if split else None
+        raw_data = self._as_dataset_dict(raw_data, single_split_name=split_name or "train")
 
         if split is not None:
             raw_data = self._normalize_split_names(raw_data)
-            if split not in raw_data:
+            if split_name not in raw_data:
                 raise ValueError(
                     f"Requested split {split!r} was not found. "
                     f"Available splits: {list(raw_data.keys())}"
                 )
-            raw_data = DatasetDict({split: raw_data[split]})
+            raw_data = DatasetDict({split_name: raw_data[split_name]})
+
+        if self.task_type == TaskType.GRPO:
+            self._warn_ignored_grpo_columns(raw_data)
 
         # Establish the final train/validation/test splits before any
         # CuratorKIT filtering. Each final split must be curated independently.

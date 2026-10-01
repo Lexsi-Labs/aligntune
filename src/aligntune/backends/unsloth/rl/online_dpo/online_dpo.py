@@ -332,5 +332,6 @@ class UnslothOnlineDPOTrainer(TrainerBase):
         # Train
         self.trainer.train()
         self.trainer.save_model(output_dir)
+        self.write_provenance(output_dir)
 
         return {"status": "success", "output_dir": output_dir}

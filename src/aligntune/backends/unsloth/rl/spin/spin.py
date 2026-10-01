@@ -376,8 +376,7 @@ class UnslothSPINTrainer(TrainerBase):
                 max_steps=self.dpo_steps_per_round,  # SPIN uses fixed steps per round
                 learning_rate=optim_scheduler['learning_rate'],
                 lr_scheduler_type=optim_scheduler['lr_scheduler_type'],
-                warmup_steps=optim_scheduler['warmup_steps'],
-                warmup_ratio=optim_scheduler['warmup_ratio'],
+                warmup_steps=optim_scheduler['warmup_steps'] if optim_scheduler['warmup_ratio'] is None else optim_scheduler['warmup_ratio'],
                 optim=optim_scheduler['optimizer_type'],
                 logging_steps=self._get_config_value(self.config.train, 'logging_steps', default=10),
                 logging_strategy=self._get_config_value(self.config.train, 'logging_strategy', default='steps'),
@@ -870,6 +869,7 @@ class UnslothSPINTrainer(TrainerBase):
             logger.info(f"Saving model to {output_dir}")
             self.model.save_pretrained(output_dir)
             self.tokenizer.save_pretrained(output_dir)
+            self.write_provenance(output_dir)
             logger.info("Model saved successfully")
         except Exception as e:
             logger.error(f"Failed to save model: {e}")

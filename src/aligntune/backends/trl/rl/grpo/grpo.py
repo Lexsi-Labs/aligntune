@@ -29,6 +29,7 @@ from aligntune.core.rl.reward_handler import (
     resolve_trl_reward_weights,
 )
 from aligntune.core.precision_handler import PrecisionHandler
+from aligntune.core.rl.sample_logger import generate_and_log_samples
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 logger = logging.getLogger(__name__)
 
@@ -419,6 +420,7 @@ class TRLGRPOTrainer(TrainerBase):
         # Save model
         logger.info(f"Saving model to {output_dir}")
         self.trainer.save_model(output_dir)
+        self.write_provenance(output_dir)
         self.tokenizer.save_pretrained(output_dir)
 
         # Compile results

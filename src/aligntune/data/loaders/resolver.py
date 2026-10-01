@@ -10,6 +10,22 @@ from .docx_loader import DocxLoader
 from .markdown_loader import MarkdownLoader
 
 
+def _has_dataset_card_configs(path: Path) -> bool:
+    """True when ``path/README.md`` has YAML front-matter declaring ``configs:``."""
+    readme = path / "README.md"
+    if not readme.is_file():
+        return False
+    lines = readme.read_text(encoding="utf-8", errors="ignore").splitlines()
+    if not lines or lines[0].strip() != "---":
+        return False
+    for line in lines[1:]:
+        if line.strip() == "---":
+            return False
+        if line.startswith("configs:"):
+            return True
+    return False
+
+
 class LoaderResolver:
     """
     Resolves the appropriate loader based on source type.
@@ -46,10 +62,19 @@ class LoaderResolver:
         path = Path(source)
 
         if path.exists():
+            # A Hugging Face dataset folder (README.md with a `configs:` card,
+            # e.g. a CuratorKIT export) loads exactly as datasets.load_dataset(dir, config).
+            if path.is_dir() and _has_dataset_card_configs(path):
+                return HFLoader(source, **kwargs)
             if path.is_dir():
                 pattern = kwargs.get("pattern")
                 recurse = kwargs.get("recurse", True)
-                return DirectoryLoader(source, pattern=pattern, recurse=recurse)
+                return DirectoryLoader(
+                    source,
+                    pattern=pattern,
+                    recurse=recurse,
+                    config_name=kwargs.get("config_name"),
+                )
 
             if source.endswith(".json") or source.endswith(".jsonl"):
                 return JSONLoader(source)

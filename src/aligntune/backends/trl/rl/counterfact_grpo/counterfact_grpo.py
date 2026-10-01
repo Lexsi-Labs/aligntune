@@ -469,7 +469,8 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
 
         elif "gsm8k" in dataset_name or "math" in dataset_name:
             self.dataset_type = "math"
-            self._setup_math_data(dataset_name, split, system_prompt, ds_config= config_name)
+            self._setup_math_data(dataset_name, split, system_prompt, ds_config=config_name,
+                                  max_samples=self._get_config_value(dataset_config, 'max_samples', default=None))
         
         else:
             # Normal dataset - use DataManager
@@ -520,7 +521,8 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
 
     
     
-    def _setup_math_data(self, ds_name: str, split: str, system_prompt: str, ds_config: str = None) -> None:
+    def _setup_math_data(self, ds_name: str, split: str, system_prompt: str, ds_config: str = None,
+                         max_samples: Optional[int] = None) -> None:
         """Setup math dataset (GSM8K or similar)."""
         from datasets import load_dataset
 
@@ -531,6 +533,9 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             raw_dataset = load_dataset(ds_name, "main", split=split)
         else:
             raw_dataset = load_dataset(ds_name, split=split)
+
+        if max_samples is not None and len(raw_dataset) > max_samples:
+            raw_dataset = raw_dataset.select(range(max_samples))
 
         # Detect format
         if "question" in raw_dataset.column_names:
@@ -553,7 +558,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             answer = item.get(answer_col, "") if answer_col else ""
 
             # Extract gold answer for math
-            gold_answer = extract_math_gold(answer) if answer else None
+            gold_answer = (extract_math_gold(answer) or self.parse_gsm8k_gold(str(answer))) if answer else None
 
             # Format prompt
             formatted_prompt = self._format_math_prompt(question, system_prompt)
@@ -1186,7 +1191,7 @@ for r in results:
         beta = self._get_config_value(self.config.train, 'beta', 'kl_coef', default=0.005)  # Critical: was 0.1, now 0.005
         epsilon = self._get_config_value(self.config.train, 'epsilon', 'cliprange', default=0.2)
         loss_type = self._get_config_value(self.config.train, 'loss_type', default='dapo')  # TRL default is 'dapo'
-        if loss_type == "sigmoid":
+        if loss_type is None or loss_type == "sigmoid":
             loss_type = "dapo"
         scale_rewards = self._get_config_value(self.config.train, 'scale_rewards', default='group')
 
@@ -1231,7 +1236,7 @@ for r in results:
         def kwargs_to_str(kwargs_dict):
             """Convert optimizer/scheduler kwargs dict to string format."""
             return ",".join(
-                f"{k}={f'({','.join(map(str, v))})' if isinstance(v, tuple) else v}" 
+                f"{k}={'(' + ','.join(map(str, v)) + ')' if isinstance(v, tuple) else v}" 
                 for k, v in kwargs_dict.items()
             ) if kwargs_dict else None
 
@@ -1387,6 +1392,7 @@ for r in results:
             per_device_train_batch_size=per_device_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
             num_generations=num_generations,
+            num_train_epochs=num_epochs,
             max_steps=max_steps,
             learning_rate=learning_rate,
             # NOTE: max_prompt_length was removed from trl's GRPOConfig in the
@@ -1402,7 +1408,7 @@ for r in results:
             save_strategy=save_strategy,
             save_total_limit=save_total_limit,
             logging_steps=logging_steps,
-            warmup_ratio=warmup_ratio,
+            warmup_steps=warmup_ratio,
             seed=seed,
             report_to=self.config.logging.loggers if self.config.logging.loggers else [],
             fp16=precision == "fp16",
@@ -1564,6 +1570,7 @@ for r in results:
         # Save model
         logger.info(f"Saving model to {output_dir}")
         self.trainer.save_model(output_dir)
+        self.write_provenance(output_dir)
         self.tokenizer.save_pretrained(output_dir)
         
         # Compile results
@@ -1702,6 +1709,7 @@ for r in results:
             # Save using Unsloth's optimized saving
             self.model.save_pretrained(save_path)
             self.tokenizer.save_pretrained(save_path)
+            self.write_provenance(save_path)
 
             # Save training configuration
             config_path = Path(save_path) / "counterfact_grpo_training_config.yaml"

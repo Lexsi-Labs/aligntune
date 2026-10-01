@@ -33,7 +33,7 @@ app = typer.Typer(
 )
 
 # Merge methods dispatched to MergekitMerger
-_MERGEKIT_METHODS = {"linear", "task_arithmetic"}
+_MERGEKIT_METHODS = {"slerp", "ties", "dare_ties", "linear", "task_arithmetic"}
 # Merge methods dispatched to PEFTMerger
 _PEFT_METHODS = {"lora-merge"}
 _ALL_METHODS = _MERGEKIT_METHODS | _PEFT_METHODS
@@ -46,8 +46,8 @@ def run(
         "--method",
         "-m",
         help=(
-            "Merge method. Mergekit methods: linear, task_arithmetic. "
-            "PEFT method: lora-merge."
+            "Merge method. Mergekit methods: slerp, ties, dare_ties, linear, "
+            "task_arithmetic. PEFT method: lora-merge."
         ),
     ),
     models: Optional[List[str]] = typer.Option(
@@ -83,24 +83,27 @@ def run(
         None,
         "--weights",
         help=(
-            "Per-model weights for linear, task_arithmetic. "
+            "Per-model weights for ties, dare_ties, linear, task_arithmetic. "
             "Must match number of --models."
         ),
     ),
     density: Optional[float] = typer.Option(
         None,
         "--density",
-        help="Unused by the currently supported merge methods.",
+        help="Sparsity density for TIES / DARE-TIES (0.0 – 1.0, default 0.7).",
     ),
     t: Optional[float] = typer.Option(
         None,
         "--t",
-        help="Unused by the currently supported merge methods.",
+        help="SLERP interpolation factor (0.0 – 1.0, default 0.5).",
     ),
-    dtype: str = typer.Option(
-        "bfloat16",
+    dtype: Optional[str] = typer.Option(
+        None,
         "--dtype",
-        help="Output dtype: bfloat16, float16, float32.",
+        help=(
+            "Output dtype: bfloat16, float16, float32. Default: bfloat16 for "
+            "mergekit methods, the base model's own dtype for lora-merge."
+        ),
     ),
 ):
     """
@@ -141,6 +144,9 @@ def run(
     if adapter:
         typer.echo(f"  Adapter : {adapter}")
     typer.echo("")
+
+    if dtype is None:
+        dtype = "bfloat16" if method in _MERGEKIT_METHODS else "auto"
 
     try:
         if method in _MERGEKIT_METHODS:

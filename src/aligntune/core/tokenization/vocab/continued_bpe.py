@@ -97,6 +97,15 @@ def extend_tokenizer_continued_bpe(
         try:
             import icu  # noqa: F401
         except ImportError as e:
+            if "No module named" not in str(e):
+                # PyICU is installed but cannot load (typically built against a
+                # different ICU version than the system library).
+                raise ImportError(
+                    f"PyICU is installed but failed to import: {e}. "
+                    "The system ICU library does not match the version PyICU was "
+                    "built against; install the matching libicu or reinstall pyicu "
+                    "(pip install --no-binary=:all: pyicu)."
+                ) from e
             raise ImportError(
                 "PyICU is required for continued BPE training on "
                 "SentencePiece tokenizers (used to detect Unicode script "
@@ -184,10 +193,14 @@ def extend_tokenizer_continued_bpe(
 
     # Train vocabulary extension
     logger.info("Training vocabulary extension...")
+    # Some trained tokens already exist in the base vocabulary or collide with
+    # added/special tokens and are dropped when the extension is applied. Train
+    # a small surplus so that exactly ``num_new_tokens`` survive that filtering.
+    training_margin = max(64, int(num_new_tokens * 0.05))
     extension_result = train_vocab_extension(
         tokenizer=base_tokenizer,
         corpus=corpus,
-        extension_size=num_new_tokens,
+        extension_size=num_new_tokens + training_margin,
         is_sentencepiece=is_sentencepiece,
         max_token_length=max_token_length,
         sp_kwargs=kwargs.get('sp_kwargs', None),

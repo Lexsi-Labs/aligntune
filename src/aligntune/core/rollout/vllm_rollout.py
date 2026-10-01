@@ -99,7 +99,7 @@ class VLLMRolloutBackend(BaseRolloutBackend):
             from transformers import AutoTokenizer
         except ImportError:
             raise ImportError(
-                "vLLM is not installed. Install it with: pip install vllm"
+                'vLLM is not installed. Install it with: pip install "aligntune[vllm]" (Linux + CUDA only)'
             )
 
         # Load tokenizer for chat template formatting
