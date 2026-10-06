@@ -18,7 +18,7 @@ copyright: >
 theme:
   name: material
   custom_dir: docs/_overrides
-  logo: assets/aligntune-logo-dark.png
+  logo: assets/aligntune-logo-on-dark.png   # header is dark ink in both schemes
   favicon: assets/favicon.ico
   icon:
     repo: fontawesome/brands/github
@@ -197,6 +197,18 @@ extra:
     - icon: fontawesome/brands/discord
       link: https://discord.gg/ckVbEJGW
       name: AlignTune on Discord
+    - icon: fontawesome/brands/github
+      link: https://github.com/Lexsi-Labs
+      name: Lexsi Labs on GitHub
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/Lexsi_labs
+      name: Lexsi Labs on X
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/lexsi-labs/
+      name: Lexsi Labs on LinkedIn
+    - icon: simple/huggingface
+      link: https://huggingface.co/Lexsi
+      name: Lexsi Labs on Hugging Face
     - icon: fontawesome/solid/globe
       link: https://lexsi.ai
       name: Lexsi Labs

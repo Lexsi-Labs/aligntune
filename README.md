@@ -8,6 +8,15 @@
   <a href="https://pypi.org/project/aligntune/"><img src="https://img.shields.io/pypi/v/aligntune.svg"/></a>
 </div>
 
+<div align="center">
+  <a href="https://discord.gg/ckVbEJGW"><img src="https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white"/></a>
+  <a href="https://github.com/Lexsi-Labs"><img src="https://img.shields.io/badge/GitHub-Lexsi--Labs-171515?logo=github&logoColor=white"/></a>
+  <a href="https://x.com/Lexsi_labs"><img src="https://img.shields.io/badge/X-Follow-000000?logo=x&logoColor=white"/></a>
+  <a href="https://www.linkedin.com/company/lexsi-labs/"><img src="https://img.shields.io/badge/LinkedIn-Lexsi%20Labs-0A66C2?logo=linkedin&logoColor=white"/></a>
+  <a href="https://huggingface.co/Lexsi"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-Lexsi-FFD21E"/></a>
+  <a href="https://lexsi.ai"><img src="https://img.shields.io/badge/Website-lexsi.ai-ff4400.svg"/></a>
+</div>
+
 ---
 
 **AlignTune** is the definitive modular ecosystem for the **utility-driven post-training** of Large Language Models. Built for both researchers and production engineers, it abstracts the complexity of disparate training backends into a single, high-performance interface focused on maximizing model reasoning, coding, and mathematical capabilities.
