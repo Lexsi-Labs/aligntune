@@ -1,45 +1,46 @@
 /* ============================================================================
    AlignTune — design system
-   Direction: precise, engineering-grade alignment tooling. Navy dominates
-   (the wordmark's color), amber appears only as a sharp, deliberate accent.
+   Direction: precise, engineering-grade alignment tooling. Ink-black
+   dominates (the wordmark's ground), orange appears only as a sharp,
+   deliberate accent — matching the wordmark's own "Tune" ink.
    A waveform pulse — the logo's signal line — is the recurring motif.
    Type: Schibsted Grotesk (text, via theme) · IBM Plex Mono (code, via theme)
    ========================================================================== */
 
 :root {
-  --at-ink: #0b1f3a;           /* wordmark navy-black */
-  --at-navy: #10305c;          /* primary brand navy */
-  --at-navy-dark: #0a2347;
-  --at-navy-bright: #6fa3ef;   /* dark-scheme accent */
-  --at-amber: #e8a33d;         /* sharp accent, used sparingly */
+  --at-ink: #171515;           /* wordmark black */
+  --at-orange: #ff4400;        /* logo orange — the accent */
+  --at-orange-deep: #e03c00;
+  --at-orange-bright: #ff6b33; /* dark-scheme accent */
+  --at-amber: #ffb380;         /* pale orange tint for light surfaces */
   --at-paper: #f7f8fa;         /* cool paper, light scheme */
 }
 
 /* ── Palette: light ─────────────────────────────────────────────────────── */
 [data-md-color-scheme="default"] {
-  --md-primary-fg-color: var(--at-navy);
-  --md-primary-fg-color--light: #2c4a7c;
+  --md-primary-fg-color: var(--at-ink);     /* dark header: the wordmark's orange "Tune" vanished on an orange bar */
+  --md-primary-fg-color--light: #c04a2a;
   --md-primary-fg-color--dark: var(--at-ink);
   --md-accent-fg-color: var(--at-amber);
-  --md-typeset-a-color: var(--at-navy);
+  --md-typeset-a-color: var(--at-orange);
   --md-default-bg-color: var(--at-paper);
   --md-code-bg-color: #eef1f5;
   --md-footer-bg-color: var(--at-ink);
-  --md-footer-bg-color--dark: #071527;
+  --md-footer-bg-color--dark: #0f0e0e;
 }
 
 /* ── Palette: dark ───────────────────────────────────────────────────────── */
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #0a1424;
-  --md-primary-fg-color--light: #2c4a7c;
-  --md-primary-fg-color--dark: #060d18;
-  --md-accent-fg-color: var(--at-navy-bright);
-  --md-typeset-a-color: var(--at-navy-bright);
-  --md-default-bg-color: #0d1420;
-  --md-default-fg-color--lightest: rgba(200, 212, 230, 0.12);
-  --md-code-bg-color: #121b2c;
-  --md-footer-bg-color: #0a1424;
-  --md-footer-bg-color--dark: #060d18;
+  --md-primary-fg-color: #141313;
+  --md-primary-fg-color--light: #c04a2a;
+  --md-primary-fg-color--dark: #121111;
+  --md-accent-fg-color: var(--at-orange-bright);
+  --md-typeset-a-color: var(--at-orange-bright);
+  --md-default-bg-color: #0f0e0e;          /* neutral ink, matching the wordmark's black */
+  --md-default-fg-color--lightest: rgba(255, 255, 255, 0.10);
+  --md-code-bg-color: #1a1817;
+  --md-footer-bg-color: #141313;
+  --md-footer-bg-color--dark: #121111;
 }
 
 /* ── Typography ─────────────────────────────────────────────────────────── */
@@ -62,9 +63,10 @@
   width: auto;
 }
 
-/* logo artwork is solid navy line-art — invisible against the dark header,
-   so flip it to white in the slate scheme instead of shipping a second asset */
-[data-md-color-scheme="slate"] .md-header__button.md-logo img,
+/* hero banner artwork is black ink + orange accent — invisible against the
+   dark page background, so flip it to white in the slate scheme instead of
+   shipping a second asset. The header uses a pre-made on-dark wordmark
+   (white ink + orange accent) directly, so it needs no inversion. */
 [data-md-color-scheme="slate"] .at-hero img.at-hero-mark {
   filter: brightness(0) invert(1);
 }
@@ -91,10 +93,10 @@
   border: 0;
 }
 
-/* brand hairline under the tab bar: navy flowing into amber */
+/* brand hairline under the tab bar: orange flowing into pale orange */
 .md-tabs {
   border-bottom: 2px solid transparent;
-  border-image: linear-gradient(90deg, var(--at-navy) 0%, var(--at-navy) 55%, var(--at-amber) 100%) 1;
+  border-image: linear-gradient(90deg, var(--at-orange) 0%, var(--at-orange) 55%, var(--at-amber) 100%) 1;
 }
 
 .md-tabs__link {
@@ -133,8 +135,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(90deg, transparent 46%, var(--at-navy) 46.5%, var(--at-navy) 47%, transparent 47.5%),
-    linear-gradient(90deg, transparent 74%, var(--at-navy) 74.5%, var(--at-navy) 75%, transparent 75.5%);
+    linear-gradient(90deg, transparent 46%, var(--at-orange) 46.5%, var(--at-orange) 47%, transparent 47.5%),
+    linear-gradient(90deg, transparent 74%, var(--at-orange) 74.5%, var(--at-orange) 75%, transparent 75.5%);
   background-size: 220px 100%;
   opacity: 0.06;
   -webkit-mask-image: radial-gradient(ellipse 75% 90% at 50% 35%, black 30%, transparent 75%);
@@ -184,13 +186,13 @@
 }
 
 .at-hero .md-button--primary {
-  background-color: var(--at-navy);
-  border-color: var(--at-navy);
+  background-color: var(--at-orange);
+  border-color: var(--at-orange);
   transition: background-color 125ms, border-color 125ms, transform 125ms;
 }
 
 .at-hero .md-button--primary:hover {
-  background-color: var(--at-navy-dark);
+  background-color: var(--at-orange-deep);
   border-color: var(--at-amber);
   transform: translateY(-1px);
 }
@@ -202,28 +204,28 @@
 }
 
 [data-md-color-scheme="slate"] .at-hero .md-button:not(.md-button--primary):hover {
-  color: var(--at-navy-bright);
-  border-color: var(--at-navy-bright);
+  color: var(--at-orange-bright);
+  border-color: var(--at-orange-bright);
   background-color: transparent;
 }
 
 /* ── Mermaid: brand palette instead of default blue ─────────────────────── */
 :root,
 [data-md-color-scheme="default"] {
-  --md-mermaid-node-bg-color: color-mix(in srgb, var(--at-navy) 10%, #ffffff);
+  --md-mermaid-node-bg-color: color-mix(in srgb, var(--at-orange) 10%, #ffffff);
   --md-mermaid-node-fg-color: var(--at-ink);
-  --md-mermaid-edge-color: #2c4a7c;
+  --md-mermaid-edge-color: #c04a2a;
   --md-mermaid-label-bg-color: var(--at-paper);
   --md-mermaid-label-fg-color: var(--at-ink);
   --md-mermaid-font-family: var(--md-text-font-family);
 }
 
 [data-md-color-scheme="slate"] {
-  --md-mermaid-node-bg-color: #16233a;
-  --md-mermaid-node-fg-color: #d7e2f4;
-  --md-mermaid-edge-color: #7d97c3;
-  --md-mermaid-label-bg-color: #0d1420;
-  --md-mermaid-label-fg-color: #d7e2f4;
+  --md-mermaid-node-bg-color: #1f1c1a;
+  --md-mermaid-node-fg-color: #ffe9df;
+  --md-mermaid-edge-color: #c96a48;
+  --md-mermaid-label-bg-color: #0f0e0e;
+  --md-mermaid-label-fg-color: #ffe9df;
 }
 
 .md-typeset .mermaid {
@@ -265,7 +267,7 @@
 
 .md-typeset .grid.cards > ul > li:hover {
   border-top: 2px solid var(--at-amber);
-  box-shadow: 0 6px 18px rgba(11, 31, 58, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -273,7 +275,7 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
-/* icon medallion: soft navy disc behind each card icon */
+/* icon medallion: soft orange disc behind each card icon */
 .md-typeset .grid.cards > ul > li .twemoji.lg {
   display: inline-flex;
   align-items: center;
@@ -281,27 +283,27 @@
   width: 2.1rem;
   height: 2.1rem;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--at-navy) 12%, transparent);
+  background: color-mix(in srgb, var(--at-orange) 12%, transparent);
   vertical-align: middle;
 }
 
 .md-typeset .grid.cards > ul > li .twemoji svg {
-  color: var(--at-navy);
+  color: var(--at-orange);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li .twemoji.lg {
-  background: color-mix(in srgb, var(--at-navy-bright) 16%, transparent);
+  background: color-mix(in srgb, var(--at-orange-bright) 16%, transparent);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li .twemoji svg {
-  color: var(--at-navy-bright);
+  color: var(--at-orange-bright);
 }
 
 /* ── Content details ────────────────────────────────────────────────────── */
 .md-typeset table:not([class]) th {
   font-weight: 600;
   background-color: transparent;
-  border-bottom: 2px solid var(--at-navy);
+  border-bottom: 2px solid var(--at-orange);
 }
 
 .md-typeset code {
@@ -310,7 +312,7 @@
 
 .md-typeset .admonition,
 .md-typeset details {
-  border-left-color: var(--at-navy);
+  border-left-color: var(--at-orange);
 }
 
 /* footer social icons pick up the accent on hover */
