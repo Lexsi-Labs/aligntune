@@ -575,7 +575,7 @@ See [ORPO](../algorithms/orpo.md) for full configuration.
 
 **Use TRL when:**
 - Need maximum compatibility
-- Need vLLM-backed rollout (`rollout_backend='vllm'`), which is TRL-only
+- Need vLLM- or SGLang-backed rollout (`rollout_backend='vllm'` or `'sglang'`), which is TRL-only
 - Working with standard models
 - Want the most-tested training path
 

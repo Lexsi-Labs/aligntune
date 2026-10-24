@@ -903,6 +903,9 @@ def train(
     vllm_tensor_parallel_size: Optional[int] = typer.Option(
         None, "--vllm-tensor-parallel", help="vLLM tensor parallelism (number of GPUs, default: 1)"
     ),
+    sglang_server_url: Optional[str] = typer.Option(
+        None, "--sglang-url", help="SGLang server URL for --rollout-backend sglang (default: http://localhost:30000)"
+    ),
 
     # ========== Custom Reward Model Training ==========
     train_custom_reward_model: Optional[bool] = typer.Option(
@@ -1530,6 +1533,7 @@ def train(
     if rollout_backend: train_config['rollout_backend'] = rollout_backend
     if vllm_gpu_memory_utilization: train_config['vllm_gpu_memory_utilization'] = vllm_gpu_memory_utilization
     if vllm_tensor_parallel_size: train_config['vllm_tensor_parallel_size'] = vllm_tensor_parallel_size
+    if sglang_server_url: train_config['sglang_server_url'] = sglang_server_url
 
     # Counterfactual GRPO parameters
     if boost_factor: train_config['boost_factor'] = boost_factor

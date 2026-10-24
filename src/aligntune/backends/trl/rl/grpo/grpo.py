@@ -189,7 +189,11 @@ class TRLGRPOTrainer(TrainerBase):
             self.config.train, 'vllm_gpu_memory_utilization', default=0.7)
         vllm_tensor_parallel_size = self._get_config_value(
             self.config.train, 'vllm_tensor_parallel_size', default=1)
-            
+        sglang_server_url = self._get_config_value(
+            self.config.train, 'sglang_server_url', default='http://localhost:30000')
+        sglang_sync_dir = self._get_config_value(
+            self.config.train, 'sglang_sync_dir', default=None)
+
 
         # Evaluation parameters
         eval_strategy = self._get_config_value(
@@ -243,6 +247,8 @@ class TRLGRPOTrainer(TrainerBase):
         if rollout_backend == "vllm":
             logger.info(f"  vLLM GPU memory utilization: {vllm_gpu_memory_utilization}")
             logger.info(f"  vLLM tensor parallel size: {vllm_tensor_parallel_size}")
+        if rollout_backend == "sglang":
+            logger.info(f"  SGLang server URL: {sglang_server_url}")
         logger.info(f"Output directory: {output_dir}")
         logger.info("=" * 80)
 
@@ -333,6 +339,13 @@ class TRLGRPOTrainer(TrainerBase):
             setattr(grpo_config, key, value)
 
 
+        # SGLang generates through TRL's rollout_func hook (TRL has no native
+        # SGLang support); the constructor fails fast if the server is down.
+        rollout_func = None
+        if rollout_backend == "sglang":
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+            rollout_func = SGLangRollout(sglang_server_url, sync_dir=sglang_sync_dir)
+
         # The central bridge converts registry rewards to TRL's batch contract.
         self.reward_functions = reward_functions
 
@@ -349,6 +362,7 @@ class TRLGRPOTrainer(TrainerBase):
             eval_dataset=self.eval_dataset,
             processing_class=self.tokenizer,
             reward_funcs=reward_functions,
+            rollout_func=rollout_func,
         )
 
         logger.info("GRPO trainer setup completed successfully!")

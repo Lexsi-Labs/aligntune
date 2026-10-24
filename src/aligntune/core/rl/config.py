@@ -448,6 +448,8 @@ class TrainingConfig:
     # Rollout backend configuration
     rollout_backend: str = "hf"  # choices: hf (HuggingFace), vllm, sglang
     vllm_tensor_parallel_size: int = 1  # Tensor parallelism for vLLM (distribute across GPUs)
+    sglang_server_url: str = "http://localhost:30000"  # SGLang server (same host) for rollout_backend="sglang"
+    sglang_sync_dir: Optional[str] = None  # Weight-sync dir readable by the server (default: temp dir in /dev/shm)
 
     # Seed parameters
     seed: Optional[int] = 42
