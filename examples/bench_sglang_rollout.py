@@ -11,11 +11,13 @@ Also times the SGLang weight sync (LoRA fold + safetensors write + reload).
 import argparse
 import json
 import statistics
+import threading
 import time
 from contextlib import nullcontext
 from types import SimpleNamespace
 
 import peft
+import psutil
 import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -78,7 +80,27 @@ rollout = SGLangRollout(args.sglang_url)
 params = {"max_new_tokens": args.max_new_tokens, "temperature": 1.0, "top_p": 1.0, "top_k": -1, "min_p": 0.0,
           "repetition_penalty": 1.0, "stop_token_ids": [tokenizer.eos_token_id]}
 
-results = {"hf": [], "sglang": [], "sync_s": []}
+def peak_rss_during(fn):
+    """Run fn and return (seconds, peak host RSS growth in MiB) sampled every 5 ms."""
+    proc, peak, done = psutil.Process(), [0], threading.Event()
+    base = proc.memory_info().rss
+
+    def sample():
+        while not done.is_set():
+            peak[0] = max(peak[0], proc.memory_info().rss - base)
+            time.sleep(0.005)
+
+    thread = threading.Thread(target=sample)
+    thread.start()
+    start = time.perf_counter()
+    fn()
+    elapsed = time.perf_counter() - start
+    done.set()
+    thread.join()
+    return elapsed, peak[0] / 2**20
+
+
+results = {"hf": [], "sglang": [], "sync_s": [], "sync_peak_rss_mib": []}
 for r in range(args.rounds + 1):  # round 0 is warmup
     prompt_ids = batch(r)
 
@@ -88,9 +110,7 @@ for r in range(args.rounds + 1):  # round 0 is warmup
     torch.cuda.synchronize()
     hf_s = time.perf_counter() - t
 
-    t = time.perf_counter()
-    rollout.sync_weights(trainer)
-    sync_s = time.perf_counter() - t
+    sync_s, sync_rss = peak_rss_during(lambda: rollout.sync_weights(trainer))
 
     t = time.perf_counter()
     outputs = rollout._generate_groups(prompt_ids, params)
@@ -98,11 +118,12 @@ for r in range(args.rounds + 1):  # round 0 is warmup
     sg_tokens = sum(len(o["output_ids"]) for o in outputs)
 
     print(f"round {r}: hf {hf_s:.2f}s {hf_tokens / hf_s:.0f} tok/s | sglang {sg_s:.2f}s {sg_tokens / sg_s:.0f} tok/s "
-          f"| sync {sync_s:.2f}s", flush=True)
+          f"| sync {sync_s:.2f}s +{sync_rss:.0f} MiB RSS", flush=True)
     if r:
         results["hf"].append({"s": hf_s, "tokens": hf_tokens})
         results["sglang"].append({"s": sg_s, "tokens": sg_tokens})
         results["sync_s"].append(sync_s)
+        results["sync_peak_rss_mib"].append(sync_rss)
 
 summary = {
     backend: {
@@ -111,5 +132,7 @@ summary = {
     }
     for backend in ("hf", "sglang")
 }
+summary["sync_mode"] = "adapter" if rollout.server_lora else "full"
 summary["median_sync_s"] = statistics.median(results["sync_s"])
+summary["max_sync_peak_rss_mib"] = max(results["sync_peak_rss_mib"])
 print(json.dumps(summary, indent=2))

@@ -1,6 +1,8 @@
 """
 GPU integration test: weights synced by SGLangRollout really change what the
-SGLang server computes, and match the trainer's (LoRA) policy.
+SGLang server computes, and match the trainer's (LoRA) policy. Covers whichever
+sync mode the server supports: run it once against a plain server (full-weight
+sync) and once against one launched with --enable-lora (adapter sync).
 
 Compares per-token logprobs of a fixed continuation (greedy text comparisons
 are too sensitive to bf16 kernel differences). Needs a running server for
@@ -36,12 +38,15 @@ def hf_logprobs(model, seq, start):
 
 
 def sglang_logprobs(rollout, seq, start):
-    out = rollout.client._request("POST", "/generate", {
+    payload = {
         "input_ids": seq,
         "sampling_params": {"max_new_tokens": 1, "temperature": 0.0},
         "return_logprob": True,
         "logprob_start_len": start - 1,
-    })
+    }
+    if rollout.lora_name:  # adapter-sync mode (server launched with --enable-lora)
+        payload["lora_path"] = rollout.lora_name
+    out = rollout.client._request("POST", "/generate", payload)
     return torch.tensor([lp for lp, _, _ in out["meta_info"]["input_token_logprobs"] if lp is not None])
 
 
@@ -81,5 +86,6 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
     rollout.sync_weights(trainer)
 
     error = (sglang_logprobs(rollout, seq, start) - target).abs().mean()
-    print(f"noise {noise:.3f}, policy shift {shift:.3f}, SGLang-vs-policy error after sync {error:.3f} nats/token")
+    mode = "adapter" if rollout.lora_name else "full-weight"
+    print(f"[{mode} sync] noise {noise:.3f}, policy shift {shift:.3f}, SGLang-vs-policy error after sync {error:.3f} nats/token")
     assert error < 0.2 * shift, f"synced server logprobs off by {error:.3f} (policy shift {shift:.3f})"
