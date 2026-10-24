@@ -44,7 +44,7 @@ class FakeSGLang(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.calls.append((self.path, None))
-        if self.path == "/get_model_info":
+        if self.path == "/model_info":
             return self._reply(200, {"model_path": "tiny-model"})
         self._reply(404, {"error": "not found"})
 
@@ -54,7 +54,8 @@ class FakeSGLang(BaseHTTPRequestHandler):
         if self.path == "/generate":
             if payload["sampling_params"].get("max_new_tokens", 1) <= 0:
                 return self._reply(400, {"error": "bad max_new_tokens"})
-            return self._reply(200, [{"output_ids": [len(ids), EOS]} for ids in payload["input_ids"]])
+            n = payload["sampling_params"].get("n", 1)
+            return self._reply(200, [{"output_ids": [len(ids), EOS]} for ids in payload["input_ids"] for _ in range(n)])
         if self.path == "/update_weights_from_disk":
             ok = self.weight_update_ok and os.path.exists(os.path.join(payload["model_path"], WEIGHTS_FILE))
             return self._reply(200, {"success": ok, "message": "ok" if ok else "load failed"})
@@ -146,6 +147,21 @@ class TestSGLangRollout:
         assert out["completion_ids"] == [[2, EOS], [2, EOS], [4, EOS], [4, EOS]]
         assert out["logprobs"] is None
 
+    def test_grpo_groups_are_sent_once_with_n(self, server, tmp_path):
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        rollout(["ab", "ab", "abcd", "abcd"], make_trainer(tiny_model()))
+        request = [p for path, p in FakeSGLang.calls if path == "/generate"][0]
+        assert request["input_ids"] == [[1, 1], [1] * 4]
+        assert request["sampling_params"]["n"] == 2
+
+    def test_uneven_groups_fall_back_to_one_sample_per_prompt(self, server, tmp_path):
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        out = rollout(["ab", "ab", "abc"], make_trainer(tiny_model()))
+        request = [p for path, p in FakeSGLang.calls if path == "/generate"][0]
+        assert request["input_ids"] == [[1, 1], [1, 1], [1] * 3]
+        assert "n" not in request["sampling_params"]
+        assert out["completion_ids"] == [[2, EOS], [2, EOS], [3, EOS]]
+
     def test_sampling_params_map_trl_defaults_to_sglang(self, server, tmp_path):
         rollout = SGLangRollout(server, sync_dir=str(tmp_path))
         rollout(["a"], make_trainer(tiny_model()))
@@ -208,5 +224,5 @@ class TestExportPolicyStateDict:
 
         assert set(saved) == base_names
         q = "model.layers.0.self_attn.q_proj.weight"
-        assert torch.allclose(saved[q], q_before + delta.detach(), atol=1e-6)  # adapter merged in
-        assert torch.equal(q_layer.base_layer.weight, q_before)  # trainer's model left unmerged
+        assert torch.allclose(saved[q], q_before + delta.detach(), atol=1e-6)  # adapter folded in
+        assert torch.equal(q_layer.base_layer.weight, q_before)  # trainer's model is not mutated
