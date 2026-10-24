@@ -59,14 +59,19 @@ class SGLangClient:
                 "`sglang_server_url`, or use rollout_backend='hf'."
             ) from e
         if response.status_code != 200:
-            raise RuntimeError(f"SGLang {path} failed with HTTP {response.status_code}: {response.text[:500]}")
+            raise RuntimeError(
+                f"SGLang {path} failed with HTTP {response.status_code}: {response.text[:500]}"
+            )
         return response.json()
 
     def get_model_info(self) -> Dict[str, Any]:
         return self._request("GET", "/model_info")
 
     def generate(
-        self, input_ids: List[List[int]], sampling_params: Dict[str, Any], lora_name: Optional[str] = None
+        self,
+        input_ids: List[List[int]],
+        sampling_params: Dict[str, Any],
+        lora_name: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Generate ``sampling_params.get("n", 1)`` samples per prompt, grouped by prompt."""
         payload = {"input_ids": input_ids, "sampling_params": sampling_params}
@@ -90,12 +95,18 @@ class SGLangClient:
     def update_weights_from_disk(self, model_path: str) -> None:
         result = self._request("POST", "/update_weights_from_disk", {"model_path": model_path})
         if not result.get("success", False):
-            raise RuntimeError(f"SGLang weight update from {model_path} failed: {result.get('message')}")
+            raise RuntimeError(
+                f"SGLang weight update from {model_path} failed: {result.get('message')}"
+            )
 
 
 def _base_name(name: str) -> str:
     """Map a PEFT parameter/module name to the base model's HF name."""
-    return name.removeprefix("base_model.model.").replace(".base_layer", "").replace("modules_to_save.default.", "")
+    return (
+        name.removeprefix("base_model.model.")
+        .replace(".base_layer", "")
+        .replace("modules_to_save.default.", "")
+    )
 
 
 @torch.no_grad()
@@ -128,10 +139,14 @@ def iter_policy_weights(model) -> Iterator[Tuple[str, torch.Tensor]]:
         if module is not None:
             merged = weight.float()
             for adapter in module.active_adapters:
-                if adapter not in module.lora_A and adapter not in getattr(module, "lora_embedding_A", {}):
+                if adapter not in module.lora_A and adapter not in getattr(
+                    module, "lora_embedding_A", {}
+                ):
                     continue
                 if getattr(module, "use_dora", {}).get(adapter, False):
-                    raise NotImplementedError("rollout_backend='sglang' does not support DoRA adapters yet")
+                    raise NotImplementedError(
+                        "rollout_backend='sglang' does not support DoRA adapters yet"
+                    )
                 merged = merged + module.get_delta_weight(adapter).float()
             weight = merged.to(weight.dtype)
         yield _base_name(name), weight.contiguous()
@@ -142,7 +157,9 @@ def export_policy_state_dict(model) -> Dict[str, torch.Tensor]:
     return dict(iter_policy_weights(model))
 
 
-def write_sharded_safetensors(weights: Iterator[Tuple[str, torch.Tensor]], directory: str) -> List[str]:
+def write_sharded_safetensors(
+    weights: Iterator[Tuple[str, torch.Tensor]], directory: str
+) -> List[str]:
     """Write weights as ``model-XXXXX.safetensors`` shards of about ``SHARD_BYTES``.
 
     Peak host memory is about one shard: tensors stay on their device until
@@ -210,7 +227,7 @@ class SGLangRollout:
         if sync_dir is None:
             shm = "/dev/shm" if os.path.isdir("/dev/shm") else None
             sync_dir = tempfile.mkdtemp(prefix="aligntune-sglang-", dir=shm)
-            # Synced weights live here (RAM-backed in /dev/shm); remove them with the rollout or at exit.
+            # Synced weights live here (RAM-backed in /dev/shm): remove them with the rollout.
             weakref.finalize(self, shutil.rmtree, sync_dir, True)
         self.sync_dir = sync_dir
         os.makedirs(self.sync_dir, exist_ok=True)
@@ -229,7 +246,9 @@ class SGLangRollout:
 
         prompt_ids, images, _ = trainer._tokenize_prompts(prompts)
         if images is not None:
-            raise NotImplementedError("rollout_backend='sglang' does not support multimodal prompts yet")
+            raise NotImplementedError(
+                "rollout_backend='sglang' does not support multimodal prompts yet"
+            )
 
         start = time.perf_counter()
         outputs = self._generate_groups(prompt_ids, self.sampling_params(trainer))
@@ -242,7 +261,9 @@ class SGLangRollout:
         # logprobs=None: TRL only consumes rollout logprobs for vLLM importance sampling.
         return {"prompt_ids": prompt_ids, "completion_ids": completion_ids, "logprobs": None}
 
-    def _generate_groups(self, prompt_ids: List[List[int]], sampling_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_groups(
+        self, prompt_ids: List[List[int]], sampling_params: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Send each GRPO group as one prompt with ``n`` samples.
 
         TRL repeats every prompt ``num_generations`` times back to back. SGLang
@@ -268,7 +289,9 @@ class SGLangRollout:
             "max_new_tokens": trainer.max_completion_length,
             "temperature": trainer.temperature,
             "top_p": trainer.top_p,
-            "top_k": trainer.top_k if trainer.top_k else -1,  # TRL uses 0 for "disabled", SGLang uses -1
+            "top_k": (
+                trainer.top_k if trainer.top_k else -1
+            ),  # TRL uses 0 for "disabled", SGLang uses -1
             "min_p": trainer.min_p or 0.0,
             "repetition_penalty": trainer.repetition_penalty,
             # Same stop token as TRL's transformers path; it is kept in output_ids.
@@ -294,17 +317,25 @@ class SGLangRollout:
         trainer._log_metric("rollout/sglang_sync_s", time.perf_counter() - start)
 
     def _check_same_base(self, policy_base: Optional[str]) -> None:
-        """Adapter sync never touches base weights, so the server must serve the policy's base model."""
-        same = lambda a, b: a.rstrip("/").split("/")[-1].lower() == b.rstrip("/").split("/")[-1].lower()
-        if policy_base and self.server_model and not same(policy_base, self.server_model):
+        """Adapter sync never touches base weights: the server must serve the policy's base."""
+
+        def short(name: str) -> str:  # "Qwen/Qwen3-4B" and "/models/Qwen3-4B" are the same model
+            return name.rstrip("/").split("/")[-1].lower()
+
+        if policy_base and self.server_model and short(policy_base) != short(self.server_model):
             raise ValueError(
-                f"SGLang serves '{self.server_model}' but the LoRA policy's base model is '{policy_base}'. "
+                f"SGLang serves '{self.server_model}' but the LoRA policy's base model is "
+                f"'{policy_base}'. "
                 "Launch the server with --model-path set to the policy's base model."
             )
 
     def _sync_adapter(self, model) -> None:
         """Hot-load the current LoRA adapter under a new name, then drop the old one."""
-        adapter = model.active_adapter if isinstance(model.active_adapter, str) else model.active_adapter[0]
+        adapter = (
+            model.active_adapter
+            if isinstance(model.active_adapter, str)
+            else model.active_adapter[0]
+        )
         check_adapter_supported(model.peft_config[adapter])
         if self.lora_name is None:
             base = model.peft_config[adapter].base_model_name_or_path

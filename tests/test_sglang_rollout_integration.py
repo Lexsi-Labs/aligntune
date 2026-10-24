@@ -26,7 +26,9 @@ MODEL = os.environ.get("SGLANG_TEST_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
 pytestmark = [
     pytest.mark.gpu,
     pytest.mark.integration,
-    pytest.mark.skipif(not SGLANG_URL or not torch.cuda.is_available(), reason="needs SGLANG_URL and a GPU"),
+    pytest.mark.skipif(
+        not SGLANG_URL or not torch.cuda.is_available(), reason="needs SGLANG_URL and a GPU"
+    ),
 ]
 
 
@@ -34,7 +36,7 @@ pytestmark = [
 def hf_logprobs(model, seq, start):
     logits = model(torch.tensor([seq], device="cuda")).logits[0, :-1].float()
     logps = logits.log_softmax(-1).gather(-1, torch.tensor(seq[1:], device="cuda")[:, None])[:, 0]
-    return logps[start - 1:].cpu()
+    return logps[start - 1 :].cpu()
 
 
 def sglang_logprobs(rollout, seq, start):
@@ -47,7 +49,9 @@ def sglang_logprobs(rollout, seq, start):
     if rollout.lora_name:  # adapter-sync mode (server launched with --enable-lora)
         payload["lora_path"] = rollout.lora_name
     out = rollout.client._request("POST", "/generate", payload)
-    return torch.tensor([lp for lp, _, _ in out["meta_info"]["input_token_logprobs"] if lp is not None])
+    return torch.tensor(
+        [lp for lp, _, _ in out["meta_info"]["input_token_logprobs"] if lp is not None]
+    )
 
 
 def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
@@ -57,10 +61,17 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
     model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16).cuda().eval()
     prompt = tokenizer.apply_chat_template(
-        [{"role": "user", "content": "Name three colors."}], add_generation_prompt=True, tokenize=True,
+        [{"role": "user", "content": "Name three colors."}],
+        add_generation_prompt=True,
+        tokenize=True,
         return_dict=True,
     )["input_ids"]
-    seq = prompt + tokenizer("Red, green and blue are three common colors people see every day.")["input_ids"]
+    seq = (
+        prompt
+        + tokenizer("Red, green and blue are three common colors people see every day.")[
+            "input_ids"
+        ]
+    )
     start = len(prompt)
 
     rollout = SGLangRollout(SGLANG_URL, sync_dir=str(tmp_path))
@@ -69,9 +80,15 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
     assert noise < 0.1, f"server does not start at the base weights (error {noise:.3f})"
 
     torch.manual_seed(0)
-    policy = peft.get_peft_model(model, peft.LoraConfig(
-        r=8, lora_alpha=2, target_modules=["q_proj", "v_proj", "down_proj"], init_lora_weights=False,
-    ))
+    policy = peft.get_peft_model(
+        model,
+        peft.LoraConfig(
+            r=8,
+            lora_alpha=2,
+            target_modules=["q_proj", "v_proj", "down_proj"],
+            init_lora_weights=False,
+        ),
+    )
     target = hf_logprobs(policy, seq, start)
     shift = (target - base).abs().mean()
     assert shift > 0.5, f"random LoRA too weak to test sync (shift={shift:.3f})"
@@ -79,7 +96,9 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
     trainer = SimpleNamespace(
         model=policy,
         is_fsdp_enabled=False,
-        accelerator=SimpleNamespace(unwrap_model=lambda m: m, is_main_process=True, wait_for_everyone=lambda: None),
+        accelerator=SimpleNamespace(
+            unwrap_model=lambda m: m, is_main_process=True, wait_for_everyone=lambda: None
+        ),
         _dist=SimpleNamespace(gather_params=lambda params: nullcontext()),
         _log_metric=lambda name, value: None,
     )
@@ -87,5 +106,10 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
 
     error = (sglang_logprobs(rollout, seq, start) - target).abs().mean()
     mode = "adapter" if rollout.lora_name else "full-weight"
-    print(f"[{mode} sync] noise {noise:.3f}, policy shift {shift:.3f}, SGLang-vs-policy error after sync {error:.3f} nats/token")
-    assert error < 0.2 * shift, f"synced server logprobs off by {error:.3f} (policy shift {shift:.3f})"
+    print(
+        f"[{mode} sync] noise {noise:.3f}, policy shift {shift:.3f}, "
+        f"SGLang-vs-policy error after sync {error:.3f} nats/token"
+    )
+    assert (
+        error < 0.2 * shift
+    ), f"synced server logprobs off by {error:.3f} (policy shift {shift:.3f})"

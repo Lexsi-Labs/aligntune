@@ -40,11 +40,13 @@ _generate = GRPOTrainer._generate
 def timed_generate(self, prompts):
     start = time.perf_counter()
     out = _generate(self, prompts)
-    rollouts.append({
-        "step": self.state.global_step,
-        "seconds": time.perf_counter() - start,
-        "completion_tokens": int(out[4]),  # total_completion_tokens
-    })
+    rollouts.append(
+        {
+            "step": self.state.global_step,
+            "seconds": time.perf_counter() - start,
+            "completion_tokens": int(out[4]),  # total_completion_tokens
+        }
+    )
     return out
 
 
@@ -90,7 +92,15 @@ trainer = create_rl_trainer(
     use_peft=True,
     lora_r=16,
     lora_alpha=32,
-    lora_target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    lora_target_modules=[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+    ],
     rewards=[{"type": "math_verifiable", "weight": 1.0, "params": {}}],
     bf16=True,
     use_gradient_checkpointing=True,

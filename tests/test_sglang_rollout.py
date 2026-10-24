@@ -59,7 +59,10 @@ class FakeSGLang(BaseHTTPRequestHandler):
             if payload["sampling_params"].get("max_new_tokens", 1) <= 0:
                 return self._reply(400, {"error": "bad max_new_tokens"})
             n = payload["sampling_params"].get("n", 1)
-            return self._reply(200, [{"output_ids": [len(ids), EOS]} for ids in payload["input_ids"] for _ in range(n)])
+            return self._reply(
+                200,
+                [{"output_ids": [len(ids), EOS]} for ids in payload["input_ids"] for _ in range(n)],
+            )
         if self.path == "/update_weights_from_disk":
             ok = self.weight_update_ok and bool(shards(payload["model_path"]))
             return self._reply(200, {"success": ok, "message": "ok" if ok else "load failed"})
@@ -72,7 +75,9 @@ class FakeSGLang(BaseHTTPRequestHandler):
 
 
 def shards(directory):
-    return sorted(f for f in os.listdir(directory) if f.startswith("model-") and f.endswith(".safetensors"))
+    return sorted(
+        f for f in os.listdir(directory) if f.startswith("model-") and f.endswith(".safetensors")
+    )
 
 
 def load_shards(directory):
@@ -110,7 +115,9 @@ def unused_url():
 
 
 def make_trainer(model, step=0):
-    tokenize = lambda prompts: ([[1] * len(p) for p in prompts], None, {})
+    def tokenize(prompts):
+        return [[1] * len(p) for p in prompts], None, {}
+
     metrics = {}
     return SimpleNamespace(
         state=SimpleNamespace(global_step=step),
@@ -138,8 +145,13 @@ def tiny_model(tie=True):
 
     torch.manual_seed(0)
     config = LlamaConfig(
-        vocab_size=32, hidden_size=16, intermediate_size=32, num_hidden_layers=1,
-        num_attention_heads=2, num_key_value_heads=2, tie_word_embeddings=tie,
+        vocab_size=32,
+        hidden_size=16,
+        intermediate_size=32,
+        num_hidden_layers=1,
+        num_attention_heads=2,
+        num_key_value_heads=2,
+        tie_word_embeddings=tie,
     )
     return LlamaForCausalLM(config)
 
@@ -203,8 +215,13 @@ class TestSGLangRollout:
         rollout(["a"], make_trainer(tiny_model()))
         params = [p for path, p in FakeSGLang.calls if path == "/generate"][0]["sampling_params"]
         assert params == {
-            "max_new_tokens": 16, "temperature": 0.7, "top_p": 0.95, "top_k": -1,
-            "min_p": 0.0, "repetition_penalty": 1.0, "stop_token_ids": [EOS],
+            "max_new_tokens": 16,
+            "temperature": 0.7,
+            "top_p": 0.95,
+            "top_k": -1,
+            "min_p": 0.0,
+            "repetition_penalty": 1.0,
+            "stop_token_ids": [EOS],
         }
 
     def test_weights_sync_once_per_optimizer_step(self, server, tmp_path):
@@ -257,11 +274,16 @@ class TestExportPolicyStateDict:
         base = tiny_model(tie=False)
         base_names = {n for n, _ in base.named_parameters()}
         lora = peft.get_peft_model(
-            base, peft.LoraConfig(r=4, lora_alpha=8, target_modules=["q_proj", "v_proj"], init_lora_weights=False)
+            base,
+            peft.LoraConfig(
+                r=4, lora_alpha=8, target_modules=["q_proj", "v_proj"], init_lora_weights=False
+            ),
         )
         q_layer = lora.base_model.model.model.layers[0].self_attn.q_proj
         q_before = q_layer.base_layer.weight.detach().clone()
-        delta = (q_layer.lora_B["default"].weight @ q_layer.lora_A["default"].weight) * q_layer.scaling["default"]
+        delta = (
+            q_layer.lora_B["default"].weight @ q_layer.lora_A["default"].weight
+        ) * q_layer.scaling["default"]
 
         SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(lora))
         saved = load_shards(tmp_path)
@@ -291,9 +313,15 @@ class TestAdapterSync:
         trainer.state.global_step = 1
         rollout(["a"], trainer)
 
-        assert [p["lora_name"] for p in calls("/load_lora_adapter")] == ["aligntune-policy-v1", "aligntune-policy-v2"]
+        assert [p["lora_name"] for p in calls("/load_lora_adapter")] == [
+            "aligntune-policy-v1",
+            "aligntune-policy-v2",
+        ]
         assert calls("/unload_lora_adapter") == [{"lora_name": "aligntune-policy-v1"}]
-        assert [p["lora_path"] for p in calls("/generate")] == ["aligntune-policy-v1", "aligntune-policy-v2"]
+        assert [p["lora_path"] for p in calls("/generate")] == [
+            "aligntune-policy-v1",
+            "aligntune-policy-v2",
+        ]
         assert calls("/update_weights_from_disk") == []
         assert shards(tmp_path) == []  # no full-weight copy written
 
@@ -304,11 +332,15 @@ class TestAdapterSync:
         assert len(calls("/update_weights_from_disk")) == 1
         assert "lora_path" not in calls("/generate")[0]
 
-    @pytest.mark.parametrize("config", [{"use_rslora": True}, {"use_dora": True}, {"modules_to_save": ["lm_head"]}])
+    @pytest.mark.parametrize(
+        "config", [{"use_rslora": True}, {"use_dora": True}, {"modules_to_save": ["lm_head"]}]
+    )
     def test_adapter_features_sglang_cannot_serve_raise(self, server, tmp_path, config):
         FakeSGLang.enable_lora = True
         with pytest.raises(NotImplementedError, match="without --enable-lora"):
-            SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(lora_model(**config)))
+            SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(
+                make_trainer(lora_model(**config))
+            )
 
     def test_base_model_mismatch_raises(self, server, tmp_path):
         FakeSGLang.enable_lora = True
