@@ -70,7 +70,7 @@ trainer = create_rl_trainer(
     max_samples=2000,
     column_mapping={"question": "prompt", "answer": "response"},
     system_prompt=(
-        "Solve the math problem step by step. "
+        "Solve the math problem with brief step-by-step reasoning. "
         "End with 'The answer is: <number>'."
     ),
     algorithm="grpo",
@@ -80,7 +80,7 @@ trainer = create_rl_trainer(
     sglang_server_url=args.sglang_url,
     max_steps=args.max_steps,
     batch_size=8,
-    gradient_accumulation_steps=4,  # 32 completions = 4 prompts x 8 per optimizer step
+    gradient_accumulation_steps=8,  # 64 completions = 8 prompts x 8 per optimizer step
     num_generations=8,
     learning_rate=3e-5,
     beta=0.0,
