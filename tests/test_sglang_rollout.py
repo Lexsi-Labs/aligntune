@@ -15,8 +15,8 @@ from types import SimpleNamespace
 import pytest
 import torch
 
+from aligntune.backends.trl.rl.rollout import sglang_rollout
 from aligntune.backends.trl.rl.rollout.sglang_rollout import (
-    WEIGHTS_FILE,
     SGLangClient,
     SGLangRollout,
     export_policy_state_dict,
@@ -30,6 +30,8 @@ class FakeSGLang(BaseHTTPRequestHandler):
 
     calls = []
     weight_update_ok = True
+    enable_lora = False
+    model_path = "tiny-model"
 
     def log_message(self, *args):
         pass
@@ -45,7 +47,9 @@ class FakeSGLang(BaseHTTPRequestHandler):
     def do_GET(self):
         self.calls.append((self.path, None))
         if self.path == "/model_info":
-            return self._reply(200, {"model_path": "tiny-model"})
+            return self._reply(200, {"model_path": self.model_path})
+        if self.path == "/server_info":
+            return self._reply(200, {"enable_lora": self.enable_lora})
         self._reply(404, {"error": "not found"})
 
     def do_POST(self):
@@ -57,15 +61,39 @@ class FakeSGLang(BaseHTTPRequestHandler):
             n = payload["sampling_params"].get("n", 1)
             return self._reply(200, [{"output_ids": [len(ids), EOS]} for ids in payload["input_ids"] for _ in range(n)])
         if self.path == "/update_weights_from_disk":
-            ok = self.weight_update_ok and os.path.exists(os.path.join(payload["model_path"], WEIGHTS_FILE))
+            ok = self.weight_update_ok and bool(shards(payload["model_path"]))
             return self._reply(200, {"success": ok, "message": "ok" if ok else "load failed"})
+        if self.path == "/load_lora_adapter":
+            ok = os.path.exists(os.path.join(payload["lora_path"], "adapter_model.safetensors"))
+            return self._reply(200 if ok else 400, {"success": ok})
+        if self.path == "/unload_lora_adapter":
+            return self._reply(200, {"success": True})
         self._reply(404, {"error": "not found"})
+
+
+def shards(directory):
+    return sorted(f for f in os.listdir(directory) if f.startswith("model-") and f.endswith(".safetensors"))
+
+
+def load_shards(directory):
+    from safetensors.torch import load_file
+
+    state = {}
+    for name in shards(directory):
+        state.update(load_file(os.path.join(str(directory), name)))
+    return state
+
+
+def calls(path):
+    return [p for called, p in FakeSGLang.calls if called == path]
 
 
 @pytest.fixture
 def server():
     FakeSGLang.calls = []
     FakeSGLang.weight_update_ok = True
+    FakeSGLang.enable_lora = False
+    FakeSGLang.model_path = "tiny-model"
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), FakeSGLang)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
@@ -140,6 +168,14 @@ class TestSGLangRollout:
         with pytest.raises(ConnectionError):
             SGLangRollout(unused_url(), sync_dir=str(tmp_path), timeout=2)
 
+    def test_default_sync_dir_is_removed_with_the_rollout(self, server):
+        rollout = SGLangRollout(server)
+        sync_dir = rollout.sync_dir
+        rollout(["a"], make_trainer(tiny_model()))  # writes the weights
+        assert shards(sync_dir)
+        del rollout
+        assert not os.path.exists(sync_dir)
+
     def test_rollout_returns_trl_contract(self, server, tmp_path):
         rollout = SGLangRollout(server, sync_dir=str(tmp_path))
         out = rollout(["ab", "ab", "abcd", "abcd"], make_trainer(tiny_model()))
@@ -184,12 +220,22 @@ class TestSGLangRollout:
         assert len(trainer.metrics["rollout/sglang_tokens_per_s"]) == 3
 
     def test_sync_writes_loadable_full_model_weights(self, server, tmp_path):
-        from safetensors.torch import load_file
-
         model = tiny_model(tie=False)
         SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(model))
-        saved = load_file(str(tmp_path / WEIGHTS_FILE))
+        saved = load_shards(tmp_path)
         expected = dict(model.named_parameters())
+        assert saved.keys() == expected.keys()
+        assert all(torch.equal(saved[k], expected[k]) for k in saved)
+
+    def test_full_sync_is_sharded_and_replaces_stale_shards(self, server, tmp_path, monkeypatch):
+        monkeypatch.setattr(sglang_rollout, "SHARD_BYTES", 1024)  # force many shards
+        (tmp_path / "model-99999.safetensors").write_bytes(b"stale")
+        model = tiny_model(tie=False)
+        SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(model))
+        assert len(shards(tmp_path)) > 1
+        assert "model-99999.safetensors" not in shards(tmp_path)
+        expected = dict(model.named_parameters())
+        saved = load_shards(tmp_path)
         assert saved.keys() == expected.keys()
         assert all(torch.equal(saved[k], expected[k]) for k in saved)
 
@@ -208,8 +254,6 @@ class TestExportPolicyStateDict:
 
     def test_peft_export_uses_base_names_and_merged_weights(self, server, tmp_path):
         peft = pytest.importorskip("peft")
-        from safetensors.torch import load_file
-
         base = tiny_model(tie=False)
         base_names = {n for n, _ in base.named_parameters()}
         lora = peft.get_peft_model(
@@ -220,9 +264,75 @@ class TestExportPolicyStateDict:
         delta = (q_layer.lora_B["default"].weight @ q_layer.lora_A["default"].weight) * q_layer.scaling["default"]
 
         SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(lora))
-        saved = load_file(str(tmp_path / WEIGHTS_FILE))
+        saved = load_shards(tmp_path)
 
         assert set(saved) == base_names
         q = "model.layers.0.self_attn.q_proj.weight"
         assert torch.allclose(saved[q], q_before + delta.detach(), atol=1e-6)  # adapter folded in
         assert torch.equal(q_layer.base_layer.weight, q_before)  # trainer's model is not mutated
+
+
+def lora_model(**config):
+    peft = pytest.importorskip("peft")
+    base = tiny_model(tie=False)
+    base.config._name_or_path = "org/tiny-model"
+    defaults = dict(r=4, lora_alpha=8, target_modules=["q_proj", "v_proj"], init_lora_weights=False)
+    return peft.get_peft_model(base, peft.LoraConfig(**{**defaults, **config}))
+
+
+class TestAdapterSync:
+    """Server launched with --enable-lora + LoRA policy: only the adapter is synced."""
+
+    def test_adapter_is_hot_loaded_and_previous_version_unloaded(self, server, tmp_path):
+        FakeSGLang.enable_lora = True
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        trainer = make_trainer(lora_model())
+        rollout(["a"], trainer)
+        trainer.state.global_step = 1
+        rollout(["a"], trainer)
+
+        assert [p["lora_name"] for p in calls("/load_lora_adapter")] == ["aligntune-policy-v1", "aligntune-policy-v2"]
+        assert calls("/unload_lora_adapter") == [{"lora_name": "aligntune-policy-v1"}]
+        assert [p["lora_path"] for p in calls("/generate")] == ["aligntune-policy-v1", "aligntune-policy-v2"]
+        assert calls("/update_weights_from_disk") == []
+        assert shards(tmp_path) == []  # no full-weight copy written
+
+    def test_full_model_policy_uses_full_sync_even_on_lora_server(self, server, tmp_path):
+        FakeSGLang.enable_lora = True
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        rollout(["a"], make_trainer(tiny_model()))
+        assert len(calls("/update_weights_from_disk")) == 1
+        assert "lora_path" not in calls("/generate")[0]
+
+    @pytest.mark.parametrize("config", [{"use_rslora": True}, {"use_dora": True}, {"modules_to_save": ["lm_head"]}])
+    def test_adapter_features_sglang_cannot_serve_raise(self, server, tmp_path, config):
+        FakeSGLang.enable_lora = True
+        with pytest.raises(NotImplementedError, match="without --enable-lora"):
+            SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(lora_model(**config)))
+
+    def test_base_model_mismatch_raises(self, server, tmp_path):
+        FakeSGLang.enable_lora = True
+        FakeSGLang.model_path = "org/other-model"
+        with pytest.raises(ValueError, match="base model"):
+            SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(lora_model()))
+
+
+class TestNoSilentFallback:
+    def test_trainers_that_ignore_sglang_raise(self):
+        from aligntune.backends.trl.rl.pace.pace import TRLPaceTrainer
+        from aligntune.core.rl.trainer_base import RLTrainerBase, check_rollout_backend_supported
+
+        config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
+        for trainer_cls in (RLTrainerBase, TRLPaceTrainer):
+            with pytest.raises(ValueError, match="not supported"):
+                check_rollout_backend_supported(trainer_cls, config)
+
+    def test_trl_grpo_family_accepts_sglang(self):
+        from aligntune.backends.trl.rl.dapo.dapo import TRLDAPOTrainer
+        from aligntune.backends.trl.rl.gbmpo.gbmpo import TRLGBMPOTrainer
+        from aligntune.backends.trl.rl.grpo.grpo import TRLGRPOTrainer
+        from aligntune.core.rl.trainer_base import check_rollout_backend_supported
+
+        config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
+        for trainer_cls in (TRLGRPOTrainer, TRLDAPOTrainer, TRLGBMPOTrainer):
+            check_rollout_backend_supported(trainer_cls, config)

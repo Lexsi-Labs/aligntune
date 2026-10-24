@@ -8,27 +8,36 @@ public ``rollout_func`` hook instead of patching trainer internals:
   the token ids to a running SGLang server (``POST /generate``). Each GRPO
   group goes out as one prompt with ``n=num_generations``, so RadixAttention
   prefills the prompt once and shares its KV cache across the group.
-- Weight sync: after every optimizer step the policy weights (LoRA deltas
-  folded in) are written as one safetensors file and the server reloads them
-  with ``POST /update_weights_from_disk``, which also flushes the prefix cache.
+- Weight sync, once per optimizer step, picked from what the server supports:
+  * LoRA policy + server started with ``--enable-lora``: only the adapter is
+    saved and hot-loaded (``/load_lora_adapter``), then the previous version
+    is unloaded. Cheap (adapter-sized I/O) and no base weights touched.
+  * Otherwise: full weights (LoRA deltas folded in) are streamed to sharded
+    safetensors files with bounded host memory and reloaded via
+    ``/update_weights_from_disk``, which also flushes the prefix cache.
 
 The server runs as a separate process (it can live in its own venv), started
 with e.g. ``python -m sglang.launch_server --model-path <same model>``. It must
-see the trainer's filesystem, so it has to run on the same host.
+see the trainer's filesystem, so it has to run on the same host. Tested with
+SGLang 0.5.10.post1 and 0.5.22; only endpoints present in both are used.
 """
 
 import logging
 import os
+import shutil
 import tempfile
 import time
-from typing import Any, Dict, List, Optional
+import weakref
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import requests
 import torch
 
 logger = logging.getLogger(__name__)
 
-WEIGHTS_FILE = "model.safetensors"
+WEIGHTS_PREFIX = "model-"
+# Host-RAM bound for full-weight sync: each shard is serialized in memory once.
+SHARD_BYTES = 1 << 30
 
 
 class SGLangClient:
@@ -56,13 +65,27 @@ class SGLangClient:
     def get_model_info(self) -> Dict[str, Any]:
         return self._request("GET", "/model_info")
 
-    def generate(self, input_ids: List[List[int]], sampling_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def generate(
+        self, input_ids: List[List[int]], sampling_params: Dict[str, Any], lora_name: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Generate ``sampling_params.get("n", 1)`` samples per prompt, grouped by prompt."""
-        outputs = self._request("POST", "/generate", {"input_ids": input_ids, "sampling_params": sampling_params})
+        payload = {"input_ids": input_ids, "sampling_params": sampling_params}
+        if lora_name is not None:
+            payload["lora_path"] = lora_name  # a loaded adapter's name, applied to every prompt
+        outputs = self._request("POST", "/generate", payload)
         expected = len(input_ids) * sampling_params.get("n", 1)
         if len(outputs) != expected:
             raise RuntimeError(f"SGLang returned {len(outputs)} outputs, expected {expected}")
         return outputs
+
+    def get_server_info(self) -> Dict[str, Any]:
+        return self._request("GET", "/server_info")
+
+    def load_lora_adapter(self, name: str, path: str) -> None:
+        self._request("POST", "/load_lora_adapter", {"lora_name": name, "lora_path": path})
+
+    def unload_lora_adapter(self, name: str) -> None:
+        self._request("POST", "/unload_lora_adapter", {"lora_name": name})
 
     def update_weights_from_disk(self, model_path: str) -> None:
         result = self._request("POST", "/update_weights_from_disk", {"model_path": model_path})
@@ -76,37 +99,94 @@ def _base_name(name: str) -> str:
 
 
 @torch.no_grad()
-def export_policy_state_dict(model) -> Dict[str, torch.Tensor]:
-    """Return the policy weights under the base model's HF parameter names.
+def iter_policy_weights(model) -> Iterator[Tuple[str, torch.Tensor]]:
+    """Yield the policy weights under the base model's HF parameter names.
 
-    LoRA deltas are added to copies of the base weights (computed in fp32, cast
-    back), so the trainer's model is never merged/unmerged in place: repeated
-    in-place merges would accumulate bf16 rounding error in the frozen base.
+    LoRA deltas are folded into copies of the base weights one module at a
+    time (fp32 math, cast back), so the trainer's model is never merged in
+    place (repeated in-place merges would pile bf16 rounding error into the
+    frozen base) and at most one merged copy is alive per yielded tensor.
     ``named_parameters`` skips tied duplicates (e.g. lm_head), which
     safetensors refuses to save twice; SGLang re-ties them on load.
     """
     if not hasattr(model, "peft_config"):
-        return {name: param.detach().contiguous() for name, param in model.named_parameters()}
+        for name, param in model.named_parameters():
+            yield name, param.detach().contiguous()
+        return
 
     adapter_prefix = getattr(model, "prefix", "lora_")
-    state = {}
+    lora_layers = {
+        name + ".base_layer.weight": module
+        for name, module in model.named_modules()
+        if hasattr(module, "get_delta_weight") and hasattr(module, "base_layer")
+    }
     for name, param in model.named_parameters():
         if adapter_prefix in name or "original_module" in name:
             continue
-        state[_base_name(name)] = param.detach()
-    for module_name, module in model.named_modules():
-        if not (hasattr(module, "get_delta_weight") and hasattr(module, "base_layer")):
-            continue
-        key = _base_name(module_name) + ".weight"
-        merged = state[key].float()
-        for adapter in module.active_adapters:
-            if adapter not in module.lora_A and adapter not in getattr(module, "lora_embedding_A", {}):
-                continue
-            if getattr(module, "use_dora", {}).get(adapter, False):
-                raise NotImplementedError("rollout_backend='sglang' does not support DoRA adapters yet")
-            merged = merged + module.get_delta_weight(adapter).float()
-        state[key] = merged.to(state[key].dtype)
-    return {name: tensor.contiguous() for name, tensor in state.items()}
+        weight = param.detach()
+        module = lora_layers.get(name)
+        if module is not None:
+            merged = weight.float()
+            for adapter in module.active_adapters:
+                if adapter not in module.lora_A and adapter not in getattr(module, "lora_embedding_A", {}):
+                    continue
+                if getattr(module, "use_dora", {}).get(adapter, False):
+                    raise NotImplementedError("rollout_backend='sglang' does not support DoRA adapters yet")
+                merged = merged + module.get_delta_weight(adapter).float()
+            weight = merged.to(weight.dtype)
+        yield _base_name(name), weight.contiguous()
+
+
+def export_policy_state_dict(model) -> Dict[str, torch.Tensor]:
+    """Materialize :func:`iter_policy_weights` (tests and small models only)."""
+    return dict(iter_policy_weights(model))
+
+
+def write_sharded_safetensors(weights: Iterator[Tuple[str, torch.Tensor]], directory: str) -> List[str]:
+    """Write weights as ``model-XXXXX.safetensors`` shards of about ``SHARD_BYTES``.
+
+    Peak host memory is about one shard: tensors stay on their device until
+    their shard is serialized. Stale shards from a previous sync are removed.
+    """
+    from safetensors.torch import save_file
+
+    for old in os.listdir(directory):
+        if old.startswith(WEIGHTS_PREFIX) and old.endswith(".safetensors"):
+            os.remove(os.path.join(directory, old))
+    paths, shard, size = [], {}, 0
+
+    def flush():
+        path = os.path.join(directory, f"{WEIGHTS_PREFIX}{len(paths):05d}.safetensors")
+        save_file(shard, path)
+        paths.append(path)
+
+    for name, tensor in weights:
+        shard[name] = tensor
+        size += tensor.numel() * tensor.element_size()
+        if size >= SHARD_BYTES:
+            flush()
+            shard, size = {}, 0
+    if shard:
+        flush()
+    return paths
+
+
+def check_adapter_supported(peft_config) -> None:
+    """Raise for LoRA features SGLang's adapter loader would silently get wrong."""
+    peft_type = str(getattr(peft_config, "peft_type", ""))
+    if "LORA" not in peft_type.upper():
+        raise NotImplementedError(f"SGLang adapter sync supports LoRA only, got {peft_type}")
+    unsupported = {
+        "use_rslora": getattr(peft_config, "use_rslora", False),  # SGLang scales by alpha / r
+        "use_dora": getattr(peft_config, "use_dora", False),
+        "modules_to_save": bool(getattr(peft_config, "modules_to_save", None)),
+    }
+    bad = [k for k, v in unsupported.items() if v]
+    if bad:
+        raise NotImplementedError(
+            f"SGLang LoRA adapters do not support {bad}. Start the SGLang server without "
+            "--enable-lora to sync merged full weights instead."
+        )
 
 
 class SGLangRollout:
@@ -123,13 +203,24 @@ class SGLangRollout:
         self.client = SGLangClient(server_url, timeout=timeout)
         info = self.client.get_model_info()  # fails fast if the server is down
         self.server_model = info.get("model_path")
-        shm = "/dev/shm" if os.path.isdir("/dev/shm") else None
-        self.sync_dir = sync_dir or tempfile.mkdtemp(prefix="aligntune-sglang-", dir=shm)
+        # Feature detection: adapter-only sync needs a server launched with --enable-lora.
+        self.server_lora = bool(self.client.get_server_info().get("enable_lora"))
+        self.lora_name: Optional[str] = None
+        self._version = 0
+        if sync_dir is None:
+            shm = "/dev/shm" if os.path.isdir("/dev/shm") else None
+            sync_dir = tempfile.mkdtemp(prefix="aligntune-sglang-", dir=shm)
+            # Synced weights live here (RAM-backed in /dev/shm); remove them with the rollout or at exit.
+            weakref.finalize(self, shutil.rmtree, sync_dir, True)
+        self.sync_dir = sync_dir
         os.makedirs(self.sync_dir, exist_ok=True)
         # None forces a sync before the first rollout, so generation is on-policy
         # even if the server was started from a different checkpoint of the model.
         self._synced_step: Optional[int] = None
-        logger.info(f"SGLang rollout backend: server={server_url} model={self.server_model} sync_dir={self.sync_dir}")
+        logger.info(
+            f"SGLang rollout backend: server={server_url} model={self.server_model} "
+            f"lora={self.server_lora} sync_dir={self.sync_dir}"
+        )
 
     def __call__(self, prompts: list, trainer) -> Dict[str, Any]:
         if self._synced_step != trainer.state.global_step:
@@ -167,8 +258,8 @@ class SGLangRollout:
                 unique.append(ids)
                 counts.append(1)
         if len(set(counts)) == 1 and counts[0] > 1:
-            return self.client.generate(unique, {**sampling_params, "n": counts[0]})
-        return self.client.generate(prompt_ids, sampling_params)
+            return self.client.generate(unique, {**sampling_params, "n": counts[0]}, self.lora_name)
+        return self.client.generate(prompt_ids, sampling_params, self.lora_name)
 
     @staticmethod
     def sampling_params(trainer) -> Dict[str, Any]:
@@ -186,8 +277,6 @@ class SGLangRollout:
 
     def sync_weights(self, trainer) -> None:
         """Push the current policy weights to the SGLang server."""
-        from safetensors.torch import save_file
-
         if trainer.is_fsdp_enabled:
             raise NotImplementedError("rollout_backend='sglang' does not support FSDP yet")
 
@@ -196,7 +285,38 @@ class SGLangRollout:
         # gather_params is a no-op outside DeepSpeed ZeRO-3.
         with trainer._dist.gather_params(list(model.parameters())):
             if trainer.accelerator.is_main_process:
-                save_file(export_policy_state_dict(model), os.path.join(self.sync_dir, WEIGHTS_FILE))
-                self.client.update_weights_from_disk(self.sync_dir)
+                if self.server_lora and hasattr(model, "peft_config"):
+                    self._sync_adapter(model)
+                else:
+                    write_sharded_safetensors(iter_policy_weights(model), self.sync_dir)
+                    self.client.update_weights_from_disk(self.sync_dir)
         trainer.accelerator.wait_for_everyone()
         trainer._log_metric("rollout/sglang_sync_s", time.perf_counter() - start)
+
+    def _check_same_base(self, policy_base: Optional[str]) -> None:
+        """Adapter sync never touches base weights, so the server must serve the policy's base model."""
+        same = lambda a, b: a.rstrip("/").split("/")[-1].lower() == b.rstrip("/").split("/")[-1].lower()
+        if policy_base and self.server_model and not same(policy_base, self.server_model):
+            raise ValueError(
+                f"SGLang serves '{self.server_model}' but the LoRA policy's base model is '{policy_base}'. "
+                "Launch the server with --model-path set to the policy's base model."
+            )
+
+    def _sync_adapter(self, model) -> None:
+        """Hot-load the current LoRA adapter under a new name, then drop the old one."""
+        adapter = model.active_adapter if isinstance(model.active_adapter, str) else model.active_adapter[0]
+        check_adapter_supported(model.peft_config[adapter])
+        if self.lora_name is None:
+            base = model.peft_config[adapter].base_model_name_or_path
+            self._check_same_base(base or model.get_base_model().config.name_or_path)
+        self._version += 1
+        name = f"aligntune-policy-v{self._version}"
+        # Two alternating dirs: the previous adapter's files stay intact until it is unloaded.
+        path = os.path.join(self.sync_dir, f"adapter-{self._version % 2}")
+        model.save_pretrained(path, selected_adapters=[adapter], safe_serialization=True)
+        if adapter != "default":  # PEFT nests non-default adapters in a subdir
+            path = os.path.join(path, adapter)
+        self.client.load_lora_adapter(name, path)
+        previous, self.lora_name = self.lora_name, name
+        if previous is not None:
+            self.client.unload_lora_adapter(previous)

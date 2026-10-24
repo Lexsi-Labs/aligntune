@@ -43,6 +43,7 @@ class TRLGRPOTrainer(TrainerBase):
 
     TASK_TYPE = "grpo"  # Used by base class setup_data()
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
 
     def __init__(self, config: UnifiedConfig):
         super().__init__(config)
