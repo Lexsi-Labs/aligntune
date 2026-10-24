@@ -4,7 +4,7 @@ Rollout backend abstraction for efficient generation during RL training.
 This module provides a pluggable system for different generation backends:
 - HF: Standard HuggingFace transformers (baseline)
 - vLLM: High-throughput inference engine (5-10x faster)
-- SGLang: Structured generation (future)
+- SGLang: server-mode GRPO rollouts via TRL rollout_func (backends/trl/rl/rollout/sglang_rollout.py)
 
 vLLM Rollout Backend
 """
