@@ -28,7 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--rollout-backend", choices=["hf", "sglang"], default="sglang")
 parser.add_argument("--sglang-url", default="http://localhost:30000")
 parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
-parser.add_argument("--max-steps", type=int, default=40)
+parser.add_argument("--max-steps", type=int, default=60)
 parser.add_argument("--output-dir", default=None)
 args = parser.parse_args()
 output_dir = args.output_dir or f"output/grpo_gsm8k_{args.rollout_backend}"
@@ -79,10 +79,10 @@ trainer = create_rl_trainer(
     rollout_backend=args.rollout_backend,
     sglang_server_url=args.sglang_url,
     max_steps=args.max_steps,
-    batch_size=16,
-    gradient_accumulation_steps=2,  # 32 completions = 4 prompts x 8 per optimizer step
+    batch_size=8,
+    gradient_accumulation_steps=4,  # 32 completions = 4 prompts x 8 per optimizer step
     num_generations=8,
-    learning_rate=1e-5,
+    learning_rate=3e-5,
     beta=0.0,
     max_completion_length=256,
     temperature=1.0,
