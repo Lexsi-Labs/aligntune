@@ -27,6 +27,7 @@ import os
 import shutil
 import tempfile
 import time
+import uuid
 import weakref
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
@@ -229,6 +230,8 @@ class SGLangRollout:
         self.server_lora = bool(self.client.get_server_info().get("enable_lora"))
         self.lora_name: Optional[str] = None
         self._version = 0
+        # Unique per run: a long-lived server may still hold adapters from an earlier run.
+        self.adapter_prefix = f"aligntune-{uuid.uuid4().hex[:8]}"
         if sync_dir is None:
             shm = "/dev/shm" if os.path.isdir("/dev/shm") else None
             sync_dir = tempfile.mkdtemp(prefix="aligntune-sglang-", dir=shm)
@@ -351,7 +354,7 @@ class SGLangRollout:
             base = model.peft_config[adapter].base_model_name_or_path
             self._check_same_base(base or model.get_base_model().config.name_or_path)
         self._version += 1
-        name = f"aligntune-policy-v{self._version}"
+        name = f"{self.adapter_prefix}-v{self._version}"
         # Two alternating dirs: the previous adapter's files stay intact until it is unloaded.
         path = os.path.join(self.sync_dir, f"adapter-{self._version % 2}")
         model.save_pretrained(path, selected_adapters=[adapter], safe_serialization=True)

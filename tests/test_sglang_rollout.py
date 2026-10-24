@@ -322,17 +322,20 @@ class TestAdapterSync:
         trainer.state.global_step = 1
         rollout(["a"], trainer)
 
-        assert [p["lora_name"] for p in calls("/load_lora_adapter")] == [
-            "aligntune-policy-v1",
-            "aligntune-policy-v2",
-        ]
-        assert calls("/unload_lora_adapter") == [{"lora_name": "aligntune-policy-v1"}]
-        assert [p["lora_path"] for p in calls("/generate")] == [
-            "aligntune-policy-v1",
-            "aligntune-policy-v2",
-        ]
+        v1, v2 = f"{rollout.adapter_prefix}-v1", f"{rollout.adapter_prefix}-v2"
+        assert [p["lora_name"] for p in calls("/load_lora_adapter")] == [v1, v2]
+        assert calls("/unload_lora_adapter") == [{"lora_name": v1}]
+        assert [p["lora_path"] for p in calls("/generate")] == [v1, v2]
         assert calls("/update_weights_from_disk") == []
         assert shards(tmp_path) == []  # no full-weight copy written
+
+    def test_runs_sharing_a_server_use_distinct_adapter_names(self, server, tmp_path):
+        # The last adapter of a finished run stays loaded; a new run must not collide with it.
+        FakeSGLang.enable_lora = True
+        for _ in range(2):
+            SGLangRollout(server, sync_dir=str(tmp_path))(["a"], make_trainer(lora_model()))
+        first, second = (p["lora_name"] for p in calls("/load_lora_adapter"))
+        assert first != second
 
     def test_adapter_mode_prefills_groups_once_without_n(self, server, tmp_path):
         # SGLang 0.5.10 leaks the adapter's ref count on n > 1 requests, so unload would hang.
@@ -345,7 +348,7 @@ class TestAdapterSync:
         assert warm["sampling_params"]["max_new_tokens"] == 0
         assert sample["input_ids"] == [[1, 1], [1, 1], [1] * 4, [1] * 4]
         assert "n" not in sample["sampling_params"]
-        assert warm["lora_path"] == sample["lora_path"] == "aligntune-policy-v1"
+        assert warm["lora_path"] == sample["lora_path"] == f"{rollout.adapter_prefix}-v1"
         assert out["completion_ids"] == [[2, EOS], [2, EOS], [4, EOS], [4, EOS]]
 
     def test_full_model_policy_uses_full_sync_even_on_lora_server(self, server, tmp_path):
