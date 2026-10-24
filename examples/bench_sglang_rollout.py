@@ -158,11 +158,13 @@ for r in range(args.rounds + 1):  # round 0 is warmup
     outputs = rollout._generate_groups(prompt_ids, params)
     sg_s = time.perf_counter() - t
     sg_tokens = sum(len(o["output_ids"]) for o in outputs)
+    cached = sum(o["meta_info"]["cached_tokens"] for o in outputs)
+    prompt_tokens = sum(o["meta_info"]["prompt_tokens"] for o in outputs)
 
     print(
         f"round {r}: hf {hf_s:.2f}s {hf_tokens / hf_s:.0f} tok/s | "
         f"sglang {sg_s:.2f}s {sg_tokens / sg_s:.0f} tok/s "
-        f"| sync {sync_s:.2f}s +{sync_rss:.0f} MiB RSS",
+        f"| sync {sync_s:.2f}s +{sync_rss:.0f} MiB RSS | prompt cache {cached}/{prompt_tokens}",
         flush=True,
     )
     if r:

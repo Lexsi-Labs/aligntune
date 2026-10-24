@@ -8,6 +8,7 @@ without sglang installed.
 import json
 import os
 import threading
+import time
 from contextlib import nullcontext
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import SimpleNamespace
@@ -32,6 +33,7 @@ class FakeSGLang(BaseHTTPRequestHandler):
     weight_update_ok = True
     enable_lora = False
     model_path = "tiny-model"
+    unload_delay_s = 0.0
 
     def log_message(self, *args):
         pass
@@ -56,7 +58,7 @@ class FakeSGLang(BaseHTTPRequestHandler):
         payload = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         self.calls.append((self.path, payload))
         if self.path == "/generate":
-            if payload["sampling_params"].get("max_new_tokens", 1) <= 0:
+            if payload["sampling_params"].get("max_new_tokens", 1) < 0:
                 return self._reply(400, {"error": "bad max_new_tokens"})
             n = payload["sampling_params"].get("n", 1)
             return self._reply(
@@ -70,6 +72,7 @@ class FakeSGLang(BaseHTTPRequestHandler):
             ok = os.path.exists(os.path.join(payload["lora_path"], "adapter_model.safetensors"))
             return self._reply(200 if ok else 400, {"success": ok})
         if self.path == "/unload_lora_adapter":
+            time.sleep(self.unload_delay_s)
             return self._reply(200, {"success": True})
         self._reply(404, {"error": "not found"})
 
@@ -99,6 +102,7 @@ def server():
     FakeSGLang.weight_update_ok = True
     FakeSGLang.enable_lora = False
     FakeSGLang.model_path = "tiny-model"
+    FakeSGLang.unload_delay_s = 0.0
     httpd = ThreadingHTTPServer(("127.0.0.1", 0), FakeSGLang)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
@@ -163,7 +167,12 @@ class TestSGLangClient:
 
     def test_http_error_is_raised_not_swallowed(self, server):
         with pytest.raises(RuntimeError, match="HTTP 400"):
-            SGLangClient(server).generate([[1, 2]], {"max_new_tokens": 0})
+            SGLangClient(server).generate([[1, 2]], {"max_new_tokens": -1})
+
+    def test_stuck_server_raises_instead_of_waiting_forever(self, server):
+        FakeSGLang.unload_delay_s = 2.0
+        with pytest.raises(RuntimeError, match="did not answer within"):
+            SGLangClient(server, timeout=0.2).unload_lora_adapter("policy")
 
     def test_generate_returns_one_output_per_prompt_in_order(self, server):
         outputs = SGLangClient(server).generate([[1], [1, 1, 1]], {"max_new_tokens": 4})
@@ -324,6 +333,20 @@ class TestAdapterSync:
         ]
         assert calls("/update_weights_from_disk") == []
         assert shards(tmp_path) == []  # no full-weight copy written
+
+    def test_adapter_mode_prefills_groups_once_without_n(self, server, tmp_path):
+        # SGLang 0.5.10 leaks the adapter's ref count on n > 1 requests, so unload would hang.
+        FakeSGLang.enable_lora = True
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        out = rollout(["ab", "ab", "abcd", "abcd"], make_trainer(lora_model()))
+
+        warm, sample = calls("/generate")
+        assert warm["input_ids"] == [[1, 1], [1] * 4]
+        assert warm["sampling_params"]["max_new_tokens"] == 0
+        assert sample["input_ids"] == [[1, 1], [1, 1], [1] * 4, [1] * 4]
+        assert "n" not in sample["sampling_params"]
+        assert warm["lora_path"] == sample["lora_path"] == "aligntune-policy-v1"
+        assert out["completion_ids"] == [[2, EOS], [2, EOS], [4, EOS], [4, EOS]]
 
     def test_full_model_policy_uses_full_sync_even_on_lora_server(self, server, tmp_path):
         FakeSGLang.enable_lora = True

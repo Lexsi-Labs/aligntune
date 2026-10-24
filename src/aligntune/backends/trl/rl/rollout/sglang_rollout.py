@@ -52,6 +52,11 @@ class SGLangClient:
         url = f"{self.base_url}{path}"
         try:
             response = self.session.request(method, url, json=payload, timeout=self.timeout)
+        except requests.Timeout as e:
+            raise RuntimeError(
+                f"SGLang {path} did not answer within {self.timeout:.0f}s; the server is up "
+                "but stuck, check its log."
+            ) from e
         except requests.RequestException as e:
             raise ConnectionError(
                 f"SGLang server at {self.base_url} is unreachable ({e}). Start it with "
@@ -264,7 +269,7 @@ class SGLangRollout:
     def _generate_groups(
         self, prompt_ids: List[List[int]], sampling_params: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """Send each GRPO group as one prompt with ``n`` samples.
+        """Generate TRL's repeated prompts, prefilling each GRPO group's prompt once.
 
         TRL repeats every prompt ``num_generations`` times back to back. SGLang
         only shares the prompt prefill across samples requested via ``n``
@@ -278,8 +283,13 @@ class SGLangRollout:
             else:
                 unique.append(ids)
                 counts.append(1)
-        if len(set(counts)) == 1 and counts[0] > 1:
-            return self.client.generate(unique, {**sampling_params, "n": counts[0]}, self.lora_name)
+        grouped = len(set(counts)) == 1 and counts[0] > 1
+        if grouped and self.lora_name is None:
+            return self.client.generate(unique, {**sampling_params, "n": counts[0]})
+        if grouped:
+            # SGLang 0.5.10 never releases a LoRA adapter used with n > 1, so its unload hangs.
+            # Prefill each group's prompt once into the prefix cache, then send the duplicates.
+            self.client.generate(unique, {**sampling_params, "max_new_tokens": 0}, self.lora_name)
         return self.client.generate(prompt_ids, sampling_params, self.lora_name)
 
     @staticmethod
