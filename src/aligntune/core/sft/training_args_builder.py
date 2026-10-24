@@ -155,6 +155,14 @@ def build_sft_config(
     if dataset_kwargs:
         config_dict["dataset_kwargs"] = dataset_kwargs
 
+    # Must be passed at construction: Unsloth's patched SFTConfig.__init__ turns a
+    # None dataset_num_proc into cpu_count + 4, so the backfill below never sees it.
+    dataset_num_proc = (getattr(train_cfg, 'dataset_num_proc', None) if train_cfg else None) or (
+        getattr(dataset_cfg, 'dataset_num_proc', None) if dataset_cfg else None
+    )
+    if dataset_num_proc is not None:
+        config_dict["dataset_num_proc"] = dataset_num_proc
+
     # 9. Padding-free batching
     # Explicitly set padding_free (defaults to False) so it doesn't fall back to
     # None, which Unsloth's SFTTrainer patch treats as "auto-enable". Auto-enabling
