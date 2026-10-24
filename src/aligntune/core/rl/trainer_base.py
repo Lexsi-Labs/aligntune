@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 def check_rollout_backend_supported(trainer_cls, config) -> None:
     """Fail loudly instead of silently generating with transformers."""
     train = getattr(config, "train", None)
-    if getattr(train, "rollout_backend", None) == "sglang" and not trainer_cls.SUPPORTS_SGLANG_ROLLOUT:
-        raise ValueError(
-            f"rollout_backend='sglang' is not supported by {trainer_cls.__name__}. Use backend='trl' with "
-            "algorithm grpo, gspo, dapo, drgrpo or gbmpo, or set rollout_backend='hf'."
-        )
+    if getattr(train, "rollout_backend", None) != "sglang" or trainer_cls.SUPPORTS_SGLANG_ROLLOUT:
+        return
+    raise ValueError(
+        f"rollout_backend='sglang' is not supported by {trainer_cls.__name__}. Use backend='trl' "
+        "with algorithm grpo, gspo, dapo, drgrpo or gbmpo, or set rollout_backend='hf'."
+    )
 
 
 class RLTrainerBase(UnifiedTrainerBase):
