@@ -4,7 +4,7 @@ against the default transformers generation path.
 
 1. Start SGLang (any venv; it only talks HTTP + reads the weight-sync dir):
      python -m sglang.launch_server --model-path Qwen/Qwen2.5-0.5B-Instruct \
-         --port 30000 --mem-fraction-static 0.25 --skip-tokenizer-init
+         --port 30000 --mem-fraction-static 0.25 --skip-tokenizer-init --sleep-on-idle
 2. Train:
      python examples/trl_grpo_sglang_gsm8k.py --rollout-backend sglang
      python examples/trl_grpo_sglang_gsm8k.py --rollout-backend hf   # baseline
