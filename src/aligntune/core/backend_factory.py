@@ -1471,7 +1471,7 @@ def create_rl_trainer(
             # Rollout backend: previously never forwarded, so the Python API always used 'hf'.
             rollout_backend=kwargs.get('rollout_backend', 'hf'),
             vllm_tensor_parallel_size=kwargs.get('vllm_tensor_parallel_size', 1),
-            sglang_server_url=kwargs.get('sglang_server_url', 'http://localhost:30000'),
+            sglang_server_url=kwargs.get('sglang_server_url', 'http://127.0.0.1:30000'),
             sglang_sync_dir=kwargs.get('sglang_sync_dir'),
             gbmpo_l2_coefficient=kwargs.get('gbmpo_l2_coefficient', 0.0001),
             gbmpo_divergence_type=kwargs.get('gbmpo_divergence_type'),

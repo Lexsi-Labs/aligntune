@@ -4,7 +4,7 @@ against the default transformers generation path.
 
 1. Start SGLang (any venv; it only talks HTTP + reads the weight-sync dir):
      python -m sglang.launch_server --model-path Qwen/Qwen2.5-0.5B-Instruct \
-         --port 30000 --mem-fraction-static 0.25
+         --port 30000 --mem-fraction-static 0.25 --skip-tokenizer-init
 2. Train:
      python examples/trl_grpo_sglang_gsm8k.py --rollout-backend sglang
      python examples/trl_grpo_sglang_gsm8k.py --rollout-backend hf   # baseline
@@ -26,7 +26,7 @@ from aligntune.core.backend_factory import create_rl_trainer
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--rollout-backend", choices=["hf", "sglang"], default="sglang")
-parser.add_argument("--sglang-url", default="http://localhost:30000")
+parser.add_argument("--sglang-url", default="http://127.0.0.1:30000")
 parser.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
 parser.add_argument("--max-steps", type=int, default=60)
 parser.add_argument("--output-dir", default=None)

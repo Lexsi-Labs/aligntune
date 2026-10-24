@@ -47,7 +47,7 @@ How it plugs in, with no TRL changes and no subclassing:
 ```bash
 # SGLang can live in its own venv; it only needs HTTP and the sync dir.
 python -m sglang.launch_server --model-path Qwen/Qwen2.5-0.5B-Instruct \
-    --port 30000 --mem-fraction-static 0.25
+    --port 30000 --mem-fraction-static 0.25 --skip-tokenizer-init
 ```
 
 ```python
@@ -55,11 +55,13 @@ trainer = create_rl_trainer(
     model_name="Qwen/Qwen2.5-0.5B-Instruct",
     algorithm="grpo", backend="trl",
     rollout_backend="sglang",
-    sglang_server_url="http://127.0.0.1:30000",   # default http://localhost:30000
+    sglang_server_url="http://127.0.0.1:30000",   # default http://127.0.0.1:30000
     # sglang_sync_dir="/dev/shm/my-run",          # optional; must be readable by the server
     ...
 )
 ```
+
+`--skip-tokenizer-init` is optional but recommended, because the trainer sends and receives token ids and the server never has to detokenize.
 
 CLI: `--rollout-backend sglang --sglang-url http://127.0.0.1:30000`.
 YAML: `train.rollout_backend: sglang`, `train.sglang_server_url: ...`.

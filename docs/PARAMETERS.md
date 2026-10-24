@@ -623,7 +623,7 @@ GRPO uses the common RL parameters plus:
 | `rollout_backend` | str | `'hf'` | *(not exposed)* | `'hf'`, `'vllm'` or `'sglang'`: **TRL-only** |
 | `vllm_gpu_memory_utilization` | float | `0.7` | *(not exposed)* | vLLM GPU mem fraction. **TRL-only** |
 | `vllm_tensor_parallel_size` | int | `1` | *(not exposed)* | vLLM tensor-parallel degree. **TRL-only** |
-| `sglang_server_url` | str | `'http://localhost:30000'` | *(not exposed)* | SGLang server for `rollout_backend='sglang'` (same host). **TRL-only** |
+| `sglang_server_url` | str | `'http://127.0.0.1:30000'` | *(not exposed)* | SGLang server for `rollout_backend='sglang'` (same host). **TRL-only** |
 | `sglang_sync_dir` | str | `None` | *(not exposed)* | Weight-sync dir the SGLang server can read; defaults to a temp dir in `/dev/shm`. **TRL-only** |
 | `scale_rewards` | str | `'group'` | `'group'` | Reward normalization scope; Unsloth forwards explicitly, TRL receives it through generic backfill |
 | `mask_truncated_completions` | bool | `False` | `True` | Whether to mask truncated completions; Unsloth forwards explicitly, TRL receives it through generic backfill |

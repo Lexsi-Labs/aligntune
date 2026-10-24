@@ -904,7 +904,7 @@ def train(
         None, "--vllm-tensor-parallel", help="vLLM tensor parallelism (number of GPUs, default: 1)"
     ),
     sglang_server_url: Optional[str] = typer.Option(
-        None, "--sglang-url", help="SGLang server URL for --rollout-backend sglang (default: http://localhost:30000)"
+        None, "--sglang-url", help="SGLang server URL for --rollout-backend sglang (default: http://127.0.0.1:30000)"
     ),
 
     # ========== Custom Reward Model Training ==========

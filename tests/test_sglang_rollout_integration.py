@@ -6,7 +6,7 @@ Compares per-token logprobs of a fixed continuation (greedy text comparisons
 are too sensitive to bf16 kernel differences). Needs a running server for
 the same model and a CUDA GPU, e.g.:
     python -m sglang.launch_server --model-path Qwen/Qwen2.5-0.5B-Instruct --port 30000
-    SGLANG_URL=http://localhost:30000 pytest tests/test_sglang_rollout_integration.py
+    SGLANG_URL=http://127.0.0.1:30000 pytest tests/test_sglang_rollout_integration.py
 """
 
 import os

@@ -190,7 +190,7 @@ class TRLGRPOTrainer(TrainerBase):
         vllm_tensor_parallel_size = self._get_config_value(
             self.config.train, 'vllm_tensor_parallel_size', default=1)
         sglang_server_url = self._get_config_value(
-            self.config.train, 'sglang_server_url', default='http://localhost:30000')
+            self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000')
         sglang_sync_dir = self._get_config_value(
             self.config.train, 'sglang_sync_dir', default=None)
 
