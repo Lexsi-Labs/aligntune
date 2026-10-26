@@ -311,8 +311,43 @@ def lora_model(**config):
     return peft.get_peft_model(base, peft.LoraConfig(**{**defaults, **config}))
 
 
+def _two_rank_worker(rank, init_file, server_url, out_dir):
+    """One training process of a two-process (gloo, CPU) run; records its adapter per step."""
+    import torch.distributed as dist
+
+    dist.init_process_group("gloo", init_method=f"file://{init_file}", rank=rank, world_size=2)
+    try:
+        rollout = SGLangRollout(server_url, sync_dir=os.path.join(out_dir, f"sync{rank}"))
+        trainer = make_trainer(lora_model())
+        trainer.accelerator.is_main_process = rank == 0
+        trainer.accelerator.wait_for_everyone = dist.barrier
+        names = []
+        for step in range(2):
+            trainer.state.global_step = step
+            rollout(["a"], trainer)
+            names.append(rollout.lora_name)
+        with open(os.path.join(out_dir, f"rank{rank}.json"), "w") as f:
+            json.dump(names, f)
+    finally:
+        dist.destroy_process_group()
+
+
 class TestAdapterSync:
     """Server launched with --enable-lora + LoRA policy: only the adapter is synced."""
+
+    def test_every_rank_generates_with_the_synced_adapter(self, server, tmp_path):
+        # Only rank 0 loads the adapter; rank 1 used to send /generate with no lora_path.
+        if not torch.distributed.is_available():
+            pytest.skip("torch.distributed is not available")
+        FakeSGLang.enable_lora = True
+        torch.multiprocessing.spawn(
+            _two_rank_worker, args=(str(tmp_path / "init"), server, str(tmp_path)), nprocs=2
+        )
+
+        v1, v2 = (p["lora_name"] for p in calls("/load_lora_adapter"))
+        for rank in (0, 1):
+            assert json.loads((tmp_path / f"rank{rank}.json").read_text()) == [v1, v2]
+        assert sorted(p["lora_path"] for p in calls("/generate")) == [v1, v1, v2, v2]
 
     def test_adapter_is_hot_loaded_and_previous_version_unloaded(self, server, tmp_path):
         FakeSGLang.enable_lora = True

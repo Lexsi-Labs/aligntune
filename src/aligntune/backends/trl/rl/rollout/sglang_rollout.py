@@ -420,6 +420,12 @@ class SGLangRollout:
                     )
                     self.client.update_weights_from_disk(self.sync_dir)
         trainer.accelerator.wait_for_everyone()
+        # Only the main process loads the adapter, but every rank sends /generate:
+        # give them its name, or they sample from the base model without the LoRA.
+        if torch.distributed.is_available() and torch.distributed.is_initialized():
+            name = [self.lora_name]
+            torch.distributed.broadcast_object_list(name, src=0)
+            self.lora_name = name[0]
         trainer._log_metric("rollout/sglang_sync_s", time.perf_counter() - start)
 
     def _check_same_base(self, policy_base: Optional[str]) -> None:
