@@ -285,6 +285,10 @@ class PEFTMerger(BaseMerger):
             add_legacy_tokenizer_fields(output_path)
         if keep_base_config:
             if base_ref and restore_base_config(output_path, str(base_ref)):
+                # A base config saved by transformers 5 has no top-level rope_theta
+                # either, so still add the legacy fields (existing keys are kept).
+                if legacy_config_fields:
+                    add_legacy_config_fields(output_path)
                 return
             logger.warning(
                 "keep_base_config=True but the base model config could not be found; "

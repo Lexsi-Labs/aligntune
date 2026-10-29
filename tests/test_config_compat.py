@@ -139,6 +139,22 @@ def test_restore_base_config_missing_base_returns_false(tmp_path):
     assert _read(merged) == {"vocab_size": 10}
 
 
+def test_keep_base_config_still_adds_legacy_fields_to_a_transformers5_base(tmp_path):
+    from aligntune.core.merge.peft_merger import PEFTMerger
+
+    base = tmp_path / "base"
+    merged = tmp_path / "merged"
+    # A base config.json written by transformers 5: RoPE only under rope_parameters.
+    _write(base, {
+        "model_type": "qwen2", "vocab_size": 100, "dtype": "bfloat16",
+        "rope_parameters": {"rope_theta": 1000000.0, "rope_type": "default"},
+    })
+    _write(merged, {"model_type": "qwen2", "vocab_size": 100, "dtype": "bfloat16"})
+    PEFTMerger._finalize_config(merged, str(base), legacy_config_fields=True, keep_base_config=True)
+    cfg = _read(merged)
+    assert cfg["rope_theta"] == 1000000.0  # what a 4.x loader reads
+    assert cfg["rope_parameters"] == {"rope_theta": 1000000.0, "rope_type": "default"}
+
 # --- tokenizer_config.json -------------------------------------------------
 
 from aligntune.utils.config_compat import add_legacy_tokenizer_fields  # noqa: E402
