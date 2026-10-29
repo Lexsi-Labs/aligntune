@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
+## [Unreleased]
+
+### Changed
+- SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36).
+
+### Fixed
+- Unsloth SFT: `dataset.map` fingerprinting no longer pickles the model into host RAM (#33).
+- `create_sft_trainer` / `create_rl_trainer`: values from `config` are no longer replaced by the function's own defaults. Explicit argument, then config, then default (#34).
+- YAML `train:` keys such as `gradient_checkpointing`, `optimizer` and `dataset_num_proc` are no longer dropped (#35).
+- Merged models stay readable by transformers 4.x loaders: top-level `rope_theta` / `rope_scaling` / `torch_dtype` and legacy tokenizer fields are written, also with `keep_base_config=True` (#38).
+- Unsloth `SFTConfig` pickling at checkpoint time.
+
 ## [0.1.10] — 2026-08-05
 
 Initial public release.

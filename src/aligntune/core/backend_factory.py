@@ -9,6 +9,8 @@ This module provides a clean backend selection system where users can choose:
 The factory pattern ensures proper backend selection and fallback handling.
 """
 
+import functools
+import inspect
 import logging
 import os
 from typing import Dict, Any, Optional, Type, List, Union
@@ -756,7 +758,44 @@ _register_backends()
 
 
 
+# Already read from the parsed config inside the factories ("config" in the
+# parsed dict is a dataset subset name, not the config itself).
+_RESOLVED_IN_BODY = {"config", "model_name", "dataset_name", "algorithm", "backend"}
+
+
+def _config_fills_named_params(training_type: str):
+    """Let a ``config`` fill the factory's named parameters, not just ``**kwargs``.
+
+    The factories merge the parsed config into ``**kwargs`` only, so named
+    parameters such as ``max_seq_length`` or ``output_dir`` kept their
+    signature defaults and silently ignored the config.
+    Precedence: explicit argument > config > signature default.
+    """
+    def decorator(factory):
+        signature = inspect.signature(factory)
+
+        @functools.wraps(factory)
+        def wrapper(*args, **kwargs):
+            passed = signature.bind_partial(*args, **kwargs).arguments
+            config = passed.get("config")
+            if config is None:
+                return factory(*args, **kwargs)
+            config_dict = load_config(config) if isinstance(config, (str, Path)) else dict(config)
+            parsed = parse_config_to_unified(config_dict, training_type=training_type)
+            from_config = {
+                name: parsed[name]
+                for name in signature.parameters
+                if name in parsed and name not in passed and name not in _RESOLVED_IN_BODY
+            }
+            return factory(*args, **from_config, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 # Convenience functions for easy backend selection
+@_config_fills_named_params("sft")
 def create_sft_trainer(
     model_name: Optional[str] = None,
     dataset_name: Optional[str] = None,
@@ -1056,6 +1095,7 @@ def create_sft_trainer(
     return BackendFactory.create_trainer(config, backend_config)
 
 
+@_config_fills_named_params("rl")
 def create_rl_trainer(
     model_name: Optional[str] = None,
     dataset_name: Optional[str] = None,

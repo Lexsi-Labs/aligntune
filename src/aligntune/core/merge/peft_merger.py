@@ -17,6 +17,11 @@ import logging
 from pathlib import Path
 from typing import Optional, Union
 
+from aligntune.utils.config_compat import (
+    add_legacy_config_fields,
+    add_legacy_tokenizer_fields,
+    restore_base_config,
+)
 from aligntune.utils.provenance import build_provenance, provenance_input, write_provenance
 
 from .base import BaseMerger
@@ -107,6 +112,8 @@ class PEFTMerger(BaseMerger):
         tokenizer: Optional[object] = None,
         torch_dtype: str = "auto",
         provenance: Optional[dict] = None,
+        legacy_config_fields: bool = True,
+        keep_base_config: bool = False,
     ) -> str:
         """
         Merge a LoRA adapter into a base model.
@@ -120,6 +127,18 @@ class PEFTMerger(BaseMerger):
             provenance: ``lexsi_provenance.json`` object for the merged dir.
                 Defaults to one whose input is the adapter (and its own
                 provenance, when the adapter dir has one).
+            legacy_config_fields: Also write the transformers 4.x top-level
+                fields (``rope_theta``, ``rope_scaling``, ``torch_dtype``)
+                next to the transformers 5 ones in ``config.json``, so loaders
+                pinned to transformers 4.x (e.g. SGLang on T4) don't silently
+                fall back to ``rope_theta=10000``. Values are identical, so
+                transformers 5 reads the config unchanged. Also writes the
+                tokenizer's extra special tokens as
+                ``additional_special_tokens`` so 4.x can load the tokenizer.
+            keep_base_config: Write the base model's original ``config.json``
+                instead of the re-serialized one (``vocab_size`` and dtype are
+                taken from the merged model). Falls back to the merged config
+                if the base config can't be found.
 
         Returns:
             Absolute path to the merged model directory
@@ -216,6 +235,7 @@ class PEFTMerger(BaseMerger):
             model.save_pretrained(str(output_path))
             if tokenizer:
                 tokenizer.save_pretrained(str(output_path))
+            self._finalize_config(output_path, base_model_path, legacy_config_fields, keep_base_config)
             write_provenance(output_path, provenance)
             return str(output_path.resolve())
 
@@ -246,10 +266,36 @@ class PEFTMerger(BaseMerger):
         if tokenizer:
             tokenizer.save_pretrained(str(output_path))
             logger.info("Tokenizer saved")
+        self._finalize_config(
+            output_path, base_model_path or hub_base, legacy_config_fields, keep_base_config
+        )
         write_provenance(output_path, provenance)
 
         logger.info(f"✓ LoRA merge complete: {output_path}")
         return str(output_path.resolve())
+
+    @staticmethod
+    def _finalize_config(
+        output_path: Path,
+        base_ref: Optional[str],
+        legacy_config_fields: bool,
+        keep_base_config: bool,
+    ) -> None:
+        if legacy_config_fields:
+            add_legacy_tokenizer_fields(output_path)
+        if keep_base_config:
+            if base_ref and restore_base_config(output_path, str(base_ref)):
+                # A base config saved by transformers 5 has no top-level rope_theta
+                # either, so still add the legacy fields (existing keys are kept).
+                if legacy_config_fields:
+                    add_legacy_config_fields(output_path)
+                return
+            logger.warning(
+                "keep_base_config=True but the base model config could not be found; "
+                "keeping the merged config."
+            )
+        if legacy_config_fields:
+            add_legacy_config_fields(output_path)
 
     def merge(
         self,
@@ -289,4 +335,6 @@ class PEFTMerger(BaseMerger):
             output_path=output_path,
             adapter_path=adapter_path,
             torch_dtype=torch_dtype,
+            legacy_config_fields=kwargs.get("legacy_config_fields", True),
+            keep_base_config=kwargs.get("keep_base_config", False),
         )
