@@ -74,8 +74,11 @@ def test_dataset_num_proc_is_passed_to_sftconfig_constructor():
     ):
         config = create_sft_trainer(config=CONFIG)
 
+    import trl.trainer.sft_config as sft_config_module
+
+    # build_sft_config looks SFTConfig up on trl's module at call time, so patch it there.
     with mock.patch.object(
-        training_args_builder, "SFTConfig", wraps=training_args_builder.SFTConfig
+        sft_config_module, "SFTConfig", wraps=sft_config_module.SFTConfig
     ) as sft_config_cls:
         sft_config = training_args_builder.build_sft_config(
             config, datasets.Dataset.from_list([{"text": "x"}] * 4), output_dir="unused"
