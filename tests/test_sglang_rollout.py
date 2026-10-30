@@ -482,8 +482,56 @@ def test_drop_non_text_adapter_weights_keeps_language_model_tensors(tmp_path):
     assert drop_non_text_adapter_weights(str(tmp_path)) == 0
 
 
-def test_full_sync_refuses_quantized_models(server, tmp_path):
+def test_full_sync_refuses_8bit_models(server, tmp_path):
     model = tiny_model()
-    model.is_quantized = True  # what transformers sets for 4/8-bit loads
-    with pytest.raises(NotImplementedError, match="quantized"):
+    model.is_loaded_in_8bit = True  # what transformers sets for 8-bit loads
+    with pytest.raises(NotImplementedError, match="8-bit"):
         SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(model))
+
+
+def test_regex_target_modules_become_an_explicit_list(tmp_path):
+    import json
+
+    from safetensors.torch import save_file
+
+    from aligntune.backends.trl.rl.rollout.sglang_rollout import explicit_target_modules
+
+    prefix = "base_model.model.model.language_model.layers.0"
+    save_file(
+        {
+            f"{prefix}.self_attn.q_proj.lora_A.weight": torch.zeros(2, 4),
+            f"{prefix}.self_attn.q_proj.lora_B.weight": torch.zeros(4, 2),
+            f"{prefix}.mlp.down_proj.lora_A.weight": torch.zeros(2, 4),
+        },
+        str(tmp_path / "adapter_model.safetensors"),
+    )
+    config = tmp_path / "adapter_config.json"
+    regex = "(?:.*?language_model.*?(?:q_proj|down_proj))"
+    config.write_text(json.dumps({"target_modules": regex}))
+    assert explicit_target_modules(str(tmp_path))
+    assert json.loads(config.read_text())["target_modules"] == ["down_proj", "q_proj"]
+    assert not explicit_target_modules(str(tmp_path))  # a list is left alone
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="bitsandbytes 4-bit needs a GPU")
+def test_full_sync_dequantizes_4bit_weights(tmp_path):
+    pytest.importorskip("bitsandbytes")
+    from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+
+    from aligntune.backends.trl.rl.rollout.sglang_rollout import export_policy_state_dict
+
+    dense = tiny_model().to(torch.bfloat16)
+    dense.save_pretrained(tmp_path / "dense")
+    quantized = AutoModelForCausalLM.from_pretrained(
+        tmp_path / "dense",
+        quantization_config=BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_compute_dtype=torch.bfloat16
+        ),
+        device_map="cuda",
+    )
+    exported = export_policy_state_dict(quantized)
+    for name, tensor in dense.state_dict().items():
+        if name in exported:
+            assert exported[name].shape == tensor.shape, name
+            assert exported[name].dtype == torch.bfloat16, name
+            assert (exported[name].float().cpu() - tensor.float()).abs().mean() < 0.05, name

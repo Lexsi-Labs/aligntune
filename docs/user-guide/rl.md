@@ -616,7 +616,7 @@ These come from SGLang itself (tested with 0.5.10.post1), not from aligntune:
 - **Multimodal models** (for example Gemma 3) work in both sync modes for text-only training.
   LoRA weights on the vision or audio encoder are not sent to SGLang, which applies LoRA to the language model only.
 - **Large-vocabulary models** (Gemma, 256k tokens) may need a smaller `batch_size` when the trainer and the server share one GPU.
-- Unsloth models loaded in 4-bit can use adapter sync only.
+- Models loaded in 8-bit can use adapter sync only (4-bit weights are dequantized for full sync).
 
 ## Configuration
 

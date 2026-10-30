@@ -116,6 +116,16 @@ def _base_name(name: str) -> str:
     )
 
 
+def _dense(param) -> torch.Tensor:
+    """A bitsandbytes 4-bit weight dequantized to its compute dtype; other params as they are."""
+    quant_state = getattr(param, "quant_state", None)
+    if quant_state is None:
+        return param.detach()
+    import bitsandbytes.functional as bnb_functional
+
+    return bnb_functional.dequantize_4bit(param.data, quant_state).to(quant_state.dtype)
+
+
 @torch.no_grad()
 def iter_policy_weights(model) -> Iterator[Tuple[str, torch.Tensor]]:
     """Yield the policy weights under the base model's HF parameter names.
@@ -129,7 +139,7 @@ def iter_policy_weights(model) -> Iterator[Tuple[str, torch.Tensor]]:
     """
     if not hasattr(model, "peft_config"):
         for name, param in model.named_parameters():
-            yield name, param.detach().contiguous()
+            yield name, _dense(param).contiguous()
         return
 
     adapter_prefix = getattr(model, "prefix", "lora_")
@@ -141,7 +151,7 @@ def iter_policy_weights(model) -> Iterator[Tuple[str, torch.Tensor]]:
     for name, param in model.named_parameters():
         if adapter_prefix in name or "original_module" in name:
             continue
-        weight = param.detach()
+        weight = _dense(param)
         module = lora_layers.get(name)
         if module is not None:
             merged = weight.float()
@@ -247,6 +257,30 @@ def drop_non_text_adapter_weights(adapter_dir: str) -> int:
     if len(kept) < len(weights):
         save_file(kept, path, metadata={"format": "pt"})
     return len(weights) - len(kept)
+
+
+def explicit_target_modules(adapter_dir: str) -> bool:
+    """Replace a regex ``target_modules`` in a saved adapter with the module names it covers.
+
+    SGLang accepts a list of module names (or "all"/"all-linear") but not a regex, which is
+    what Unsloth saves for some models (e.g. Gemma 3). Returns whether the config changed.
+    """
+    import json
+
+    from safetensors import safe_open
+
+    config_path = os.path.join(adapter_dir, "adapter_config.json")
+    with open(config_path) as f:
+        config = json.load(f)
+    targets = config.get("target_modules")
+    if not isinstance(targets, str) or targets in ("all", "all-linear"):
+        return False
+    with safe_open(os.path.join(adapter_dir, "adapter_model.safetensors"), "pt") as f:
+        names = {key.split(".lora_")[0].rsplit(".", 1)[-1] for key in f.keys() if ".lora_" in key}
+    config["target_modules"] = sorted(names)
+    with open(config_path, "w") as f:
+        json.dump(config, f, indent=2)
+    return True
 
 
 class SGLangRollout:
@@ -362,10 +396,10 @@ class SGLangRollout:
                     self._sync_adapter(model)
                 else:
                     base = model.get_base_model() if hasattr(model, "peft_config") else model
-                    if getattr(base, "is_quantized", False):
+                    if getattr(base, "is_loaded_in_8bit", False):
                         raise NotImplementedError(
-                            "Full-weight SGLang sync cannot send quantized (4/8-bit) weights. "
-                            "Start the server with --enable-lora to sync the LoRA adapter instead."
+                            "Full-weight SGLang sync cannot send 8-bit weights. Start the server "
+                            "with --enable-lora to sync the LoRA adapter instead."
                         )
                     write_sharded_safetensors(
                         iter_policy_weights(model),
@@ -408,6 +442,7 @@ class SGLangRollout:
         if adapter != "default":  # PEFT nests non-default adapters in a subdir
             path = os.path.join(path, adapter)
         dropped = drop_non_text_adapter_weights(path)
+        explicit_target_modules(path)
         if dropped and self._version == 1:
             logger.warning(
                 f"SGLang applies LoRA to the language model only: left out {dropped} adapter "
