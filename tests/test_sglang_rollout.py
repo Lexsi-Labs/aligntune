@@ -329,8 +329,26 @@ class TestAdapterSync:
         assert calls("/update_weights_from_disk") == []
         assert shards(tmp_path) == []  # no full-weight copy written
 
+    def test_close_unloads_the_last_adapter(self, server, tmp_path):
+        FakeSGLang.enable_lora = True
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        rollout(["a"], make_trainer(lora_model()))
+        sglang_rollout.SGLangRolloutCallback(rollout).on_train_end(None, None, None)
+
+        assert calls("/unload_lora_adapter") == [{"lora_name": f"{rollout.adapter_prefix}-v1"}]
+        assert rollout.lora_name is None
+        rollout.close()  # idempotent
+        assert len(calls("/unload_lora_adapter")) == 1
+
+    def test_close_does_not_raise_when_server_is_gone(self, tmp_path):
+        rollout = SGLangRollout.__new__(SGLangRollout)
+        rollout.client = SGLangClient(unused_url(), timeout=2)
+        rollout.lora_name, rollout._synced_step = "aligntune-x-v1", 0
+        rollout.close()
+        assert rollout.lora_name is None
+
     def test_runs_sharing_a_server_use_distinct_adapter_names(self, server, tmp_path):
-        # The last adapter of a finished run stays loaded; a new run must not collide with it.
+        # Runs on one server must not collide, even if an earlier run did not close cleanly.
         FakeSGLang.enable_lora = True
         for _ in range(2):
             SGLangRollout(server, sync_dir=str(tmp_path))(["a"], make_trainer(lora_model()))
@@ -405,3 +423,50 @@ class TestNoSilentFallback:
         config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
         for trainer_cls in (TRLGRPOTrainer, TRLDAPOTrainer, TRLGBMPOTrainer):
             check_rollout_backend_supported(trainer_cls, config)
+
+
+def test_checkpoint_names_match_save_pretrained_for_renamed_models(tmp_path):
+    """Gemma 3 is renamed on load by transformers 5; SGLang loads the hub names."""
+    from safetensors import safe_open
+    from transformers import (
+        Gemma3Config,
+        Gemma3ForConditionalGeneration,
+        Gemma3TextConfig,
+        SiglipVisionConfig,
+    )
+
+    from aligntune.backends.trl.rl.rollout.sglang_rollout import checkpoint_names
+
+    text = Gemma3TextConfig(
+        hidden_size=32, intermediate_size=64, num_hidden_layers=2, num_attention_heads=2,
+        num_key_value_heads=1, head_dim=16, vocab_size=100,
+    )
+    vision = SiglipVisionConfig(
+        hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2,
+        image_size=28, patch_size=14,
+    )
+    model = Gemma3ForConditionalGeneration(
+        Gemma3Config(text_config=text, vision_config=vision, mm_tokens_per_image=1)
+    )
+    model.save_pretrained(tmp_path)
+    with safe_open(str(tmp_path / "model.safetensors"), "pt") as f:
+        saved = set(f.keys())
+
+    names = set(checkpoint_names(model, dict(model.named_parameters())))
+    assert names - {"lm_head.weight"} == saved  # lm_head is tied to the embeddings
+
+
+def test_drop_non_text_adapter_weights_keeps_language_model_tensors(tmp_path):
+    from safetensors.torch import load_file, save_file
+
+    from aligntune.backends.trl.rl.rollout.sglang_rollout import drop_non_text_adapter_weights
+
+    text = "base_model.model.model.language_model.layers.0.self_attn.q_proj.lora_A.weight"
+    vision = "base_model.model.model.vision_tower.encoder.layers.0.q_proj.lora_A.weight"
+    save_file(
+        {text: torch.zeros(2, 4), vision: torch.zeros(2, 3)},
+        str(tmp_path / "adapter_model.safetensors"),
+    )
+    assert drop_non_text_adapter_weights(str(tmp_path)) == 1
+    assert list(load_file(str(tmp_path / "adapter_model.safetensors"))) == [text]
+    assert drop_non_text_adapter_weights(str(tmp_path)) == 0

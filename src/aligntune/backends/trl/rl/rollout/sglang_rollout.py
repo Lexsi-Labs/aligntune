@@ -33,6 +33,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import requests
 import torch
+from transformers import TrainerCallback
 
 logger = logging.getLogger(__name__)
 
@@ -163,13 +164,29 @@ def export_policy_state_dict(model) -> Dict[str, torch.Tensor]:
     return dict(iter_policy_weights(model))
 
 
+def checkpoint_names(model, weights: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    """Rename weights to the layout of the hub checkpoint, as ``save_pretrained`` does.
+
+    transformers 5 renames some weights on load (Gemma 3 keeps
+    ``language_model.model.*`` on the hub but ``model.language_model.*`` in memory), and
+    SGLang loads the hub layout. Older transformers keep the names, so nothing changes there.
+    """
+    try:
+        from transformers.core_model_loading import revert_weight_conversion
+    except ImportError:
+        return weights
+    base = model.get_base_model() if hasattr(model, "get_base_model") else model
+    return revert_weight_conversion(base, weights)
+
+
 def write_sharded_safetensors(
-    weights: Iterator[Tuple[str, torch.Tensor]], directory: str
+    weights: Iterator[Tuple[str, torch.Tensor]], directory: str, rename=None
 ) -> List[str]:
     """Write weights as ``model-XXXXX.safetensors`` shards of about ``SHARD_BYTES``.
 
     Peak host memory is about one shard: tensors stay on their device until
     their shard is serialized. Stale shards from a previous sync are removed.
+    ``rename`` maps each shard's name->tensor dict to the names to save under.
     """
     from safetensors.torch import save_file
 
@@ -180,7 +197,7 @@ def write_sharded_safetensors(
 
     def flush():
         path = os.path.join(directory, f"{WEIGHTS_PREFIX}{len(paths):05d}.safetensors")
-        save_file(shard, path)
+        save_file(rename(shard) if rename else shard, path)
         paths.append(path)
 
     for name, tensor in weights:
@@ -210,6 +227,26 @@ def check_adapter_supported(peft_config) -> None:
             f"SGLang LoRA adapters do not support {bad}. Start the SGLang server without "
             "--enable-lora to sync merged full weights instead."
         )
+
+
+NON_TEXT_MODULES = ("vision_tower", "vision_model", "visual", "multi_modal_projector", "audio")
+
+
+def drop_non_text_adapter_weights(adapter_dir: str) -> int:
+    """Remove LoRA tensors on vision/audio modules from a saved adapter; return how many.
+
+    A multimodal model (e.g. Gemma 3) matches ``q_proj`` in its vision encoder too, but SGLang
+    applies LoRA to the language model only and fails to load adapter tensors of any other
+    shape. Text-only rollouts never run those modules, so they are not needed.
+    """
+    from safetensors.torch import load_file, save_file
+
+    path = os.path.join(adapter_dir, "adapter_model.safetensors")
+    weights = load_file(path)
+    kept = {k: v for k, v in weights.items() if not any(m in k for m in NON_TEXT_MODULES)}
+    if len(kept) < len(weights):
+        save_file(kept, path, metadata={"format": "pt"})
+    return len(weights) - len(kept)
 
 
 class SGLangRollout:
@@ -324,7 +361,11 @@ class SGLangRollout:
                 if self.server_lora and hasattr(model, "peft_config"):
                     self._sync_adapter(model)
                 else:
-                    write_sharded_safetensors(iter_policy_weights(model), self.sync_dir)
+                    write_sharded_safetensors(
+                        iter_policy_weights(model),
+                        self.sync_dir,
+                        rename=lambda shard: checkpoint_names(model, shard),
+                    )
                     self.client.update_weights_from_disk(self.sync_dir)
         trainer.accelerator.wait_for_everyone()
         trainer._log_metric("rollout/sglang_sync_s", time.perf_counter() - start)
@@ -360,7 +401,34 @@ class SGLangRollout:
         model.save_pretrained(path, selected_adapters=[adapter], safe_serialization=True)
         if adapter != "default":  # PEFT nests non-default adapters in a subdir
             path = os.path.join(path, adapter)
+        dropped = drop_non_text_adapter_weights(path)
+        if dropped and self._version == 1:
+            logger.warning(
+                f"SGLang applies LoRA to the language model only: left out {dropped} adapter "
+                "tensors on vision/audio modules (text-only rollouts do not use them)."
+            )
         self.client.load_lora_adapter(name, path)
         previous, self.lora_name = self.lora_name, name
         if previous is not None:
             self.client.unload_lora_adapter(previous)
+
+    def close(self) -> None:
+        """Unload this run's adapter so a long-lived server does not accumulate them."""
+        name, self.lora_name = self.lora_name, None
+        self._synced_step = None  # a reused rollout re-syncs before generating again
+        if name is None:
+            return
+        try:
+            self.client.unload_lora_adapter(name)
+        except (ConnectionError, RuntimeError) as e:  # never fail a finished run over cleanup
+            logger.warning(f"Could not unload SGLang adapter {name}: {e}")
+
+
+class SGLangRolloutCallback(TrainerCallback):
+    """Closes the rollout when training ends."""
+
+    def __init__(self, rollout: SGLangRollout):
+        self.rollout = rollout
+
+    def on_train_end(self, args, state, control, **kwargs):
+        self.rollout.close()

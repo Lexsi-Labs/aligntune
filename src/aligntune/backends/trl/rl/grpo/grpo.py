@@ -365,6 +365,9 @@ class TRLGRPOTrainer(TrainerBase):
             reward_funcs=reward_functions,
             rollout_func=rollout_func,
         )
+        if rollout_func is not None:
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+            self.trainer.add_callback(SGLangRolloutCallback(rollout_func))
 
         logger.info("GRPO trainer setup completed successfully!")
 

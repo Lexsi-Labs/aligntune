@@ -60,18 +60,21 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
     model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16).cuda().eval()
-    prompt = tokenizer.apply_chat_template(
-        [{"role": "user", "content": "Name three colors."}],
-        add_generation_prompt=True,
-        tokenize=True,
-        return_dict=True,
-    )["input_ids"]
-    seq = (
-        prompt
-        + tokenizer("Red, green and blue are three common colors people see every day.")[
-            "input_ids"
-        ]
-    )
+    if tokenizer.chat_template:
+        prompt = tokenizer.apply_chat_template(
+            [{"role": "user", "content": "Name three colors."}],
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+        )["input_ids"]
+    else:  # base model without a chat template
+        prompt = tokenizer("Q: Name three colors.\nA:")["input_ids"]
+    # Score the model's own greedy answer: fixed text can be very unlikely under the model (log
+    # probs near -30 for instruction-tuned models like Gemma 3), where bf16 rounding alone
+    # produces large server-vs-trainer differences.
+    seq = model.generate(
+        torch.tensor([prompt], device="cuda"), max_new_tokens=24, do_sample=False
+    )[0].tolist()
     start = len(prompt)
 
     rollout = SGLangRollout(SGLANG_URL, sync_dir=str(tmp_path))
@@ -79,18 +82,24 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
     noise = (sglang_logprobs(rollout, seq, start) - base).abs().mean()  # bf16 kernel mismatch
     assert noise < 0.1, f"server does not start at the base weights (error {noise:.3f})"
 
-    torch.manual_seed(0)
-    policy = peft.get_peft_model(
-        model,
-        peft.LoraConfig(
-            r=8,
-            lora_alpha=2,
-            target_modules=["q_proj", "v_proj", "down_proj"],
-            init_lora_weights=False,
-        ),
-    )
-    target = hf_logprobs(policy, seq, start)
-    shift = (target - base).abs().mean()
+    # Use the weakest random LoRA that clearly moves the policy: the server's bf16 error grows
+    # faster than the LoRA does, and models differ in how strong a random LoRA has to be.
+    for alpha in (1, 2, 4, 8, 16, 32, 64):
+        torch.manual_seed(0)
+        policy = peft.get_peft_model(
+            model,
+            peft.LoraConfig(
+                r=8,
+                lora_alpha=alpha,
+                target_modules=["q_proj", "v_proj", "down_proj"],
+                init_lora_weights=False,
+            ),
+        )
+        target = hf_logprobs(policy, seq, start)
+        shift = (target - base).abs().mean()
+        if shift > 0.5:
+            break
+        model = policy.unload()
     assert shift > 0.5, f"random LoRA too weak to test sync (shift={shift:.3f})"
 
     trainer = SimpleNamespace(
