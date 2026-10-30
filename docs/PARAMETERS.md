@@ -620,9 +620,11 @@ GRPO uses the common RL parameters plus:
 | `top_k` | int | `0` | `0` | Top-k sampling; `0` disables it |
 | `reward_weights` | list[float] | `None` | `None` | One weight per configured reward function |
 | `max_steps` | int | `500` | `500` | Max training steps |
-| `rollout_backend` | str | `'hf'` | *(not exposed)* | `'hf'` or `'vllm'`: **TRL-only** |
+| `rollout_backend` | str | `'hf'` | `'hf'` | `'hf'`, `'vllm'` (TRL only) or `'sglang'` (GRPO, GSPO, DAPO, Dr.GRPO, GBMPO and counterfactual GRPO, on TRL and Unsloth; not PACE) |
 | `vllm_gpu_memory_utilization` | float | `0.7` | *(not exposed)* | vLLM GPU mem fraction. **TRL-only** |
 | `vllm_tensor_parallel_size` | int | `1` | *(not exposed)* | vLLM tensor-parallel degree. **TRL-only** |
+| `sglang_server_url` | str | `'http://127.0.0.1:30000'` | `'http://127.0.0.1:30000'` | SGLang server for `rollout_backend='sglang'` (same host) |
+| `sglang_sync_dir` | str | `None` | `None` | Weight-sync dir the SGLang server can read; defaults to a temp dir in `/dev/shm` |
 | `scale_rewards` | str | `'group'` | `'group'` | Reward normalization scope; Unsloth forwards explicitly, TRL receives it through generic backfill |
 | `mask_truncated_completions` | bool | `False` | `True` | Whether to mask truncated completions; Unsloth forwards explicitly, TRL receives it through generic backfill |
 

@@ -256,6 +256,7 @@ for result in results:
 # ============================================================================
 class TRLCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
     """Counterfactual GRPO trainer using custom CounterfactualGRPOTrainer with enhanced rewards."""
     
     def __init__(self, config: UnifiedConfig):
@@ -1461,6 +1462,20 @@ for r in results:
                 return [0.0] * (len(prompts) if prompts else 1)
             return self._combined_reward_function(completions, prompts=prompts, **kwargs)
 
+        # SGLang generates through TRL's rollout_func hook; CounterfactualGRPOTrainer only
+        # changes the loss, so it keeps that hook. The constructor fails fast if the server is down.
+        sglang_kwargs = {}
+        rollout_backend = self._get_config_value(
+            self.config.train, 'rollout_backend', default='hf')
+        if rollout_backend == "sglang":
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+            sglang_kwargs["rollout_func"] = SGLangRollout(
+                self._get_config_value(
+                    self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000'),
+                sync_dir=self._get_config_value(
+                    self.config.train, 'sglang_sync_dir', default=None),
+            )
+
         if should_use_pure_trl:
             logger.info("PURE_TRL_MODE enabled - using pure TRL API with CounterfactualGRPOTrainer")
             self.trainer = CounterfactualGRPOTrainer(
@@ -1481,6 +1496,7 @@ for r in results:
                 extra_verbose=extra_verbose,
                 extra_verbose_log_path=extra_verbose_log_path,
                 extra_verbose_sample_rate=extra_verbose_sample_rate,
+                **sglang_kwargs,
             )
         else:
             try:
@@ -1505,6 +1521,7 @@ for r in results:
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
                     extra_verbose_sample_rate=extra_verbose_sample_rate,
+                    **sglang_kwargs,
                 )
             except ImportError:
                 logger.info("Using pure TRL, using reward_function parameter")
@@ -1526,7 +1543,12 @@ for r in results:
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
                     extra_verbose_sample_rate=extra_verbose_sample_rate,
+                    **sglang_kwargs,
                 )
+
+        if sglang_kwargs:
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+            self.trainer.add_callback(SGLangRolloutCallback(sglang_kwargs["rollout_func"]))
 
         log_gpu_memory("After trainer creation")
 

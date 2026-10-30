@@ -19,6 +19,17 @@ from ...eval.metrics import RougeMetric, BleuMetric, PerplexityMetric
 logger = logging.getLogger(__name__)
 
 
+def check_rollout_backend_supported(trainer_cls, config) -> None:
+    """Fail loudly instead of silently generating with transformers."""
+    train = getattr(config, "train", None)
+    if getattr(train, "rollout_backend", None) != "sglang" or trainer_cls.SUPPORTS_SGLANG_ROLLOUT:
+        return
+    raise ValueError(
+        f"rollout_backend='sglang' is not supported by {trainer_cls.__name__}. Use backend='trl' "
+        "with algorithm grpo, gspo, dapo, drgrpo or gbmpo, or set rollout_backend='hf'."
+    )
+
+
 class RLTrainerBase(UnifiedTrainerBase):
     """
     RLHF-specific base trainer. Inherits lifecycle, saving, and callbacks from UnifiedTrainerBase.
@@ -27,8 +38,11 @@ class RLTrainerBase(UnifiedTrainerBase):
     # Algorithm backends override this. Users can override it through the
     # public dataset `keep_columns` option.
     KEEP_COLUMNS = False
-    
+    # Trainers that route rollout_backend="sglang" to an SGLang server set this.
+    SUPPORTS_SGLANG_ROLLOUT = False
+
     def __init__(self, config: UnifiedConfig, callbacks: Optional[List[TrainerCallback]] = None):
+        check_rollout_backend_supported(type(self), config)
         super().__init__(config, callbacks)
         
         self.backend = BackendFactory.create(config.distributed)
