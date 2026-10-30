@@ -22,6 +22,8 @@ from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
 
 SGLANG_URL = os.environ.get("SGLANG_URL")
 MODEL = os.environ.get("SGLANG_TEST_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
+# LoRA layers for the test; GPT-2, for example, needs "c_attn,c_fc".
+TARGETS = os.environ.get("SGLANG_TEST_TARGETS", "q_proj,v_proj,down_proj").split(",")
 
 pytestmark = [
     pytest.mark.gpu,
@@ -59,7 +61,8 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
-    model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16).cuda().eval()
+    # Same dtype as the server, which serves the checkpoint dtype (float32 for GPT-2).
+    model = AutoModelForCausalLM.from_pretrained(MODEL, dtype="auto").cuda().eval()
     if tokenizer.chat_template:
         prompt = tokenizer.apply_chat_template(
             [{"role": "user", "content": "Name three colors."}],
@@ -91,7 +94,7 @@ def test_synced_lora_policy_is_what_sglang_computes(tmp_path):
             peft.LoraConfig(
                 r=8,
                 lora_alpha=alpha,
-                target_modules=["q_proj", "v_proj", "down_proj"],
+                target_modules=TARGETS,
                 init_lora_weights=False,
             ),
         )

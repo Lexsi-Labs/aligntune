@@ -395,29 +395,24 @@ class TestAdapterSync:
 
 class TestNoSilentFallback:
     def test_trainers_that_ignore_sglang_raise(self):
-        from aligntune.backends.trl.rl.counterfact_grpo.counterfact_grpo import (
-            TRLCounterFactGRPOTrainer,
-        )
         from aligntune.backends.trl.rl.pace.pace import TRLPaceTrainer
-        from aligntune.backends.unsloth.rl.counterfact_grpo.counterfact_grpo import (
-            UnslothCounterFactGRPOTrainer,
-        )
         from aligntune.core.rl.trainer_base import RLTrainerBase, check_rollout_backend_supported
 
         config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
-        for trainer_cls in (
-            RLTrainerBase,
-            TRLPaceTrainer,
-            TRLCounterFactGRPOTrainer,
-            UnslothCounterFactGRPOTrainer,
-        ):
+        for trainer_cls in (RLTrainerBase, TRLPaceTrainer):
             with pytest.raises(ValueError, match="not supported"):
                 check_rollout_backend_supported(trainer_cls, config)
 
     def test_grpo_family_accepts_sglang(self):
+        from aligntune.backends.trl.rl.counterfact_grpo.counterfact_grpo import (
+            TRLCounterFactGRPOTrainer,
+        )
         from aligntune.backends.trl.rl.dapo.dapo import TRLDAPOTrainer
         from aligntune.backends.trl.rl.gbmpo.gbmpo import TRLGBMPOTrainer
         from aligntune.backends.trl.rl.grpo.grpo import TRLGRPOTrainer
+        from aligntune.backends.unsloth.rl.counterfact_grpo.counterfact_grpo import (
+            UnslothCounterFactGRPOTrainer,
+        )
         from aligntune.backends.unsloth.rl.dapo.dapo import UnslothDAPOTrainer
         from aligntune.backends.unsloth.rl.gbmpo.gbmpo import UnslothGBMPOTrainer
         from aligntune.backends.unsloth.rl.grpo.grpo import UnslothGRPOTrainer
@@ -431,6 +426,8 @@ class TestNoSilentFallback:
             UnslothGRPOTrainer,
             UnslothDAPOTrainer,
             UnslothGBMPOTrainer,
+            TRLCounterFactGRPOTrainer,
+            UnslothCounterFactGRPOTrainer,
         ):
             check_rollout_backend_supported(trainer_cls, config)
 
@@ -518,7 +515,10 @@ def test_full_sync_dequantizes_4bit_weights(tmp_path):
     pytest.importorskip("bitsandbytes")
     from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 
-    from aligntune.backends.trl.rl.rollout.sglang_rollout import export_policy_state_dict
+    from aligntune.backends.trl.rl.rollout.sglang_rollout import (
+        checkpoint_names,
+        export_policy_state_dict,
+    )
 
     dense = tiny_model().to(torch.bfloat16)
     dense.save_pretrained(tmp_path / "dense")
@@ -529,7 +529,7 @@ def test_full_sync_dequantizes_4bit_weights(tmp_path):
         ),
         device_map="cuda",
     )
-    exported = export_policy_state_dict(quantized)
+    exported = checkpoint_names(quantized, export_policy_state_dict(quantized))
     for name, tensor in dense.state_dict().items():
         if name in exported:
             assert exported[name].shape == tensor.shape, name

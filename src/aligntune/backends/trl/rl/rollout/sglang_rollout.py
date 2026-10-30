@@ -186,7 +186,19 @@ def checkpoint_names(model, weights: Dict[str, torch.Tensor]) -> Dict[str, torch
     except ImportError:
         return weights
     base = model.get_base_model() if hasattr(model, "get_base_model") else model
-    return revert_weight_conversion(base, weights)
+    try:
+        return revert_weight_conversion(base, weights)
+    except NotImplementedError:
+        # Quantized loads also record conversions (e.g. 4-bit packing) that have no reverse.
+        # The weights sent here are already dense, so undo only the renames.
+        from transformers.core_model_loading import WeightRenaming
+
+        conversions = base._weight_conversions
+        base._weight_conversions = [c for c in conversions if isinstance(c, WeightRenaming)]
+        try:
+            return revert_weight_conversion(base, weights)
+        finally:
+            base._weight_conversions = conversions
 
 
 def write_sharded_safetensors(
