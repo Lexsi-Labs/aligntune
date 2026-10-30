@@ -575,7 +575,7 @@ See [ORPO](../algorithms/orpo.md) for full configuration.
 
 **Use TRL when:**
 - Need maximum compatibility
-- Need vLLM-backed rollout (`rollout_backend='vllm'`), which is TRL-only. SGLang rollout (`'sglang'`) works with both backends for GRPO, GSPO, DAPO, Dr.GRPO and GBMPO.
+- Need vLLM-backed rollout (`rollout_backend='vllm'`), which is TRL-only. SGLang rollout (`'sglang'`) works with both backends for GRPO, GSPO, DAPO, Dr.GRPO, GBMPO and counterfactual GRPO (not PACE).
 - Working with standard models
 - Want the most-tested training path
 

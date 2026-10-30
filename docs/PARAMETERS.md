@@ -620,7 +620,7 @@ GRPO uses the common RL parameters plus:
 | `top_k` | int | `0` | `0` | Top-k sampling; `0` disables it |
 | `reward_weights` | list[float] | `None` | `None` | One weight per configured reward function |
 | `max_steps` | int | `500` | `500` | Max training steps |
-| `rollout_backend` | str | `'hf'` | `'hf'` | `'hf'`, `'vllm'` (TRL only) or `'sglang'` (TRL, and Unsloth GRPO, GSPO, DAPO, Dr.GRPO and GBMPO) |
+| `rollout_backend` | str | `'hf'` | `'hf'` | `'hf'`, `'vllm'` (TRL only) or `'sglang'` (GRPO, GSPO, DAPO, Dr.GRPO, GBMPO and counterfactual GRPO, on TRL and Unsloth; not PACE) |
 | `vllm_gpu_memory_utilization` | float | `0.7` | *(not exposed)* | vLLM GPU mem fraction. **TRL-only** |
 | `vllm_tensor_parallel_size` | int | `1` | *(not exposed)* | vLLM tensor-parallel degree. **TRL-only** |
 | `sglang_server_url` | str | `'http://127.0.0.1:30000'` | `'http://127.0.0.1:30000'` | SGLang server for `rollout_backend='sglang'` (same host) |

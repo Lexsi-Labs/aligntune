@@ -55,6 +55,7 @@ def apply_chat_template_safe(
 
 class UnslothCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
     """
     Counterfactual GRPO trainer using Unsloth's FastLanguageModel + TRL's CounterfactualGRPOTrainer.
 
@@ -804,6 +805,21 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             import sys
             sys.stdout.flush()
 
+            # SGLang generates through TRL's rollout_func hook; CounterfactualGRPOTrainer only
+            # changes the loss, so it keeps that hook. The constructor fails fast if the server
+            # is down.
+            sglang_kwargs = {}
+            rollout_backend = self._get_config_value(
+                self.config.train, 'rollout_backend', default='hf')
+            if rollout_backend == "sglang":
+                from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+                sglang_kwargs["rollout_func"] = SGLangRollout(
+                    self._get_config_value(
+                        self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000'),
+                    sync_dir=self._get_config_value(
+                        self.config.train, 'sglang_sync_dir', default=None),
+                )
+
             # Create CounterfactualGRPOTrainer with Unsloth model
             # This is the KEY difference - we use the TRL CounterfactualGRPOTrainer
             # but pass in the Unsloth-optimized model!
@@ -826,7 +842,11 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 extra_verbose=extra_verbose,
                 extra_verbose_log_path=extra_verbose_log_path,
                 extra_verbose_sample_rate=extra_verbose_sample_rate,
+                **sglang_kwargs,
             )
+            if sglang_kwargs:
+                from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+                self.trainer.add_callback(SGLangRolloutCallback(sglang_kwargs["rollout_func"]))
 
             logger.info(
                 "CounterfactualGRPOTrainer with Unsloth model setup completed")
