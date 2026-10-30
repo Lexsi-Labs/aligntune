@@ -361,6 +361,12 @@ class SGLangRollout:
                 if self.server_lora and hasattr(model, "peft_config"):
                     self._sync_adapter(model)
                 else:
+                    base = model.get_base_model() if hasattr(model, "peft_config") else model
+                    if getattr(base, "is_quantized", False):
+                        raise NotImplementedError(
+                            "Full-weight SGLang sync cannot send quantized (4/8-bit) weights. "
+                            "Start the server with --enable-lora to sync the LoRA adapter instead."
+                        )
                     write_sharded_safetensors(
                         iter_policy_weights(model),
                         self.sync_dir,

@@ -575,7 +575,7 @@ See [ORPO](../algorithms/orpo.md) for full configuration.
 
 **Use TRL when:**
 - Need maximum compatibility
-- Need vLLM- or SGLang-backed rollout (`rollout_backend='vllm'` or `'sglang'`), which is TRL-only
+- Need vLLM-backed rollout (`rollout_backend='vllm'`), which is TRL-only. SGLang rollout (`'sglang'`) works with both backends for GRPO, GSPO, DAPO, Dr.GRPO and GBMPO.
 - Working with standard models
 - Want the most-tested training path
 
@@ -604,6 +604,19 @@ trainer = create_rl_trainer(
  backend="unsloth"
 )
 ```
+
+### SGLang rollout: known limits
+
+These come from SGLang itself (tested with 0.5.10.post1), not from aligntune:
+
+- **Adapter sync** (server started with `--enable-lora`) is not available for Qwen3.5 or GPT-2: SGLang's LoRA support does not cover them.
+  Start the server without `--enable-lora`; aligntune then uses full-weight sync, which works for both.
+- **Gemma 2:** `--lora-target-modules all` crashes SGLang (it also puts LoRA on the embeddings).
+  Pass the layers explicitly: `--lora-target-modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj`.
+- **Multimodal models** (for example Gemma 3) work in both sync modes for text-only training.
+  LoRA weights on the vision or audio encoder are not sent to SGLang, which applies LoRA to the language model only.
+- **Large-vocabulary models** (Gemma, 256k tokens) may need a smaller `batch_size` when the trainer and the server share one GPU.
+- Unsloth models loaded in 4-bit can use adapter sync only.
 
 ## Configuration
 

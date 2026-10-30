@@ -399,8 +399,9 @@ class TestNoSilentFallback:
             TRLCounterFactGRPOTrainer,
         )
         from aligntune.backends.trl.rl.pace.pace import TRLPaceTrainer
-        from aligntune.backends.unsloth.rl.dapo.dapo import UnslothDAPOTrainer
-        from aligntune.backends.unsloth.rl.grpo.grpo import UnslothGRPOTrainer
+        from aligntune.backends.unsloth.rl.counterfact_grpo.counterfact_grpo import (
+            UnslothCounterFactGRPOTrainer,
+        )
         from aligntune.core.rl.trainer_base import RLTrainerBase, check_rollout_backend_supported
 
         config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
@@ -408,20 +409,29 @@ class TestNoSilentFallback:
             RLTrainerBase,
             TRLPaceTrainer,
             TRLCounterFactGRPOTrainer,
-            UnslothGRPOTrainer,
-            UnslothDAPOTrainer,
+            UnslothCounterFactGRPOTrainer,
         ):
             with pytest.raises(ValueError, match="not supported"):
                 check_rollout_backend_supported(trainer_cls, config)
 
-    def test_trl_grpo_family_accepts_sglang(self):
+    def test_grpo_family_accepts_sglang(self):
         from aligntune.backends.trl.rl.dapo.dapo import TRLDAPOTrainer
         from aligntune.backends.trl.rl.gbmpo.gbmpo import TRLGBMPOTrainer
         from aligntune.backends.trl.rl.grpo.grpo import TRLGRPOTrainer
+        from aligntune.backends.unsloth.rl.dapo.dapo import UnslothDAPOTrainer
+        from aligntune.backends.unsloth.rl.gbmpo.gbmpo import UnslothGBMPOTrainer
+        from aligntune.backends.unsloth.rl.grpo.grpo import UnslothGRPOTrainer
         from aligntune.core.rl.trainer_base import check_rollout_backend_supported
 
         config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
-        for trainer_cls in (TRLGRPOTrainer, TRLDAPOTrainer, TRLGBMPOTrainer):
+        for trainer_cls in (
+            TRLGRPOTrainer,
+            TRLDAPOTrainer,
+            TRLGBMPOTrainer,
+            UnslothGRPOTrainer,
+            UnslothDAPOTrainer,
+            UnslothGBMPOTrainer,
+        ):
             check_rollout_backend_supported(trainer_cls, config)
 
 
@@ -470,3 +480,10 @@ def test_drop_non_text_adapter_weights_keeps_language_model_tensors(tmp_path):
     assert drop_non_text_adapter_weights(str(tmp_path)) == 1
     assert list(load_file(str(tmp_path / "adapter_model.safetensors"))) == [text]
     assert drop_non_text_adapter_weights(str(tmp_path)) == 0
+
+
+def test_full_sync_refuses_quantized_models(server, tmp_path):
+    model = tiny_model()
+    model.is_quantized = True  # what transformers sets for 4/8-bit loads
+    with pytest.raises(NotImplementedError, match="quantized"):
+        SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(model))
