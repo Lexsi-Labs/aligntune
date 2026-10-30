@@ -23,6 +23,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def _trl_distillation_supports_lmbda():
+    """Offline (dataset completions) distillation needs a TRL DistillationConfig with lmbda."""
+    try:
+        import dataclasses
+
+        from aligntune.backends.trl.distill.distillation.distillation import (
+            _distillation_trainer_classes,
+        )
+
+        config_cls, _ = _distillation_trainer_classes()
+        return "lmbda" in {f.name for f in dataclasses.fields(config_cls)}
+    except ImportError:
+        return True
+
+
+
 class TestOfflineDistillationConfig:
     """Test offline distillation configuration."""
 
@@ -214,6 +230,10 @@ class TestRegistryTaskTypes:
 class TestOfflineTrainingWithBackendFactory:
     """Test offline distillation training using BackendFactory."""
 
+    @pytest.mark.skipif(
+        not _trl_distillation_supports_lmbda(),
+        reason="installed TRL distills on-policy only (its DistillationConfig has no lmbda)",
+    )
     def test_offline_training_e2e(self):
         """Test complete offline distillation training via BackendFactory."""
         from aligntune.core.backend_factory import create_distill_trainer

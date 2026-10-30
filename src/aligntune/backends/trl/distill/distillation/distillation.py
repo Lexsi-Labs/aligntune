@@ -4,6 +4,7 @@ Standard Distillation Trainer - TRL Backend Implementation.
 Simple wrapper: delegates model loading to build_model() and training to TRL.
 """
 
+import dataclasses
 import logging
 import os
 from typing import Dict, Any, Optional, List
@@ -155,6 +156,17 @@ class TRLDistillationTrainer(DistillTrainerBase):
                 on_policy = on_policy.strip().lower() in {"online", "true", "1", "yes"}
             configured_lmbda = 1.0 if on_policy else 0.0
 
+        # Older TRL (experimental DistillationConfig) takes lmbda, the share of student-generated
+        # data. Newer TRL's stable DistillationConfig always trains on-policy and has no lmbda.
+        supports_lmbda = "lmbda" in {f.name for f in dataclasses.fields(DistillationConfig)}
+        if not supports_lmbda and configured_lmbda != 1.0:
+            raise ValueError(
+                f"lmbda={configured_lmbda} (offline or mixed distillation) needs a TRL version "
+                "whose DistillationConfig supports lmbda; the installed TRL distills on-policy "
+                "only. Use on_policy=True (lmbda=1.0) or install a TRL release with lmbda."
+            )
+        lmbda_kwargs = {"lmbda": configured_lmbda} if supports_lmbda else {}
+
         # TRL config
         trl_config = DistillationConfig(
             output_dir=self.config.logging.output_dir,
@@ -171,8 +183,8 @@ class TRLDistillationTrainer(DistillTrainerBase):
             optim=optim_scheduler['optimizer_name'],
             lr_scheduler_type=optim_scheduler['scheduler_name'],
             # Distillation
-            lmbda=configured_lmbda,
             beta=self.config.train.beta if self.config.train.beta is not None else 1.0,
+            **lmbda_kwargs,
         )
         for key, value in extract_extra_and_missing_params(
             backend_config=trl_config, config=self.config, algorithm='distillation'
