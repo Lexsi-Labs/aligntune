@@ -25,6 +25,7 @@ Usage:
 """
 
 import re
+from fractions import Fraction
 from typing import Optional
 
 # Optional dependencies - graceful degradation
@@ -707,6 +708,12 @@ def parse_gsm8k_gold(ans: str) -> str:
     return s
 
 
+def _gsm8k_number(text: str) -> float:
+    """Read an answer as a number, ignoring a currency or percent sign."""
+    text = re.sub(r"\\?[$%]", "", text)
+    return float(Fraction(text)) if "/" in text else float(text)
+
+
 def grade_gsm8k_answer(pred: str, gold: str, rel_tol: float = 1e-5, abs_tol: float = 1e-9) -> bool:
     """
     Grade GSM8K answer with numeric tolerance.
@@ -731,10 +738,10 @@ def grade_gsm8k_answer(pred: str, gold: str, rel_tol: float = 1e-5, abs_tol: flo
 
     # Try numeric comparison
     try:
-        pred_num = float(pred_clean)
-        gold_num = float(gold_clean)
+        pred_num = _gsm8k_number(pred_clean)
+        gold_num = _gsm8k_number(gold_clean)
         return math.isclose(pred_num, gold_num, rel_tol=rel_tol, abs_tol=abs_tol)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, ArithmeticError):
         pass
 
     return False
