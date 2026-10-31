@@ -554,6 +554,11 @@ grade_answer = grade_math_answer
 # Answer Extraction Functions
 # =============================================================================
 
+def _clean_phrase_answer(pred: str) -> str:
+    """Trim the colon, full stop and closing paragraph around an answer taken from a sentence."""
+    return pred.lstrip(": \n").split("\n\n")[0].rstrip(". \n")
+
+
 def extract_math_answer(text: str) -> str:
     """
     Extract the predicted answer from model output.
@@ -602,10 +607,10 @@ def extract_math_answer(text: str) -> str:
     # Check for "answer is" phrases
     if "he answer is" in pred_str:
         pred = pred_str.split("he answer is")[-1].strip()
-        return pred
+        return _clean_phrase_answer(pred)
     elif "final answer is" in pred_str:
         pred = pred_str.split("final answer is")[-1].strip()
-        return pred
+        return _clean_phrase_answer(pred)
 
     # Last resort: extract last number
     pattern = r"-?\d*\.?\d+"
