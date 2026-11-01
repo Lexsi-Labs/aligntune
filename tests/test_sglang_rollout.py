@@ -439,6 +439,15 @@ class TestNoSilentFallback:
             with pytest.raises(ValueError, match="not supported"):
                 check_rollout_backend_supported(trainer_cls, config)
 
+    def test_unsupported_error_does_not_send_users_to_one_backend(self):
+        from aligntune.core.rl.trainer_base import RLTrainerBase, check_rollout_backend_supported
+
+        config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
+        with pytest.raises(ValueError) as error:
+            check_rollout_backend_supported(RLTrainerBase, config)
+        assert "backend='trl'" not in str(error.value)
+        assert "counterfact_grpo" in str(error.value)
+
     def test_grpo_family_accepts_sglang(self):
         from aligntune.backends.trl.rl.counterfact_grpo.counterfact_grpo import (
             TRLCounterFactGRPOTrainer,
