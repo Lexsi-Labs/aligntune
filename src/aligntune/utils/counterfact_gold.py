@@ -8,9 +8,12 @@ from typing import Any, Mapping
 from aligntune.utils.math_grading import extract_math_gold, parse_gsm8k_gold
 
 
-def extract_counterfact_gold(example: Mapping[str, Any]) -> str:
-    """Extract a gold answer without treating arbitrary expressions as GSM8K prose."""
-    raw_answer = example.get("answer")
+def extract_counterfact_gold(example: Mapping[str, Any], answer_col: str = "answer") -> str:
+    """Extract a gold answer without treating arbitrary expressions as GSM8K prose.
+
+    ``answer_col`` is the column holding the answer, for datasets that do not call it "answer".
+    """
+    raw_answer = example.get(answer_col)
     raw_solution = example.get("solution")
     answer = "" if raw_answer is None else str(raw_answer).strip()
     solution = "" if raw_solution is None else str(raw_solution).strip()
