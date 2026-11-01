@@ -46,6 +46,8 @@ def test_numeric_formats_compare_by_value(pred, gold):
         ("1/0", "18", False),
         pytest.param("9" * 400 + "/1", "18", False, id="fraction-too-large-for-float"),
         ("18 dollars", "18", False),
+        pytest.param("1$8", "18", False, id="dollar-inside-a-number"),
+        pytest.param("1%8", "18", False, id="percent-inside-a-number"),
         ("18.", "18", True),
     ],
 )
