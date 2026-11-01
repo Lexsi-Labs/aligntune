@@ -103,3 +103,22 @@ def test_one_number_in_plain_text_is_the_gold(answer, prediction, gold):
 ])
 def test_text_that_is_not_one_plain_number_stays_whole(answer):
     assert extract_counterfact_gold({"answer": answer}) == answer
+
+
+@pytest.mark.parametrize("row", [{"answer": "#### 1/3"}, {"answer": "", "solution": "#### 1/3"}])
+def test_gsm8k_marker_keeps_a_fraction(row):
+    gold = extract_counterfact_gold(row)
+    assert gold == "1/3"
+    assert grade_math_answer(extract_math_answer("The answer is 1/3."), gold)
+
+
+@pytest.mark.parametrize("completion", ["so 0.33333", "so 1/3"])
+def test_unsloth_reward_reads_a_fraction_gold(completion):
+    from aligntune.backends.unsloth.rl.counterfact_grpo.counterfact_grpo import (
+        UnslothCounterFactGRPOTrainer,
+    )
+
+    trainer = object.__new__(UnslothCounterFactGRPOTrainer)
+    trainer.prompt_to_answer = {"p": extract_counterfact_gold({"answer": "#### 1/3"})}
+    assert trainer._combined_reward_function([completion], prompts=["p"]) == [1.0]
+    assert trainer._combined_reward_function(["so 0.5"], prompts=["p"]) == [0.0]

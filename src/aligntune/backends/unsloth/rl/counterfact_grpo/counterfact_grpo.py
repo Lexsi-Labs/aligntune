@@ -14,6 +14,7 @@ import logging
 import time
 import re
 import math
+from fractions import Fraction
 import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional, List
@@ -500,7 +501,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             **kwargs) -> List[float]:
         """Outcome-based reward function matching training_script.py."""
         def parse_pred_number(text: str) -> str:
-            nums = re.findall(r"-?\d+(?:\.\d+)?", text.replace(",", ""))
+            nums = re.findall(r"-?\d+(?:/\d+|\.\d+)?", text.replace(",", ""))
             candidate = nums[-1] if nums else ""
             if re.fullmatch(r"-?\d+/\d+", candidate):
                 num, den = candidate.split("/")
@@ -513,7 +514,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
         def numeric_equal(a: str, b: str, rtol=1e-4, atol=1e-8) -> bool:
             try:
                 fa = float(a)
-                fb = float(b)
+                fb = float(Fraction(b))  # gold keeps a fraction as written
                 return math.isclose(fa, fb, rel_tol=rtol, abs_tol=atol)
             except BaseException:
                 return a.strip() == b.strip()

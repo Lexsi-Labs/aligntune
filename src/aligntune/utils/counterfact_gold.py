@@ -6,7 +6,7 @@ Keep GSM8K explicit answer markers separate from free-form MATH expressions.
 import re
 from typing import Any, Mapping
 
-from aligntune.utils.math_grading import extract_math_gold, parse_gsm8k_gold
+from aligntune.utils.math_grading import extract_math_gold
 
 _MATH_SYNTAX = re.compile(r"[\\^_{}=+*/()\[\]<>|]|\w-\w|\w\s+-\s+\w")
 _NUMBER = re.compile(r"(?<![\w.])-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w)")
@@ -35,9 +35,9 @@ def extract_counterfact_gold(example: Mapping[str, Any], answer_col: str = "answ
 
     # GSM8K's explicit marker is the reliable signal for its prose-style format.
     if "####" in answer:
-        return parse_gsm8k_gold(answer)
+        return extract_math_gold(answer)
     if "####" in solution:
-        return parse_gsm8k_gold(solution)
+        return extract_math_gold(solution)
 
     # MATH datasets commonly put the canonical boxed answer in the solution.
     solution_gold = extract_math_gold(solution) if solution else ""
