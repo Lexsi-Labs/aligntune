@@ -30,6 +30,7 @@ from aligntune.core.rl.caching import DatasetCache
 from aligntune.core.rl.sample_logger import generate_and_log_samples
 from aligntune.core.sft.evaluator import EnhancedEvaluator
 from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
+from aligntune.utils.counterfact_gold import extract_counterfact_gold
 from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
@@ -558,7 +559,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             answer = item.get(answer_col, "") if answer_col else ""
 
             # Extract gold answer for math
-            gold_answer = (extract_math_gold(answer) or self.parse_gsm8k_gold(str(answer))) if answer else None
+            gold_answer = extract_counterfact_gold(item) if answer else None
 
             # Format prompt
             formatted_prompt = self._format_math_prompt(question, system_prompt)
