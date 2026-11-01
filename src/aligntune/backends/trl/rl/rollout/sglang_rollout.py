@@ -480,7 +480,8 @@ class SGLangRollout:
         """Unload this run's adapter so a long-lived server does not accumulate them."""
         name, self.lora_name = self.lora_name, None
         self._synced_step = None  # a reused rollout re-syncs before generating again
-        if name is None:
+        # on_train_end runs on every rank, but only the rank that loaded the adapter unloads it.
+        if name is None or self._version == 0:
             return
         try:
             self.client.unload_lora_adapter(name)

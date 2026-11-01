@@ -328,6 +328,7 @@ def _two_rank_worker(rank, init_file, server_url, out_dir):
             names.append(rollout.lora_name)
         with open(os.path.join(out_dir, f"rank{rank}.json"), "w") as f:
             json.dump(names, f)
+        rollout.close()  # on_train_end runs on every rank
     finally:
         dist.destroy_process_group()
 
@@ -348,6 +349,7 @@ class TestAdapterSync:
         for rank in (0, 1):
             assert json.loads((tmp_path / f"rank{rank}.json").read_text()) == [v1, v2]
         assert sorted(p["lora_path"] for p in calls("/generate")) == [v1, v1, v2, v2]
+        assert [p["lora_name"] for p in calls("/unload_lora_adapter")] == [v1, v2]
 
     def test_adapter_is_hot_loaded_and_previous_version_unloaded(self, server, tmp_path):
         FakeSGLang.enable_lora = True
@@ -378,7 +380,7 @@ class TestAdapterSync:
     def test_close_does_not_raise_when_server_is_gone(self, tmp_path):
         rollout = SGLangRollout.__new__(SGLangRollout)
         rollout.client = SGLangClient(unused_url(), timeout=2)
-        rollout.lora_name, rollout._synced_step = "aligntune-x-v1", 0
+        rollout.lora_name, rollout._synced_step, rollout._version = "aligntune-x-v1", 0, 1
         rollout.close()
         assert rollout.lora_name is None
 
