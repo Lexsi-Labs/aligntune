@@ -16,6 +16,15 @@ def test_preserves_unboxed_math_expressions(answer):
     assert extract_counterfact_gold({"answer": answer}) == answer
 
 
+def test_preserves_unboxed_expression_from_solution_when_answer_is_empty():
+    expression = r"\frac{14}{3}"
+    assert extract_counterfact_gold({"answer": "", "solution": expression}) == expression
+
+
+def test_preserves_numeric_zero():
+    assert extract_counterfact_gold({"answer": 0}) == "0"
+
+
 def test_prefers_boxed_answer_from_math_solution():
     example = {
         "answer": r"\frac{14}{3}",
