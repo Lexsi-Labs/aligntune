@@ -559,7 +559,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             answer = item.get(answer_col, "") if answer_col else ""
 
             # Extract gold answer for math
-            gold_answer = extract_counterfact_gold(item) if answer else None
+            gold_answer = extract_counterfact_gold(item)
 
             # Format prompt
             formatted_prompt = self._format_math_prompt(question, system_prompt)
