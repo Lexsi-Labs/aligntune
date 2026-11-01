@@ -3,9 +3,24 @@
 Keep GSM8K explicit answer markers separate from free-form MATH expressions.
 """
 
+import re
 from typing import Any, Mapping
 
 from aligntune.utils.math_grading import extract_math_gold, parse_gsm8k_gold
+
+_MATH_SYNTAX = re.compile(r"[\\^_{}=+*/()\[\]<>|]|\w-\w|\w\s+-\s+\w")
+_NUMBER = re.compile(r"(?<![\w.])-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w)")
+
+
+def _lone_number(text: str) -> str:
+    """The number in plain text with exactly one ("72 eggs"), else "" ("x^2+1", "(1,2)", "3x").
+
+    Known limit: "2 x" and "2 pi" read as 2, as they did before.
+    """
+    if _MATH_SYNTAX.search(text):
+        return ""
+    numbers = _NUMBER.findall(text)
+    return numbers[0].replace(",", "") if len(numbers) == 1 else ""
 
 
 def extract_counterfact_gold(example: Mapping[str, Any], answer_col: str = "answer") -> str:
@@ -37,4 +52,5 @@ def extract_counterfact_gold(example: Mapping[str, Any], answer_col: str = "answ
     # Preserve unboxed values, including expressions and numeric zero. If the
     # answer column is absent/empty, retain a non-empty solution rather than
     # silently replacing it with an empty gold answer.
-    return answer or solution
+    text = answer or solution
+    return _lone_number(text) or text

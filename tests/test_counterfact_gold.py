@@ -3,6 +3,7 @@
 import pytest
 
 from aligntune.utils.counterfact_gold import extract_counterfact_gold
+from aligntune.utils.math_grading import extract_math_answer, grade_math_answer
 
 
 @pytest.mark.parametrize("answer", [
@@ -75,3 +76,30 @@ def test_trl_rows_with_no_gold_stay_none():
     ]
     assert trl_golds([{"problem": "a", "final_answer": ""}]) == [None]
     assert trl_golds([{"problem": "a", "answer": "0"}]) == ["0"]
+
+
+@pytest.mark.parametrize("answer, prediction, gold", [
+    ("72 eggs", "The answer is 72.", "72"),
+    ("The answer is 42", "The answer is 42.", "42"),
+    ("$1,234", "The answer is 1234.", "1234"),
+    ("-5 degrees", "The answer is -5.", "-5"),
+    ("It is -5", "The answer is -5.", "-5"),
+    ("3.5 km", "The answer is 3.5.", "3.5"),
+])
+def test_one_number_in_plain_text_is_the_gold(answer, prediction, gold):
+    assert extract_counterfact_gold({"answer": answer}) == gold
+    assert grade_math_answer(extract_math_answer(prediction), gold)
+
+
+@pytest.mark.parametrize("answer", [
+    "x^2+1",
+    "3x",
+    "x - 1",
+    "x = 5",
+    "1, 2",
+    "1,2 or 3",
+    "3 apples and 4 pears",
+    "Even",
+])
+def test_text_that_is_not_one_plain_number_stays_whole(answer):
+    assert extract_counterfact_gold({"answer": answer}) == answer
