@@ -52,6 +52,8 @@ class UnslothPaceTrainer(UnslothGRPOTrainer):
     the GRPOTrainer class that we subclass.
     """
 
+    SUPPORTS_SGLANG_ROLLOUT = False  # builds its own trainer in setup_trainer
+
     def __init__(self, config: UnifiedConfig):
         super().__init__(config)
 

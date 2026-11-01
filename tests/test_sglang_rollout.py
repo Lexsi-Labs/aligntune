@@ -431,10 +431,11 @@ class TestAdapterSync:
 class TestNoSilentFallback:
     def test_trainers_that_ignore_sglang_raise(self):
         from aligntune.backends.trl.rl.pace.pace import TRLPaceTrainer
+        from aligntune.backends.unsloth.rl.pace.pace import UnslothPaceTrainer
         from aligntune.core.rl.trainer_base import RLTrainerBase, check_rollout_backend_supported
 
         config = SimpleNamespace(train=SimpleNamespace(rollout_backend="sglang"))
-        for trainer_cls in (RLTrainerBase, TRLPaceTrainer):
+        for trainer_cls in (RLTrainerBase, TRLPaceTrainer, UnslothPaceTrainer):
             with pytest.raises(ValueError, match="not supported"):
                 check_rollout_backend_supported(trainer_cls, config)
 
