@@ -27,7 +27,7 @@ from aligntune.core.rl.registries import DatasetRegistry, RewardRegistry
 from aligntune.core.rl.caching import DatasetCache
 from aligntune.core.sft.evaluator import EnhancedEvaluator
 from aligntune.data.manager import DataManager
-from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
+from aligntune.utils.math_grading import extract_math_answer, grade_math_answer
 from aligntune.utils.counterfact_gold import extract_counterfact_gold
 
 logger = logging.getLogger(__name__)
@@ -300,21 +300,6 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
         """Setup datasets for Counterfactual GRPO training."""
         self.setup_dataset()
     
-    def parse_gsm8k_gold(self,ans: str) -> str:
-            """Parse gold answer from GSM8K format (#### answer)."""
-            import re
-            m = re.search(r"####\s*(.+)$", ans, flags=re.MULTILINE)
-            if not m:
-                nums = re.findall(r"-?\d+(?:\.\d+)?", ans.replace(",", ""))
-                return nums[-1] if nums else ""
-            s = m.group(1).strip().replace(",", "")
-            if re.fullmatch(r"-?\d+/\d+", s):
-                num, den = s.split("/")
-                try:
-                    return str(float(num) / float(den))
-                except:
-                    return s
-            return s
 
     def setup_dataset(self) -> None:
         """Setup datasets for GRPO training using unified DataManager."""
