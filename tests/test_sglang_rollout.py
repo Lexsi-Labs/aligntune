@@ -5,8 +5,10 @@ A tiny in-process HTTP server stands in for SGLang, so these run on CPU
 without sglang installed.
 """
 
+import contextlib
 import json
 import os
+import sys
 import threading
 import time
 from contextlib import nullcontext
@@ -603,3 +605,147 @@ def test_full_sync_dequantizes_4bit_weights(tmp_path):
             assert exported[name].shape == tensor.shape, name
             assert exported[name].dtype == torch.bfloat16, name
             assert (exported[name].float().cpu() - tensor.float()).abs().mean() < 0.05, name
+
+
+def tiny_gemma3():
+    """A multimodal model that transformers 5 renames on load (the Gemma 3 weight-name case)."""
+    from transformers import (
+        Gemma3Config,
+        Gemma3ForConditionalGeneration,
+        Gemma3TextConfig,
+        SiglipVisionConfig,
+    )
+
+    torch.manual_seed(0)
+    text = Gemma3TextConfig(
+        hidden_size=32, intermediate_size=64, num_hidden_layers=1, num_attention_heads=2,
+        num_key_value_heads=1, head_dim=16, vocab_size=100,
+    )
+    vision = SiglipVisionConfig(
+        hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2,
+        image_size=28, patch_size=14,
+    )
+    return Gemma3ForConditionalGeneration(
+        Gemma3Config(text_config=text, vision_config=vision, mm_tokens_per_image=1)
+    )
+
+
+class TestSyncWiring:
+    """sync_weights and _sync_adapter call the helpers that make a real server accept the files."""
+
+    def test_full_sync_writes_the_names_save_pretrained_writes(self, server, tmp_path):
+        from safetensors import safe_open
+
+        model = tiny_gemma3()
+        model.save_pretrained(tmp_path / "saved")
+        with safe_open(str(tmp_path / "saved" / "model.safetensors"), "pt") as f:
+            saved = set(f.keys())
+
+        sync_dir = tmp_path / "sync"
+        SGLangRollout(server, sync_dir=str(sync_dir)).sync_weights(make_trainer(model))
+        assert set(load_shards(str(sync_dir))) - {"lm_head.weight"} == saved
+
+    def adapter_sent_to_server(self, server, tmp_path, target_modules):
+        from peft import LoraConfig, get_peft_model
+        from safetensors import safe_open
+
+        FakeSGLang.enable_lora = True
+        model = tiny_gemma3()
+        model.config._name_or_path = FakeSGLang.model_path
+        model = get_peft_model(model, LoraConfig(r=2, target_modules=target_modules))
+        SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(model))
+        path = calls("/load_lora_adapter")[-1]["lora_path"]
+        with safe_open(os.path.join(path, "adapter_model.safetensors"), "pt") as f:
+            keys = set(f.keys())
+        with open(os.path.join(path, "adapter_config.json")) as f:
+            return keys, json.load(f)["target_modules"]
+
+    def test_adapter_sync_leaves_out_vision_tensors(self, server, tmp_path):
+        keys, _ = self.adapter_sent_to_server(server, tmp_path, ["q_proj"])
+        assert keys
+        assert not [k for k in keys if "vision_tower" in k]
+
+    def test_adapter_sync_rewrites_a_regex_target_modules(self, server, tmp_path):
+        _, target_modules = self.adapter_sent_to_server(
+            server, tmp_path, ".*language_model.*q_proj"
+        )
+        assert target_modules == ["q_proj"]
+
+
+class _StopAfterSetup(Exception):
+    pass
+
+
+class _RecordingTrainer:
+    """Stands in for TRL's trainers: records its kwargs and callbacks."""
+
+    last = None
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.args = kwargs["args"]
+        self.callbacks = []
+        type(self).last = self
+
+    def add_callback(self, callback):
+        self.callbacks.append(callback)
+
+    def train(self, *args, **kwargs):  # TRLCounterFactGRPOTrainer builds its trainer in train()
+        raise _StopAfterSetup
+
+    def compute_loss(self):  # Unsloth counterfactual patches trl.GRPOTrainer with these two
+        pass
+
+    _compute_loss_impl = compute_loss
+
+
+TRAINERS_WITH_SGLANG = [
+    "aligntune.backends.trl.rl.grpo.grpo:TRLGRPOTrainer",
+    "aligntune.backends.trl.rl.counterfact_grpo.counterfact_grpo:TRLCounterFactGRPOTrainer",
+    "aligntune.backends.unsloth.rl.grpo.grpo:UnslothGRPOTrainer",
+    "aligntune.backends.unsloth.rl.counterfact_grpo.counterfact_grpo:UnslothCounterFactGRPOTrainer",
+]
+
+
+@pytest.mark.parametrize("path", TRAINERS_WITH_SGLANG, ids=lambda p: p.split(":")[1])
+def test_setup_trainer_hands_the_rollout_to_trl(path, server, tmp_path, monkeypatch):
+    import importlib
+    from unittest import mock
+
+    import trl
+
+    from aligntune.backends.trl.rl.counterfact_grpo import custom_trainer as trl_custom
+    from aligntune.backends.unsloth.rl.counterfact_grpo import custom_trainer as unsloth_custom
+
+    module, name = path.split(":")
+    monkeypatch.setitem(sys.modules, "unsloth", None)  # importing it raises without a GPU
+    _RecordingTrainer.last = None
+    monkeypatch.setattr(trl, "GRPOTrainer", _RecordingTrainer)
+    monkeypatch.setattr(trl_custom, "CounterfactualGRPOTrainer", _RecordingTrainer)
+    monkeypatch.setattr(unsloth_custom, "CounterfactualGRPOTrainer", _RecordingTrainer)
+    trainer = object.__new__(getattr(importlib.import_module(module), name))
+    trainer.config = SimpleNamespace(
+        train=SimpleNamespace(
+            rollout_backend="sglang", sglang_server_url=server, sglang_sync_dir=str(tmp_path),
+            use_cpu=True, max_steps=1, learning_rate=1e-5, weight_decay=0.0, num_generations=2,
+            per_device_batch_size=2,
+        ),
+        model=SimpleNamespace(),
+        logging=SimpleNamespace(output_dir=str(tmp_path), loggers=[]),
+        rewards=[],
+    )
+    for attribute in ("model", "unsloth_model", "tokenizer"):
+        setattr(trainer, attribute, mock.MagicMock())
+    for step in ("setup_model", "setup_rewards", "setup_data"):  # train() calls these first
+        setattr(trainer, step, lambda: None)
+    trainer.train_dataset, trainer.eval_dataset = [{"prompt": "a"}], None
+    trainer.reward_functions = [lambda completions, **kwargs: [0.0] * len(completions)]
+    trainer.prepared_rewards = SimpleNamespace(functions=trainer.reward_functions, weights=[1.0])
+
+    with contextlib.suppress(_StopAfterSetup):
+        (trainer.setup_trainer if hasattr(trainer, "setup_trainer") else trainer.train)()
+
+    built = _RecordingTrainer.last
+    assert isinstance(built.kwargs["rollout_func"], SGLangRollout)
+    assert built.kwargs["rollout_func"].client.base_url == server
+    assert [type(c).__name__ for c in built.callbacks].count("SGLangRolloutCallback") == 1
