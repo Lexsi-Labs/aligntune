@@ -515,6 +515,27 @@ def test_drop_non_text_adapter_weights_keeps_language_model_tensors(tmp_path):
     assert drop_non_text_adapter_weights(str(tmp_path)) == 0
 
 
+def test_drop_non_text_adapter_weights_matches_whole_module_names(tmp_path):
+    from safetensors.torch import load_file, save_file
+
+    from aligntune.backends.trl.rl.rollout.sglang_rollout import drop_non_text_adapter_weights
+
+    keep = {
+        f"base_model.model.model.layers.0.{module}.q_proj.lora_A.weight": torch.zeros(2, 4)
+        for module in ("visual_attn", "audio_gate", "cross_vision_model_attn")
+    }
+    drop = {
+        f"base_model.model.model.{module}.layers.0.q_proj.lora_A.weight": torch.zeros(2, 3)
+        for module in (
+            "vision_tower", "vision_model", "vision_encoder", "visual", "multi_modal_projector",
+            "audio", "audio_tower", "audio_model", "audio_encoder",
+        )
+    }
+    save_file({**keep, **drop}, str(tmp_path / "adapter_model.safetensors"))
+    assert drop_non_text_adapter_weights(str(tmp_path)) == len(drop)
+    assert set(load_file(str(tmp_path / "adapter_model.safetensors"))) == set(keep)
+
+
 def test_full_sync_refuses_8bit_models(server, tmp_path):
     model = tiny_model()
     model.is_loaded_in_8bit = True  # what transformers sets for 8-bit loads

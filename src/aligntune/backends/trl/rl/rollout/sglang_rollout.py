@@ -251,7 +251,12 @@ def check_adapter_supported(peft_config) -> None:
         )
 
 
-NON_TEXT_MODULES = ("vision_tower", "vision_model", "visual", "multi_modal_projector", "audio")
+# Whole module names: a text model's "visual_attn" or "audio_gate" is not one of these.
+NON_TEXT_MODULES = frozenset({
+    "vision_tower", "vision_model", "vision_encoder", "visual", "embed_vision",
+    "multi_modal_projector",
+    "audio", "audio_tower", "audio_model", "audio_encoder", "embed_audio",
+})
 
 
 def drop_non_text_adapter_weights(adapter_dir: str) -> int:
@@ -265,7 +270,7 @@ def drop_non_text_adapter_weights(adapter_dir: str) -> int:
 
     path = os.path.join(adapter_dir, "adapter_model.safetensors")
     weights = load_file(path)
-    kept = {k: v for k, v in weights.items() if not any(m in k for m in NON_TEXT_MODULES)}
+    kept = {k: v for k, v in weights.items() if NON_TEXT_MODULES.isdisjoint(k.split("."))}
     if len(kept) < len(weights):
         save_file(kept, path, metadata={"format": "pt"})
     return len(weights) - len(kept)
