@@ -28,6 +28,7 @@ for real isolation.
 import ast
 import builtins
 import functools
+import itertools
 import json
 import logging
 import math
@@ -334,18 +335,57 @@ class _Vals(list):
     touched = 0
 
 
+_VIEWS = (type({}.keys()), type({}.values()), type({}.items()))
+
+
+def _same_hash(members: Any) -> bool:
+    """Whether too many of ``members`` hash alike, which makes building a set or dict quadratic."""
+    def h(x: Any) -> int:
+        try:
+            return hash(x)
+        except TypeError:  # unhashable, so it can't become a member or a key
+            return id(x)
+
+    return bool(members) and max(Counter(map(h, members)).values()) > _MAX_SAME_HASH
+
+
+def _tame(x: Any) -> Any:
+    """A dict view or an iterator (zip, enumerate, reversed...) as a list, read up to the element cap."""
+    if type(x) in _VIEWS or hasattr(x, "__next__"):
+        out = list(itertools.islice(x, _MAX_REPEAT + 1))
+        if len(out) > _MAX_REPEAT:
+            raise _Fail
+        return out
+    return x
+
+
 def _small(v: Any, *things: Any) -> None:
     """Refuse a big container or string, a total past the cap for this assert, and hash collisions."""
     for t in things:
-        if type(t) in (str, list, tuple, set, frozenset, dict):
+        if type(t) in (str, list, tuple, set, frozenset, dict) or type(t) in _VIEWS:
             if len(t) > _MAX_REPEAT:
                 raise _Fail
             v.touched += len(t)
-            # Values that hash alike make building a set or dict quadratic.
-            if type(t) is not str and t and max(Counter(map(hash, t)).values()) > _MAX_SAME_HASH:
+            if type(t) is not str and _same_hash(t):
                 raise _Fail
     if v.touched > 10 * _MAX_REPEAT:
         raise _Fail
+
+
+def _dict_keys_collide(arg: Any) -> bool:
+    """For ``dict(pairs)``: whether the keys that would be inserted hash alike.
+
+    Every element must be a list or tuple of two items, so no key hides in another kind of pair.
+    """
+    if type(arg) not in (list, tuple, set, frozenset):
+        return False
+    keys = []
+    for p in arg:
+        if type(p) not in (list, tuple) or len(p) != 2:
+            raise _Fail
+        keys.append(p[0])
+    return _same_hash(keys)
+
 
 Ev = Callable[[List[Any]], Any]
 
@@ -387,7 +427,9 @@ def _binop(op: ast.operator, a: Any, b: Any, v: Any) -> Any:
     elif isinstance(op, ast.Mod):
         if type(a) not in (int, float) or type(b) not in (int, float):  # no printf-style formatting
             raise _Fail
-    return _BINOPS[type(op)](a, b)
+    result = _BINOPS[type(op)](a, b)
+    _small(v, result)
+    return result
 
 
 _BINOPS = {
@@ -505,9 +547,11 @@ def _compile_node(node: ast.expr, calls: List[str]) -> Ev:
         func = node.func
         if isinstance(func, ast.Name) and func.id in _FUNCS:
             def call(v: List[Any]) -> Any:
-                values = [a(v) for a in args]
+                values = [_tame(a(v)) for a in args]
                 if func.id != "len":
                     _small(v, *values)
+                if func.id == "dict" and values and _dict_keys_collide(values[0]):
+                    raise _Fail
                 return _FUNCS[func.id](*values, **{k: a(v) for k, a in kwargs})
 
             return call
@@ -521,12 +565,14 @@ def _compile_node(node: ast.expr, calls: List[str]) -> Ev:
                 r = receiver(v)
                 if type(r) not in _PLAIN:
                     raise _Fail
-                values = [a(v) for a in args]
+                values = [_tame(a(v)) for a in args]
                 _small(v, r, *values)
                 if func.attr == "join" and (len(values) != 1 or not hasattr(values[0], "__len__")
                                             or len(r) * len(values[0]) > _MAX_REPEAT):
                     raise _Fail
-                return getattr(r, func.attr)(*values, **{k: a(v) for k, a in kwargs})
+                result = getattr(r, func.attr)(*values, **{k: a(v) for k, a in kwargs})
+                _small(v, result)
+                return result
 
             return method
     raise _Undecomposable(ast.unparse(node))

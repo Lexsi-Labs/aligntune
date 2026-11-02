@@ -213,3 +213,118 @@ def test_colliding_hashes_are_refused_before_the_set_is_built():
         with pytest.raises(_code_grader._Fail):
             check([bad])
         assert time.time() - start < 0.2
+
+
+# Dict views and iterators (zip, enumerate, reversed) go through the same collision check as the
+# containers they come from. The values here are what the child would return.
+_M = 2**61 - 1
+_BAD = [_M * i for i in range(1, 9000)]
+_BAD_KEYS = dict.fromkeys(_BAD, 0)  # keys that hash alike
+_BAD_VALUES = {i: _M * i for i in range(1, 9000)}  # distinct keys, values that hash alike
+_GOOD = list(range(9000))
+_GOOD_KEYS = dict.fromkeys(_GOOD, 0)
+_GOOD_VALUES = {i: i for i in _GOOD}
+
+
+def _run(test, *values):
+    plan = _code_grader.plan_assert(test)
+    assert plan is not None
+    return plan[1](list(values))
+
+
+@pytest.mark.parametrize(
+    "test, values",
+    [
+        ("assert set(f().values()) == set()", [_BAD_VALUES]),
+        ("assert frozenset(f().items()) == frozenset()", [_BAD_KEYS]),
+        ("assert set(f().keys()) == set()", [_BAD_KEYS]),
+        ("assert set(zip(f(), f())) == set()", [_BAD, _BAD]),
+        ("assert set(zip(f().values(), f().values())) == set()", [_BAD_VALUES, _BAD_VALUES]),
+        ("assert dict(zip(f().values(), f().keys())) == {}", [_BAD_VALUES, _BAD_VALUES]),
+        ("assert dict(zip(f(), g())) == {}", [_BAD, _GOOD]),
+        ("assert dict(enumerate(f().values())) == {}", [_BAD_VALUES]),
+        ("assert dict(zip(f().values(), g())) == {}", [_BAD_VALUES, _GOOD]),
+        ("assert set(reversed(f().values())) == set()", [_BAD_VALUES]),
+        ("assert set(reversed(f())) == set()", [_BAD]),
+        ("assert f().keys() | g().keys() == set()", [_BAD_KEYS, _BAD_KEYS]),
+        ("assert f().keys() & g().keys() == set()", [_BAD_KEYS, _BAD_KEYS]),
+        ("assert f().keys() - g().keys() == set()", [_BAD_KEYS, _BAD_KEYS]),
+        ("assert f().keys() ^ g().keys() == set()", [_BAD_KEYS, _BAD_KEYS]),
+        ("assert set([1]).union(f().values()) == set()", [_BAD_VALUES]),
+        ("assert set([1]).issubset(f().keys()) == set()", [_BAD_KEYS]),
+    ],
+)
+def test_views_and_iterators_cannot_dodge_the_collision_check(test, values):
+    import time
+
+    start = time.time()
+    with pytest.raises(_code_grader._Fail):
+        _run(test, *values)
+    assert time.time() - start < 1
+
+
+@pytest.mark.parametrize(
+    "test, values",
+    [
+        ("assert len(set(f().values())) == 9000", [_GOOD_VALUES]),
+        ("assert len(frozenset(f().items())) == 9000", [_GOOD_KEYS]),
+        ("assert len(set(zip(f(), f()))) == 9000", [_GOOD, _GOOD]),
+        ("assert len(dict(zip(f(), g()))) == 9000", [_GOOD, _GOOD]),
+        ("assert len(dict(enumerate(f().values()))) == 9000", [_GOOD_VALUES]),
+        ("assert len(set(reversed(f()))) == 9000", [_GOOD]),
+        ("assert len(f().keys() | g().keys()) == 9000", [_GOOD_KEYS, _GOOD_KEYS]),
+        ("assert len(f().keys() & g().keys()) == 9000", [_GOOD_KEYS, _GOOD_KEYS]),
+        ("assert len(set([-1]).union(f().values())) == 9001", [_GOOD_VALUES]),
+        ("assert sorted(f().items())[0] == (0, 0)", [_GOOD_VALUES]),
+        ("assert sum(f().values()) == 9000 * 8999 // 2", [_GOOD_VALUES]),
+    ],
+)
+def test_the_same_shapes_with_distinct_values_still_work(test, values):
+    assert _run(test, *values) is True
+
+
+_SETS_BAD = [{_M * i for i in range(1, 4001)}, {_M * i for i in range(4001, 8001)}]
+_SETS_GOOD = [set(range(4000)), set(range(4000, 8000))]
+_PAIRS_BAD = [(k, 0) for k in _BAD]
+
+
+@pytest.mark.parametrize(
+    "test, values",
+    [
+        ("assert dict(f()) == {}", [_PAIRS_BAD + [(1, 2, 3)]]),
+        ("assert dict(f()) == {}", [_PAIRS_BAD + [7]]),
+        ("assert dict(f()) == {}", [_PAIRS_BAD]),
+        ("assert dict(f()) == {}", [[frozenset({k, 0}) for k in _BAD]]),
+        ("assert dict(f()) == {}", [[{k, 0} for k in _BAD]]),
+        ("assert dict(f()) == {}", [["ab"]]),
+        ("assert dict(f()) == {}", [[{1: 2, 3: 4}]]),
+        ("assert f() | g() == set()", _SETS_BAD),
+        ("assert f() & g() == set()", _SETS_BAD),
+        ("assert f().union(g()) == set()", _SETS_BAD),
+        ("assert f().intersection(g()) == set()", _SETS_BAD),
+        ("assert f().difference(g()) == set()", _SETS_BAD),
+        ("assert f().symmetric_difference(g()) == set()", _SETS_BAD),
+    ],
+)
+def test_dict_pairs_and_set_operators_are_checked_per_element_and_on_results(test, values):
+    import time
+
+    start = time.time()
+    with pytest.raises(_code_grader._Fail):
+        _run(test, *values)
+    assert time.time() - start < 1
+
+
+@pytest.mark.parametrize(
+    "test, values",
+    [
+        ("assert len(dict(f())) == 9000", [[(k, 0) for k in _GOOD]]),
+        ("assert len(dict(f())) == 9000", [[[k, 0] for k in _GOOD]]),
+        ("assert len(f() | g()) == 8000", _SETS_GOOD),
+        ("assert len(f() & g()) == 0", _SETS_GOOD),
+        ("assert len(f().union(g())) == 8000", _SETS_GOOD),
+        ("assert len(f().difference(g())) == 4000", _SETS_GOOD),
+    ],
+)
+def test_ordinary_pairs_and_sets_still_work(test, values):
+    assert _run(test, *values) is True
