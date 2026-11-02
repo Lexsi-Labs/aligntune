@@ -27,6 +27,7 @@ from aligntune.core.rl.caching import DatasetCache
 from aligntune.core.sft.evaluator import EnhancedEvaluator
 from aligntune.data.manager import DataManager
 from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
+from aligntune.utils.counterfact_gold import extract_counterfact_gold
 
 logger = logging.getLogger(__name__)
 
@@ -393,12 +394,10 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 
                 # Extract gold answer - CRITICAL for reward computation!
                 answer_clean = ""
-                if 'answer' in example:
-                    answer_clean = self.parse_gsm8k_gold(str(example['answer']))
-                elif 'answer_clean' in example:
+                if 'answer_clean' in example:
                     answer_clean = str(example['answer_clean'])
-                elif 'solution' in example:
-                    answer_clean = extract_math_gold(str(example['solution']))
+                else:
+                    answer_clean = extract_counterfact_gold(example)
                 
                 return {
                     "query": prompt_text,
