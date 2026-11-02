@@ -12,6 +12,7 @@ import sys
 import tempfile
 import threading
 from pathlib import Path
+from typing import Any, Dict
 
 import pytest
 
@@ -29,7 +30,7 @@ def _child(fn, conn):
         conn.send(("raised", type(e).__name__))
 
 
-def in_child(fn, limit=60.0):
+def in_child(fn, limit=60.0) -> Any:
     """Run ``fn`` in a forked child; return its value, or a string saying how it went wrong."""
     ctx = multiprocessing.get_context("fork")
     recv, send = ctx.Pipe(duplex=False)
@@ -196,7 +197,7 @@ def test_no_test_path_works_on_a_worker_thread():
 
 @pytest.mark.parametrize("name", ["code_correctness", "code_quality"])
 def test_weight_is_not_applied_inside_compute(name):
-    kwargs = {"test_cases": DICTS} if name == "code_correctness" else {}
+    kwargs: Dict[str, Any] = {"test_cases": DICTS} if name == "code_correctness" else {}
 
     def run():
         return (reward(name, weight=1.0).compute(GOOD, **kwargs), reward(name, weight=0.3).compute(GOOD, **kwargs))
@@ -348,7 +349,7 @@ def test_assert_shape_it_cant_split_fails_with_a_warning(caplog):
         import logging
         records = []
         handler = logging.Handler()
-        handler.emit = records.append
+        handler.emit = records.append  # type: ignore[assignment]
         logging.getLogger("aligntune.rewards._code_grader").addHandler(handler)
         value = reward("code_execution").compute(GOOD, test_cases=["print('not an assert')"])
         return value, [r.getMessage() for r in records]
@@ -390,7 +391,7 @@ HE_TEST = (
     "    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 1.0) == True\n"
     "    assert candidate([1.1, 2.2, 3.1, 4.1, 5.1], 0.5) == False\n\n"
 )
-HE_ROW = {"test": HE_TEST, "entry_point": "has_close_elements", "prompt": HE_PROMPT}
+HE_ROW: Dict[str, Any] = {"test": HE_TEST, "entry_point": "has_close_elements", "prompt": HE_PROMPT}
 HE_FORMS = {
     "fenced": "Here is the function.\n" + fence(HE_PROMPT + HE_BODY),
     "bare": HE_PROMPT + HE_BODY,

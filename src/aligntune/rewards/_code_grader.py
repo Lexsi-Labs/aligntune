@@ -39,7 +39,7 @@ import subprocess
 import sys
 import tempfile
 from collections import Counter
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence, Tuple, cast
 
 logger = logging.getLogger(__name__)
 
@@ -351,7 +351,7 @@ def plan_assert(assertion: str) -> Optional[Tuple[Tuple[Operand, ...], Callable[
         return (_operand(test.operand),), operator.not_
     if isinstance(test, ast.Call) and ast.unparse(test.func) == "math.isclose" and len(test.args) == 2:
         try:
-            kwargs = {k.arg: ast.literal_eval(k.value) for k in test.keywords}
+            kwargs = cast(Dict[str, Any], {k.arg: ast.literal_eval(k.value) for k in test.keywords})
         except (ValueError, TypeError, SyntaxError):
             logger.warning("Can't grade this test, so it counts as failed: %.120s", assertion)
             return None
@@ -402,6 +402,7 @@ def grade(
     run = run_candidate(code, timeout, items, memory_limit_mb=memory_limit_mb, builtins_allow=builtins_allow)
     if run.status != "ok":
         return run.status, [False] * len(tests)
+    assert run.values is not None  # status "ok" always comes with values
     passed = []
     for plan in checks:
         if plan is None:
