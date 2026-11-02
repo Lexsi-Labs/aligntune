@@ -31,7 +31,15 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
   non-existent dataset `openai/humaneval`; they now use `openai/openai_humaneval`. Code rewards read
   HumanEval's `test` + `entry_point` and MBPP's `test_list` (+ `test_imports`/`test_setup_code`) as
   well as `test_cases`, and body-only HumanEval answers are graded with the prompt prepended.
+- HumanEval's `check(candidate)` now runs in the trainer with `candidate` forwarded to the sandbox,
+  so asserts inside loops, asserts using locals and multi-line asserts are graded. 9 of 164
+  canonical solutions (HumanEval/1, 32, 38, 44, 50, 53, 87, 113, 151) scored below 1.0 before;
+  all 164 now score 1.0.
 - `examples/grpo_code_gen_trl_mbpp.py` said it used `mbpp_reward` but configured `code_quality`.
+- `examples/dapo_trl__code.py` trained on MBPP with `code_quality` only (it never runs the code and
+  scored comment-only answers above correct ones); it now uses `mbpp_reward`, and its printout says
+  DAPO and lists the rewards actually configured. `code_syntax`, `code_completeness` and
+  `code_quality` are documented as heuristics not to be used alone for code training.
 - `code_correctness` now strips code fences (every fenced answer scored 0) and returns 0, with a
   warning, when no tests arrive (it gave 0.5 to anything that compiled, including the empty string).
 - Bare-code extraction keeps imports above the first `def`.
@@ -46,10 +54,31 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
   (were 0.5 / 0.3 / 0.2), so a stub cannot outscore a correct answer.
 - `code_execution` with no tests still pays any code that runs and now warns once: pass tests.
 
+- **The child confines itself on Linux** before running the candidate. A seccomp filter refuses
+  `kill`/`tgkill`/`pidfd_send_signal`, `ptrace`, `socket`, `io_uring_setup`, `fork`/`clone` and
+  `execve`, so a completion can no longer SIGKILL the trainer via `os.getppid()`. A Landlock ruleset
+  limits writes to the child's temp directory and reads to the Python installation and system
+  directories (not the user's home), and blocks TCP on Landlock ABI 4+. Set
+  `ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1` to refuse to run candidate code where the kernel offers
+  neither; otherwise a one-time warning is logged.
+- `code_verifiable` now reads the row's tests (`test_cases`, MBPP `test_list` + `test_imports`,
+  HumanEval `test` + `entry_point`). Through TRL it ignored them and paid 1.0 to any code that ran,
+  a stub included.
+- `SafeCodeExecutor` (pass@k evaluation) runs code in the same sandbox and grades values out; it
+  used a forked `multiprocessing` child with the asserts executed beside the candidate.
+- `code_verifiable`'s stdout check runs in the sandbox (it had no limits and left grandchildren
+  running after a timeout); its `input`/`expected_output` pairs compare plain values, and `input`
+  may be argument values (as in `code_correctness`) as well as a call expression.
+
 ### Known limitations
-- The child process is not a full sandbox: it runs as the trainer's user, can read that user's
-  files, use the network and signal other processes. `RLIMIT_NPROC` has no effect when running as
-  root.
+- Kernel confinement is best effort: without seccomp/Landlock (non-Linux, old kernels, some
+  containers) the child is a separate process with resource limits only. `RLIMIT_NPROC` has no
+  effect when running as root (the seccomp filter still blocks `fork`/`clone` there).
+- Threads cannot be started in candidate code (as before, via `RLIMIT_NPROC=0`). BLAS libraries are told to use one
+  thread, so `numpy` imports and numpy return values (scalars, arrays) are graded as plain values.
+- HumanEval helpers (`poly`, `encode_cyclic`, ...) are taken from the task prompt. When no prompt
+  reaches the reward, tasks that need one score 0, rather than trusting the candidate's own copy.
+  Body-only answers need the raw (untemplated) prompt to be completed.
 
 ## [0.1.10] — 2026-08-05
 

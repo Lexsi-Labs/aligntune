@@ -46,11 +46,13 @@ class SafeCodeExecutor:
     Safe executor for generated code with multiple protection layers.
     
     Features:
-    - Process isolation using multiprocessing
-    - Timeout protection
-    - Restricted builtins
-    - Captured stdout/stderr
-    - Test case validation
+    - Runs code in the AlignTune code sandbox (separate process, limits, timeout,
+      seccomp/Landlock confinement on Linux)
+    - Tests graded "values out" in the calling process
+    - Captured stdout for test-free runs
+
+    ``safe_builtins`` is kept for backward compatibility and is no longer used: the sandbox
+    process, not a restricted namespace, is the security boundary.
     """
     
     def __init__(
@@ -173,176 +175,6 @@ class SafeCodeExecutor:
         except Exception as e:
             return False, f"Parse error: {str(e)}"
     
-    def _execute_in_process(
-        self,
-        code: str,
-        test_cases: List[Dict[str, Any]],
-        result_queue: mp.Queue
-    ):
-        """
-        Execute code in a separate process (internal use).
-        
-        Args:
-            code: Code to execute
-            test_cases: Test cases to validate
-            result_queue: Queue to return results
-        """
-        try:
-            # Capture stdout
-            stdout_capture = io.StringIO()
-            
-            with contextlib.redirect_stdout(stdout_capture):
-                # Create restricted namespace
-                namespace = {
-                    '__builtins__': self.safe_builtins,
-                    '__name__': '__main__',
-                }
-                
-                # Execute code
-                start_time = time.time()
-                exec(code, namespace)
-                exec_time = time.time() - start_time
-                
-                # Find callable functions (user-defined)
-                functions = {
-                    k: v for k, v in namespace.items()
-                    if callable(v) and not k.startswith('_')
-                }
-                
-                if not functions and not test_cases:
-                    # Just execution, no tests
-                    result_queue.put(ExecutionResult(
-                        success=True,
-                        output=stdout_capture.getvalue(),
-                        execution_time=exec_time,
-                        test_passed=True
-                    ))
-                    return
-                
-                if not functions and test_cases:
-                    result_queue.put(ExecutionResult(
-                        success=False,
-                        error="No callable functions found in code",
-                        output=stdout_capture.getvalue(),
-                        execution_time=exec_time
-                    ))
-                    return
-                
-                # Get main function name and callable
-                main_func_name = list(functions.keys())[0]
-                main_func = functions[main_func_name]
-
-                # Run test cases
-                test_results = []
-                all_passed = True
-
-                # Detect test format
-                # 1. MBPP: list of assertion strings ["assert func(...) == result", ...]
-                # 2. HumanEval: single string with check(candidate) function
-                # 3. Structured dict: [{"input": ..., "expected_output": ...}, ...]
-
-                is_assertion_format = (
-                    test_cases and
-                    isinstance(test_cases[0], str) and
-                    test_cases[0].strip().startswith('assert')
-                )
-
-                is_humaneval_format = (
-                    test_cases and
-                    isinstance(test_cases, str) and
-                    'def check(candidate)' in test_cases
-                )
-
-                if is_humaneval_format:
-                    # HumanEval format: execute check(candidate) function
-                    try:
-                        # Execute the test code which defines check(candidate)
-                        exec(test_cases, namespace)
-                        # Call check with our generated function
-                        namespace['check'](main_func)
-                        all_passed = True
-                        test_results.append({'test_id': 0, 'format': 'humaneval_check', 'passed': True})
-                    except AssertionError as e:
-                        all_passed = False
-                        test_results.append({'test_id': 0, 'format': 'humaneval_check', 'passed': False, 'error': f'Assertion failed: {e}'})
-                    except Exception as e:
-                        all_passed = False
-                        test_results.append({'test_id': 0, 'format': 'humaneval_check', 'passed': False, 'error': str(e)})
-
-                elif is_assertion_format:
-                    # MBPP format: execute assertion strings directly
-                    import re
-                    for i, assertion_str in enumerate(test_cases):
-                        try:
-                            # Replace original function name with generated function name
-                            match = re.search(r'assert\s+(\w+)\s*\(', assertion_str)
-                            if match:
-                                orig_func = match.group(1)
-                                modified = assertion_str.replace(orig_func + '(', main_func_name + '(', 1)
-                            else:
-                                modified = assertion_str
-
-                            exec(modified, namespace)
-                            test_results.append({'test_id': i, 'assertion': assertion_str, 'passed': True})
-                        except AssertionError:
-                            all_passed = False
-                            test_results.append({'test_id': i, 'assertion': assertion_str, 'passed': False, 'error': 'Assertion failed'})
-                        except Exception as e:
-                            all_passed = False
-                            test_results.append({'test_id': i, 'assertion': assertion_str, 'passed': False, 'error': str(e)})
-                else:
-                    # Structured dict format (HumanEval, etc.)
-                    for i, test in enumerate(test_cases):
-                        try:
-                            test_input = test.get('input', test.get('inputs'))
-                            expected = test.get('expected_output', test.get('output'))
-
-                            # Call function with input
-                            if isinstance(test_input, (list, tuple)):
-                                actual = main_func(*test_input)
-                            else:
-                                actual = main_func(test_input)
-
-                            # Compare outputs
-                            passed = self._compare_outputs(actual, expected)
-
-                            test_results.append({
-                                'test_id': i,
-                                'input': test_input,
-                                'expected': expected,
-                                'actual': actual,
-                                'passed': passed
-                            })
-
-                            if not passed:
-                                all_passed = False
-
-                        except Exception as test_error:
-                            test_results.append({
-                                'test_id': i,
-                                'input': test_input if 'test_input' in locals() else None,
-                                'expected': expected if 'expected' in locals() else None,
-                                'error': str(test_error),
-                                'passed': False
-                            })
-                            all_passed = False
-                
-                result_queue.put(ExecutionResult(
-                    success=True,
-                    output=stdout_capture.getvalue(),
-                    execution_time=exec_time,
-                    test_passed=all_passed,
-                    test_results=test_results
-                ))
-        
-        except Exception as e:
-            result_queue.put(ExecutionResult(
-                success=False,
-                error=f"{type(e).__name__}: {str(e)}",
-                output=stdout_capture.getvalue() if 'stdout_capture' in locals() else "",
-                execution_time=time.time() - start_time if 'start_time' in locals() else 0.0
-            ))
-    
     def execute(
         self,
         code: str,
@@ -350,60 +182,123 @@ class SafeCodeExecutor:
     ) -> ExecutionResult:
         """
         Execute code safely with timeout and test cases.
-        
+
+        The code runs in the AlignTune code sandbox (a separate ``sys.executable -I`` process with
+        resource limits, a wall-clock timeout and, on Linux, seccomp/Landlock confinement). Tests
+        are graded "values out": the child only returns the values the candidate's function
+        produced, as plain data, and every assert / comparison is evaluated here. Printing,
+        exit codes and objects with a custom ``__eq__`` cannot pass a test.
+
         Args:
             code: Code to execute
-            test_cases: Optional list of test cases
-            
+            test_cases: Optional tests: MBPP assert strings, a HumanEval ``check(candidate)``
+                program, or ``[{"input": ..., "expected_output": ...}, ...]``
+
         Returns:
             ExecutionResult with execution details
         """
+        from aligntune.rewards._code_sandbox import (
+            HumanEvalTests, defines, entry_name, grade_tests_detail, is_plain, run_calls, run_program,
+        )
+
         if test_cases is None:
             test_cases = []
-        
+
         # Extract code from markdown if needed
         code = self.extract_code(code)
-        
+
         # Validate syntax first
         is_valid, error_msg = self.validate_syntax(code)
         if not is_valid:
-            return ExecutionResult(
-                success=False,
-                error=error_msg
-            )
-        
-        # Create result queue for process communication
-        result_queue = mp.Queue()
-        
-        # Create and start execution process
-        process = mp.Process(
-            target=self._execute_in_process,
-            args=(code, test_cases, result_queue)
-        )
-        
-        process.start()
-        process.join(timeout=self.timeout)
-        
-        # Check if process completed
-        if process.is_alive():
-            # Timeout occurred
-            process.terminate()
-            process.join()
-            return ExecutionResult(
-                success=False,
-                error=f"Execution timeout ({self.timeout}s exceeded)"
-            )
-        
-        # Get result from queue
-        if not result_queue.empty():
-            return result_queue.get()
+            return ExecutionResult(success=False, error=error_msg)
+
+        start = time.time()
+        mem = int(self.max_memory_mb) * 1024 * 1024
+
+        def failed(load, **kw):
+            err = f"Execution timeout ({self.timeout}s exceeded)" if load == "timed out" else str(load)
+            return ExecutionResult(success=False, error=err, execution_time=time.time() - start, **kw)
+
+        if not test_cases:
+            load, output = run_program(code, timeout=self.timeout, mem_bytes=mem)
+            if load is not None:
+                return failed(load, output=output)
+            return ExecutionResult(success=True, output=output, execution_time=time.time() - start,
+                                   test_passed=True)
+
+        main = self._first_function(code)
+        if isinstance(test_cases, str) and 'def check(candidate)' in test_cases:
+            # HumanEval format: check(candidate) runs here, candidate calls go to the sandbox
+            if main is None:
+                return failed("No callable functions found in code")
+            # The entry point is not passed in, and helpers are often defined before the solution:
+            # try each top-level function (last defined first); every try is graded values out.
+            load, results = None, [False]
+            for name in self._public_functions(code)[::-1][:5]:
+                load, results = grade_tests_detail(code, HumanEvalTests(test_cases, name), timeout=self.timeout)
+                if load is None and results and all(results):
+                    break
+            test_results = [{'test_id': i, 'format': 'humaneval_check', 'passed': ok}
+                            for i, ok in enumerate(results)]
+        elif isinstance(test_cases, list) and isinstance(test_cases[0], str) \
+                and test_cases[0].strip().startswith('assert'):
+            # MBPP format: assert strings; a differently named solution is aliased to the tested name
+            entry = entry_name(test_cases)
+            if entry and main and not defines(code, entry):
+                code = code + f"\n\n{entry} = {main}\n"
+            load, results = grade_tests_detail(code, test_cases, timeout=self.timeout, entry=entry)
+            test_results = [{'test_id': i, 'assertion': a, 'passed': ok}
+                            for i, (a, ok) in enumerate(zip(test_cases, results))]
         else:
-            # Process died without putting result
-            return ExecutionResult(
-                success=False,
-                error="Process terminated unexpectedly"
-            )
-    
+            # Structured dict format
+            if main is None:
+                return failed("No callable functions found in code")
+            calls = []
+            for test in test_cases:
+                test_input = test.get('input', test.get('inputs'))
+                if isinstance(test_input, (list, tuple)):
+                    calls.append(f"{main}(*{list(test_input)!r})")
+                else:
+                    calls.append(f"{main}({test_input!r})")
+            load, values = run_calls(code, calls, timeout=self.timeout, mem_bytes=mem)
+            results, test_results = [], []
+            for i, (test, (kind, value)) in enumerate(zip(test_cases, values)):
+                expected = test.get('expected_output', test.get('output'))
+                ok = load is None and kind == "ok" and is_plain(value) and self._compare_outputs(value, expected)
+                results.append(ok)
+                entry = {'test_id': i, 'input': test.get('input', test.get('inputs')), 'expected': expected,
+                         'passed': ok}
+                if kind == "ok":
+                    entry['actual'] = value
+                else:
+                    entry['error'] = value
+                test_results.append(entry)
+
+        if load is not None:
+            return failed(load, test_results=test_results)
+        return ExecutionResult(success=True, execution_time=time.time() - start,
+                               test_passed=bool(results) and all(results), test_results=test_results)
+
+    @staticmethod
+    def _public_functions(code: str) -> List[str]:
+        """Names of the public top-level functions, in definition order."""
+        try:
+            return [n.name for n in ast.parse(code).body
+                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and not n.name.startswith('_')]
+        except SyntaxError:
+            return []
+
+    @staticmethod
+    def _first_function(code: str) -> Optional[str]:
+        """Name of the first public top-level function (the function under test)."""
+        try:
+            for node in ast.parse(code).body:
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith('_'):
+                    return node.name
+        except SyntaxError:
+            pass
+        return None
+
     def _compare_outputs(self, actual: Any, expected: Any) -> bool:
         """
         Compare actual and expected outputs.

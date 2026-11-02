@@ -25,7 +25,16 @@ import sys
 from contextlib import contextmanager
 
 from .core import RewardFunction, RewardConfig
-from ._code_sandbox import code_runs, grade_assertions, run_calls
+from ._code_sandbox import (
+    HumanEvalTests,
+    code_runs,
+    defines,
+    grade_tests_detail,
+    run_calls,
+    run_program,
+    setup_from_kwargs,
+    tests_from_kwargs,
+)
 from ._answers import (
     answers_match,
     clean_answer,
@@ -199,6 +208,37 @@ class MathVerifiableReward(VerifiableReward):
         return False
 
 
+_NO_TESTS_WARNED = set()
+
+
+def _warn_no_tests_once(name: str, kwargs: Dict[str, Any]) -> None:
+    if name not in _NO_TESTS_WARNED:
+        _NO_TESTS_WARNED.add(name)
+        logger.warning(f"{name}: no tests reached this reward (row keys: {sorted(kwargs)[:20]}); it can only "
+                       f"check that code runs. Pass `reference`, `test_cases`, MBPP's `test_list`, or "
+                       f"HumanEval's `test` + `entry_point`.")
+
+
+def _first_public_function(code: str) -> Optional[str]:
+    import ast
+    try:
+        for node in ast.parse(code).body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith('_'):
+                return node.name
+    except SyntaxError:
+        pass
+    return None
+
+
+def _is_call_expression(s: str) -> bool:
+    import ast
+    try:
+        node = ast.parse(s.strip(), mode="eval").body
+    except SyntaxError:
+        return False
+    return isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+
+
 class CodeExecutionVerifiableReward(VerifiableReward):
     """Reward for code execution correctness.
 
@@ -217,6 +257,29 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         self.timeout = config.params.get('timeout', 5.0)
         self.test_cases = config.params.get('test_cases', [])
 
+    def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        """1.0 if the code passes its tests, else 0.0.
+
+        Tests come from ``reference``, else from the dataset row (``test_cases``, MBPP's
+        ``test_list`` + ``test_imports``, HumanEval's ``test`` + ``entry_point``), else from
+        ``params.test_cases``. Before, row columns were ignored, so on MBPP/HumanEval rows this
+        reward took the no-test path and paid 1.0 for any code that ran (a stub included).
+        """
+        if not isinstance(text, str):
+            return 0.0
+        try:
+            tests = reference if reference else tests_from_kwargs(kwargs, None)
+            if not tests and self.test_cases:
+                tests = self.test_cases
+            if not tests:
+                _warn_no_tests_once(type(self).__name__, kwargs)
+            ok = self._verify(text, tests, setup=setup_from_kwargs(kwargs),
+                              entry=kwargs.get("entry_point"), prompt=kwargs.get("prompt"))
+            return 1.0 if ok else 0.0
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Verification failed for {type(self).__name__}: {e}")
+            return 0.0
+
     def verify(self, completion: str, reference: Optional[str] = None) -> bool:
         """Verify code execution by running it and checking output.
 
@@ -227,19 +290,27 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         Returns:
             True if code executes successfully and produces expected output
         """
+        tests = reference if reference else (self.test_cases or None)
+        return self._verify(completion, tests)
+
+    def _verify(self, completion: str, test_cases: Any, setup: str = "", entry: Optional[str] = None,
+                prompt: Any = None) -> bool:
         code = self._extract_code(completion)
+        if isinstance(test_cases, HumanEvalTests):
+            entry = test_cases.entry_point
+            prompt = test_cases.prompt
+        if entry and isinstance(prompt, str) and not defines(code or "", entry) and defines(prompt, entry):
+            # HumanEval-style body-only continuation (the body alone has no def to extract)
+            body = code if code and "```" in completion else completion
+            code = prompt + body
         if not code:
             return False
 
-        # If we have test cases, validate against them
-        test_cases = reference if reference else None
-        if not test_cases and self.test_cases:
-            test_cases = self.test_cases
-
         if test_cases:
-            return self._validate_test_cases(code, test_cases)
+            return self._validate_test_cases(code, test_cases, setup=setup)
 
-        # Otherwise just check if code runs without error
+        # No tests anywhere: only check that the code runs (out of process). This cannot tell a
+        # stub from a solution; a warning has been logged.
         return self._execute_safely(code)
 
     def _extract_code(self, text: str) -> Optional[str]:
@@ -280,7 +351,7 @@ class CodeExecutionVerifiableReward(VerifiableReward):
             logger.debug(f"Code execution failed: {e}")
             return False
 
-    def _validate_test_cases(self, code: str, test_cases: Any) -> bool:
+    def _validate_test_cases(self, code: str, test_cases: Any, setup: str = "") -> bool:
         """Validate code against test cases.
 
         Args:
@@ -290,13 +361,17 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         Returns:
             True if all tests pass
         """
+        if isinstance(test_cases, HumanEvalTests):
+            load, results = grade_tests_detail(code, test_cases, setup=setup, timeout=self.timeout)
+            return load is None and bool(results) and all(results)
+
         # Handle string test cases (expected output)
         if isinstance(test_cases, str):
             return self._check_output(code, test_cases)
 
         # Handle list of assertion strings
         if isinstance(test_cases, list) and all(isinstance(t, str) for t in test_cases):
-            return self._check_assertions(code, test_cases)
+            return self._check_assertions(code, test_cases, setup=setup)
 
         # Handle dict or list of dicts with input/expected_output
         if isinstance(test_cases, dict):
@@ -308,37 +383,58 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return False
 
     def _check_output(self, code: str, expected: str) -> bool:
-        """Check if the program's stdout matches expected (a stdout task by definition)."""
+        """Check if the program's stdout matches expected (a stdout task by definition).
+
+        Runs in the same sandbox as the other code rewards (limits, process-group kill, seccomp/
+        Landlock where available); exiting early or raising counts as failure.
+        """
         try:
-            with tempfile.TemporaryDirectory() as tmp:
-                path = os.path.join(tmp, "prog.py")
-                with open(path, "w") as f:
-                    f.write(code)
-                result = subprocess.run(
-                    [sys.executable, '-I', path],
-                    capture_output=True, timeout=self.timeout, text=True, cwd=tmp,
-                    env={"PATH": "/usr/bin:/bin", "HOME": tmp}, start_new_session=True,
-                )
-            return result.returncode == 0 and result.stdout.strip() == expected.strip()
-        except subprocess.TimeoutExpired:
-            return False
-        except Exception as e:
+            load, stdout = run_program(code, timeout=self.timeout)
+            return load is None and stdout.strip() == expected.strip()
+        except Exception as e:  # noqa: BLE001
             logger.debug(f"Output check failed: {e}")
             return False
 
-    def _check_assertions(self, code: str, assertions: list) -> bool:
+    def _check_assertions(self, code: str, assertions: list, setup: str = "") -> bool:
         """All assertion strings pass, graded values out (not "the process exited 0")."""
-        results = grade_assertions(code, assertions, timeout=self.timeout)
-        return bool(results) and all(results)
+        load, results = grade_tests_detail(code, assertions, setup=setup, timeout=self.timeout)
+        return load is None and bool(results) and all(results)
 
     def _check_io_pairs(self, code: str, test_cases: list) -> bool:
-        """input is a call expression; its value (returned, not printed) must print as expected_output."""
-        calls = [str(tc.get('input', '')) for tc in test_cases]
+        """Values out: the child returns the value, compared here as plain data.
+
+        ``input`` is either a call expression string (``"add(1, 2)"``) or, as in code_correctness,
+        the argument(s) for the first public function (a list/tuple of several values is spread).
+        """
+        func = _first_public_function(code)
+        calls = []
+        for tc in test_cases:
+            inp = tc.get('input')
+            if isinstance(inp, str) and _is_call_expression(inp):
+                calls.append(inp)
+            elif func is None:
+                return False
+            elif isinstance(inp, (list, tuple)) and len(inp) > 1:
+                calls.append(f"{func}(*{inp!r})")
+            elif inp is None:
+                calls.append(f"{func}()")
+            else:
+                calls.append(f"{func}({inp!r})")
         load, results = run_calls(code, calls, timeout=self.timeout)
         if load is not None:
             return False
         for (kind, value), tc in zip(results, test_cases):
-            if kind != "ok" or str(value) != str(tc.get('expected_output', '')).strip():
+            if kind != "ok":
+                return False
+            expected = tc.get('expected_output', '')
+            if isinstance(expected, str) and not isinstance(value, str):
+                if str(value) != expected.strip():  # legacy: expected given as printed text
+                    return False
+            elif type(value) is not type(expected) and not (
+                    isinstance(value, (int, float)) and isinstance(expected, (int, float))
+                    and not isinstance(value, bool) and not isinstance(expected, bool)):
+                return False
+            elif value != expected:
                 return False
         return True
 

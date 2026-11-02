@@ -28,6 +28,8 @@ from ._code_sandbox import (
     grade_assertions,
     humaneval_assertions,
     grade_assertions_detail,
+    grade_tests_detail,
+    HumanEvalTests,
     is_plain,
     run_calls,
     setup_from_kwargs,
@@ -633,7 +635,13 @@ class MathCorrectnessReward(RewardFunction):
 
 
 class CodeSyntaxReward(RewardFunction):
-    """Reward for code syntax correctness."""
+    """Reward for code syntax correctness.
+
+    Heuristic: it only parses the code, so a stub or a comment-only block scores as high as a
+    solution. Never use it alone to train code generation;
+    pair it, at a small weight, with a test-based reward (code_correctness, mbpp_reward,
+    code_verifiable).
+    """
 
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         if not isinstance(text, str):
@@ -965,7 +973,7 @@ class CodeExecutionReward(RewardFunction):
 
         # Debug: log when test_cases are received
         if test_cases:
-            logger.debug(f"CodeExecutionReward: received {len(test_cases)} test cases")
+            logger.debug(f"CodeExecutionReward: received tests: {type(test_cases).__name__}")
         else:
             _warn_no_tests(type(self).__name__, kwargs)
 
@@ -1057,7 +1065,15 @@ class CodeExecutionReward(RewardFunction):
         Returns: float score (0.0 to 1.0) based on fraction of tests passed
         """
         if isinstance(test_cases, str):
-            test_cases = humaneval_assertions(test_cases, entry) if entry else []
+            test_cases = HumanEvalTests(test_cases, entry) if entry else []
+        if isinstance(test_cases, HumanEvalTests):
+            # check(candidate) runs here; each call to the candidate is answered by the sandbox.
+            try:
+                _, results = grade_tests_detail(code, test_cases, setup=setup, timeout=self.timeout)
+            except Exception as e:  # noqa: BLE001
+                logger.debug(f"HumanEval grading failed: {e}")
+                return 0.0
+            return sum(results) / len(results) if results else 0.0
         if not test_cases:
             return 0.0
 
@@ -1105,7 +1121,13 @@ class CodeExecutionReward(RewardFunction):
 
 
 class CodeCompletenessReward(RewardFunction):
-    """Reward for code completeness."""
+    """Reward for code completeness.
+
+    Heuristic: it never runs the code, so a stub can score well (about 0.5). Never use it alone to
+    train code generation;
+    pair it, at a small weight, with a test-based reward (code_correctness, mbpp_reward,
+    code_verifiable).
+    """
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         # Extract code blocks
@@ -1550,7 +1572,13 @@ class MathReasoningReward(RewardFunction):
 
 
 class CodeQualityReward(RewardFunction):
-    """Reward function for code quality assessment."""
+    """Reward function for code quality assessment.
+
+    Heuristic: it never runs the code and can score a comment-only answer above a correct one.
+    Never use it alone to train code generation;
+    pair it, at a small weight, with a test-based reward (code_correctness, mbpp_reward,
+    code_verifiable).
+    """
     
     def __init__(self, config: RewardConfig):
         super().__init__(config)
@@ -2783,6 +2811,8 @@ class MBPPReward:
         sample_id = kwargs.get('sample_id', 0)
         prompt_text = kwargs.get('prompt', "")
         
+        if isinstance(test_cases, HumanEvalTests):
+            return self._compute_humaneval(text, test_cases, setup_from_kwargs(kwargs))
         if test_cases is not None:
             tests = test_cases if isinstance(test_cases, list) else []
             setup_code = setup_from_kwargs(kwargs)
@@ -2808,8 +2838,31 @@ class MBPPReward:
             code=sanitized_code, setup_code=setup_code, tests=tests, timeout_seconds=5
         )
         
-        base_reward = float(passed / len(tests)) if tests else 0.0
-        
+        return self._shape_reward(text, passed, len(tests), execution_success, error_messages)
+
+    def _compute_humaneval(self, text: str, tests: "HumanEvalTests", setup_code: str) -> float:
+        """HumanEval rows: check(candidate) runs in the trainer, candidate calls go to the sandbox."""
+        entry = tests.entry_point
+        prompt = tests.prompt if isinstance(tests.prompt, str) else ""
+        if prompt and not _defines(self._extract_python_code(text), entry) and _defines(prompt, entry):
+            text_for_exec = prompt + text  # body-only continuation of the HumanEval prompt
+        else:
+            text_for_exec = text
+        sanitized_code = self._prepare_for_exec(text_for_exec, entry)
+        try:
+            load, results = grade_tests_detail(sanitized_code, tests, setup=setup_code, timeout=5)
+        except Exception as e:  # noqa: BLE001
+            load, results = f"Sandbox error: {e}", [False]
+        if load == "timed out":
+            return self._shape_reward(text, 0, len(results), False, ["Code execution timed out (infinite loop)"])
+        if load is not None:
+            return self._shape_reward(text, 0, len(results), False, [f"Execution error: {load[:200]}"])
+        return self._shape_reward(text, sum(results), len(results), True, [])
+
+    def _shape_reward(self, text: str, passed: int, total: int, execution_success: bool,
+                      error_messages: List[str]) -> float:
+        base_reward = float(passed / total) if total else 0.0
+
         if passed == 0:
             base_reward -= 0.10
         
