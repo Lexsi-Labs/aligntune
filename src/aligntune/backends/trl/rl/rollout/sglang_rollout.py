@@ -24,6 +24,7 @@ SGLang 0.5.10.post1 and 0.5.22; only endpoints present in both are used.
 
 import logging
 import os
+import re
 import shutil
 import tempfile
 import time
@@ -437,7 +438,10 @@ class SGLangRollout:
         """Adapter sync never touches base weights: the server must serve the policy's base."""
 
         def short(name: str) -> str:  # "Qwen/Qwen3-4B" and "/models/Qwen3-4B" are the same model
-            return name.rstrip("/").split("/")[-1].lower()
+            # Unsloth loads load_in_4bit=True from "unsloth/<name>-(unsloth-)bnb-4bit"; the
+            # adapter fits the full-precision <name> too (as when TRL quantizes on load).
+            name = name.rstrip("/").split("/")[-1].lower()
+            return re.sub(r"(-unsloth)?-bnb-4bit$", "", name)
 
         if policy_base and self.server_model and short(policy_base) != short(self.server_model):
             raise ValueError(

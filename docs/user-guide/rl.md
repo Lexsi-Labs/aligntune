@@ -617,6 +617,8 @@ These come from SGLang itself (tested with 0.5.10.post1), not from aligntune:
   LoRA weights on the vision or audio encoder are not sent to SGLang, which applies LoRA to the language model only.
 - **Large-vocabulary models** (Gemma, 256k tokens) may need a smaller `batch_size` when the trainer and the server share one GPU.
 - Models loaded in 8-bit can use adapter sync only (4-bit weights are dequantized for full sync).
+- **4-bit models with adapter sync:** start the server with the full-precision base (for example `Qwen/Qwen2.5-0.5B-Instruct`).
+  Unsloth loads `load_in_4bit=True` (the default for counterfactual GRPO) from its pre-quantized `unsloth/<model>-unsloth-bnb-4bit` or `unsloth/<model>-bnb-4bit` repo, which counts as the same base.
 
 ## Configuration
 

@@ -431,6 +431,23 @@ class TestAdapterSync:
         with pytest.raises(ValueError, match="base model"):
             SGLangRollout(server, sync_dir=str(tmp_path)).sync_weights(make_trainer(lora_model()))
 
+    @pytest.mark.parametrize(
+        "policy_base",
+        [
+            "unsloth/qwen2.5-0.5b-instruct-unsloth-bnb-4bit",
+            "unsloth/Qwen2.5-0.5B-Instruct-bnb-4bit",
+        ],
+    )
+    def test_prequantized_base_matches_full_precision_server(self, server, tmp_path, policy_base):
+        # Unsloth loads load_in_4bit=True from its pre-quantized repo; the adapter still fits
+        # the full-precision model the server serves.
+        FakeSGLang.enable_lora = True
+        FakeSGLang.model_path = "Qwen/Qwen2.5-0.5B-Instruct"
+        rollout = SGLangRollout(server, sync_dir=str(tmp_path))
+        rollout._check_same_base(policy_base)
+        with pytest.raises(ValueError, match="base model"):
+            rollout._check_same_base("unsloth/Qwen2.5-1.5B-Instruct-bnb-4bit")
+
 
 class TestNoSilentFallback:
     def test_trainers_that_ignore_sglang_raise(self):
