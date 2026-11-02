@@ -4,7 +4,7 @@ RLVR (RL with Verifiable Rewards) - Deterministic verification-based reward func
 This module implements verifiable reward functions inspired by DeepSeek-R1, QwQ, and DAPO.
 Instead of learned reward models, these rewards use deterministic checks:
 - Math: symbolic simplification or normalized string matching
-- Code: subprocess execution with timeout and output validation
+- Code: execution in a child process, graded by value outside it
 - SQL: query parsing and optional execution
 - JSON Schema: jsonschema validation
 - Regex: pattern matching
@@ -17,13 +17,11 @@ from abc import ABC, abstractmethod
 import logging
 import re
 import json
-import subprocess
-import tempfile
-import os
 import signal
 from contextlib import contextmanager
 
 from .core import RewardFunction, RewardConfig
+from . import _code_grader
 from ._answers import (
     answers_match,
     clean_answer,
@@ -200,7 +198,7 @@ class MathVerifiableReward(VerifiableReward):
 class CodeExecutionVerifiableReward(VerifiableReward):
     """Reward for code execution correctness.
 
-    Executes code in a subprocess with timeout and verifies output.
+    Runs code in a child process with a timeout and verifies the values it returns.
 
     reference should be the expected output or a set of test cases.
     Test cases can be:
@@ -270,36 +268,9 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return None
 
     def _execute_safely(self, code: str) -> bool:
-        """Safely execute code with timeout.
-
-        Args:
-            code: Python code to execute
-
-        Returns:
-            True if execution completes without error, False otherwise
-        """
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(code)
-                f.flush()
-                temp_file = f.name
-
-            try:
-                result = subprocess.run(
-                    ['/usr/bin/python3' if os.path.exists('/usr/bin/python3') else 'python', temp_file],
-                    capture_output=True,
-                    timeout=self.timeout,
-                    text=True
-                )
-                return result.returncode == 0
-            finally:
-                os.unlink(temp_file)
-
-        except subprocess.TimeoutExpired:
-            return False
-        except Exception as e:
-            logger.debug(f"Code execution failed: {e}")
-            return False
+        """Whether the code runs to its end in a child process (see ``_code_grader``)."""
+        status, _ = _code_grader.grade(code, [], self.timeout)
+        return status == "ok"
 
     def _validate_test_cases(self, code: str, test_cases: Any) -> bool:
         """Validate code against test cases.
@@ -329,72 +300,27 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return False
 
     def _check_output(self, code: str, expected: str) -> bool:
-        """Check if code output matches expected."""
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(code)
-                f.flush()
-                temp_file = f.name
-
-            try:
-                result = subprocess.run(
-                    ['/usr/bin/python3' if os.path.exists('/usr/bin/python3') else 'python', temp_file],
-                    capture_output=True,
-                    timeout=self.timeout,
-                    text=True
-                )
-                actual = result.stdout.strip()
-                expected_norm = expected.strip()
-                return actual == expected_norm
-            finally:
-                os.unlink(temp_file)
-
-        except subprocess.TimeoutExpired:
-            return False
-        except Exception as e:
-            logger.debug(f"Output check failed: {e}")
-            return False
+        """Check that the code runs to its end and prints the expected text."""
+        run = _code_grader.run_candidate(code, self.timeout, capture_stdout=True)
+        return run.status == "ok" and run.stdout.strip() == expected.strip()
 
     def _check_assertions(self, code: str, assertions: list) -> bool:
-        """Check if code passes a list of assertion strings."""
-        full_code = code + '\n' + '\n'.join(assertions)
-        return self._execute_safely(full_code)
+        """Check that every assertion holds, graded by value in this process."""
+        status, passed = _code_grader.grade(code, assertions, self.timeout)
+        return status == "ok" and all(passed)
 
     def _check_io_pairs(self, code: str, test_cases: list) -> bool:
-        """Check if code passes input/output test pairs."""
+        """Check each pair: the text of the ``input`` expression's value must equal ``expected_output``."""
+        items = []
         for test_case in test_cases:
             input_val = test_case.get('input', '')
-            expected_output = test_case.get('expected_output', '')
-
-            # Create test code that calls the function with input
-            # This is simplified - in practice might need more sophisticated handling
-            test_code = code + f"\nprint({input_val})"
-
-            try:
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                    f.write(test_code)
-                    f.flush()
-                    temp_file = f.name
-
-                try:
-                    result = subprocess.run(
-                        ['/usr/bin/python3' if os.path.exists('/usr/bin/python3') else 'python', temp_file],
-                        capture_output=True,
-                        timeout=self.timeout,
-                        text=True
-                    )
-                    actual = result.stdout.strip()
-                    if actual != expected_output.strip():
-                        return False
-                finally:
-                    os.unlink(temp_file)
-
-            except subprocess.TimeoutExpired:
+            items.append({"expr": input_val if isinstance(input_val, str) else repr(input_val)})
+        run = _code_grader.run_candidate(code, self.timeout, items)
+        if run.status != "ok":
+            return False
+        for value, test_case in zip(run.values, test_cases):
+            if value is _code_grader.FAILED or str(value).strip() != str(test_case.get('expected_output', '')).strip():
                 return False
-            except Exception as e:
-                logger.debug(f"Test case validation failed: {e}")
-                return False
-
         return True
 
 
