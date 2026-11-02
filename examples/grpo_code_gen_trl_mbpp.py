@@ -172,7 +172,7 @@ trainer = create_rl_trainer(
 
     rewards=[
         {
-            "type": "code_quality",
+            "type": "mbpp_reward",
             "weight": 1.0,
             "params": {},
         },

@@ -2,7 +2,7 @@ recipe:
   name: "deepseek-humaneval-grpo"
   description: "Train DeepSeek Coder on HumanEval for code generation using GRPO"
   model: "deepseek-ai/deepseek-coder-1.3b-instruct"
-  dataset: "openai/humaneval"
+  dataset: "openai/openai_humaneval"
   task: "code_generation"
   algorithm: "grpo"
   backend: "trl"
@@ -25,7 +25,7 @@ config:
     lora_dropout: 0.1
     lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   datasets:
-    - name: "openai/humaneval"
+    - name: "openai/openai_humaneval"
       split: "test"
       column_mapping:
         text: "prompt"
