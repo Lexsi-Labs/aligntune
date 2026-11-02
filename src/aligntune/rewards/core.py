@@ -334,9 +334,9 @@ class SentimentReward(RewardFunction):
                 if isinstance(result, list):
                     result = result[0]
                 if result['label'].lower() == target_sentiment.lower():
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch sentiment analysis failed, falling back to sequential: {e}")
@@ -438,9 +438,9 @@ class SafetyReward(RewardFunction):
                     result = result[0]
                 # Reward non-toxic content
                 if result['label'].lower() in ['non-toxic', 'safe', 'clean']:
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch safety analysis failed, falling back to sequential: {e}")
@@ -742,9 +742,9 @@ class ToxicityReward(RewardFunction):
                     result = result[0]
                 # Reward non-toxic content (invert toxicity score)
                 if result['label'].lower() in ['non-toxic', 'safe']:
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch toxicity analysis failed, falling back to sequential: {e}")
@@ -1264,7 +1264,7 @@ class MathReasoningReward(RewardFunction):
             components += 1
         
         final_score = (total_score / components) if components > 0 else 0.0
-        return final_score * self.config.weight
+        return final_score
     
     def _evaluate_correctness(self, response: str, reference: str) -> float:
         """Evaluate answer correctness using shared math_grading module.
@@ -1629,7 +1629,7 @@ class DiversityReward(RewardFunction):
                     except:
                         score += 0.25
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class FluencyReward(RewardFunction):
@@ -1678,7 +1678,7 @@ class FluencyReward(RewardFunction):
             connector_count = sum(1 for conn in connectors if conn in text.lower())
             score += min(connector_count / 10, 0.2)
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class RelevanceReward(RewardFunction):
@@ -1708,7 +1708,7 @@ class RelevanceReward(RewardFunction):
         elif len(words) < 20:
             score += 0.1
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class BrevityReward(RewardFunction):
@@ -1725,14 +1725,14 @@ class BrevityReward(RewardFunction):
         word_count = len(words)
         
         if word_count <= ideal_length:
-            return 1.0 * self.config.weight
+            return 1.0
         elif word_count <= max_length:
             penalty = (word_count - ideal_length) / (max_length - ideal_length)
-            return (1.0 - penalty * 0.5) * self.config.weight
+            return 1.0 - penalty * 0.5
         else:
             excess = word_count - max_length
             penalty = min(excess / max_length, 1.0)
-            return max(0.0, 0.5 - penalty) * self.config.weight
+            return max(0.0, 0.5 - penalty)
 
 
 class ImageRelevanceReward(RewardFunction):
@@ -1742,7 +1742,7 @@ class ImageRelevanceReward(RewardFunction):
         # Placeholder implementation - returns neutral reward
         # TODO: Implement actual image relevance scoring when multi-modal support is added
         logger.warning("ImageRelevanceReward is a placeholder - multi-modal support not yet implemented")
-        return 0.5 * self.config.weight
+        return 0.5
 
 
 class AudioQualityReward(RewardFunction):
@@ -1752,7 +1752,7 @@ class AudioQualityReward(RewardFunction):
         # Placeholder implementation - returns neutral reward
         # TODO: Implement actual audio quality scoring when multi-modal support is added
         logger.warning("AudioQualityReward is a placeholder - multi-modal support not yet implemented")
-        return 0.5 * self.config.weight
+        return 0.5
 
 
 class InstructionFollowingReward(RewardFunction):
