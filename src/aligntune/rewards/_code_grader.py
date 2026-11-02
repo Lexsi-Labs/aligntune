@@ -79,7 +79,7 @@ def _main():
 
     _type, _callable, _isinstance, _eval, _exception = type, callable, isinstance, eval, Exception
     _list, _tuple, _set, _frozenset, _dict, _bool, _int, _str, _float = list, tuple, set, frozenset, dict, bool, int, str, float
-    _repr, _module, _function, _getattr, _len = repr, types.ModuleType, types.FunctionType, getattr, len
+    _repr, _module, _function, _getattr, _len, _hasattr = repr, types.ModuleType, types.FunctionType, getattr, len, hasattr
     _dump, _close, _exit, _flush = json.dump, out.close, os._exit, sys.stdout.flush
     _clean_builtins = _dict(builtins.__dict__)
 
@@ -106,7 +106,9 @@ def _main():
             return lambda *a, **k: plain(v(*a, **k))
         return plain(v)
 
-    ns = {"__name__": "__main__", "__builtins__": builtins}
+    allow = job.get("builtins")
+    ns = {"__name__": "__main__",
+          "__builtins__": builtins if allow is None else {k: _getattr(builtins, k) for k in allow if _hasattr(builtins, k)}}
     exec(compile(job["code"], "<candidate>", "exec"), ns)
 
     names = {"__builtins__": _clean_builtins}
@@ -230,6 +232,7 @@ def run_candidate(
     items: Sequence[Dict[str, Any]] = (),
     capture_stdout: bool = False,
     memory_limit_mb: int = DEFAULT_MEMORY_LIMIT_MB,
+    builtins_allow: Optional[Sequence[str]] = None,
 ) -> Run:
     """Run ``code`` in a child, then evaluate each item there and return the values.
 
@@ -240,6 +243,10 @@ def run_candidate(
     :data:`FAILED`. The status is ``"ok"`` only if the child got through the
     candidate and every item, so a crash, ``sys.exit``, ``os._exit`` and a
     tampered result are ``"error"``. Nothing the child does raises here.
+
+    With ``builtins_allow``, the candidate sees only those builtins (no
+    ``__import__``, so no imports). That narrows what a completion can reach
+    by name; it does not stop a determined one.
     """
     proc = None
     limits = [["RLIMIT_CPU", math.ceil(timeout) + 1], ["RLIMIT_FSIZE", MAX_RESULT_BYTES], ["RLIMIT_CORE", 0]]
@@ -254,7 +261,7 @@ def run_candidate(
             with open(harness, "w") as f:
                 f.write(_HARNESS)
             with open(job, "w") as f:
-                json.dump({"code": code, "items": list(items)}, f)
+                json.dump({"code": code, "items": list(items), "builtins": None if builtins_allow is None else list(builtins_allow)}, f)
             env = {k: os.environ[k] for k in _ENV_NAMES if k in os.environ}
             env.update(HOME=work, TMPDIR=work)
             proc = subprocess.Popen(
@@ -359,6 +366,7 @@ def grade(
     compare: Callable[[Any, Any], bool] = operator.eq,
     no_args: bool = False,
     memory_limit_mb: int = DEFAULT_MEMORY_LIMIT_MB,
+    builtins_allow: Optional[Sequence[str]] = None,
 ) -> Tuple[str, List[bool]]:
     """Run ``code`` once and grade every test; return the run status and one bool per test.
 
@@ -391,7 +399,7 @@ def grade(
         else:
             logger.debug("Unknown test case format: %s", type(test).__name__)
             checks.append(None)
-    run = run_candidate(code, timeout, items, memory_limit_mb=memory_limit_mb)
+    run = run_candidate(code, timeout, items, memory_limit_mb=memory_limit_mb, builtins_allow=builtins_allow)
     if run.status != "ok":
         return run.status, [False] * len(tests)
     passed = []
