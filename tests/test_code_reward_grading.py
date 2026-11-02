@@ -502,3 +502,50 @@ def test_result_value_cap_counts_nested_values():
         g._decode(nested)
     code = "def f(): return [list(range(60000)), list(range(60000))]"
     assert score("code_execution", code, test_cases=["assert f()"]) == 0.0
+
+
+# --- counterfactual GRPO code tasks ---------------------------------------------------------------
+
+CF_MODULE = "aligntune.backends.trl.rl.counterfact_grpo.counterfact_grpo"
+CF_TESTS = ["assert f(2) == 4", "assert f(3) == 6"]
+CF_CANONICAL = "def f(x):\n    return 2 * x"
+CF_FORGERIES = {
+    "printed_pass": "def f(x):\n    return 0\n" + "".join(f"print('PASS:{i}')\n" for i in range(5)),
+    "exit_zero": "import sys\nprint('PASS:0')\nprint('PASS:1')\nsys.exit(0)\ndef f(x):\n    return 0",
+    "always_equal": "class _A:\n    def __eq__(self, o): return True\n    __hash__ = None\ndef f(x): return _A()",
+    "int_subclass": "class B(int):\n    def __eq__(self, o): return True\ndef f(x): return B(0)",
+}
+
+
+def cf_asserts(code):
+    from importlib import import_module
+    return import_module(CF_MODULE)._run_code_in_sandbox(code, "", CF_TESTS, 5)
+
+
+def cf_evalplus(code):
+    from importlib import import_module
+    trainer = import_module(CF_MODULE).TRLCounterFactGRPOTrainer
+    return trainer._run_evalplus_tests(None, code, CF_CANONICAL, "f", [2, 3, [4]], 5)
+
+
+@pytest.mark.parametrize("run, total", [(cf_asserts, 2), (cf_evalplus, 3)])
+@pytest.mark.parametrize("name", sorted(CF_FORGERIES))
+def test_counterfact_forgeries_score_zero(run, total, name):
+    result = in_child(lambda: run(CF_FORGERIES[name]))
+    assert not isinstance(result, str), result
+    assert result[1] == 0, result
+
+
+@pytest.mark.parametrize("run, total", [(cf_asserts, 2), (cf_evalplus, 3)])
+def test_counterfact_correct_solution_still_passes(run, total):
+    ok, passed, errors = in_child(lambda: run("def f(x):\n    return x + x"))
+    assert (ok, passed, errors) == (True, total, [])
+
+
+def test_counterfact_wrong_and_hanging_solutions():
+    wrong = in_child(lambda: cf_evalplus("def f(x):\n    return x + 1"))
+    assert wrong[:2] == (True, 0)
+    hang = in_child(lambda: cf_asserts("while True:\n    pass"))
+    assert hang[:2] == (False, 0) and "timed out" in hang[2][0]
+    hang = in_child(lambda: cf_evalplus("while True:\n    pass"))
+    assert hang[:2] == (False, 0) and "timed out" in hang[2][0]
