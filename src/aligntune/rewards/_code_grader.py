@@ -149,14 +149,31 @@ MAX_RESULT_ELEMENTS = 100_000
 _MAX_SAME_HASH = 64
 
 
-def _hashed(items: List[Any]) -> List[Any]:
-    """Refuse hash collisions before building a set or dict from the child's data.
+def _collides(members: Any) -> bool:
+    """Whether more than :data:`_MAX_SAME_HASH` distinct members share one hash.
 
-    Values that all hash alike (multiples of ``2**61 - 1`` all hash to 0) make
-    building a set or dict quadratic, which would hang the trainer. Counting the
-    hash values is linear, since distinct hash values hash apart.
+    Distinct values that all hash alike (multiples of ``2**61 - 1`` all hash to 0)
+    make building a set or dict quadratic, which would hang the trainer. Equal
+    values are cheap to insert, so they don't count. Everything here is linear:
+    members are grouped by hash, and a crowded group is counted by ``repr``,
+    which is conservative (``1``, ``1.0`` and ``True`` count as three).
     """
-    if items and max(Counter(map(hash, items)).values()) > _MAX_SAME_HASH:
+    def h(x: Any) -> int:
+        try:
+            return hash(x)
+        except TypeError:  # unhashable, so it can't become a member or a key
+            return id(x)
+
+    buckets: Dict[int, List[Any]] = {}
+    for m in members:
+        buckets.setdefault(h(m), []).append(m)
+    return any(len(b) > _MAX_SAME_HASH and len({(type(x).__name__, repr(x)) for x in b}) > _MAX_SAME_HASH
+               for b in buckets.values())
+
+
+def _hashed(items: List[Any]) -> List[Any]:
+    """Refuse hash collisions before building a set or dict from the child's data."""
+    if _collides(items):
         raise ValueError("too many colliding hashes")
     return items
 
@@ -325,7 +342,6 @@ _BUILTIN_NAMES = frozenset(dir(builtins))
 # can't make the trainer allocate or loop for long.
 _MAX_REPEAT = 10**5
 _MAX_NODES = 10_000
-_MAX_SAME_HASH = 64
 
 
 class _Vals(list):
@@ -338,17 +354,6 @@ class _Vals(list):
 _VIEWS = (type({}.keys()), type({}.values()), type({}.items()))
 
 
-def _same_hash(members: Any) -> bool:
-    """Whether too many of ``members`` hash alike, which makes building a set or dict quadratic."""
-    def h(x: Any) -> int:
-        try:
-            return hash(x)
-        except TypeError:  # unhashable, so it can't become a member or a key
-            return id(x)
-
-    return bool(members) and max(Counter(map(h, members)).values()) > _MAX_SAME_HASH
-
-
 def _tame(x: Any) -> Any:
     """A dict view or an iterator (zip, enumerate, reversed...) as a list, read up to the element cap."""
     if type(x) in _VIEWS or hasattr(x, "__next__"):
@@ -359,14 +364,18 @@ def _tame(x: Any) -> Any:
     return x
 
 
-def _small(v: Any, *things: Any) -> None:
-    """Refuse a big container or string, a total past the cap for this assert, and hash collisions."""
+def _small(v: Any, *things: Any, hashed: bool = False) -> None:
+    """Refuse a big container or string, a total past the cap for this assert, and hash collisions.
+
+    Sets, dicts and dict views are always checked; a list or tuple only with ``hashed``, when its
+    elements are about to become set members or dict keys.
+    """
     for t in things:
         if type(t) in (str, list, tuple, set, frozenset, dict) or type(t) in _VIEWS:
             if len(t) > _MAX_REPEAT:
                 raise _Fail
             v.touched += len(t)
-            if type(t) is not str and _same_hash(t):
+            if type(t) is not str and (hashed or type(t) not in (list, tuple)) and _collides(t):
                 raise _Fail
     if v.touched > 10 * _MAX_REPEAT:
         raise _Fail
@@ -384,7 +393,7 @@ def _dict_keys_collide(arg: Any) -> bool:
         if type(p) not in (list, tuple) or len(p) != 2:
             raise _Fail
         keys.append(p[0])
-    return _same_hash(keys)
+    return _collides(keys)
 
 
 Ev = Callable[[List[Any]], Any]
@@ -411,8 +420,12 @@ def _candidate(node: ast.expr) -> bool:
     return False
 
 
+_SET_LIKE = (set, frozenset) + _VIEWS
+_SET_METHODS = frozenset("union intersection difference symmetric_difference issubset issuperset".split())
+
+
 def _binop(op: ast.operator, a: Any, b: Any, v: Any) -> Any:
-    _small(v, a, b)
+    _small(v, a, b, hashed=type(a) in _SET_LIKE or type(b) in _SET_LIKE)
     if isinstance(op, ast.Mult):
         for seq, n in ((a, b), (b, a)):
             if isinstance(seq, (str, list, tuple)) and type(n) in (int, bool):
@@ -549,7 +562,7 @@ def _compile_node(node: ast.expr, calls: List[str]) -> Ev:
             def call(v: List[Any]) -> Any:
                 values = [_tame(a(v)) for a in args]
                 if func.id != "len":
-                    _small(v, *values)
+                    _small(v, *values, hashed=func.id in ("set", "frozenset", "dict"))
                 if func.id == "dict" and values and _dict_keys_collide(values[0]):
                     raise _Fail
                 return _FUNCS[func.id](*values, **{k: a(v) for k, a in kwargs})
@@ -566,7 +579,7 @@ def _compile_node(node: ast.expr, calls: List[str]) -> Ev:
                 if type(r) not in _PLAIN:
                     raise _Fail
                 values = [_tame(a(v)) for a in args]
-                _small(v, r, *values)
+                _small(v, r, *values, hashed=func.attr in _SET_METHODS)
                 if func.attr == "join" and (len(values) != 1 or not hasattr(values[0], "__len__")
                                             or len(r) * len(values[0]) > _MAX_REPEAT):
                     raise _Fail

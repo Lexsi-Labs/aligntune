@@ -328,3 +328,39 @@ def test_dict_pairs_and_set_operators_are_checked_per_element_and_on_results(tes
 )
 def test_ordinary_pairs_and_sets_still_work(test, values):
     assert _run(test, *values) is True
+
+
+@pytest.mark.parametrize(
+    "code, test",
+    [
+        ("def f(): return [0]*100\n", "assert f() == [0]*100"),
+        ("def f(): return [0]*100\n", "assert set(f()) == {0}"),
+        ("def f(): return [7]*200\n", "assert f().count(7) == 200"),
+        ("def f(): return [(1, 2)]*100\n", "assert dict(f()) == {1: 2}"),
+        ("def f(): return [1]*100\ndef g(): return [2]*100\n", "assert set(f()).union(g()) == {1, 2}"),
+        ("def f(): return [1]*100\ndef g(): return [2]*100\n", "assert set(f()) | set(g()) == {1, 2}"),
+        ("def f(): return [2**61 - 1]*9000\n", "assert len(set(f())) == 1"),
+        ("def f(): return {1: 0, 2: 0}\n", "assert dict(zip([3]*100, [4]*100)) == {3: 4}"),
+        (HASHES, "assert sorted(f())[0] == 2**61 - 1"),
+        (HASHES, "assert len(sorted(f())) == 8999 and f().count(2**61 - 1) == 1"),
+        (HASHES, "assert max(f()) == 8999 * (2**61 - 1)"),
+    ],
+)
+def test_equal_elements_and_unhashed_lists_are_not_collisions(code, test):
+    assert passes(code, test)
+
+
+def test_equal_elements_are_accepted_and_distinct_colliding_ones_refused_in_the_helper():
+    assert not _code_grader._collides([_M] * 9000)
+    assert not _code_grader._collides([1] * 100 + [1.0] * 30)
+    assert _code_grader._collides(_BAD)
+    assert not _code_grader._collides(_BAD[:64])
+
+
+@pytest.mark.parametrize(
+    "test",
+    ["assert set(f()) == set()", "assert frozenset(f()) == frozenset()", "assert dict.fromkeys(f()) == {}",
+     "assert len(dict(zip(f(), g()))) == 0", "assert set(f()).union(g()) == set()", "assert f()[0] in set(f())"],
+)
+def test_distinct_colliding_ints_are_still_refused(test):
+    assert not passes(HASHES, test)
