@@ -252,6 +252,8 @@ class TRLPaceTrainer(TRLGRPOTrainer):
     - Both: curriculum_enabled=True, use_baseline_advantages=True
     """
 
+    SUPPORTS_SGLANG_ROLLOUT = False  # builds its own trainer in setup_trainer
+
     def __init__(self, config: UnifiedConfig):
         super().__init__(config)
 

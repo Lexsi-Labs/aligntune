@@ -33,6 +33,7 @@ class UnslothGRPOTrainer(TrainerBase):
 
     TASK_TYPE = "grpo"  # Used by base class setup_data()
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
 
     def __init__(self, config: UnifiedConfig):
         super().__init__(config)
@@ -343,6 +344,20 @@ class UnslothGRPOTrainer(TrainerBase):
                 setattr(grpo_config, key, value)
             self.reward_functions = prepared_rewards.functions
 
+            # Same SGLang path as the TRL backend: Unsloth's GRPOTrainer is TRL's, so it
+            # takes the rollout_func hook. The constructor fails fast if the server is down.
+            rollout_func = None
+            rollout_backend = self._get_config_value(
+                self.config.train, 'rollout_backend', default='hf')
+            if rollout_backend == "sglang":
+                from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+                rollout_func = SGLangRollout(
+                    self._get_config_value(
+                        self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000'),
+                    sync_dir=self._get_config_value(
+                        self.config.train, 'sglang_sync_dir', default=None),
+                )
+
             self.trainer = GRPOTrainer(
                 model=self.model,
                 args=grpo_config,
@@ -350,7 +365,11 @@ class UnslothGRPOTrainer(TrainerBase):
                 eval_dataset=self.eval_dataset,
                 processing_class=self.tokenizer,
                 reward_funcs=self.reward_functions,
+                rollout_func=rollout_func,
             )
+            if rollout_func is not None:
+                from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+                self.trainer.add_callback(SGLangRolloutCallback(rollout_func))
 
             logger.info("✓ GRPO trainer setup completed")
 
