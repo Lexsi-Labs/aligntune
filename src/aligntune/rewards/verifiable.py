@@ -213,12 +213,23 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         self.timeout = config.params.get('timeout', 5.0)
         self.test_cases = config.params.get('test_cases', [])
 
-    def verify(self, completion: str, reference: Optional[str] = None) -> bool:
+    def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        """Like the base class, but the row's test columns reach ``verify``."""
+        try:
+            return 1.0 if self.verify(text, reference, **kwargs) else 0.0
+        except Exception as e:
+            logger.warning(f"Verification failed for {type(self).__name__}: {e}")
+            return 0.0
+
+    def verify(self, completion: str, reference: Optional[str] = None, **row) -> bool:
         """Verify code execution by running it and checking output.
 
         Args:
             completion: Generated code
             reference: Expected output or test cases
+            **row: Dataset columns. Tests come from ``test_cases``, MBPP's
+                ``test_list``, or HumanEval's ``test`` plus ``entry_point``;
+                they are used before ``reference``.
 
         Returns:
             True if code executes successfully and produces expected output
@@ -226,6 +237,12 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         code = self._extract_code(completion)
         if not code:
             return False
+        tests, setup = _code_grader.tests_from_columns(row)
+        if tests:
+            code = _code_grader.with_prompt(code, completion, row)
+            if setup:
+                code = code + "\n\n" + setup
+            return self._validate_test_cases(code, tests)
 
         # If we have test cases, validate against them
         test_cases = reference if reference else None
