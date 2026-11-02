@@ -16,6 +16,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ### Changed
 - SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).
 - `create_rl_trainer` now passes `rollout_backend` to the trainer, so `rollout_backend="vllm"` turns vLLM rollout on. Before, the argument was ignored and the trainer used `hf` (#32, @chayan-bit).
+- Code rewards: a function must return plain Python data (`None`, `bool`, `int`, `float`, `str`, `list`, `tuple`, `set`, `frozenset`, `dict`); NumPy scalars, `bytes`, custom classes and results of more than 100,000 values in all now fail the test. An `assert` shape that can't be split, or a non-`assert` test string, fails with a warning. A completion runs with `__name__ == "__main__"`, so one that calls `sys.exit` under that guard fails. All of a completion's tests run in one child, so a test that hangs fails them all. The child doesn't get the trainer's environment variables or `PYTHONPATH`.
 
 ### Fixed
 - Unsloth SFT: `dataset.map` fingerprinting no longer pickles the model into host RAM (#33, @chayan-bit).
@@ -28,6 +29,16 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - Counterfactual GRPO gold answers: MATH expressions such as `\frac{14}{3}` and a numeric zero stay as written, and a boxed answer in `solution` is used (#45, @Yuvraj27-5; reported in #44 by @ANDROIDHASSAN). On top: TRL reads the answer column it chose, one number in plain text (`72 eggs`) is the gold, and `#### 1/3` keeps the fraction.
 - SGLang adapter sync: every training process generates with the synced adapter, not only the main one, and only the main process unloads it. Unsloth PACE raises for `rollout_backend="sglang"` instead of generating with transformers. Adapter tensors are dropped only for whole vision or audio module names (on top of #32 and #41).
 - SGLang adapter sync with Unsloth 4-bit models, such as counterfactual GRPO by default: the pre-quantized `unsloth/<model>-bnb-4bit` base now matches a server running the full-precision `<model>`, instead of failing the base-model check.
+- Code rewards read the tests a dataset ships: MBPP's `test_list` and HumanEval's `test` plus `entry_point`, as well as `test_cases`. A HumanEval completion that only writes the function body is graded as prompt plus completion. Before, every reward took its no-test branch on these datasets.
+- `code_correctness` strips a Markdown fence, and a bare answer keeps the imports above its first `def`.
+- `code_execution` without tests works on a worker thread; it used `signal.alarm`, which fails there.
+- `code_correctness` and `code_quality` return unweighted scores. The trainer applies `weight`, so it was applied twice.
+- `mbpp_reward` no longer leaves a temporary file behind on every call, and honours `params["timeout"]`.
+- The `deepseek_humaneval` and `gbmpo_l2_code` recipes name the real dataset, `openai/openai_humaneval` (`openai/humaneval` returns 401).
+- `examples/grpo_code_gen_trl_mbpp.py` trains with `mbpp_reward`, as it says, not `code_quality`.
+
+### Security
+- Code rewards (`code_execution`, `code_correctness`, `mbpp_reward`, `code_verifiable`) no longer run completions in the training process, and grade by value. Each call runs the code in a fresh `sys.executable -I` child with a temporary working directory, a minimal environment, a process group killed on timeout, CPU and file-size limits, and a memory limit on Linux. The child returns plain values and the trainer compares them, so printed `PASS` lines, exit status 0, `sys.exit`/`os._exit`, an always-equal `__eq__` and patching `math.isclose` no longer earn a pass, end the trainer or change later grades, and `while True` no longer hangs it. `code_correctness` scores 0 and warns when no tests arrive, instead of 0.5 for anything that compiles. The child is not a sandbox: it can still read the user's files, use the network and signal the trainer (see the reward functions guide). Reported by Ebin Babu Thomas (@ebt55).
 
 ## [0.1.10] — 2026-08-05
 
