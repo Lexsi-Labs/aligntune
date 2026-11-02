@@ -17,7 +17,22 @@ import numpy as np
 import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import ast
-import time 
+import os
+import sys
+import time
+
+# Model-generated code is only ever run out of process, graded "values out".
+from ._code_sandbox import (
+    _BUILTINS as _BUILTIN_NAMES,
+    code_runs,
+    grade_assertions,
+    humaneval_assertions,
+    grade_assertions_detail,
+    is_plain,
+    run_calls,
+    setup_from_kwargs,
+    tests_from_kwargs,
+)
 
 # Import robust math grading from shared module
 from aligntune.utils.math_grading import (
@@ -900,6 +915,35 @@ class BERTScoreReward(RewardFunction):
             return 0.0
 
 
+_NO_TESTS_WARNED = set()
+
+
+def _warn_no_tests(reward_name: str, kwargs: Dict[str, Any]) -> None:
+    """Say once, loudly, that a test-based reward got no tests (e.g. a dataset column mismatch)."""
+    if reward_name not in _NO_TESTS_WARNED:
+        _NO_TESTS_WARNED.add(reward_name)
+        logger.warning(
+            f"{reward_name}: no test cases reached this reward (row keys: {sorted(kwargs)[:20]}). "
+            f"Pass `test_cases`, MBPP's `test_list`, or HumanEval's `test` + `entry_point`."
+        )
+
+
+def _defines(code: str, name: Optional[str]) -> bool:
+    return bool(name) and re.search(r"^\s*(async\s+)?def\s+" + re.escape(name) + r"\s*\(", code, re.M) is not None
+
+
+def _first_function(code: str) -> Optional[str]:
+    """Name of the first public top-level function in code (not the first callable in a namespace,
+    which picked `typing.List` on HumanEval)."""
+    try:
+        for node in ast.parse(code).body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith('_'):
+                return node.name
+    except SyntaxError:
+        pass
+    return None
+
+
 class CodeExecutionReward(RewardFunction):
     """Reward for code execution success.
 
@@ -914,28 +958,34 @@ class CodeExecutionReward(RewardFunction):
         self.test_cases = config.params.get('test_cases', [])
 
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        # Get test cases from kwargs or config
-        test_cases = kwargs.get('test_cases', self.test_cases)
+        # Tests from kwargs (test_cases, MBPP test_list, or HumanEval test + entry_point) or config
+        test_cases = tests_from_kwargs(kwargs, self.test_cases)
+        setup = setup_from_kwargs(kwargs)
+        entry = kwargs.get('entry_point')
 
         # Debug: log when test_cases are received
         if test_cases:
             logger.debug(f"CodeExecutionReward: received {len(test_cases)} test cases")
         else:
-            logger.debug(f"CodeExecutionReward: NO test cases (kwargs keys: {list(kwargs.keys())})")
+            _warn_no_tests(type(self).__name__, kwargs)
 
         # Extract code from response
         code = self._extract_code(text)
+        if code and entry and kwargs.get('prompt') and not _defines(code, entry) \
+                and _defines(str(kwargs['prompt']), entry):
+            code = str(kwargs['prompt']) + text  # HumanEval-style body-only continuation
         if not code:
             logger.debug("CodeExecutionReward: no code extracted")
             return 0.0
 
         # If test cases provided, validate against them
         if test_cases:
-            score = self._validate_with_test_cases(code, test_cases)
+            score = self._validate_with_test_cases(code, test_cases, setup=setup, entry=entry)
             logger.debug(f"CodeExecutionReward: validation score = {score}")
             return score
         else:
-            # Otherwise, just check if code executes without error
+            # Otherwise, only check that the code runs (out of process). This cannot tell a stub
+            # from a solution: pass tests whenever you have them.
             return 1.0 if self._execute_code_safely(code) else 0.0
 
     def _extract_code(self, text: str) -> str:
@@ -963,14 +1013,15 @@ class CodeExecutionReward(RewardFunction):
             # Fallback: return first block
             return all_code_blocks[0].strip()
 
-        # Try to find function definition directly
+        # No code block: start at the first top-level def/import/class line, so imports above
+        # the first def are kept (starting at the def dropped them and failed correct code).
         lines = text.split('\n')
         code_lines = []
-        in_function = False
+        in_code = False
         for line in lines:
-            if line.strip().startswith('def '):
-                in_function = True
-            if in_function:
+            if re.match(r'(def |async def |class |import |from \S+ import |@)', line):
+                in_code = True
+            if in_code:
                 code_lines.append(line)
 
         if code_lines:
@@ -980,190 +1031,70 @@ class CodeExecutionReward(RewardFunction):
         return text.strip()
 
     def _execute_code_safely(self, code: str) -> bool:
-        """Safely execute code and return success status with timeout."""
+        """Run code in a separate process; True if it runs to the end without raising.
+
+        Nothing runs in the trainer process, and sys.exit()/os._exit() count as failure.
+        """
         try:
-            import signal
-
-            def timeout_handler(signum, frame):
-                raise TimeoutError("Code execution timed out")
-
-            # Set timeout (Unix only)
-            old_handler = None
-            if hasattr(signal, 'SIGALRM'):
-                old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                signal.alarm(int(self.timeout))
-
-            try:
-                # Use full builtins for proper execution
-                namespace = {'__builtins__': __builtins__}
-                exec(code, namespace)
-                return True
-            finally:
-                # Cancel timeout
-                if hasattr(signal, 'SIGALRM'):
-                    signal.alarm(0)
-                    if old_handler:
-                        signal.signal(signal.SIGALRM, old_handler)
-
+            return code_runs(code, timeout=self.timeout)
         except Exception as e:
             logger.debug(f"Code execution failed: {e}")
             return False
 
-    def _validate_with_test_cases(self, code: str, test_cases: List[Any]) -> float:
-        """Validate code against test cases.
+    def _validate_with_test_cases(self, code: str, test_cases: List[Any], setup: str = "",
+                                  entry: Optional[str] = None) -> float:
+        """Validate code against test cases, out of process and "values out".
 
-        Handles both:
+        The child process returns only the values of the candidate's calls; each assert or
+        expected_output comparison is evaluated here on plain data. Printed text and exit codes
+        are ignored.
+
+        Handles:
         - MBPP-style assertion strings: 'assert func(x) == y'
         - Dict-style: {'input': x, 'expected_output': y}
+        - HumanEval's check() program as one string (needs entry_point)
 
         Returns: float score (0.0 to 1.0) based on fraction of tests passed
         """
+        if isinstance(test_cases, str):
+            test_cases = humaneval_assertions(test_cases, entry) if entry else []
         if not test_cases:
             return 0.0
 
+        asserts = [t for t in test_cases if isinstance(t, str) and t.strip().startswith('assert')]
+        dicts = [t for t in test_cases if isinstance(t, dict)]
         passed = 0
-        total = len(test_cases)
-
-        for test_case in test_cases:
-            try:
-                if isinstance(test_case, str) and test_case.strip().startswith('assert'):
-                    # MBPP-style assertion string
-                    if self._run_assertion_test(code, test_case):
-                        passed += 1
-                elif isinstance(test_case, dict):
-                    # Dict-style test case
-                    if self._run_dict_test(code, test_case):
-                        passed += 1
-                else:
-                    logger.debug(f"Unknown test case format: {type(test_case)}")
-            except Exception as e:
-                logger.debug(f"Test case validation failed: {e}")
-                continue
-
-        return passed / total if total > 0 else 0.0
-
-    def _run_assertion_test(self, code: str, assertion: str) -> bool:
-        """Run a single MBPP-style assertion test using subprocess for safety."""
-        import subprocess
-        import tempfile
-        import os
-
-        # Create a temporary file with the test code
-        test_code = f'''{code}
-
-{assertion}
-print("PASS")
-'''
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(test_code)
-                temp_file = f.name
-
-            # Run in subprocess with timeout
-            result = subprocess.run(
-                ['python', temp_file],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout
-            )
-
-            # Clean up
-            os.unlink(temp_file)
-
-            # Check if test passed
-            return result.returncode == 0 and "PASS" in result.stdout
-
-        except subprocess.TimeoutExpired:
-            logger.debug("Assertion test timed out")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
+            if asserts:
+                passed += sum(grade_assertions(code, asserts, setup=setup, timeout=self.timeout, entry=entry))
+            if dicts:
+                passed += sum(self._run_dict_tests(code, dicts, setup))
         except Exception as e:
-            logger.debug(f"Assertion test error: {e}")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
+            logger.debug(f"Test case validation failed: {e}")
+        return passed / len(test_cases)
 
-    def _run_dict_test(self, code: str, test_case: Dict[str, Any]) -> bool:
-        """Run a single dict-style test case using subprocess for safety."""
-        import subprocess
-        import tempfile
-        import os
-        import json
-
-        test_input = test_case.get('input')
-        expected_output = test_case.get('expected_output')
-
-        # Build test script
-        test_code = f'''{code}
-
-import json
-
-# Get the function (first callable that's not builtin)
-functions = {{k: v for k, v in dict(globals()).items()
-            if callable(v) and not k.startswith('_') and k not in ('json',)}}
-if not functions:
-    exit(1)
-
-main_func = list(functions.values())[0]
-test_input = {repr(test_input)}
-expected_output = {repr(expected_output)}
-
-if isinstance(test_input, (list, tuple)) and len(test_input) > 1:
-    actual_output = main_func(*test_input)
-else:
-    actual_output = main_func(test_input) if test_input is not None else main_func()
-
-# Compare outputs
-def compare(actual, expected):
-    import math
-    if isinstance(actual, float) and isinstance(expected, float):
-        return math.isclose(actual, expected, rel_tol=1e-5, abs_tol=1e-9)
-    if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
-        if len(actual) != len(expected):
-            return False
-        return all(compare(a, e) for a, e in zip(actual, expected))
-    return actual == expected
-
-if compare(actual_output, expected_output):
-    print("PASS")
-'''
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(test_code)
-                temp_file = f.name
-
-            result = subprocess.run(
-                ['python', temp_file],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout
-            )
-
-            os.unlink(temp_file)
-            return result.returncode == 0 and "PASS" in result.stdout
-
-        except subprocess.TimeoutExpired:
-            logger.debug("Dict test timed out")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
-        except Exception as e:
-            logger.debug(f"Dict test error: {e}")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
+    def _run_dict_tests(self, code: str, test_cases: List[Dict[str, Any]], setup: str = "") -> List[bool]:
+        """Dict-style tests, values out: the child returns func(input); the comparison is done here."""
+        func = _first_function(code)
+        if func is None:
+            return [False] * len(test_cases)
+        calls = []
+        for tc in test_cases:
+            test_input = tc.get('input')
+            if isinstance(test_input, (list, tuple)) and len(test_input) > 1:
+                calls.append(f"{func}(*{test_input!r})")
+            elif test_input is None:
+                calls.append(f"{func}()")
+            else:
+                calls.append(f"{func}({test_input!r})")
+        load, results = run_calls(code, calls, setup=setup, timeout=self.timeout)
+        return [load is None and kind == "ok" and self._compare_outputs(value, tc.get('expected_output'))
+                for (kind, value), tc in zip(results, test_cases)]
 
     def _compare_outputs(self, actual: Any, expected: Any) -> bool:
-        """Compare actual and expected outputs."""
+        """Compare actual and expected outputs (plain data only: no custom __eq__ can answer)."""
+        if not (is_plain(actual) and is_plain(expected)):
+            return False
         if isinstance(actual, float) and isinstance(expected, float):
             return math.isclose(actual, expected, rel_tol=1e-5, abs_tol=1e-9)
         if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
@@ -1652,7 +1583,9 @@ class CodeQualityReward(RewardFunction):
             components += 1
         
         final_score = (total_score / components) if components > 0 else 0.0
-        return final_score * self.config.weight
+        # Not multiplied by self.config.weight: the trainer (TRL reward_weights, CompositeReward)
+        # applies the weight, so multiplying here applied it twice.
+        return final_score
     
     # ... [Include all the helper methods from your grpo_trainer.py]
     def _evaluate_syntax(self, code: str, language: str) -> float:
@@ -1745,54 +1678,28 @@ class CodeQualityReward(RewardFunction):
 
 
 class CodeCorrectnessReward(RewardFunction):
-    """Reward function for code correctness based on test cases."""
-    
+    """Reward function for code correctness based on test cases.
+
+    Accepts the same tests as CodeExecutionReward (assert strings, input/expected_output dicts, or
+    HumanEval's test + entry_point) and grades them the same way: out of process, values out.
+    Code blocks are extracted from the response (a ```python fence used to make every answer fail).
+    """
+
     def __init__(self, config: RewardConfig):
         super().__init__(config)
         self.test_cases = config.params.get('test_cases', [])
         self.timeout = config.params.get('timeout', 5.0)
-    
-    def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        test_cases = kwargs.get('test_cases', self.test_cases)
-        
-        if not test_cases:
-            try:
-                compile(text, '<string>', 'exec')
-                return 0.5 * self.config.weight
-            except:
-                return 0.0
-        
-        passed = sum(1 for test_case in test_cases if self._run_test_case(text, test_case))
-        return (passed / len(test_cases)) * self.config.weight if test_cases else 0.0
-    
-    # ... [Include all the helper methods]
-    def _run_test_case(self, code: str, test_case: Dict[str, Any]) -> bool:
-        try:
-            namespace = {'__builtins__': __builtins__}
-            exec(code, namespace)
-            functions = {k: v for k, v in namespace.items() 
-                        if callable(v) and not k.startswith('_') and k != '__builtins__'}
-            if not functions:
-                return False
-            main_func = list(functions.values())[0]
-            test_input = test_case.get('input')
-            expected_output = test_case.get('expected_output')
-            if isinstance(test_input, (list, tuple)) and len(test_input) > 1:
-                actual_output = main_func(*test_input)
-            else:
-                actual_output = main_func(test_input)
-            return self._compare_outputs(actual_output, expected_output)
-        except:
-            return False
+        self._executor = CodeExecutionReward(config)
 
-    def _compare_outputs(self, actual: Any, expected: Any) -> bool:
-        if isinstance(actual, float) and isinstance(expected, float):
-            return math.isclose(actual, expected, rel_tol=1e-5)
-        if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
-            if len(actual) != len(expected):
-                return False
-            return all(self._compare_outputs(a, e) for a, e in zip(actual, expected))
-        return actual == expected
+    def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
+        test_cases = tests_from_kwargs(kwargs, self.test_cases)
+        if not test_cases:
+            # Nothing to check correctness against. (This used to return 0.5 * weight for anything
+            # that compiles, including the empty string.)
+            _warn_no_tests(type(self).__name__, kwargs)
+            return 0.0
+        # Not multiplied by self.config.weight: the trainer applies it.
+        return self._executor.compute(text, reference, **{**kwargs, 'test_cases': test_cases})
 
 
 class DiversityReward(RewardFunction):
@@ -2871,14 +2778,14 @@ class MBPPReward:
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         """Compute reward for a single completion."""
-        # Extract test data from kwargs
-        test_cases = kwargs.get('test_cases', None)
+        # Extract test data from kwargs (test_cases, MBPP's test_list, HumanEval's test + entry_point)
+        test_cases = tests_from_kwargs(kwargs, None)
         sample_id = kwargs.get('sample_id', 0)
         prompt_text = kwargs.get('prompt', "")
         
         if test_cases is not None:
             tests = test_cases if isinstance(test_cases, list) else []
-            setup_code = ""
+            setup_code = setup_from_kwargs(kwargs)
         else:
             if prompt_text:
                 id_match = re.search(r"__SAMPLE_ID:(\d+)__", prompt_text)
@@ -2925,7 +2832,9 @@ class MBPPReward:
     def _extract_function_info_from_test(self, test_str: str) -> Tuple[Optional[str], int]:
         """Extract function name and arity from test string."""
         try:
-            match = re.search(r'(\w+)\([^)]*\)', test_str)
+            # first called name that is not a builtin (`assert set(f(x)) == ...` tests f, not set)
+            match = next((m for m in re.finditer(r'(\w+)\(', test_str) if m.group(1) not in _BUILTIN_NAMES), None) \
+                or re.search(r'(\w+)\([^)]*\)', test_str)
             if match:
                 func_name = match.group(1)
                 args_match = re.search(r'\(([^)]*)\)', test_str)
@@ -2994,78 +2903,22 @@ class MBPPReward:
         return f"def {expected_name}(*args, **kwargs):\n    raise NotImplementedError\n\n" + code
     
     def _run_code_in_sandbox(self, code: str, setup_code: str, tests: List[str], timeout_seconds: int = 5) -> Tuple[bool, int, List[str]]:
-        """Run code in a subprocess sandbox with timeout."""
-        import subprocess
-        import tempfile
-        import sys
-        
-        error_messages = []
-        input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
+        """Run the tests against code in a separate process, values out.
 
-        test_script = f"""
-import sys
-import traceback
-
-# Block input
-{input_blocker}
-
-# Setup code
-{setup_code}
-
-# Generated code
-{code}
-
-# Test execution
-results = []
-for i, test_code in enumerate({repr(tests)}):
-    try:
-        exec(test_code)
-        results.append(f"PASS:{{i}}")
-    except Exception as e:
-        results.append(f"FAIL:{{i}}:{{type(e).__name__}}:{{str(e)}}")
-
-# Output results
-for result in results:
-    print(result)
-"""
-
+        The child returns only the values of the calls the asserts make; each assert is evaluated
+        here. Printed "PASS:" lines, exit codes and custom __eq__ objects no longer count.
+        Returns (execution_success, tests_passed, error_messages).
+        """
         try:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-                f.write(test_script)
-                temp_file = f.name
-
-            result = subprocess.run([sys.executable, temp_file], capture_output=True, text=True, timeout=timeout_seconds)
-
-            tests_passed = 0
-            if result.returncode == 0:
-                for line in result.stdout.strip().split("\n"):
-                    if line.startswith("PASS:"):
-                        tests_passed += 1
-                    elif line.startswith("FAIL:"):
-                        parts = line.split(":", 3)
-                        if len(parts) >= 4:
-                            error_messages.append(f"Test {parts[1]}: {parts[2]} - {parts[3]}")
-                execution_success = True
-            else:
-                execution_success = False
-                if result.stderr:
-                    error_messages.append(f"Execution error: {result.stderr[:200]}")
-
-            return execution_success, tests_passed, error_messages
-
-        except subprocess.TimeoutExpired:
-            error_messages.append("Code execution timed out (infinite loop)")
-            return False, 0, error_messages
+            load, results = grade_assertions_detail(code, tests, setup=setup_code, timeout=timeout_seconds)
         except Exception as e:
-            error_messages.append(f"Sandbox error: {str(e)}")
-            return False, 0, error_messages
-        finally:
-            try:
-                if "temp_file" in locals():
-                    os.unlink(temp_file)
-            except:
-                pass
-    
+            return False, 0, [f"Sandbox error: {str(e)}"]
+        if load == "timed out":
+            return False, 0, ["Code execution timed out (infinite loop)"]
+        if load is not None:
+            return False, 0, [f"Execution error: {load[:200]}"]
+        return True, sum(results), [f"Test {i}: failed" for i, ok in enumerate(results) if not ok]
+
     def _calculate_format_penalties(self, text: str) -> float:
         """Calculate format penalties."""
         penalties = 0.0

@@ -32,6 +32,7 @@ from aligntune.core.sft.evaluator import EnhancedEvaluator
 from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
 from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
+from aligntune.rewards._code_sandbox import grade_assertions_detail, is_plain, run_calls
 
 logger = logging.getLogger(__name__)
 
@@ -165,95 +166,22 @@ def _run_code_in_sandbox(
     timeout_seconds: int = 5
 ) -> Tuple[bool, int, List[str]]:
     """
-    Run code in a subprocess sandbox with timeout.
+    Run the tests against code in a separate process, graded "values out".
+    The child returns only the values of the calls the asserts make; each assert is evaluated
+    in this process. Printed "PASS:" lines, exit codes and custom __eq__ objects do not count.
     Returns: (execution_success, tests_passed, error_messages)
     """
-    error_messages = []
-
-    # Block input() to prevent hanging
-    input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
-
-    # Create the test script
-    test_script = f"""
-import sys
-import traceback
-
-# Block input
-{input_blocker}
-
-# Setup code
-{setup_code}
-
-# Generated code
-{code}
-
-# Test execution
-results = []
-for i, test_code in enumerate({repr(tests)}):
     try:
-        exec(test_code)
-        results.append(f"PASS:{{i}}")
-    except Exception as e:
-        results.append(f"FAIL:{{i}}:{{type(e).__name__}}:{{str(e)}}")
-
-# Output results
-for result in results:
-    print(result)
-"""
-
-    temp_file = None
-    try:
-        # Write to temporary file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            f.write(test_script)
-            temp_file = f.name
-
-        # Run in subprocess with timeout
-        result = subprocess.run(
-            [sys.executable, temp_file],
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds
-        )
-
-        # Parse output
-        tests_passed = 0
-        if result.returncode == 0:
-            for line in result.stdout.strip().split('\n'):
-                if line.startswith('PASS:'):
-                    tests_passed += 1
-                elif line.startswith('FAIL:'):
-                    parts = line.split(':', 3)
-                    if len(parts) >= 4:
-                        error_messages.append(f"Test {parts[1]}: {parts[2]} - {parts[3]}")
-            execution_success = True
-        else:
-            execution_success = False
-            if result.stderr:
-                error_messages.append(f"Execution error: {result.stderr[:200]}")
-
-        return execution_success, tests_passed, error_messages
-
-    except subprocess.TimeoutExpired:
-        error_messages.append("Code execution timed out (infinite loop)")
-        return False, 0, error_messages
-    except Exception as e:
-        error_messages.append(f"Sandbox error: {str(e)}")
-        return False, 0, error_messages
-    finally:
-        # Clean up temp file
-        if temp_file:
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
+        load, results = grade_assertions_detail(code, tests, setup=setup_code or "", timeout=timeout_seconds)
+    except Exception as e:  # noqa: BLE001
+        return False, 0, [f"Sandbox error: {str(e)}"]
+    if load == "timed out":
+        return False, 0, ["Code execution timed out (infinite loop)"]
+    if load is not None:
+        return False, 0, [f"Execution error: {load[:200]}"]
+    return True, sum(results), [f"Test {i}: failed" for i, ok in enumerate(results) if not ok]
 
 
-
-
-# ============================================================================
-# COUNTERFACTUAL TRL TRAINER (mirrors TRLGRPOTrainer 1:1)
-# ============================================================================
 class TRLCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
     """Counterfactual GRPO trainer using custom CounterfactualGRPOTrainer with enhanced rewards."""
@@ -860,94 +788,33 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         timeout_seconds: int = 5
     ) -> Tuple[bool, int, List[str]]:
         """
-        Run evalplus-style tests by comparing outputs to canonical solution.
+        Run evalplus-style tests by comparing outputs to the canonical solution.
+        The canonical solution and the generated code each run in their own child process;
+        only their return values (plain data) come back, and they are compared here, so
+        printed text, exit codes and custom __eq__ objects cannot pass a test.
         Returns: (execution_success, tests_passed, error_messages)
         """
-        error_messages = []
-        passed = 0
-
-        # Block input() to prevent hanging
-        input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
-
-        # Create test script that compares generated vs canonical outputs
-        test_script = f'''
-import sys
-import traceback
-
-# Block input
-{input_blocker}
-
-# Canonical solution
-{canonical_solution}
-_canonical_func = {entry_point}
-
-# Generated solution
-{code}
-_generated_func = {entry_point}
-
-# Test inputs
-base_inputs = {repr(base_inputs)}
-
-# Run tests
-results = []
-for i, inp in enumerate(base_inputs):
-    try:
-        if isinstance(inp, (list, tuple)):
-            expected = _canonical_func(*inp)
-            actual = _generated_func(*inp)
-        else:
-            expected = _canonical_func(inp)
-            actual = _generated_func(inp)
-
-        if expected == actual:
-            results.append(f"PASS:{{i}}")
-        else:
-            results.append(f"FAIL:{{i}}:expected={{expected}},got={{actual}}")
-    except Exception as e:
-        results.append(f"ERROR:{{i}}:{{type(e).__name__}}:{{str(e)[:50]}}")
-
-for r in results:
-    print(r)
-'''
-
-        temp_file = None
+        calls = [
+            f"{entry_point}(*{inp!r})" if isinstance(inp, (list, tuple)) else f"{entry_point}({inp!r})"
+            for inp in base_inputs
+        ]
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(test_script)
-                temp_file = f.name
-
-            result = subprocess.run(
-                [sys.executable, temp_file],
-                capture_output=True,
-                text=True,
-                timeout=timeout_seconds
-            )
-
-            if result.returncode == 0:
-                for line in result.stdout.strip().split('\n'):
-                    if line.startswith('PASS:'):
-                        passed += 1
-                    elif line.startswith('FAIL:') or line.startswith('ERROR:'):
-                        error_messages.append(line)
-                return True, passed, error_messages
+            _, expected = run_calls(canonical_solution, calls, timeout=timeout_seconds)
+            load, actual = run_calls(code, calls, timeout=timeout_seconds)
+        except Exception as e:  # noqa: BLE001
+            return False, 0, [f"Sandbox error: {str(e)}"]
+        if load == "timed out":
+            return False, 0, ["Code execution timed out"]
+        if load is not None:
+            return False, 0, [f"Execution error: {load[:200]}"]
+        passed, error_messages = 0, []
+        for i, ((ek, ev), (ak, av)) in enumerate(zip(expected, actual)):
+            if ek == "ok" and ak == "ok" and is_plain(ev) and is_plain(av) and ev == av:
+                passed += 1
             else:
-                error_messages.append(f"Execution error: {result.stderr[:200]}")
-                return False, 0, error_messages
+                error_messages.append(f"FAIL:{i}")
+        return True, passed, error_messages
 
-        except subprocess.TimeoutExpired:
-            error_messages.append("Code execution timed out")
-            return False, 0, error_messages
-        except Exception as e:
-            error_messages.append(f"Sandbox error: {str(e)}")
-            return False, 0, error_messages
-        finally:
-            if temp_file:
-                try:
-                    os.unlink(temp_file)
-                except:
-                    pass
-
-    
     def _compute_code_rewards(self, completions: List, **kwargs) -> List[float]:
         """Compute rewards for code generation (MBPP)."""
         prompts = kwargs.get("prompts", [""] * len(completions))

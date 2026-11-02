@@ -2,7 +2,7 @@ recipe:
   name: "deepseek-humaneval-grpo"
   description: "Train DeepSeek Coder on HumanEval for code generation using GRPO"
   model: "deepseek-ai/deepseek-coder-1.3b-instruct"
-  dataset: "openai/humaneval"
+  dataset: "openai/openai_humaneval"
   task: "code_generation"
   algorithm: "grpo"
   backend: "trl"
@@ -25,16 +25,21 @@ config:
     lora_dropout: 0.1
     lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   datasets:
-    - name: "openai/humaneval"
+    # "openai/humaneval" does not exist on the Hub; the dataset is openai/openai_humaneval.
+    # Its `test` (a check(candidate) program) and `entry_point` columns are kept for GRPO and reach
+    # the code rewards as keyword arguments; the rewards read them directly (no `test_cases` needed).
+    - name: "openai/openai_humaneval"
       split: "test"
       column_mapping:
         text: "prompt"
   rewards:
+    # Test-based correctness dominates. code_quality is a structural heuristic that never runs the
+    # code, so it gets a small weight: a stub cannot outscore a correct answer.
     - type: "code_correctness"
-      weight: 0.5
+      weight: 0.7
       params: {}
     - type: "code_quality"
-      weight: 0.3
+      weight: 0.1
       params: {}
     - type: "code_execution"
       weight: 0.2

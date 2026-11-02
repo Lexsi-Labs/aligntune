@@ -2,7 +2,7 @@ recipe:
   name: "gbmpo-l2-code"
   description: "GBMPO with L2 divergence for code generation with fine-grained policy control"
   model: "deepseek-ai/deepseek-coder-6.7b-instruct"
-  dataset: "openai/humaneval"
+  dataset: "openai/openai_humaneval"
   task: "code_generation"
   algorithm: "gbmpo"
   backend: "trl"
@@ -25,16 +25,19 @@ config:
     lora_dropout: 0.1
     lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   datasets:
-    - name: "openai/humaneval"
+    # The Hub dataset is openai/openai_humaneval; its `test` + `entry_point` columns reach the rewards.
+    - name: "openai/openai_humaneval"
       split: "test"
       column_mapping:
         text: "prompt"
   rewards:
+    # Test-based correctness dominates. code_quality is a structural heuristic that never runs the
+    # code, so it gets a small weight: a stub cannot outscore a correct answer.
     - type: "code_correctness"
-      weight: 0.5
+      weight: 0.7
       params: {}
     - type: "code_quality"
-      weight: 0.3
+      weight: 0.1
       params: {}
     - type: "code_execution"
       weight: 0.2

@@ -21,9 +21,11 @@ import subprocess
 import tempfile
 import os
 import signal
+import sys
 from contextlib import contextmanager
 
 from .core import RewardFunction, RewardConfig
+from ._code_sandbox import code_runs, grade_assertions, run_calls
 from ._answers import (
     answers_match,
     clean_answer,
@@ -254,12 +256,12 @@ class CodeExecutionVerifiableReward(VerifiableReward):
                 # Return last match (likely the actual solution)
                 return matches[-1].strip()
 
-        # If no blocks found, try to extract function definition
+        # If no blocks found, start at the first top-level def/class/import line (keeps imports)
         lines = text.split('\n')
         code_lines = []
         in_code = False
         for line in lines:
-            if line.strip().startswith('def ') or line.strip().startswith('class '):
+            if re.match(r'(def |async def |class |import |from \S+ import |@)', line):
                 in_code = True
             if in_code:
                 code_lines.append(line)
@@ -270,33 +272,10 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return None
 
     def _execute_safely(self, code: str) -> bool:
-        """Safely execute code with timeout.
-
-        Args:
-            code: Python code to execute
-
-        Returns:
-            True if execution completes without error, False otherwise
-        """
+        """True if code runs to the end without raising, in a separate process
+        (sys.exit()/os._exit() count as failure; the exit code is not used)."""
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(code)
-                f.flush()
-                temp_file = f.name
-
-            try:
-                result = subprocess.run(
-                    ['/usr/bin/python3' if os.path.exists('/usr/bin/python3') else 'python', temp_file],
-                    capture_output=True,
-                    timeout=self.timeout,
-                    text=True
-                )
-                return result.returncode == 0
-            finally:
-                os.unlink(temp_file)
-
-        except subprocess.TimeoutExpired:
-            return False
+            return code_runs(code, timeout=self.timeout)
         except Exception as e:
             logger.debug(f"Code execution failed: {e}")
             return False
@@ -329,26 +308,18 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return False
 
     def _check_output(self, code: str, expected: str) -> bool:
-        """Check if code output matches expected."""
+        """Check if the program's stdout matches expected (a stdout task by definition)."""
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(code)
-                f.flush()
-                temp_file = f.name
-
-            try:
+            with tempfile.TemporaryDirectory() as tmp:
+                path = os.path.join(tmp, "prog.py")
+                with open(path, "w") as f:
+                    f.write(code)
                 result = subprocess.run(
-                    ['/usr/bin/python3' if os.path.exists('/usr/bin/python3') else 'python', temp_file],
-                    capture_output=True,
-                    timeout=self.timeout,
-                    text=True
+                    [sys.executable, '-I', path],
+                    capture_output=True, timeout=self.timeout, text=True, cwd=tmp,
+                    env={"PATH": "/usr/bin:/bin", "HOME": tmp}, start_new_session=True,
                 )
-                actual = result.stdout.strip()
-                expected_norm = expected.strip()
-                return actual == expected_norm
-            finally:
-                os.unlink(temp_file)
-
+            return result.returncode == 0 and result.stdout.strip() == expected.strip()
         except subprocess.TimeoutExpired:
             return False
         except Exception as e:
@@ -356,45 +327,19 @@ class CodeExecutionVerifiableReward(VerifiableReward):
             return False
 
     def _check_assertions(self, code: str, assertions: list) -> bool:
-        """Check if code passes a list of assertion strings."""
-        full_code = code + '\n' + '\n'.join(assertions)
-        return self._execute_safely(full_code)
+        """All assertion strings pass, graded values out (not "the process exited 0")."""
+        results = grade_assertions(code, assertions, timeout=self.timeout)
+        return bool(results) and all(results)
 
     def _check_io_pairs(self, code: str, test_cases: list) -> bool:
-        """Check if code passes input/output test pairs."""
-        for test_case in test_cases:
-            input_val = test_case.get('input', '')
-            expected_output = test_case.get('expected_output', '')
-
-            # Create test code that calls the function with input
-            # This is simplified - in practice might need more sophisticated handling
-            test_code = code + f"\nprint({input_val})"
-
-            try:
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                    f.write(test_code)
-                    f.flush()
-                    temp_file = f.name
-
-                try:
-                    result = subprocess.run(
-                        ['/usr/bin/python3' if os.path.exists('/usr/bin/python3') else 'python', temp_file],
-                        capture_output=True,
-                        timeout=self.timeout,
-                        text=True
-                    )
-                    actual = result.stdout.strip()
-                    if actual != expected_output.strip():
-                        return False
-                finally:
-                    os.unlink(temp_file)
-
-            except subprocess.TimeoutExpired:
+        """input is a call expression; its value (returned, not printed) must print as expected_output."""
+        calls = [str(tc.get('input', '')) for tc in test_cases]
+        load, results = run_calls(code, calls, timeout=self.timeout)
+        if load is not None:
+            return False
+        for (kind, value), tc in zip(results, test_cases):
+            if kind != "ok" or str(value) != str(tc.get('expected_output', '')).strip():
                 return False
-            except Exception as e:
-                logger.debug(f"Test case validation failed: {e}")
-                return False
-
         return True
 
 
@@ -438,15 +383,19 @@ class SQLVerifiableReward(VerifiableReward):
         if not self._validate_syntax(completion):
             return False
 
-        # If no reference, just syntax check is enough
+        # If no reference, this is a syntax check only (any query that parses passes).
         if not reference:
             return True
 
-        # If reference is provided and execute is enabled, validate result
-        if self.execute:
-            return self._validate_result(completion, reference)
-
-        return True
+        # A reference can only be checked by running both queries. Without execute=True we cannot
+        # verify the result, so do not pay (this used to return True for any parseable query).
+        if not self.execute:
+            if not getattr(self, "_warned_no_execute", False):
+                self._warned_no_execute = True
+                logger.warning("SQLVerifiableReward: a reference was given but execute=False; "
+                               "results cannot be checked, so the reward is 0. Set params.execute=True.")
+            return False
+        return self._validate_result(completion, reference)
 
     def _validate_syntax(self, query: str) -> bool:
         """Validate SQL syntax using sqlglot."""
@@ -457,29 +406,59 @@ class SQLVerifiableReward(VerifiableReward):
             logger.debug(f"SQL syntax validation failed: {e}")
             return False
 
-    def _validate_result(self, query: str, expected: str) -> bool:
-        """Validate SQL query result by execution."""
+    def _connect_readonly(self):
+        """Open db_path read-only, so a generated query cannot modify the user's database.
+        ':memory:' gives a fresh empty database each time."""
+        import sqlite3
+        if self.db_path in (None, "", ":memory:"):
+            return sqlite3.connect(":memory:")
+        from urllib.parse import quote
+        return sqlite3.connect(f"file:{quote(os.path.abspath(self.db_path))}?mode=ro", uri=True)
+
+    def _run_query(self, query: str, timeout: float = 5.0):
+        """Run one read-only statement with a time limit; returns the rows."""
+        import time as _time
+        conn = self._connect_readonly()
         try:
-            import sqlite3
-            conn = sqlite3.connect(self.db_path)
+            deadline = _time.monotonic() + timeout
+            conn.set_progress_handler(lambda: 1 if _time.monotonic() > deadline else 0, 10_000)
             cursor = conn.cursor()
+            cursor.execute(query)  # execute() runs a single statement only
+            return cursor.fetchall()
+        finally:
+            conn.close()
 
-            # Execute query
-            cursor.execute(query)
-            result = cursor.fetchall()
+    @staticmethod
+    def _normalise_rows(rows):
+        return sorted((tuple(r) if isinstance(r, (list, tuple)) else (r,) for r in rows), key=repr)
 
-            # For now, just check if query executes without error
-            # Full result comparison would require parsing expected result format
-            return True
+    def _validate_result(self, query: str, expected: str) -> bool:
+        """Run the query and compare its rows with the reference.
 
+        The reference may be a SQL query (run on the same database) or the expected rows as
+        JSON / a Python literal, e.g. [[1, "a"], [2, "b"]]. Row order is ignored.
+        """
+        try:
+            actual = self._run_query(query)
         except Exception as e:
             logger.debug(f"SQL execution failed: {e}")
             return False
-        finally:
-            try:
-                conn.close()
-            except:
-                pass
+        try:
+            if isinstance(expected, str) and self._validate_syntax(expected) and \
+                    not expected.lstrip().startswith(("[", "(")):
+                want = self._run_query(expected)
+            elif isinstance(expected, str):
+                try:
+                    want = json.loads(expected)
+                except ValueError:
+                    import ast as _ast
+                    want = _ast.literal_eval(expected)
+            else:
+                want = expected
+            return self._normalise_rows(actual) == self._normalise_rows(want)
+        except Exception as e:
+            logger.debug(f"SQL reference could not be evaluated: {e}")
+            return False
 
 
 class JSONSchemaVerifiableReward(VerifiableReward):
