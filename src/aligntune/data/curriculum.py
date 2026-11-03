@@ -288,8 +288,9 @@ class CurriculumSampler:
         if passed:
             stats["passed"] += 1
 
-        # Update pass rate as running average
-        stats["pass_rate"] = stats["passed"] / stats["total"]
+        # Update pass rate as running average. Average from the stored rate,
+        # not passed/total, so a rate seeded by set_pass_rate() is kept.
+        stats["pass_rate"] += (float(passed) - stats["pass_rate"]) / stats["total"]
 
     def get_curriculum_progress(self) -> CurriculumStats:
         """
