@@ -837,7 +837,9 @@ def create_sft_trainer(
         # Extract required parameters
         model_name = model_name or kwargs.pop('model_name', None)
         dataset_name = dataset_name or kwargs.pop('dataset_name', None)
-        backend = kwargs.pop('backend', backend)
+        from_config_backend = kwargs.pop('backend', backend)
+        if backend == 'auto':  # an explicit backend argument wins over the config
+            backend = from_config_backend
 
         # Update seed if it was in config but not kwargs
         if 'seed' in kwargs:
@@ -1163,7 +1165,9 @@ def create_rl_trainer(
         model_name = model_name or kwargs.pop('model_name', None)
         dataset_name = dataset_name or kwargs.pop('dataset_name', None)
         algorithm = algorithm or kwargs.pop('algorithm', None)
-        backend = kwargs.pop('backend', backend)
+        from_config_backend = kwargs.pop('backend', backend)
+        if backend == 'auto':  # an explicit backend argument wins over the config
+            backend = from_config_backend
 
         # Update seed if it was in config
         if 'seed' in kwargs:

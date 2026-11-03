@@ -389,6 +389,18 @@ class ColumnMapper:
     def _normalize_by_task(self, dataset: Dataset) -> Dataset:
         """Apply the explicit post-CuratorKIT normalizer for this task."""
         if self.task_type == TaskType.SFT:
+            # CuratorKIT stores the mapped prompt text under ``instruction`` and
+            # leaves its ``prompt`` placeholder blank (e.g. a column mapping of
+            # input->prompt on an orca-style dataset). Fill blank prompts from
+            # ``instruction`` so SFT rows (and PPO, which loads data as SFT)
+            # get real prompts.
+            if {"prompt", "instruction"}.issubset(dataset.column_names):
+                def fill_prompt(example: Dict[str, Any]) -> Dict[str, Any]:
+                    if not str(example.get("prompt") or "").strip() and str(example.get("instruction") or "").strip():
+                        example["prompt"] = example["instruction"]
+                    return example
+
+                dataset = dataset.map(fill_prompt, desc="Filling blank prompt from instruction")
             dataset = self._combine_sft_input(dataset)
             return self._normalize_sft_messages(dataset)
         if self.task_type == TaskType.DISTILLATION_OFFLINE:
