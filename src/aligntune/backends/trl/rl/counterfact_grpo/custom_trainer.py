@@ -1343,7 +1343,11 @@ def compute_batched_counterfactual_importance(
             sequence_map.append((b, span_idx, reasoning_end))
 
     if not all_sequences:
-        # All samples had no spans/answer region
+        # All samples had no spans/answer region. Duplicates of those samples are still
+        # placeholders, so fill them before returning (else compute_soft_weights gets None).
+        for b in range(batch_size):
+            if importance_list[b] is None:
+                importance_list[b] = importance_list[hash_to_idx[sample_hashes[b]]]
         return importance_list, stats
 
     # Step 4: Chunked batched forward pass with IMMEDIATE score computation
