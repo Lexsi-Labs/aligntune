@@ -117,6 +117,18 @@ def _main():
     allow = job.get("builtins")
     ns = {"__name__": "__main__",
           "__builtins__": builtins if allow is None else {k: _getattr(builtins, k) for k in allow if _hasattr(builtins, k)}}
+    imports = job.get("imports")
+    if allow is not None and imports is not None:
+        # With a restricted builtins list there is no __import__. Give the candidate one that
+        # only reaches the named top-level modules (``from typing import List``, ``import math``).
+        _real_import, _ok = builtins.__import__, frozenset(imports)
+
+        def _guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
+            if level == 0 and name.split(".")[0] in _ok:
+                return _real_import(name, globals, locals, fromlist, level)
+            raise ImportError("import of " + repr(name) + " is not allowed here")
+
+        ns["__builtins__"]["__import__"] = _guarded_import
     exec(compile(job["code"], "<candidate>", "exec"), ns)
 
     defined = [v for k, v in ns.items() if not k.startswith("_") and _type(v) is _function
@@ -251,6 +263,7 @@ def run_candidate(
     capture_stdout: bool = False,
     memory_limit_mb: int = DEFAULT_MEMORY_LIMIT_MB,
     builtins_allow: Optional[Sequence[str]] = None,
+    imports_allow: Optional[Sequence[str]] = None,
 ) -> Run:
     """Run ``code`` in a child, then evaluate each item there and return the values.
 
@@ -263,8 +276,9 @@ def run_candidate(
     tampered result are ``"error"``. Nothing the child does raises here.
 
     With ``builtins_allow``, the candidate sees only those builtins (no
-    ``__import__``, so no imports). That narrows what a completion can reach
-    by name; it does not stop a determined one.
+    ``__import__``, so no imports) unless ``imports_allow`` names top-level
+    modules it may import. That narrows what a completion can reach by name;
+    it does not stop a determined one.
     """
     proc = None
     limits = [["RLIMIT_CPU", math.ceil(timeout) + 1], ["RLIMIT_FSIZE", MAX_RESULT_BYTES], ["RLIMIT_CORE", 0]]
@@ -280,6 +294,7 @@ def run_candidate(
                 f.write(_HARNESS)
             with open(job, "w") as f:
                 json.dump({"code": code, "items": list(items), "builtins": None if builtins_allow is None else list(builtins_allow),
+                           "imports": None if imports_allow is None else list(imports_allow),
                            "require": require_isolation()}, f)
             env = {k: os.environ[k] for k in _ENV_NAMES if k in os.environ}
             env.update(HOME=work, TMPDIR=work, **SINGLE_THREAD_ENV)
@@ -669,6 +684,7 @@ def grade(
     no_args: bool = False,
     memory_limit_mb: int = DEFAULT_MEMORY_LIMIT_MB,
     builtins_allow: Optional[Sequence[str]] = None,
+    imports_allow: Optional[Sequence[str]] = None,
 ) -> Tuple[str, List[bool]]:
     """Run ``code`` once and grade every test; return the run status and one bool per test.
 
@@ -677,6 +693,8 @@ def grade(
     with the input in the child, and ``compare(actual, expected)`` runs here.
     Anything else fails. With no tests, status ``"ok"`` means the code ran to its end.
     """
+    if len(tests) == 1 and isinstance(tests[0], HumanEvalCheck):
+        return _grade_check_function(code, tests[0], timeout)
     items: List[Dict[str, Any]] = []
     checks: List[Optional[Tuple[List[int], Callable[[List[Any]], bool]]]] = []
     for test in tests:
@@ -700,7 +718,8 @@ def grade(
         else:
             logger.debug("Unknown test case format: %s", type(test).__name__)
             checks.append(None)
-    run = run_candidate(code, timeout, items, memory_limit_mb=memory_limit_mb, builtins_allow=builtins_allow)
+    run = run_candidate(code, timeout, items, memory_limit_mb=memory_limit_mb, builtins_allow=builtins_allow,
+                        imports_allow=imports_allow)
     if run.status != "ok":
         return run.status, [False] * len(tests)
     assert run.values is not None  # status "ok" always comes with values
@@ -762,6 +781,36 @@ def humaneval_tests(test: str, entry_point: str) -> Tuple[Tuple[str, ...], str]:
     return tuple(asserts), "\n".join(setup)
 
 
+class HumanEvalCheck(NamedTuple):
+    """A HumanEval task whose ``check(candidate)`` can't be split into single asserts.
+
+    A loop, a local variable or a multi-line assert needs ``check`` itself to run. It runs in the
+    trainer with ``candidate`` forwarded to a confined child (``_code_sandbox``), so the candidate
+    still never evaluates an assert.
+    """
+
+    test: str
+    entry_point: str
+    prompt: str
+
+
+def humaneval_plan(test: str, entry_point: str, prompt: Any = "") -> Tuple[List[Any], str]:
+    """``(tests, setup)`` for a HumanEval row: single asserts when ``check`` splits into them,
+    else one :class:`HumanEvalCheck` and no setup (``check`` brings its own)."""
+    asserts, setup = humaneval_tests(test, entry_point)
+    if any(not a.startswith("assert ") for a in asserts):
+        return [HumanEvalCheck(test, entry_point, prompt if isinstance(prompt, str) else "")], ""
+    return list(asserts), setup
+
+
+def _grade_check_function(code: str, task: HumanEvalCheck, timeout: float) -> Tuple[str, List[bool]]:
+    from aligntune.rewards._code_sandbox import HumanEvalTests, grade_humaneval_detail  # heavy, rarely needed
+
+    load_error, passed = grade_humaneval_detail(code, HumanEvalTests(task.test, task.entry_point, task.prompt or None), timeout=timeout)
+    # One task, one result: callers divide by the number of tests, and a HumanEval task is all or nothing.
+    return ("error", [False]) if load_error is not None else ("ok", [bool(passed) and all(passed)])
+
+
 def tests_from_columns(kwargs: Dict[str, Any]) -> Tuple[Optional[List[Any]], str]:
     """Find a row's tests: ``test_cases``, MBPP's ``test_list``, or HumanEval's ``test`` plus ``entry_point``.
 
@@ -773,8 +822,7 @@ def tests_from_columns(kwargs: Dict[str, Any]) -> Tuple[Optional[List[Any]], str
             return (list(value) if isinstance(value, (list, tuple)) else value), ""
     test, entry_point = kwargs.get("test"), kwargs.get("entry_point")
     if isinstance(test, str) and isinstance(entry_point, str) and entry_point:
-        asserts, setup = humaneval_tests(test, entry_point)
-        return list(asserts), setup
+        return humaneval_plan(test, entry_point, kwargs.get("prompt"))
     return None, ""
 
 

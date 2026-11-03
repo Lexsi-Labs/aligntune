@@ -36,6 +36,8 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 
 ### Fixed
+- HumanEval `check()` with a loop, a local variable or a multi-line assert is graded instead of counted as failed: the trainer runs `check` and forwards the candidate's calls to a confined child, so a correct solution to those tasks no longer scores 0.
+- `SafeCodeExecutor` in its default restricted mode can import a short list of harmless standard modules (`typing`, `math`, `re`, `collections`, ...). Before, any import made a correct solution fail, including the `from typing import List` at the top of most HumanEval prompts. `os`, `sys` and `subprocess` are still refused.
 - Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with `'NoneType' object is not subscriptable` in `compute_soft_weights`. The repeated completions now get the same uniform importance as the first.
 - Counterfactual GRPO code tasks (TRL) grade by value like the code rewards. Before, a completion that printed `PASS:0`, `PASS:1` and so on, or exited with status 0, could score full marks, and the MBPP+ output comparison ran inside the same process as the candidate, so an object with an `__eq__` that always returns True matched everything. The candidate's results now come back as plain data and are compared in the trainer, against the reference solution's results from its own child process.
 - Data: chat lists stored as text, as in a CSV (`"[{'content': ..., 'role': ...}]"`), are parsed and flattened like real lists, so KTO and other trainers no longer train on the repr string.
@@ -67,8 +69,6 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - HumanEval helpers (`poly`, `encode_cyclic`, ...) are taken from the task prompt. When no prompt
   reaches the reward, tasks that need one score 0, rather than trusting the candidate's own copy.
   Body-only answers need the raw (untemplated) prompt to be completed.
-- The release grader (`rewards/_code_grader.py`) counts a HumanEval `check()` that uses a loop, a local or a multi-line assert as failed, with a warning, so those tasks score 0 even for a correct solution (`rewards/_code_sandbox.py` grades them; 3 tests in `test_code_reward_security.py` are marked `xfail` for this).
-- `SafeCodeExecutor` gives candidates only a short list of builtins by default (`restrict_builtins=True`), so a solution that imports anything, such as the `from typing import List` at the top of most HumanEval prompts, fails. Pass `restrict_builtins=False` to evaluate those.
 
 ## [0.1.10] — 2026-08-05
 

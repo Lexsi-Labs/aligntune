@@ -42,6 +42,16 @@ class TimeoutException(Exception):
     pass
 
 
+# Pure-computation standard modules. A restricted candidate may import these (most HumanEval prompts
+# start with ``from typing import List``, and many MBPP solutions use ``math`` or ``re``); anything
+# else, such as ``os``, ``sys`` or ``subprocess``, is refused.
+SAFE_IMPORTS = (
+    "math", "cmath", "typing", "collections", "itertools", "functools", "operator", "heapq", "bisect",
+    "re", "string", "fractions", "decimal", "statistics", "random", "copy", "dataclasses", "enum",
+    "json", "datetime", "textwrap", "numbers", "abc", "array", "hashlib",
+)
+
+
 class SafeCodeExecutor:
     """
     Runs generated code in a child process with limited builtins.
@@ -149,6 +159,10 @@ class SafeCodeExecutor:
     def _allow(self) -> Optional[List[str]]:
         return list(self.safe_builtins) if self.restrict_builtins else None
 
+    def _imports(self) -> Optional[List[str]]:
+        """Modules a restricted candidate may import; None when builtins are not restricted."""
+        return list(SAFE_IMPORTS) if self.restrict_builtins else None
+
     def _public_functions(self, code: str) -> List[str]:
         """Names of the public functions and classes the code defines at its top level, in order."""
         try:
@@ -212,7 +226,7 @@ class SafeCodeExecutor:
             # so try the public functions, last first (the entry point usually ends the code).
             result = None
             for name in self._public_functions(code)[::-1][:5]:
-                asserts, setup = _code_grader.humaneval_tests(test_cases, name)
+                asserts, setup = _code_grader.humaneval_plan(test_cases, name)
                 full = code + "\n\n" + setup if setup else code
                 result = self._run_assertions(full, list(asserts), None, start, humaneval=True)
                 if result.test_passed:
@@ -228,7 +242,7 @@ class SafeCodeExecutor:
                 renamed.append(assertion_str)
             return self._run_assertions(code, renamed, test_cases, start)
         if not test_cases:
-            run = _code_grader.run_candidate(code, self.timeout, capture_stdout=True, memory_limit_mb=self.max_memory_mb, builtins_allow=self._allow())
+            run = _code_grader.run_candidate(code, self.timeout, capture_stdout=True, memory_limit_mb=self.max_memory_mb, builtins_allow=self._allow(), imports_allow=self._imports())
             if run.status == "timeout":
                 return ExecutionResult(success=False, error=f"Execution timeout ({self.timeout}s exceeded)")
             if run.status != "ok":
@@ -238,7 +252,7 @@ class SafeCodeExecutor:
         return self._run_structured(code, main_func_name, test_cases, start)
 
     def _run_assertions(self, code, asserts, originals, start, humaneval=False) -> ExecutionResult:
-        status, passed = _code_grader.grade(code, asserts, self.timeout, memory_limit_mb=self.max_memory_mb, builtins_allow=self._allow())
+        status, passed = _code_grader.grade(code, asserts, self.timeout, memory_limit_mb=self.max_memory_mb, builtins_allow=self._allow(), imports_allow=self._imports())
         if status == "timeout":
             return ExecutionResult(success=False, error=f"Execution timeout ({self.timeout}s exceeded)")
         if status != "ok":
@@ -264,7 +278,7 @@ class SafeCodeExecutor:
             test_input = test.get('input', test.get('inputs'))
             spread = "*" if isinstance(test_input, (list, tuple)) else ""
             items.append({"expr": f"{main_func_name}({spread}{test_input!r})"})
-        run = _code_grader.run_candidate(code, self.timeout, items, memory_limit_mb=self.max_memory_mb, builtins_allow=self._allow())
+        run = _code_grader.run_candidate(code, self.timeout, items, memory_limit_mb=self.max_memory_mb, builtins_allow=self._allow(), imports_allow=self._imports())
         if run.status == "timeout":
             return ExecutionResult(success=False, error=f"Execution timeout ({self.timeout}s exceeded)")
         if run.status != "ok":

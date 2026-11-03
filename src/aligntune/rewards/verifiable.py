@@ -279,6 +279,10 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         if isinstance(test_cases, str):
             return self._check_output(code, test_cases)
 
+        # A HumanEval check() that can't be split into asserts (loops, locals, multi-line asserts)
+        if isinstance(test_cases, list) and len(test_cases) == 1 and isinstance(test_cases[0], _code_grader.HumanEvalCheck):
+            return self._check_assertions(code, test_cases)
+
         # Handle list of assertion strings
         if isinstance(test_cases, list) and all(isinstance(t, str) for t in test_cases):
             return self._check_assertions(code, test_cases)
