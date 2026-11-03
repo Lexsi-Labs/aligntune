@@ -31,6 +31,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - SGLang rollout on Unsloth GRPO-family and counterfactual GRPO trainers, with Gemma 3 weight names, vision adapter tensors, regex LoRA `target_modules` and full sync for 4-bit models (#41, @zeralyngkhoi19).
 
 ### Changed
+- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
 - SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).
 - `create_rl_trainer` now passes `rollout_backend` to the trainer, so `rollout_backend="vllm"` turns vLLM rollout on. Before, the argument was ignored and the trainer used `hf` (#32, @chayan-bit).
 
