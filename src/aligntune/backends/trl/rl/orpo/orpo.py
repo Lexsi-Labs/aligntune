@@ -22,6 +22,24 @@ from aligntune.utils.config_extractor import extract_extra_and_missing_params
 logger = logging.getLogger(__name__)
 
 
+def drop_rows_without_completion_tokens(dataset):
+    """Drop tokenized preference rows where chosen or rejected has no completion token.
+
+    ORPO averages a completion's log-probabilities over its tokens, so a row whose
+    completion was cut off entirely (a prompt longer than ``max_length``, or a
+    tokenizer boundary that swallows it) divides 0 by 0: the loss becomes NaN, the
+    gradients become NaN, and every step after it trains on NaN weights.
+    Returns ``(dataset, number_dropped)``.
+    """
+    def has_tokens(row):
+        return all(any(label != -100 for label in row[side + "_labels"][1:]) for side in ("chosen", "rejected"))
+
+    if not {"chosen_labels", "rejected_labels"} <= set(dataset.column_names):
+        return dataset, 0
+    keep = [i for i, row in enumerate(dataset) if has_tokens(row)]
+    return (dataset.select(keep) if len(keep) < len(dataset) else dataset), len(dataset) - len(keep)
+
+
 class TRLORPOTrainer(TrainerBase):
     """TRL-based ORPO trainer using TRL's ORPOTrainer."""
 
@@ -199,6 +217,13 @@ class TRLORPOTrainer(TrainerBase):
                 eval_dataset=self.eval_dataset,
                 args=orpo_config,
             )
+
+            self.trainer.train_dataset, dropped = drop_rows_without_completion_tokens(self.trainer.train_dataset)
+            if dropped:
+                logger.warning(
+                    "ORPO: dropped %d of %d training rows whose chosen or rejected completion has no tokens "
+                    "after tokenization (a prompt longer than max_length leaves no room for it); "
+                    "they would have made the loss NaN.", dropped, dropped + len(self.trainer.train_dataset))
 
             logger.info("TRL ORPOTrainer setup completed")
 

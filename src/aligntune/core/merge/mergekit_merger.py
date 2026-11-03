@@ -57,6 +57,34 @@ def _mergekit_has_method(method: str) -> bool:
     return method in REGISTERED_MERGE_METHODS
 
 
+def restore_chat_template(source_model: str, output_path) -> bool:
+    """Give a merged model back the chat template mergekit leaves out.
+
+    mergekit rebuilds the tokenizer files in the output and does not carry the
+    chat template over, so a merged chat model could no longer format a
+    conversation. When the output has none, copy the one from ``source_model``
+    (the base model, else the first model). Never fails the merge; returns
+    whether a template was written.
+    """
+    try:
+        from transformers import AutoTokenizer
+
+        output_path = str(output_path)
+        merged = AutoTokenizer.from_pretrained(output_path)
+        if getattr(merged, "chat_template", None):
+            return False
+        template = getattr(AutoTokenizer.from_pretrained(str(source_model)), "chat_template", None)
+        if not template:
+            return False
+        merged.chat_template = template
+        merged.save_pretrained(output_path)
+        logger.info("Copied the chat template from %s into the merged model", source_model)
+        return True
+    except Exception as e:  # a missing template must not fail a finished merge
+        logger.warning("Could not restore the chat template from %s: %s", source_model, e)
+        return False
+
+
 def _require_mergekit() -> None:
     """Raise a helpful ImportError if mergekit is not installed."""
     try:
@@ -424,6 +452,8 @@ class MergekitMerger(BaseMerger):
                 os.unlink(config_path)
             except OSError:
                 pass
+
+        restore_chat_template(base_model or models[0], output_path)
 
         logger.info("Merge complete. Output: %s", output_path)
         return str(output_path.resolve())
