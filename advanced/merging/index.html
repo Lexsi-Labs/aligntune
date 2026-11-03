@@ -25,16 +25,16 @@
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
 <title>Model Merging - AlignTune</title>
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1018,6 +1018,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Direct LoRA merge (no mergekit)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#serving-with-transformers-4x-sglang-older-vllm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serving with transformers 4.x (SGLang, older vLLM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1398,6 +1415,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Direct LoRA merge (no mergekit)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#serving-with-transformers-4x-sglang-older-vllm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serving with transformers 4.x (SGLang, older vLLM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1523,6 +1557,18 @@ manage, skip mergekit entirely:</p>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">output_path</span><span class="o">=</span><span class="s2">"./merged"</span><span class="p">,</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
 </code></pre></div>
+<h3 id="serving-with-transformers-4x-sglang-older-vllm">Serving with transformers 4.x (SGLang, older vLLM)<a class="headerlink" href="#serving-with-transformers-4x-sglang-older-vllm" title="Permanent link">&para;</a></h3>
+<p>AlignTune saves with transformers 5, which moves <code>rope_theta</code> / <code>rope_scaling</code> into
+<code>rope_parameters</code> and writes <code>dtype</code> instead of <code>torch_dtype</code>. Loaders still on
+transformers 4.x don't read the new keys and silently fall back to <code>rope_theta=10000</code>.
+<code>merge_lora</code> therefore also writes the legacy top-level fields (same values, so
+transformers 5 reads the config unchanged), and saves the tokenizer's extra special tokens as
+<code>additional_special_tokens</code>, since 4.x can't load transformers 5's list-valued
+<code>extra_special_tokens</code>, and writes the tokenizer class <code>TokenizersBackend</code> (used for e.g. Llama 3)
+as <code>PreTrainedTokenizerFast</code>. To ship the base model's original
+<code>config.json</code> instead, pass <code>keep_base_config=True</code>; <code>vocab_size</code> and the dtype are still
+taken from the merged model. Set <code>legacy_config_fields=False</code> to keep the plain
+transformers 5 config.</p>
 <h2 id="notebooks">Notebooks<a class="headerlink" href="#notebooks" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://github.com/Lexsi-Labs/aligntune/blob/main/notebooks/35_merge_models.ipynb"><code>notebooks/35_merge_models.ipynb</code></a> — linear / SLERP / TIES / DARE-TIES / task-arithmetic via Mergekit</li>
@@ -1701,10 +1747,10 @@ manage, skip mergekit entirely:</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

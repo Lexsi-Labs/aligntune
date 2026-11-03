@@ -25,16 +25,16 @@
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
 <title>Reward Functions - AlignTune</title>
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1080,6 +1080,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-model-written-code-is-run-and-graded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How model-written code is run and graded
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2098,6 +2109,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-model-written-code-is-run-and-graded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How model-written code is run and graded
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2547,14 +2569,75 @@ to TRL's batch interface automatically.</p>
 <a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="code-execution-reward">Code Execution Reward<a class="headerlink" href="#code-execution-reward" title="Permanent link">&para;</a></h4>
-<p>Tests if code runs without errors.</p>
+<p>Fraction of tests the code passes, or, with no tests, whether it runs to its end.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">reward_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">"code_execution"</span><span class="p">]</span>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">reward_config</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"code_execution"</span><span class="p">,</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"timeout"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">"safe_mode"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"timeout"</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
 <a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">1.5</span>
 <a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">}</span>
 </code></pre></div>
+<h4 id="how-model-written-code-is-run-and-graded">How model-written code is run and graded<a class="headerlink" href="#how-model-written-code-is-run-and-graded" title="Permanent link">&para;</a></h4>
+<p><code>code_execution</code>, <code>code_correctness</code>, <code>mbpp_reward</code> and <code>code_verifiable</code> never run a
+completion inside the training process. Each call starts a fresh interpreter
+(<code>sys.executable -I</code>, so no <code>python</code> on <code>PATH</code> is needed) and grades it by value:</p>
+<ul>
+<li><strong>Tests.</strong> Each reward reads the row's <code>test_cases</code>, MBPP's <code>test_list</code>, or HumanEval's
+  <code>test</code> plus <code>entry_point</code> (the asserts in <code>check(candidate)</code>), then <code>params["test_cases"]</code>.
+  A HumanEval completion that only writes the function body is graded as prompt plus
+  completion.</li>
+<li><strong>Values, not output.</strong> The child sends back plain data only: exact <code>None</code>, <code>bool</code>, <code>int</code>,
+  <code>float</code>, <code>str</code>, <code>list</code>, <code>tuple</code>, <code>set</code>, <code>frozenset</code> and <code>dict</code>. The trainer does the
+  comparison. Printed text such as <code>PASS</code>, the exit code, a subclass or an object with
+  its own <code>__eq__</code> can't earn a pass, and a literal expected value never reaches the child.</li>
+<li><strong>Asserts</strong> are split with <code>ast</code>: comparisons (<code>==</code>, <code>!=</code>, <code>&lt;</code> and the like, chained,
+  <code>in</code>, <code>is</code>), <code>not x</code>, <code>math.isclose(a, b, ...)</code> and bare <code>assert x</code>. Any other shape, or
+  a test that isn't an <code>assert</code> string, fails with a warning. <code>input</code>/<code>expected_output</code>
+  tests call the first function the completion defines.</li>
+<li><strong>Finishing.</strong> A completion must run to its end: <code>sys.exit</code>, <code>os._exit</code>, a crash or a
+  timeout scores as a failure. <code>code_correctness</code> scores 0.0 and warns when no tests arrive.</li>
+<li><strong>Weights.</strong> Rewards return unweighted scores; the trainer applies <code>weight</code>.</li>
+</ul>
+<p><strong>What the child process limits:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wall clock (<code>timeout</code>, default 5 s); the child's whole process group is killed at the end of every call</td>
+<td>all platforms</td>
+</tr>
+<tr>
+<td>CPU time (<code>timeout</code> + 1 s), file size (16 MB), no core dumps</td>
+<td>where Python has <code>resource</code> (Linux, macOS)</td>
+</tr>
+<tr>
+<td>Memory (<code>memory_limit_mb</code>, default 4096, address space)</td>
+<td>Linux only; macOS refuses the limit, so there only the wall clock bounds memory</td>
+</tr>
+<tr>
+<td>Environment: only <code>PATH</code> and the locale; <code>HOME</code>, <code>TMPDIR</code> and the working directory are an empty temporary directory, removed afterwards; no standard input</td>
+<td>all platforms</td>
+</tr>
+<tr>
+<td>Result read back: at most 16 MB and 100,000 values (nested ones included), never followed through a link or a FIFO; a set or dict whose values hash alike is refused before it is built; a tampered result scores 0 and never raises</td>
+<td>all platforms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it does not limit.</strong> This is not a sandbox. The child runs as the same user as
+the trainer, so it can read any file that user can read (a token file in your home
+directory, for example), use the network, write outside its directory, and signal other
+processes, the trainer included. A process that calls <code>setsid</code> leaves the group and is
+not killed. Everything inside the child belongs to the completion, so a determined one
+can write values of its own choosing into its result. That scores only where the needed
+value can be guessed without the expected output, such as <code>assert f(x)</code> or
+<code>assert f(x) == True</code>, so prefer tests whose expected values vary. Run training in a
+container or as a separate user when completions may be hostile.</p>
 <h3 id="math-and-reasoning-rewards">Math and Reasoning Rewards<a class="headerlink" href="#math-and-reasoning-rewards" title="Permanent link">&para;</a></h3>
 <h4 id="math-correctness-reward">Math Correctness Reward<a class="headerlink" href="#math-correctness-reward" title="Permanent link">&para;</a></h4>
 <p>Validates mathematical correctness.</p>
@@ -2897,10 +2980,10 @@ its name in <code>reward_functions</code> or <code>rewards</code>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

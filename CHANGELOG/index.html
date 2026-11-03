@@ -25,16 +25,16 @@
       
       
       <link rel="icon" href="../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
 <title>Changelog - AlignTune</title>
 
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1639,6 +1639,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Unreleased]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[Unreleased]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0110-initial-public-release" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1815,6 +1876,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Unreleased]
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[Unreleased]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0110-initial-public-release" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1893,6 +2015,54 @@
 <p>All notable changes to AlignTune are documented here.</p>
 <p>Format follows <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>.</p>
 <hr />
+<h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li>SGLang rollout backend for GRPO (<code>rollout_backend="sglang"</code>): generation goes to a running SGLang server over HTTP, and weights sync once per optimizer step, as a LoRA adapter on a <code>--enable-lora</code> server or as streamed full weights (#32, @chayan-bit).</li>
+<li>SGLang rollout on Unsloth GRPO-family and counterfactual GRPO trainers, with Gemma 3 weight names, vision adapter tensors, regex LoRA <code>target_modules</code> and full sync for 4-bit models (#41, @zeralyngkhoi19).</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>SFT runs that don't set <code>max_steps</code> now train for exactly <code>num_epochs</code>. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).</li>
+<li><code>create_rl_trainer</code> now passes <code>rollout_backend</code> to the trainer, so <code>rollout_backend="vllm"</code> turns vLLM rollout on. Before, the argument was ignored and the trainer used <code>hf</code> (#32, @chayan-bit).</li>
+<li>Code rewards: a function must return plain Python data (<code>None</code>, <code>bool</code>, <code>int</code>, <code>float</code>, <code>str</code>, <code>list</code>, <code>tuple</code>, <code>set</code>, <code>frozenset</code>, <code>dict</code>); NumPy scalars, <code>bytes</code>, custom classes and results of more than 100,000 values in all now fail the test. An <code>assert</code> shape that can't be split, or a non-<code>assert</code> test string, fails with a warning. A completion runs with <code>__name__ == "__main__"</code>, so one that calls <code>sys.exit</code> under that guard fails. All of a completion's tests run in one child, so a test that hangs fails them all. The child doesn't get the trainer's environment variables or <code>PYTHONPATH</code>.</li>
+<li>Reward weights are applied once. These rewards multiplied their score by <code>weight</code> and the trainer then applied it again, so a run with weight <code>w</code> scored <code>w</code> squared: <code>math_reasoning</code>, <code>diversity</code>, <code>fluency</code>, <code>relevance</code>, <code>brevity</code>, <code>image_relevance</code> and <code>audio_quality</code> now return the unweighted score (a run with <code>weight</code> 0.2 sees scores 5 times larger than before; weight 1.0 changes nothing). <code>sentiment</code>, <code>safety</code> and <code>toxicity</code> weighted only <code>batch_compute</code>, so it differed from <code>compute</code>; it is now unweighted too. Code that calls these rewards directly and relied on the weight being applied inside them must multiply by <code>weight</code> itself.</li>
+</ul>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>ORPO (TRL) no longer trains on NaN: a row whose chosen or rejected completion has no tokens after tokenization (a prompt longer than <code>max_length</code> leaves no room for it) made the loss, then every gradient, NaN, and the run logged a loss of 0.0 while learning nothing. Such rows are now dropped with a warning.</li>
+<li>A model merged with <code>MergekitMerger</code> keeps the chat template: mergekit leaves it out of the output, so a merged chat model could not format a conversation. It is copied from the base (or first) model when the output has none.</li>
+<li>Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with <code>'NoneType' object is not subscriptable</code> in <code>compute_soft_weights</code>. The repeated completions now get the same uniform importance as the first.</li>
+<li>Counterfactual GRPO code tasks (TRL) grade by value like the code rewards. Before, a completion that printed <code>PASS:0</code>, <code>PASS:1</code> and so on, or exited with status 0, could score full marks, and the MBPP+ output comparison ran inside the same process as the candidate, so an object with an <code>__eq__</code> that always returns True matched everything. The candidate's results now come back as plain data and are compared in the trainer, against the reference solution's results from its own child process.</li>
+<li>Data: chat lists stored as text, as in a CSV (<code>"[{'content': ..., 'role': ...}]"</code>), are parsed and flattened like real lists, so KTO and other trainers no longer train on the repr string.</li>
+<li>Data: <code>DataManager</code> accepts the SFT task names <code>supervised_fine_tuning</code> (the config default), <code>text_generation</code> and <code>chat_completion</code>; they failed with <code>is not a valid TaskType</code>.</li>
+<li>Data: SFT rows whose <code>prompt</code> CuratorKIT left blank take it from <code>instruction</code> (e.g. <code>column_mapping={"input": "prompt"}</code>), so user messages are no longer empty and PPO no longer fails on an empty prompt.</li>
+<li>Data: with <code>keep_columns</code>, a blank CuratorKIT field no longer erases the dataset's own column of the same name (the <code>input</code> prompt of <code>argilla/distilabel-intel-orca-dpo-pairs</code>), and null cells in <code>metadata</code> stay null, so Arrow no longer fails with <code>cannot mix list and non-list</code>.</li>
+<li>Unsloth SFT: <code>dataset.map</code> fingerprinting no longer pickles the model into host RAM (#33, @chayan-bit).</li>
+<li><code>create_sft_trainer</code> / <code>create_rl_trainer</code>: values from <code>config</code> are no longer replaced by the function's own defaults. Explicit argument, then config, then default (#34, @chayan-bit).</li>
+<li><code>create_sft_trainer</code> / <code>create_rl_trainer</code>: an explicit <code>backend=</code> argument is no longer replaced by the config's <code>backend</code>, nor by the <code>auto</code> filled in when the config has none (which picked Unsloth on a GPU machine). Same order: explicit argument, then config.</li>
+<li>YAML <code>train:</code> keys such as <code>gradient_checkpointing</code>, <code>optimizer</code> and <code>dataset_num_proc</code> are no longer dropped (#35, @chayan-bit).</li>
+<li>Merged models stay readable by transformers 4.x loaders: top-level <code>rope_theta</code> / <code>rope_scaling</code> / <code>torch_dtype</code> and legacy tokenizer fields are written, also with <code>keep_base_config=True</code> (#38, fixed in #39, @zeralyngkhoi19).</li>
+<li>Unsloth <code>SFTConfig</code> pickling at checkpoint time (#39, @zeralyngkhoi19).</li>
+<li>Math grading: a sentence answer such as <code>The answer is: 42.</code> drops the colon, full stop and closing paragraph around it (#42, @ANDROIDHASSAN).</li>
+<li>Math grading: markdown bold around a sentence answer (<code>**The answer is: 8.**</code>, <code>the answer is: **230.**</code>) is dropped too.</li>
+<li>GSM8K grading compares by value, so <code>$18</code>, <code>18%</code> and <code>3/4</code> grade correctly. A sign is stripped only at the ends, so <code>1$8</code> stays wrong (#43, @ANDROIDHASSAN).</li>
+<li>Counterfactual GRPO gold answers: MATH expressions such as <code>\frac{14}{3}</code> and a numeric zero stay as written, and a boxed answer in <code>solution</code> is used (#45, @Yuvraj27-5; reported in #44 by @ANDROIDHASSAN). On top: TRL reads the answer column it chose, one number in plain text (<code>72 eggs</code>) is the gold, and <code>#### 1/3</code> keeps the fraction.</li>
+<li>TRL counterfactual GRPO: a dataset named in capitals, such as <code>HuggingFaceH4/MATH-500</code>, is set up as a math dataset, as on Unsloth. Before, it went to the generic loader and failed with <code>KeyError: 'train'</code>.</li>
+<li>SGLang adapter sync: every training process generates with the synced adapter, not only the main one, and only the main process unloads it. Unsloth PACE raises for <code>rollout_backend="sglang"</code> instead of generating with transformers. Adapter tensors are dropped only for whole vision or audio module names (on top of #32 and #41).</li>
+<li>SGLang adapter sync with Unsloth 4-bit models, such as counterfactual GRPO by default: the pre-quantized <code>unsloth/&lt;model&gt;-bnb-4bit</code> base now matches a server running the full-precision <code>&lt;model&gt;</code>, instead of failing the base-model check.</li>
+<li>Code rewards read the tests a dataset ships: MBPP's <code>test_list</code> and HumanEval's <code>test</code> plus <code>entry_point</code>, as well as <code>test_cases</code>. A HumanEval completion that only writes the function body is graded as prompt plus completion. Before, every reward took its no-test branch on these datasets.</li>
+<li><code>code_correctness</code> strips a Markdown fence, and a bare answer keeps the imports above its first <code>def</code>.</li>
+<li><code>code_execution</code> without tests works on a worker thread; it used <code>signal.alarm</code>, which fails there.</li>
+<li><code>code_correctness</code> and <code>code_quality</code> return unweighted scores. The trainer applies <code>weight</code>, so it was applied twice.</li>
+<li><code>mbpp_reward</code> no longer leaves a temporary file behind on every call, and honours <code>params["timeout"]</code>.</li>
+<li>The <code>deepseek_humaneval</code> and <code>gbmpo_l2_code</code> recipes name the real dataset, <code>openai/openai_humaneval</code> (<code>openai/humaneval</code> returns 401).</li>
+<li><code>examples/grpo_code_gen_trl_mbpp.py</code> trains with <code>mbpp_reward</code>, as it says, not <code>code_quality</code>.</li>
+</ul>
+<h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Code rewards (<code>code_execution</code>, <code>code_correctness</code>, <code>mbpp_reward</code>, <code>code_verifiable</code>) no longer run completions in the training process, and grade by value. Each call runs the code in a fresh <code>sys.executable -I</code> child with a temporary working directory, a minimal environment, a process group killed on timeout, CPU and file-size limits, and a memory limit on Linux. The child returns plain values and the trainer compares them, so printed <code>PASS</code> lines, exit status 0, <code>sys.exit</code>/<code>os._exit</code>, an always-equal <code>__eq__</code> and patching <code>math.isclose</code> no longer earn a pass, end the trainer or change later grades, and <code>while True</code> no longer hangs it. <code>code_correctness</code> scores 0 and warns when no tests arrive, instead of 0.5 for anything that compiles. The child is not a sandbox: it can still read the user's files, use the network and signal the trainer (see the reward functions guide). Reported by Ebin Babu Thomas (@ebt55).</li>
+</ul>
 <h2 id="0110-initial-public-release">[0.1.10] — Initial public release<a class="headerlink" href="#0110-initial-public-release" title="Permanent link">&para;</a></h2>
 <h3 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2085,10 +2255,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../assets/extra.js"></script>
       

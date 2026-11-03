@@ -25,16 +25,16 @@
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
 <title>GRPO - AlignTune</title>
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1926,8 +1926,8 @@ its own page with its extra parameters on top of this table). GRPO uses the comm
 <td><code>rollout_backend</code></td>
 <td>str</td>
 <td><code>'hf'</code></td>
-<td><em>(not exposed)</em></td>
-<td><code>'hf'</code> or <code>'vllm'</code>: <strong>TRL-only</strong></td>
+<td><code>'hf'</code></td>
+<td><code>'hf'</code>, <code>'vllm'</code> (TRL only) or <code>'sglang'</code> (GRPO, GSPO, DAPO, Dr.GRPO, GBMPO and counterfactual GRPO, on TRL and Unsloth; not PACE)</td>
 </tr>
 <tr>
 <td><code>vllm_gpu_memory_utilization</code></td>
@@ -1942,6 +1942,20 @@ its own page with its extra parameters on top of this table). GRPO uses the comm
 <td><code>1</code></td>
 <td><em>(not exposed)</em></td>
 <td>vLLM tensor-parallel degree. <strong>TRL-only</strong></td>
+</tr>
+<tr>
+<td><code>sglang_server_url</code></td>
+<td>str</td>
+<td><code>'http://127.0.0.1:30000'</code></td>
+<td><code>'http://127.0.0.1:30000'</code></td>
+<td>SGLang server for <code>rollout_backend='sglang'</code> (same host)</td>
+</tr>
+<tr>
+<td><code>sglang_sync_dir</code></td>
+<td>str</td>
+<td><code>None</code></td>
+<td><code>None</code></td>
+<td>Weight-sync dir the SGLang server can read; defaults to a temp dir in <code>/dev/shm</code></td>
 </tr>
 <tr>
 <td><code>scale_rewards</code></td>
@@ -2153,10 +2167,10 @@ clip when supported by the installed TRL version.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

@@ -25,16 +25,16 @@
       
       
       <link rel="icon" href="../../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
 <title>Reinforcement Learning (RL) - AlignTune</title>
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1089,6 +1089,17 @@
     <span class="md-ellipsis">
       
         Unsloth Backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sglang-rollout-known-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SGLang rollout: known limits
       
     </span>
   </a>
@@ -2413,6 +2424,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sglang-rollout-known-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SGLang rollout: known limits
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3299,7 +3321,7 @@ limit; <code>max_prompt_length</code> and <code>truncation_mode</code> are not v
 <h3 id="trl-backend">TRL Backend<a class="headerlink" href="#trl-backend" title="Permanent link">&para;</a></h3>
 <p><strong>Use TRL when:</strong>
 - Need maximum compatibility
-- Need vLLM-backed rollout (<code>rollout_backend='vllm'</code>), which is TRL-only
+- Need vLLM-backed rollout (<code>rollout_backend='vllm'</code>), which is TRL-only. SGLang rollout (<code>'sglang'</code>) works with both backends for GRPO, GSPO, DAPO, Dr.GRPO, GBMPO and counterfactual GRPO (not PACE).
 - Working with standard models
 - Want the most-tested training path</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
@@ -3322,6 +3344,20 @@ limit; <code>max_prompt_length</code> and <code>truncation_mode</code> are not v
 <a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a> <span class="n">backend</span><span class="o">=</span><span class="s2">"unsloth"</span>
 <a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="p">)</span>
 </code></pre></div>
+<h3 id="sglang-rollout-known-limits">SGLang rollout: known limits<a class="headerlink" href="#sglang-rollout-known-limits" title="Permanent link">&para;</a></h3>
+<p>These come from SGLang itself (tested with 0.5.10.post1), not from aligntune:</p>
+<ul>
+<li><strong>Adapter sync</strong> (server started with <code>--enable-lora</code>) is not available for Qwen3.5 or GPT-2: SGLang's LoRA support does not cover them.
+  Start the server without <code>--enable-lora</code>; aligntune then uses full-weight sync, which works for both.</li>
+<li><strong>Gemma 2:</strong> <code>--lora-target-modules all</code> crashes SGLang (it also puts LoRA on the embeddings).
+  Pass the layers explicitly: <code>--lora-target-modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj</code>.</li>
+<li><strong>Multimodal models</strong> (for example Gemma 3) work in both sync modes for text-only training.
+  LoRA weights on the vision or audio encoder are not sent to SGLang, which applies LoRA to the language model only.</li>
+<li><strong>Large-vocabulary models</strong> (Gemma, 256k tokens) may need a smaller <code>batch_size</code> when the trainer and the server share one GPU.</li>
+<li>Models loaded in 8-bit can use adapter sync only (4-bit weights are dequantized for full sync).</li>
+<li><strong>4-bit models with adapter sync:</strong> start the server with the full-precision base (for example <code>Qwen/Qwen2.5-0.5B-Instruct</code>).
+  Unsloth loads <code>load_in_4bit=True</code> (the default for counterfactual GRPO) from its pre-quantized <code>unsloth/&lt;model&gt;-unsloth-bnb-4bit</code> or <code>unsloth/&lt;model&gt;-bnb-4bit</code> repo, which counts as the same base.</li>
+</ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
 <h3 id="model-configuration">Model Configuration<a class="headerlink" href="#model-configuration" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_rl_trainer</span><span class="p">(</span>
@@ -3791,10 +3827,10 @@ limit; <code>max_prompt_length</code> and <code>truncation_mode</code> are not v
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       
