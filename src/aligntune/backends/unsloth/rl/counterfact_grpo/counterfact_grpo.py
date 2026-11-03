@@ -14,6 +14,7 @@ import logging
 import time
 import re
 import math
+from fractions import Fraction
 import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional, List
@@ -26,7 +27,8 @@ from aligntune.core.rl.registries import DatasetRegistry, RewardRegistry
 from aligntune.core.rl.caching import DatasetCache
 from aligntune.core.sft.evaluator import EnhancedEvaluator
 from aligntune.data.manager import DataManager
-from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
+from aligntune.utils.math_grading import extract_math_answer, grade_math_answer
+from aligntune.utils.counterfact_gold import extract_counterfact_gold
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +57,7 @@ def apply_chat_template_safe(
 
 class UnslothCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
     """
     Counterfactual GRPO trainer using Unsloth's FastLanguageModel + TRL's CounterfactualGRPOTrainer.
 
@@ -297,21 +300,6 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
         """Setup datasets for Counterfactual GRPO training."""
         self.setup_dataset()
     
-    def parse_gsm8k_gold(self,ans: str) -> str:
-            """Parse gold answer from GSM8K format (#### answer)."""
-            import re
-            m = re.search(r"####\s*(.+)$", ans, flags=re.MULTILINE)
-            if not m:
-                nums = re.findall(r"-?\d+(?:\.\d+)?", ans.replace(",", ""))
-                return nums[-1] if nums else ""
-            s = m.group(1).strip().replace(",", "")
-            if re.fullmatch(r"-?\d+/\d+", s):
-                num, den = s.split("/")
-                try:
-                    return str(float(num) / float(den))
-                except:
-                    return s
-            return s
 
     def setup_dataset(self) -> None:
         """Setup datasets for GRPO training using unified DataManager."""
@@ -393,12 +381,10 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 
                 # Extract gold answer - CRITICAL for reward computation!
                 answer_clean = ""
-                if 'answer' in example:
-                    answer_clean = self.parse_gsm8k_gold(str(example['answer']))
-                elif 'answer_clean' in example:
+                if 'answer_clean' in example:
                     answer_clean = str(example['answer_clean'])
-                elif 'solution' in example:
-                    answer_clean = extract_math_gold(str(example['solution']))
+                else:
+                    answer_clean = extract_counterfact_gold(example)
                 
                 return {
                     "query": prompt_text,
@@ -500,7 +486,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             **kwargs) -> List[float]:
         """Outcome-based reward function matching training_script.py."""
         def parse_pred_number(text: str) -> str:
-            nums = re.findall(r"-?\d+(?:\.\d+)?", text.replace(",", ""))
+            nums = re.findall(r"-?\d+(?:/\d+|\.\d+)?", text.replace(",", ""))
             candidate = nums[-1] if nums else ""
             if re.fullmatch(r"-?\d+/\d+", candidate):
                 num, den = candidate.split("/")
@@ -513,7 +499,7 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
         def numeric_equal(a: str, b: str, rtol=1e-4, atol=1e-8) -> bool:
             try:
                 fa = float(a)
-                fb = float(b)
+                fb = float(Fraction(b))  # gold keeps a fraction as written
                 return math.isclose(fa, fb, rel_tol=rtol, abs_tol=atol)
             except BaseException:
                 return a.strip() == b.strip()
@@ -804,6 +790,21 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
             import sys
             sys.stdout.flush()
 
+            # SGLang generates through TRL's rollout_func hook; CounterfactualGRPOTrainer only
+            # changes the loss, so it keeps that hook. The constructor fails fast if the server
+            # is down.
+            sglang_kwargs = {}
+            rollout_backend = self._get_config_value(
+                self.config.train, 'rollout_backend', default='hf')
+            if rollout_backend == "sglang":
+                from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+                sglang_kwargs["rollout_func"] = SGLangRollout(
+                    self._get_config_value(
+                        self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000'),
+                    sync_dir=self._get_config_value(
+                        self.config.train, 'sglang_sync_dir', default=None),
+                )
+
             # Create CounterfactualGRPOTrainer with Unsloth model
             # This is the KEY difference - we use the TRL CounterfactualGRPOTrainer
             # but pass in the Unsloth-optimized model!
@@ -826,7 +827,11 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
                 extra_verbose=extra_verbose,
                 extra_verbose_log_path=extra_verbose_log_path,
                 extra_verbose_sample_rate=extra_verbose_sample_rate,
+                **sglang_kwargs,
             )
+            if sglang_kwargs:
+                from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+                self.trainer.add_callback(SGLangRolloutCallback(sglang_kwargs["rollout_func"]))
 
             logger.info(
                 "CounterfactualGRPOTrainer with Unsloth model setup completed")

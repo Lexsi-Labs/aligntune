@@ -25,6 +25,7 @@ Usage:
 """
 
 import re
+from fractions import Fraction
 from typing import Optional
 
 # Optional dependencies - graceful degradation
@@ -554,6 +555,13 @@ grade_answer = grade_math_answer
 # Answer Extraction Functions
 # =============================================================================
 
+def _clean_phrase_answer(pred: str) -> str:
+    """Trim the colon, full stop, markdown bold and closing paragraph around an answer taken from a sentence."""
+    pred = pred.lstrip(": \n").split("\n\n")[0]
+    # "**The answer is: 8.**" and "the answer is: **230.**": drop the bold markers too.
+    return pred.strip("* \n").rstrip(". \n").strip("* ").rstrip(". ")
+
+
 def extract_math_answer(text: str) -> str:
     """
     Extract the predicted answer from model output.
@@ -602,10 +610,10 @@ def extract_math_answer(text: str) -> str:
     # Check for "answer is" phrases
     if "he answer is" in pred_str:
         pred = pred_str.split("he answer is")[-1].strip()
-        return pred
+        return _clean_phrase_answer(pred)
     elif "final answer is" in pred_str:
         pred = pred_str.split("final answer is")[-1].strip()
-        return pred
+        return _clean_phrase_answer(pred)
 
     # Last resort: extract last number
     pattern = r"-?\d*\.?\d+"
@@ -707,6 +715,12 @@ def parse_gsm8k_gold(ans: str) -> str:
     return s
 
 
+def _gsm8k_number(text: str) -> float:
+    """Read an answer as a number, ignoring a leading currency or trailing percent/currency sign."""
+    text = re.sub(r"^([+-]?)\\?\$|\\?[$%]$", r"\1", text)
+    return float(Fraction(text)) if "/" in text else float(text)
+
+
 def grade_gsm8k_answer(pred: str, gold: str, rel_tol: float = 1e-5, abs_tol: float = 1e-9) -> bool:
     """
     Grade GSM8K answer with numeric tolerance.
@@ -731,10 +745,10 @@ def grade_gsm8k_answer(pred: str, gold: str, rel_tol: float = 1e-5, abs_tol: flo
 
     # Try numeric comparison
     try:
-        pred_num = float(pred_clean)
-        gold_num = float(gold_clean)
+        pred_num = _gsm8k_number(pred_clean)
+        gold_num = _gsm8k_number(gold_clean)
         return math.isclose(pred_num, gold_num, rel_tol=rel_tol, abs_tol=abs_tol)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, ArithmeticError):
         pass
 
     return False

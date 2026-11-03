@@ -81,6 +81,20 @@ merged_path = merger.merge_lora(
 )
 ```
 
+### Serving with transformers 4.x (SGLang, older vLLM)
+
+AlignTune saves with transformers 5, which moves `rope_theta` / `rope_scaling` into
+`rope_parameters` and writes `dtype` instead of `torch_dtype`. Loaders still on
+transformers 4.x don't read the new keys and silently fall back to `rope_theta=10000`.
+`merge_lora` therefore also writes the legacy top-level fields (same values, so
+transformers 5 reads the config unchanged), and saves the tokenizer's extra special tokens as
+`additional_special_tokens`, since 4.x can't load transformers 5's list-valued
+`extra_special_tokens`, and writes the tokenizer class `TokenizersBackend` (used for e.g. Llama 3)
+as `PreTrainedTokenizerFast`. To ship the base model's original
+`config.json` instead, pass `keep_base_config=True`; `vocab_size` and the dtype are still
+taken from the merged model. Set `legacy_config_fields=False` to keep the plain
+transformers 5 config.
+
 ## Notebooks
 
 - [`notebooks/35_merge_models.ipynb`](https://github.com/Lexsi-Labs/aligntune/blob/main/notebooks/35_merge_models.ipynb) — linear / SLERP / TIES / DARE-TIES / task-arithmetic via Mergekit

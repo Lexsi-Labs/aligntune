@@ -29,7 +29,8 @@ from aligntune.core.rl.registries import DatasetRegistry, RewardRegistry
 from aligntune.core.rl.caching import DatasetCache
 from aligntune.core.rl.sample_logger import generate_and_log_samples
 from aligntune.core.sft.evaluator import EnhancedEvaluator
-from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
+from aligntune.utils.math_grading import extract_math_answer, grade_math_answer
+from aligntune.utils.counterfact_gold import extract_counterfact_gold
 from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 from aligntune.rewards._code_sandbox import grade_assertions_detail, is_plain, run_calls
@@ -184,6 +185,7 @@ def _run_code_in_sandbox(
 
 class TRLCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
     """Counterfactual GRPO trainer using custom CounterfactualGRPOTrainer with enhanced rewards."""
     
     def __init__(self, config: UnifiedConfig):
@@ -347,21 +349,6 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         logger.info(f"Model device: {next(self.model.parameters()).device}")
         logger.info("=" * 80)
     
-    def parse_gsm8k_gold(self,ans: str) -> str:
-            """Parse gold answer from GSM8K format (#### answer)."""
-            import re
-            m = re.search(r"####\s*(.+)$", ans, flags=re.MULTILINE)
-            if not m:
-                nums = re.findall(r"-?\d+(?:\.\d+)?", ans.replace(",", ""))
-                return nums[-1] if nums else ""
-            s = m.group(1).strip().replace(",", "")
-            if re.fullmatch(r"-?\d+/\d+", s):
-                num, den = s.split("/")
-                try:
-                    return str(float(num) / float(den))
-                except:
-                    return s
-            return s
 
     def setup_data(self) -> None:
         """Setup datasets for GRPO training using unified DataManager."""
@@ -395,7 +382,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             self._setup_mbpp_data(dataset_name, split, system_prompt)
             return
 
-        elif "gsm8k" in dataset_name or "math" in dataset_name:
+        elif "gsm8k" in dataset_name.lower() or "math" in dataset_name.lower():  # "MATH-500" too, as on Unsloth
             self.dataset_type = "math"
             self._setup_math_data(dataset_name, split, system_prompt, ds_config=config_name,
                                   max_samples=self._get_config_value(dataset_config, 'max_samples', default=None))
@@ -457,7 +444,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         # GSM8K requires config="main" to be specified
         if ds_config:
             raw_dataset = load_dataset(ds_name, ds_config, split=split)
-        elif "gsm8k" in ds_name:
+        elif "gsm8k" in ds_name.lower():
             raw_dataset = load_dataset(ds_name, "main", split=split)
         else:
             raw_dataset = load_dataset(ds_name, split=split)
@@ -486,7 +473,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             answer = item.get(answer_col, "") if answer_col else ""
 
             # Extract gold answer for math
-            gold_answer = (extract_math_gold(answer) or self.parse_gsm8k_gold(str(answer))) if answer else None
+            gold_answer = extract_counterfact_gold(item, answer_col) or None
 
             # Format prompt
             formatted_prompt = self._format_math_prompt(question, system_prompt)
@@ -1328,6 +1315,20 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
                 return [0.0] * (len(prompts) if prompts else 1)
             return self._combined_reward_function(completions, prompts=prompts, **kwargs)
 
+        # SGLang generates through TRL's rollout_func hook; CounterfactualGRPOTrainer only
+        # changes the loss, so it keeps that hook. The constructor fails fast if the server is down.
+        sglang_kwargs = {}
+        rollout_backend = self._get_config_value(
+            self.config.train, 'rollout_backend', default='hf')
+        if rollout_backend == "sglang":
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+            sglang_kwargs["rollout_func"] = SGLangRollout(
+                self._get_config_value(
+                    self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000'),
+                sync_dir=self._get_config_value(
+                    self.config.train, 'sglang_sync_dir', default=None),
+            )
+
         if should_use_pure_trl:
             logger.info("PURE_TRL_MODE enabled - using pure TRL API with CounterfactualGRPOTrainer")
             self.trainer = CounterfactualGRPOTrainer(
@@ -1348,6 +1349,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
                 extra_verbose=extra_verbose,
                 extra_verbose_log_path=extra_verbose_log_path,
                 extra_verbose_sample_rate=extra_verbose_sample_rate,
+                **sglang_kwargs,
             )
         else:
             try:
@@ -1372,6 +1374,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
                     extra_verbose_sample_rate=extra_verbose_sample_rate,
+                    **sglang_kwargs,
                 )
             except ImportError:
                 logger.info("Using pure TRL, using reward_function parameter")
@@ -1393,7 +1396,12 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
                     extra_verbose_sample_rate=extra_verbose_sample_rate,
+                    **sglang_kwargs,
                 )
+
+        if sglang_kwargs:
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+            self.trainer.add_callback(SGLangRolloutCallback(sglang_kwargs["rollout_func"]))
 
         log_gpu_memory("After trainer creation")
 

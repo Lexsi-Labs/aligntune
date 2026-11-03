@@ -10,6 +10,7 @@ from typing import Optional, Union
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 from .base import BaseExporter
+from aligntune.utils.config_compat import add_legacy_config_fields, add_legacy_tokenizer_fields
 from aligntune.utils.provenance import build_provenance, provenance_input, write_provenance
 
 logger = logging.getLogger(__name__)
@@ -123,6 +124,9 @@ class MergeAdapterExporter(BaseExporter):
             logger.info(f"Saving merged model to {output_path}")
             merged_model.save_pretrained(output_path, safe_serialization=True)
             tokenizer.save_pretrained(output_path)
+            # Keep config.json readable by transformers 4.x loaders (issue #38).
+            add_legacy_config_fields(output_path)
+            add_legacy_tokenizer_fields(output_path)
 
             return str(output_path)
 

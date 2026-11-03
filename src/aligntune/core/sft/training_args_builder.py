@@ -44,16 +44,16 @@ def build_sft_config(
     grad_accum = getattr(train_cfg, 'gradient_accumulation_steps', 1) if train_cfg else 1
     lr = getattr(train_cfg, 'learning_rate', 2e-4) if train_cfg else 2e-4
     
-    # 2. Dynamic Max Steps Calculation
+    # 2. Max Steps
+    # When the caller did not pass max_steps, leave it at -1 so HF Trainer
+    # derives the step count from num_train_epochs (which also accounts for
+    # world size, packing and dataloader drop_last). Computing it here and
+    # clamping to a minimum silently trained extra epochs on small datasets.
     max_steps = getattr(train_cfg, 'max_steps', None) if train_cfg else None
     if max_steps is None:
-        dataset_size = len(train_dataset) if train_dataset else 1000
-        batch_size_calc = batch_size or 2
-        grad_accum_calc = grad_accum or 1
-        max_steps = (dataset_size * num_epochs) // (batch_size_calc * grad_accum_calc)
-        max_steps = max(max_steps, 10)  # Minimum 10 steps
-        logger.info(f"Calculated max_steps={max_steps} from {num_epochs} epochs, {dataset_size} samples")
-        
+        max_steps = -1
+        logger.info(f"max_steps not set; training for num_train_epochs={num_epochs}")
+
     # 3. Dynamic Evaluation Strategy
     has_eval_ds = eval_dataset is not None
     user_eval_strategy = getattr(log_cfg, 'eval_strategy', None) if log_cfg else None
@@ -155,6 +155,14 @@ def build_sft_config(
     if dataset_kwargs:
         config_dict["dataset_kwargs"] = dataset_kwargs
 
+    # Must be passed at construction: Unsloth's patched SFTConfig.__init__ turns a
+    # None dataset_num_proc into cpu_count + 4, so the backfill below never sees it.
+    dataset_num_proc = (getattr(train_cfg, 'dataset_num_proc', None) if train_cfg else None) or (
+        getattr(dataset_cfg, 'dataset_num_proc', None) if dataset_cfg else None
+    )
+    if dataset_num_proc is not None:
+        config_dict["dataset_num_proc"] = dataset_num_proc
+
     # 9. Padding-free batching
     # Explicitly set padding_free (defaults to False) so it doesn't fall back to
     # None, which Unsloth's SFTTrainer patch treats as "auto-enable". Auto-enabling
@@ -166,7 +174,12 @@ def build_sft_config(
     # Apply kwargs overrides (e.g. optimizer, dataloader_pin_memory, etc)
     config_dict.update(kwargs)
 
-    sft_config = SFTConfig(**config_dict)
+    # Look the class up now rather than using the one bound at import: Unsloth
+    # replaces trl.trainer.sft_config.SFTConfig when its trainers are patched,
+    # and an instance of the stale class can't be pickled by torch.save() at
+    # checkpoint time ("not the same object as trl.trainer.sft_config.SFTConfig").
+    import trl.trainer.sft_config as _sft_config_module
+    sft_config = _sft_config_module.SFTConfig(**config_dict)
 
     # Backfill anything else the caller passed to create_sft_trainer() that
     # isn't already explicitly threaded above (packing, seed, report_to,
