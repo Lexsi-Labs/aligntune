@@ -25,19 +25,16 @@ config:
     lora_dropout: 0.1
     lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   datasets:
-    # The Hub dataset is openai/openai_humaneval; its `test` + `entry_point` columns reach the rewards.
     - name: "openai/openai_humaneval"
       split: "test"
       column_mapping:
         text: "prompt"
   rewards:
-    # Test-based correctness dominates. code_quality is a structural heuristic that never runs the
-    # code, so it gets a small weight: a stub cannot outscore a correct answer.
     - type: "code_correctness"
-      weight: 0.7
+      weight: 0.5
       params: {}
     - type: "code_quality"
-      weight: 0.1
+      weight: 0.3
       params: {}
     - type: "code_execution"
       weight: 0.2

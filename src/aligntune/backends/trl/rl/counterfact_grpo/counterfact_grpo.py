@@ -24,6 +24,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 
 from aligntune.core.rl.trainer_base import TrainerBase
+from aligntune.rewards import _code_grader
 from aligntune.core.rl.config import UnifiedConfig
 from aligntune.core.rl.registries import DatasetRegistry, RewardRegistry
 from aligntune.core.rl.caching import DatasetCache
@@ -33,7 +34,6 @@ from aligntune.utils.math_grading import extract_math_answer, grade_math_answer
 from aligntune.utils.counterfact_gold import extract_counterfact_gold
 from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
-from aligntune.rewards._code_sandbox import grade_assertions_detail, is_plain, run_calls
 
 logger = logging.getLogger(__name__)
 
@@ -167,22 +167,23 @@ def _run_code_in_sandbox(
     timeout_seconds: int = 5
 ) -> Tuple[bool, int, List[str]]:
     """
-    Run the tests against code in a separate process, graded "values out".
-    The child returns only the values of the calls the asserts make; each assert is evaluated
-    in this process. Printed "PASS:" lines, exit codes and custom __eq__ objects do not count.
+    Run the code and its tests in one child process; grade the asserts by value here.
+    Printed text and the exit code don't count.
     Returns: (execution_success, tests_passed, error_messages)
     """
-    try:
-        load, results = grade_assertions_detail(code, tests, setup=setup_code or "", timeout=timeout_seconds)
-    except Exception as e:  # noqa: BLE001
-        return False, 0, [f"Sandbox error: {str(e)}"]
-    if load == "timed out":
+    program = code if not setup_code else setup_code + "\n\n" + code
+    status, passed = _code_grader.grade(program, tests, timeout_seconds)
+    if status == "timeout":
         return False, 0, ["Code execution timed out (infinite loop)"]
-    if load is not None:
-        return False, 0, [f"Execution error: {load[:200]}"]
-    return True, sum(results), [f"Test {i}: failed" for i, ok in enumerate(results) if not ok]
+    if status != "ok":
+        return False, 0, ["Execution error: the code did not run to its end"]
+    errors = [f"Test {i}: failed" for i, ok in enumerate(passed) if not ok]
+    return True, sum(passed), errors
 
 
+# ============================================================================
+# COUNTERFACTUAL TRL TRAINER (mirrors TRLGRPOTrainer 1:1)
+# ============================================================================
 class TRLCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
     SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
@@ -775,28 +776,31 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         timeout_seconds: int = 5
     ) -> Tuple[bool, int, List[str]]:
         """
-        Run evalplus-style tests by comparing outputs to the canonical solution.
-        The canonical solution and the generated code each run in their own child process;
-        only their return values (plain data) come back, and they are compared here, so
-        printed text, exit codes and custom __eq__ objects cannot pass a test.
+        Run evalplus-style tests by comparing outputs to canonical solution.
         Returns: (execution_success, tests_passed, error_messages)
         """
-        calls = [
-            f"{entry_point}(*{inp!r})" if isinstance(inp, (list, tuple)) else f"{entry_point}({inp!r})"
-            for inp in base_inputs
-        ]
-        try:
-            _, expected = run_calls(canonical_solution, calls, timeout=timeout_seconds)
-            load, actual = run_calls(code, calls, timeout=timeout_seconds)
-        except Exception as e:  # noqa: BLE001
-            return False, 0, [f"Sandbox error: {str(e)}"]
-        if load == "timed out":
+        def call(inp):
+            args = f"*{inp!r}" if isinstance(inp, (list, tuple)) else repr(inp)
+            return {"expr": f"{entry_point}({args})"}
+
+        items = [call(inp) for inp in base_inputs]
+        # The canonical solution is trusted but runs in its own child; only plain data comes back.
+        expected = _code_grader.run_candidate(canonical_solution, timeout_seconds, items)
+        actual = _code_grader.run_candidate(code, timeout_seconds, items)
+        if "timeout" in (expected.status, actual.status):
             return False, 0, ["Code execution timed out"]
-        if load is not None:
-            return False, 0, [f"Execution error: {load[:200]}"]
-        passed, error_messages = 0, []
-        for i, ((ek, ev), (ak, av)) in enumerate(zip(expected, actual)):
-            if ek == "ok" and ak == "ok" and is_plain(ev) and is_plain(av) and ev == av:
+        if actual.status != "ok":
+            return False, 0, ["Execution error: the code did not run to its end"]
+        if expected.status != "ok":
+            return False, 0, ["Canonical solution did not run to its end"]
+        error_messages = []
+        passed = 0
+        for i, (want, got) in enumerate(zip(expected.values, actual.values)):
+            try:
+                ok = want is not _code_grader.FAILED and got is not _code_grader.FAILED and bool(want == got)
+            except Exception:
+                ok = False
+            if ok:
                 passed += 1
             else:
                 error_messages.append(f"FAIL:{i}")

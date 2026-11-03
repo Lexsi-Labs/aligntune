@@ -33,28 +33,11 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ### Changed
 - SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).
 - `create_rl_trainer` now passes `rollout_backend` to the trainer, so `rollout_backend="vllm"` turns vLLM rollout on. Before, the argument was ignored and the trainer used `hf` (#32, @chayan-bit).
-- `code_quality` and `code_correctness` no longer multiply by their weight inside `compute()`; the
-  trainer applies the weight (it was applied twice).
-- HumanEval recipe weights: `code_correctness` 0.7, `code_quality` 0.1, `code_execution` 0.2
-  (were 0.5 / 0.3 / 0.2), so a stub cannot outscore a correct answer.
-- `code_execution` with no tests still pays any code that runs and now warns once: pass tests.
-- **The child confines itself on Linux** before running the candidate. A seccomp filter refuses
-  `kill`/`tgkill`/`pidfd_send_signal`, `ptrace`, `socket`, `io_uring_setup`, `fork`/`clone` and
-  `execve`, so a completion can no longer SIGKILL the trainer via `os.getppid()`. A Landlock ruleset
-  limits writes to the child's temp directory and reads to the Python installation and system
-  directories (not the user's home), and blocks TCP on Landlock ABI 4+. Set
-  `ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1` to refuse to run candidate code where the kernel offers
-  neither; otherwise a one-time warning is logged.
-- `code_verifiable` now reads the row's tests (`test_cases`, MBPP `test_list` + `test_imports`,
-  HumanEval `test` + `entry_point`). Through TRL it ignored them and paid 1.0 to any code that ran,
-  a stub included.
-- `SafeCodeExecutor` (pass@k evaluation) runs code in the same sandbox and grades values out; it
-  used a forked `multiprocessing` child with the asserts executed beside the candidate.
-- `code_verifiable`'s stdout check runs in the sandbox (it had no limits and left grandchildren
-  running after a timeout); its `input`/`expected_output` pairs compare plain values, and `input`
-  may be argument values (as in `code_correctness`) as well as a call expression.
+
 
 ### Fixed
+- Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with `'NoneType' object is not subscriptable` in `compute_soft_weights`. The repeated completions now get the same uniform importance as the first.
+- Counterfactual GRPO code tasks (TRL) grade by value like the code rewards. Before, a completion that printed `PASS:0`, `PASS:1` and so on, or exited with status 0, could score full marks, and the MBPP+ output comparison ran inside the same process as the candidate, so an object with an `__eq__` that always returns True matched everything. The candidate's results now come back as plain data and are compared in the trainer, against the reference solution's results from its own child process.
 - Data: chat lists stored as text, as in a CSV (`"[{'content': ..., 'role': ...}]"`), are parsed and flattened like real lists, so KTO and other trainers no longer train on the repr string.
 - Data: `DataManager` accepts the SFT task names `supervised_fine_tuning` (the config default), `text_generation` and `chat_completion`; they failed with `is not a valid TaskType`.
 - Data: SFT rows whose `prompt` CuratorKIT left blank take it from `instruction` (e.g. `column_mapping={"input": "prompt"}`), so user messages are no longer empty and PPO no longer fails on an empty prompt.
@@ -72,25 +55,8 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - TRL counterfactual GRPO: a dataset named in capitals, such as `HuggingFaceH4/MATH-500`, is set up as a math dataset, as on Unsloth. Before, it went to the generic loader and failed with `KeyError: 'train'`.
 - SGLang adapter sync: every training process generates with the synced adapter, not only the main one, and only the main process unloads it. Unsloth PACE raises for `rollout_backend="sglang"` instead of generating with transformers. Adapter tensors are dropped only for whole vision or audio module names (on top of #32 and #41).
 - SGLang adapter sync with Unsloth 4-bit models, such as counterfactual GRPO by default: the pre-quantized `unsloth/<model>-bnb-4bit` base now matches a server running the full-precision `<model>`, instead of failing the base-model check.
-- HumanEval recipes (`grpo/deepseek_humaneval.yaml`, `advanced/gbmpo_l2_code.yaml`) used the
-  non-existent dataset `openai/humaneval`; they now use `openai/openai_humaneval`. Code rewards read
-  HumanEval's `test` + `entry_point` and MBPP's `test_list` (+ `test_imports`/`test_setup_code`) as
-  well as `test_cases`, and body-only HumanEval answers are graded with the prompt prepended.
-- HumanEval's `check(candidate)` now runs in the trainer with `candidate` forwarded to the sandbox,
-  so asserts inside loops, asserts using locals and multi-line asserts are graded. 9 of 164
-  canonical solutions (HumanEval/1, 32, 38, 44, 50, 53, 87, 113, 151) scored below 1.0 before;
-  all 164 now score 1.0.
-- `examples/grpo_code_gen_trl_mbpp.py` said it used `mbpp_reward` but configured `code_quality`.
-- `examples/dapo_trl__code.py` trained on MBPP with `code_quality` only (it never runs the code and
-  scored comment-only answers above correct ones); it now uses `mbpp_reward`, and its printout says
-  DAPO and lists the rewards actually configured. `code_syntax`, `code_completeness` and
-  `code_quality` are documented as heuristics not to be used alone for code training.
-- `code_correctness` now strips code fences (every fenced answer scored 0) and returns 0, with a
-  warning, when no tests arrive (it gave 0.5 to anything that compiled, including the empty string).
-- Bare-code extraction keeps imports above the first `def`.
-- The interpreter is `sys.executable` (correct answers scored 0 when `python` was not on PATH).
-- The no-test `code_execution` path no longer fails on worker threads (it used `signal.alarm`).
-- `MBPPReward` no longer leaks a temp file on every call.
+### Security
+- Code rewards (`code_execution`, `code_correctness`, `mbpp_reward`, `code_verifiable`) no longer run completions in the training process, and grade by value. Each call runs the code in a fresh `sys.executable -I` child with a temporary working directory, a minimal environment, a process group killed on timeout, CPU and file-size limits, and a memory limit on Linux. The child returns plain values and the trainer compares them, so printed `PASS` lines, exit status 0, `sys.exit`/`os._exit`, an always-equal `__eq__` and patching `math.isclose` no longer earn a pass, end the trainer or change later grades, and `while True` no longer hangs it. `code_correctness` scores 0 and warns when no tests arrive, instead of 0.5 for anything that compiles. The child is not a sandbox: it can still read the user's files, use the network and signal the trainer (see the reward functions guide). Reported by Ebin Babu Thomas (@ebt55).
 
 ### Known limitations
 - Kernel confinement is best effort: without seccomp/Landlock (non-Linux, old kernels, some
@@ -101,7 +67,8 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - HumanEval helpers (`poly`, `encode_cyclic`, ...) are taken from the task prompt. When no prompt
   reaches the reward, tasks that need one score 0, rather than trusting the candidate's own copy.
   Body-only answers need the raw (untemplated) prompt to be completed.
-
+- The release grader (`rewards/_code_grader.py`) counts a HumanEval `check()` that uses a loop, a local or a multi-line assert as failed, with a warning, so those tasks score 0 even for a correct solution (`rewards/_code_sandbox.py` grades them; 3 tests in `test_code_reward_security.py` are marked `xfail` for this).
+- `SafeCodeExecutor` gives candidates only a short list of builtins by default (`restrict_builtins=True`), so a solution that imports anything, such as the `from typing import List` at the top of most HumanEval prompts, fails. Pass `restrict_builtins=False` to evaluate those.
 
 ## [0.1.10] — 2026-08-05
 

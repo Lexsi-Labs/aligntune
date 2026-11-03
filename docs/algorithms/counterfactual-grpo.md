@@ -42,7 +42,7 @@ trainer.train()
 Counterfactual GRPO currently uses its built-in math/code reward path rather
 than the normal GRPO reward-function bridge. For GSM8K-style data it extracts
 the numeric answer and scores generated completions against it; for MBPP-style
-data it executes the generated code against tests. The configured
+data it executes the generated code against tests. Code is run in a separate child process and graded by the values it returns (see [how model-written code is run and graded](../user-guide/reward-functions.md#how-model-written-code-is-run-and-graded)); printed text and the exit code don't count. The configured
 `reward_functions`/`rewards` entries are not used by the active TRL
 counterfactual reward calculation, so do not rely on them to replace this
 domain-specific scorer.

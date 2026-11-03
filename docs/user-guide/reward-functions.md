@@ -268,16 +268,58 @@ reward_config = {
 ```
 
 #### Code Execution Reward
-Tests if code runs without errors.
+Fraction of tests the code passes, or, with no tests, whether it runs to its end.
 
 ```python
 reward_functions=["code_execution"]
 reward_config = {
  "type": "code_execution",
- "params": {"timeout": 5, "safe_mode": True},
+ "params": {"timeout": 5},
  "weight": 1.5
 }
 ```
+
+#### How model-written code is run and graded
+
+`code_execution`, `code_correctness`, `mbpp_reward` and `code_verifiable` never run a
+completion inside the training process. Each call starts a fresh interpreter
+(`sys.executable -I`, so no `python` on `PATH` is needed) and grades it by value:
+
+- **Tests.** Each reward reads the row's `test_cases`, MBPP's `test_list`, or HumanEval's
+  `test` plus `entry_point` (the asserts in `check(candidate)`), then `params["test_cases"]`.
+  A HumanEval completion that only writes the function body is graded as prompt plus
+  completion.
+- **Values, not output.** The child sends back plain data only: exact `None`, `bool`, `int`,
+  `float`, `str`, `list`, `tuple`, `set`, `frozenset` and `dict`. The trainer does the
+  comparison. Printed text such as `PASS`, the exit code, a subclass or an object with
+  its own `__eq__` can't earn a pass, and a literal expected value never reaches the child.
+- **Asserts** are split with `ast`: comparisons (`==`, `!=`, `<` and the like, chained,
+  `in`, `is`), `not x`, `math.isclose(a, b, ...)` and bare `assert x`. Any other shape, or
+  a test that isn't an `assert` string, fails with a warning. `input`/`expected_output`
+  tests call the first function the completion defines.
+- **Finishing.** A completion must run to its end: `sys.exit`, `os._exit`, a crash or a
+  timeout scores as a failure. `code_correctness` scores 0.0 and warns when no tests arrive.
+- **Weights.** Rewards return unweighted scores; the trainer applies `weight`.
+
+**What the child process limits:**
+
+| Limit | Where |
+|---|---|
+| Wall clock (`timeout`, default 5 s); the child's whole process group is killed at the end of every call | all platforms |
+| CPU time (`timeout` + 1 s), file size (16 MB), no core dumps | where Python has `resource` (Linux, macOS) |
+| Memory (`memory_limit_mb`, default 4096, address space) | Linux only; macOS refuses the limit, so there only the wall clock bounds memory |
+| Environment: only `PATH` and the locale; `HOME`, `TMPDIR` and the working directory are an empty temporary directory, removed afterwards; no standard input | all platforms |
+| Result read back: at most 16 MB and 100,000 values (nested ones included), never followed through a link or a FIFO; a set or dict whose values hash alike is refused before it is built; a tampered result scores 0 and never raises | all platforms |
+
+**What it does not limit.** This is not a sandbox. The child runs as the same user as
+the trainer, so it can read any file that user can read (a token file in your home
+directory, for example), use the network, write outside its directory, and signal other
+processes, the trainer included. A process that calls `setsid` leaves the group and is
+not killed. Everything inside the child belongs to the completion, so a determined one
+can write values of its own choosing into its result. That scores only where the needed
+value can be guessed without the expected output, such as `assert f(x)` or
+`assert f(x) == True`, so prefer tests whose expected values vary. Run training in a
+container or as a separate user when completions may be hostile.
 
 ### Math and Reasoning Rewards
 

@@ -17,24 +17,7 @@ import numpy as np
 import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import ast
-import os
-import sys
-import time
-
-# Model-generated code is only ever run out of process, graded "values out".
-from ._code_sandbox import (
-    _BUILTINS as _BUILTIN_NAMES,
-    code_runs,
-    grade_assertions,
-    humaneval_assertions,
-    grade_assertions_detail,
-    grade_tests_detail,
-    HumanEvalTests,
-    is_plain,
-    run_calls,
-    setup_from_kwargs,
-    tests_from_kwargs,
-)
+import time 
 
 # Import robust math grading from shared module
 from aligntune.utils.math_grading import (
@@ -43,6 +26,7 @@ from aligntune.utils.math_grading import (
     extract_math_answer,
     extract_gsm8k_answer,
 )
+from aligntune.rewards import _code_grader
 
 logger = logging.getLogger(__name__)
 
@@ -350,9 +334,9 @@ class SentimentReward(RewardFunction):
                 if isinstance(result, list):
                     result = result[0]
                 if result['label'].lower() == target_sentiment.lower():
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch sentiment analysis failed, falling back to sequential: {e}")
@@ -454,9 +438,9 @@ class SafetyReward(RewardFunction):
                     result = result[0]
                 # Reward non-toxic content
                 if result['label'].lower() in ['non-toxic', 'safe', 'clean']:
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch safety analysis failed, falling back to sequential: {e}")
@@ -635,13 +619,7 @@ class MathCorrectnessReward(RewardFunction):
 
 
 class CodeSyntaxReward(RewardFunction):
-    """Reward for code syntax correctness.
-
-    Heuristic: it only parses the code, so a stub or a comment-only block scores as high as a
-    solution. Never use it alone to train code generation;
-    pair it, at a small weight, with a test-based reward (code_correctness, mbpp_reward,
-    code_verifiable).
-    """
+    """Reward for code syntax correctness."""
 
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         if not isinstance(text, str):
@@ -764,9 +742,9 @@ class ToxicityReward(RewardFunction):
                     result = result[0]
                 # Reward non-toxic content (invert toxicity score)
                 if result['label'].lower() in ['non-toxic', 'safe']:
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch toxicity analysis failed, falling back to sequential: {e}")
@@ -923,35 +901,6 @@ class BERTScoreReward(RewardFunction):
             return 0.0
 
 
-_NO_TESTS_WARNED = set()
-
-
-def _warn_no_tests(reward_name: str, kwargs: Dict[str, Any]) -> None:
-    """Say once, loudly, that a test-based reward got no tests (e.g. a dataset column mismatch)."""
-    if reward_name not in _NO_TESTS_WARNED:
-        _NO_TESTS_WARNED.add(reward_name)
-        logger.warning(
-            f"{reward_name}: no test cases reached this reward (row keys: {sorted(kwargs)[:20]}). "
-            f"Pass `test_cases`, MBPP's `test_list`, or HumanEval's `test` + `entry_point`."
-        )
-
-
-def _defines(code: str, name: Optional[str]) -> bool:
-    return bool(name) and re.search(r"^\s*(async\s+)?def\s+" + re.escape(name) + r"\s*\(", code, re.M) is not None
-
-
-def _first_function(code: str) -> Optional[str]:
-    """Name of the first public top-level function in code (not the first callable in a namespace,
-    which picked `typing.List` on HumanEval)."""
-    try:
-        for node in ast.parse(code).body:
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith('_'):
-                return node.name
-    except SyntaxError:
-        pass
-    return None
-
-
 class CodeExecutionReward(RewardFunction):
     """Reward for code execution success.
 
@@ -964,153 +913,61 @@ class CodeExecutionReward(RewardFunction):
         super().__init__(config)
         self.timeout = config.params.get('timeout', 5.0)
         self.test_cases = config.params.get('test_cases', [])
+        self.memory_limit_mb = config.params.get('memory_limit_mb', _code_grader.DEFAULT_MEMORY_LIMIT_MB)
 
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        # Tests from kwargs (test_cases, MBPP test_list, or HumanEval test + entry_point) or config
-        test_cases = tests_from_kwargs(kwargs, self.test_cases)
-        setup = setup_from_kwargs(kwargs)
-        entry = kwargs.get('entry_point')
+        # Tests from the row (test_cases, MBPP's test_list, HumanEval's test and entry_point) or the config
+        test_cases, setup = _code_grader.tests_from_columns(kwargs)
+        if not test_cases:
+            test_cases = self.test_cases
 
-        # Debug: log when test_cases are received
         if test_cases:
-            logger.debug(f"CodeExecutionReward: received tests: {type(test_cases).__name__}")
+            logger.debug(f"CodeExecutionReward: received {len(test_cases)} test cases")
         else:
-            _warn_no_tests(type(self).__name__, kwargs)
+            logger.debug(f"CodeExecutionReward: NO test cases (kwargs keys: {list(kwargs.keys())})")
 
-        # Extract code from response
         code = self._extract_code(text)
-        if code and entry and kwargs.get('prompt') and not _defines(code, entry) \
-                and _defines(str(kwargs['prompt']), entry):
-            code = str(kwargs['prompt']) + text  # HumanEval-style body-only continuation
         if not code:
             logger.debug("CodeExecutionReward: no code extracted")
             return 0.0
+        code = _code_grader.with_prompt(code, text, kwargs)
+        if setup:
+            code = code + "\n\n" + setup
 
-        # If test cases provided, validate against them
         if test_cases:
-            score = self._validate_with_test_cases(code, test_cases, setup=setup, entry=entry)
+            score = self._validate_with_test_cases(code, test_cases)
             logger.debug(f"CodeExecutionReward: validation score = {score}")
             return score
-        else:
-            # Otherwise, only check that the code runs (out of process). This cannot tell a stub
-            # from a solution: pass tests whenever you have them.
-            return 1.0 if self._execute_code_safely(code) else 0.0
+        # Otherwise, check that the code runs to its end in a child process
+        status, _ = _code_grader.grade(code, [], self.timeout, memory_limit_mb=self.memory_limit_mb)
+        return 1.0 if status == "ok" else 0.0
 
     def _extract_code(self, text: str) -> str:
         """Extract Python code from model response.
 
-        Returns the FIRST code block containing a function definition,
-        or combines all code blocks if needed.
+        Returns the first fenced block containing a function definition, else the
+        first fenced block. Without a fence: the whole text if it parses, else the
+        import lines plus everything from the first ``def`` on.
         """
-        # Try markdown code blocks first
-        patterns = [
-            r'```python\s*(.*?)```',
-            r'```\s*(.*?)```',
-        ]
+        return _code_grader.extract_code(text)
 
-        all_code_blocks = []
-        for pattern in patterns:
-            matches = re.findall(pattern, text, re.DOTALL)
-            all_code_blocks.extend(matches)
+    def _validate_with_test_cases(self, code: str, test_cases: List[Any]) -> float:
+        """Fraction of tests passed: run in a child process, compared by value here.
 
-        if all_code_blocks:
-            # Find the FIRST block that contains a function definition
-            for block in all_code_blocks:
-                if 'def ' in block:
-                    return block.strip()
-            # Fallback: return first block
-            return all_code_blocks[0].strip()
-
-        # No code block: start at the first top-level def/import/class line, so imports above
-        # the first def are kept (starting at the def dropped them and failed correct code).
-        lines = text.split('\n')
-        code_lines = []
-        in_code = False
-        for line in lines:
-            if re.match(r'(def |async def |class |import |from \S+ import |@)', line):
-                in_code = True
-            if in_code:
-                code_lines.append(line)
-
-        if code_lines:
-            return '\n'.join(code_lines)
-
-        # Return full text as fallback
-        return text.strip()
-
-    def _execute_code_safely(self, code: str) -> bool:
-        """Run code in a separate process; True if it runs to the end without raising.
-
-        Nothing runs in the trainer process, and sys.exit()/os._exit() count as failure.
-        """
-        try:
-            return code_runs(code, timeout=self.timeout)
-        except Exception as e:
-            logger.debug(f"Code execution failed: {e}")
-            return False
-
-    def _validate_with_test_cases(self, code: str, test_cases: List[Any], setup: str = "",
-                                  entry: Optional[str] = None) -> float:
-        """Validate code against test cases, out of process and "values out".
-
-        The child process returns only the values of the candidate's calls; each assert or
-        expected_output comparison is evaluated here on plain data. Printed text and exit codes
-        are ignored.
-
-        Handles:
+        Handles both:
         - MBPP-style assertion strings: 'assert func(x) == y'
         - Dict-style: {'input': x, 'expected_output': y}
-        - HumanEval's check() program as one string (needs entry_point)
-
-        Returns: float score (0.0 to 1.0) based on fraction of tests passed
         """
-        if isinstance(test_cases, str):
-            test_cases = HumanEvalTests(test_cases, entry) if entry else []
-        if isinstance(test_cases, HumanEvalTests):
-            # check(candidate) runs here; each call to the candidate is answered by the sandbox.
-            try:
-                _, results = grade_tests_detail(code, test_cases, setup=setup, timeout=self.timeout)
-            except Exception as e:  # noqa: BLE001
-                logger.debug(f"HumanEval grading failed: {e}")
-                return 0.0
-            return sum(results) / len(results) if results else 0.0
         if not test_cases:
             return 0.0
-
-        asserts = [t for t in test_cases if isinstance(t, str) and t.strip().startswith('assert')]
-        dicts = [t for t in test_cases if isinstance(t, dict)]
-        passed = 0
-        try:
-            if asserts:
-                passed += sum(grade_assertions(code, asserts, setup=setup, timeout=self.timeout, entry=entry))
-            if dicts:
-                passed += sum(self._run_dict_tests(code, dicts, setup))
-        except Exception as e:
-            logger.debug(f"Test case validation failed: {e}")
-        return passed / len(test_cases)
-
-    def _run_dict_tests(self, code: str, test_cases: List[Dict[str, Any]], setup: str = "") -> List[bool]:
-        """Dict-style tests, values out: the child returns func(input); the comparison is done here."""
-        func = _first_function(code)
-        if func is None:
-            return [False] * len(test_cases)
-        calls = []
-        for tc in test_cases:
-            test_input = tc.get('input')
-            if isinstance(test_input, (list, tuple)) and len(test_input) > 1:
-                calls.append(f"{func}(*{test_input!r})")
-            elif test_input is None:
-                calls.append(f"{func}()")
-            else:
-                calls.append(f"{func}({test_input!r})")
-        load, results = run_calls(code, calls, setup=setup, timeout=self.timeout)
-        return [load is None and kind == "ok" and self._compare_outputs(value, tc.get('expected_output'))
-                for (kind, value), tc in zip(results, test_cases)]
+        _, passed = _code_grader.grade(
+            code, test_cases, self.timeout, compare=self._compare_outputs, no_args=True,
+            memory_limit_mb=self.memory_limit_mb,
+        )
+        return sum(passed) / len(test_cases)
 
     def _compare_outputs(self, actual: Any, expected: Any) -> bool:
-        """Compare actual and expected outputs (plain data only: no custom __eq__ can answer)."""
-        if not (is_plain(actual) and is_plain(expected)):
-            return False
+        """Compare actual and expected outputs."""
         if isinstance(actual, float) and isinstance(expected, float):
             return math.isclose(actual, expected, rel_tol=1e-5, abs_tol=1e-9)
         if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
@@ -1121,13 +978,7 @@ class CodeExecutionReward(RewardFunction):
 
 
 class CodeCompletenessReward(RewardFunction):
-    """Reward for code completeness.
-
-    Heuristic: it never runs the code, so a stub can score well (about 0.5). Never use it alone to
-    train code generation;
-    pair it, at a small weight, with a test-based reward (code_correctness, mbpp_reward,
-    code_verifiable).
-    """
+    """Reward for code completeness."""
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         # Extract code blocks
@@ -1413,7 +1264,7 @@ class MathReasoningReward(RewardFunction):
             components += 1
         
         final_score = (total_score / components) if components > 0 else 0.0
-        return final_score * self.config.weight
+        return final_score
     
     def _evaluate_correctness(self, response: str, reference: str) -> float:
         """Evaluate answer correctness using shared math_grading module.
@@ -1572,13 +1423,7 @@ class MathReasoningReward(RewardFunction):
 
 
 class CodeQualityReward(RewardFunction):
-    """Reward function for code quality assessment.
-
-    Heuristic: it never runs the code and can score a comment-only answer above a correct one.
-    Never use it alone to train code generation;
-    pair it, at a small weight, with a test-based reward (code_correctness, mbpp_reward,
-    code_verifiable).
-    """
+    """Reward function for code quality assessment."""
     
     def __init__(self, config: RewardConfig):
         super().__init__(config)
@@ -1610,12 +1455,10 @@ class CodeQualityReward(RewardFunction):
             total_score += self._evaluate_efficiency(text, language)
             components += 1
         
-        final_score = (total_score / components) if components > 0 else 0.0
-        # Not multiplied by self.config.weight: the trainer (TRL reward_weights, CompositeReward)
-        # applies the weight, so multiplying here applied it twice.
-        return final_score
-    
-    # ... [Include all the helper methods from your grpo_trainer.py]
+        # Unweighted: the trainer applies the configured weight.
+        return (total_score / components) if components > 0 else 0.0
+
+
     def _evaluate_syntax(self, code: str, language: str) -> float:
         if language.lower() == "python":
             try:
@@ -1706,28 +1549,51 @@ class CodeQualityReward(RewardFunction):
 
 
 class CodeCorrectnessReward(RewardFunction):
-    """Reward function for code correctness based on test cases.
+    """Fraction of test cases the code passes, graded by value outside the trainer.
 
-    Accepts the same tests as CodeExecutionReward (assert strings, input/expected_output dicts, or
-    HumanEval's test + entry_point) and grades them the same way: out of process, values out.
-    Code blocks are extracted from the response (a ```python fence used to make every answer fail).
+    Tests come from the row (``test_cases``, MBPP's ``test_list``, or HumanEval's
+    ``test`` plus ``entry_point``) or from ``params["test_cases"]``. With no tests
+    the score is 0.0 and a warning is logged.
     """
 
     def __init__(self, config: RewardConfig):
         super().__init__(config)
         self.test_cases = config.params.get('test_cases', [])
         self.timeout = config.params.get('timeout', 5.0)
-        self._executor = CodeExecutionReward(config)
+        self.memory_limit_mb = config.params.get('memory_limit_mb', _code_grader.DEFAULT_MEMORY_LIMIT_MB)
+        self._warned_no_tests = False
 
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        test_cases = tests_from_kwargs(kwargs, self.test_cases)
+        test_cases, setup = _code_grader.tests_from_columns(kwargs)
         if not test_cases:
-            # Nothing to check correctness against. (This used to return 0.5 * weight for anything
-            # that compiles, including the empty string.)
-            _warn_no_tests(type(self).__name__, kwargs)
+            test_cases = self.test_cases
+        if not test_cases:
+            if not self._warned_no_tests:
+                logger.warning(
+                    "code_correctness got no tests (test_cases, test_list, or test plus entry_point), "
+                    "so every completion scores 0.0."
+                )
+                self._warned_no_tests = True
             return 0.0
-        # Not multiplied by self.config.weight: the trainer applies it.
-        return self._executor.compute(text, reference, **{**kwargs, 'test_cases': test_cases})
+
+        code = _code_grader.with_prompt(_code_grader.extract_code(text), text, kwargs)
+        if setup:
+            code = code + "\n\n" + setup
+        # Unweighted: the trainer applies the configured weight.
+        _, passed = _code_grader.grade(
+            code, test_cases, self.timeout, compare=self._compare_outputs,
+            memory_limit_mb=self.memory_limit_mb,
+        )
+        return sum(passed) / len(test_cases)
+
+    def _compare_outputs(self, actual: Any, expected: Any) -> bool:
+        if isinstance(actual, float) and isinstance(expected, float):
+            return math.isclose(actual, expected, rel_tol=1e-5)
+        if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
+            if len(actual) != len(expected):
+                return False
+            return all(self._compare_outputs(a, e) for a, e in zip(actual, expected))
+        return actual == expected
 
 
 class DiversityReward(RewardFunction):
@@ -1763,7 +1629,7 @@ class DiversityReward(RewardFunction):
                     except:
                         score += 0.25
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class FluencyReward(RewardFunction):
@@ -1812,7 +1678,7 @@ class FluencyReward(RewardFunction):
             connector_count = sum(1 for conn in connectors if conn in text.lower())
             score += min(connector_count / 10, 0.2)
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class RelevanceReward(RewardFunction):
@@ -1842,7 +1708,7 @@ class RelevanceReward(RewardFunction):
         elif len(words) < 20:
             score += 0.1
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class BrevityReward(RewardFunction):
@@ -1859,14 +1725,14 @@ class BrevityReward(RewardFunction):
         word_count = len(words)
         
         if word_count <= ideal_length:
-            return 1.0 * self.config.weight
+            return 1.0
         elif word_count <= max_length:
             penalty = (word_count - ideal_length) / (max_length - ideal_length)
-            return (1.0 - penalty * 0.5) * self.config.weight
+            return 1.0 - penalty * 0.5
         else:
             excess = word_count - max_length
             penalty = min(excess / max_length, 1.0)
-            return max(0.0, 0.5 - penalty) * self.config.weight
+            return max(0.0, 0.5 - penalty)
 
 
 class ImageRelevanceReward(RewardFunction):
@@ -1876,7 +1742,7 @@ class ImageRelevanceReward(RewardFunction):
         # Placeholder implementation - returns neutral reward
         # TODO: Implement actual image relevance scoring when multi-modal support is added
         logger.warning("ImageRelevanceReward is a placeholder - multi-modal support not yet implemented")
-        return 0.5 * self.config.weight
+        return 0.5
 
 
 class AudioQualityReward(RewardFunction):
@@ -1886,7 +1752,7 @@ class AudioQualityReward(RewardFunction):
         # Placeholder implementation - returns neutral reward
         # TODO: Implement actual audio quality scoring when multi-modal support is added
         logger.warning("AudioQualityReward is a placeholder - multi-modal support not yet implemented")
-        return 0.5 * self.config.weight
+        return 0.5
 
 
 class InstructionFollowingReward(RewardFunction):
@@ -2711,7 +2577,8 @@ class MBPPReward:
             # Sanitize and execute
             sanitized_code = self._prepare_for_exec(completion_code, expected_func)
             execution_success, passed, error_messages = self._run_code_in_sandbox(
-                code=sanitized_code, setup_code=setup_code, tests=tests, timeout_seconds=5
+                code=sanitized_code, setup_code=setup_code, tests=tests,
+                timeout_seconds=self.config.params.get('timeout', 5),
             )
             
             # Calculate base reward
@@ -2806,16 +2673,13 @@ class MBPPReward:
     
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         """Compute reward for a single completion."""
-        # Extract test data from kwargs (test_cases, MBPP's test_list, HumanEval's test + entry_point)
-        test_cases = tests_from_kwargs(kwargs, None)
+        # Extract test data from kwargs
+        test_cases, setup_code = _code_grader.tests_from_columns(kwargs)
         sample_id = kwargs.get('sample_id', 0)
         prompt_text = kwargs.get('prompt', "")
         
-        if isinstance(test_cases, HumanEvalTests):
-            return self._compute_humaneval(text, test_cases, setup_from_kwargs(kwargs))
         if test_cases is not None:
             tests = test_cases if isinstance(test_cases, list) else []
-            setup_code = setup_from_kwargs(kwargs)
         else:
             if prompt_text:
                 id_match = re.search(r"__SAMPLE_ID:(\d+)__", prompt_text)
@@ -2833,36 +2697,14 @@ class MBPPReward:
         if not expected_func:
             return -0.10
         
-        sanitized_code = self._prepare_for_exec(text, expected_func)
+        sanitized_code = self._prepare_for_exec(_code_grader.with_prompt(text, text, kwargs), expected_func)
         execution_success, passed, error_messages = self._run_code_in_sandbox(
-            code=sanitized_code, setup_code=setup_code, tests=tests, timeout_seconds=5
+            code=sanitized_code, setup_code=setup_code, tests=tests,
+            timeout_seconds=self.config.params.get('timeout', 5),
         )
         
-        return self._shape_reward(text, passed, len(tests), execution_success, error_messages)
-
-    def _compute_humaneval(self, text: str, tests: "HumanEvalTests", setup_code: str) -> float:
-        """HumanEval rows: check(candidate) runs in the trainer, candidate calls go to the sandbox."""
-        entry = tests.entry_point
-        prompt = tests.prompt if isinstance(tests.prompt, str) else ""
-        if prompt and not _defines(self._extract_python_code(text), entry) and _defines(prompt, entry):
-            text_for_exec = prompt + text  # body-only continuation of the HumanEval prompt
-        else:
-            text_for_exec = text
-        sanitized_code = self._prepare_for_exec(text_for_exec, entry)
-        try:
-            load, results = grade_tests_detail(sanitized_code, tests, setup=setup_code, timeout=5)
-        except Exception as e:  # noqa: BLE001
-            load, results = f"Sandbox error: {e}", [False]
-        if load == "timed out":
-            return self._shape_reward(text, 0, len(results), False, ["Code execution timed out (infinite loop)"])
-        if load is not None:
-            return self._shape_reward(text, 0, len(results), False, [f"Execution error: {load[:200]}"])
-        return self._shape_reward(text, sum(results), len(results), True, [])
-
-    def _shape_reward(self, text: str, passed: int, total: int, execution_success: bool,
-                      error_messages: List[str]) -> float:
-        base_reward = float(passed / total) if total else 0.0
-
+        base_reward = float(passed / len(tests)) if tests else 0.0
+        
         if passed == 0:
             base_reward -= 0.10
         
@@ -2885,9 +2727,7 @@ class MBPPReward:
     def _extract_function_info_from_test(self, test_str: str) -> Tuple[Optional[str], int]:
         """Extract function name and arity from test string."""
         try:
-            # first called name that is not a builtin (`assert set(f(x)) == ...` tests f, not set)
-            match = next((m for m in re.finditer(r'(\w+)\(', test_str) if m.group(1) not in _BUILTIN_NAMES), None) \
-                or re.search(r'(\w+)\([^)]*\)', test_str)
+            match = re.search(r'(\w+)\([^)]*\)', test_str)
             if match:
                 func_name = match.group(1)
                 args_match = re.search(r'\(([^)]*)\)', test_str)
@@ -2955,22 +2795,20 @@ class MBPPReward:
             return code + f"\n\n# alias for grader\n{expected_name} = {actual}\n"
         return f"def {expected_name}(*args, **kwargs):\n    raise NotImplementedError\n\n" + code
     
-    def _run_code_in_sandbox(self, code: str, setup_code: str, tests: List[str], timeout_seconds: int = 5) -> Tuple[bool, int, List[str]]:
-        """Run the tests against code in a separate process, values out.
+    def _run_code_in_sandbox(self, code: str, setup_code: str, tests: List[str], timeout_seconds: float = 5) -> Tuple[bool, int, List[str]]:
+        """Run the code and its tests in one child process; grade the asserts by value here.
 
-        The child returns only the values of the calls the asserts make; each assert is evaluated
-        here. Printed "PASS:" lines, exit codes and custom __eq__ objects no longer count.
-        Returns (execution_success, tests_passed, error_messages).
+        Returns (ran to its end, tests passed, error messages). Printed text and the
+        exit code don't count.
         """
-        try:
-            load, results = grade_assertions_detail(code, tests, setup=setup_code, timeout=timeout_seconds)
-        except Exception as e:
-            return False, 0, [f"Sandbox error: {str(e)}"]
-        if load == "timed out":
+        program = code if not setup_code else setup_code + "\n\n" + code
+        status, passed = _code_grader.grade(program, tests, timeout_seconds)
+        if status == "timeout":
             return False, 0, ["Code execution timed out (infinite loop)"]
-        if load is not None:
-            return False, 0, [f"Execution error: {load[:200]}"]
-        return True, sum(results), [f"Test {i}: failed" for i, ok in enumerate(results) if not ok]
+        if status != "ok":
+            return False, 0, ["Execution error: the code did not run to its end"]
+        errors = [f"Test {i}: failed" for i, ok in enumerate(passed) if not ok]
+        return True, sum(passed), errors
 
     def _calculate_format_penalties(self, text: str) -> float:
         """Calculate format penalties."""

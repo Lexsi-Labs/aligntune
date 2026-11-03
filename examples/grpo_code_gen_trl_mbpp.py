@@ -130,17 +130,7 @@ print(f"💾 Output: {OUTPUT_DIR}")
 print("\n" + "="*70)
 print("TRAINING GRPO MODEL ON MBPP (TRL Backend)")
 print("="*70)
-REWARDS = [
-    {
-        # Runs each completion against the row's MBPP `test_list` asserts in a separate process.
-        "type": "mbpp_reward",
-        "weight": 1.0,
-        "params": {},
-    },
-]
-print("\nRewards actually configured:")
-for r in REWARDS:
-    print(f"  - {r['type']} (weight {r['weight']}, params {r['params']}); tests come from the `test_list` column")
+print("\nUsing reward: mbpp_reward (code execution + test cases)")
 print("Backend: TRL (HuggingFace Transformers Reinforcement Learning)\n")
 
 trainer = create_rl_trainer(
@@ -180,7 +170,13 @@ trainer = create_rl_trainer(
     lora_target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                          "gate_proj", "up_proj", "down_proj"],
 
-    rewards=REWARDS,
+    rewards=[
+        {
+            "type": "mbpp_reward",
+            "weight": 1.0,
+            "params": {},
+        },
+    ],
 
     # Other settings
     bf16=True,
