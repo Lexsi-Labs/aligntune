@@ -9,6 +9,23 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 ## [Unreleased]
 
+### Security
+- **Code rewards no longer run model-generated code in the trainer process.** `code_execution`,
+  `code_correctness`, `mbpp_reward`, `code_verifiable` and the counterfactual-GRPO code reward now run
+  each completion in a separate `sys.executable -I` process (temp working directory, minimal
+  environment, CPU/memory/file-size limits, wall-clock timeout, process-group kill). Previously a
+  completion could patch modules such as `math.isclose` for later grades, end a training run with
+  status 0 via `sys.exit(0)`/`os._exit(0)`, or hang it with an infinite loop.
+- **Tests are graded "values out".** The child process returns only the values the candidate's
+  function produced, as plain data, and each assert / expected-output comparison runs in the
+  trainer. Printing `PASS`/`PASS:i`, exiting with status 0, or returning an object whose `__eq__`
+  is always true no longer passes a test.
+- `sql_verifiable` opens `db_path` read-only with a time limit, compares result rows with the
+  reference (a SQL query or literal rows), and returns 0 when a reference is given but
+  `execute=False` (it used to pay any parseable query).
+- Reported privately by Ebin Babu Thomas on 2 Nov 2026; the fix builds on the patch and regression
+  tests he provided (MIT).
+
 ### Added
 - SGLang rollout backend for GRPO (`rollout_backend="sglang"`): generation goes to a running SGLang server over HTTP, and weights sync once per optimizer step, as a LoRA adapter on a `--enable-lora` server or as streamed full weights (#32, @chayan-bit).
 - SGLang rollout on Unsloth GRPO-family and counterfactual GRPO trainers, with Gemma 3 weight names, vision adapter tensors, regex LoRA `target_modules` and full sync for 4-bit models (#41, @zeralyngkhoi19).
@@ -16,10 +33,11 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ### Changed
 - SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).
 - `create_rl_trainer` now passes `rollout_backend` to the trainer, so `rollout_backend="vllm"` turns vLLM rollout on. Before, the argument was ignored and the trainer used `hf` (#32, @chayan-bit).
-- Code rewards: a function must return plain Python data (`None`, `bool`, `int`, `float`, `str`, `list`, `tuple`, `set`, `frozenset`, `dict`); NumPy scalars, `bytes`, custom classes and results of more than 100,000 values in all now fail the test. An `assert` shape that can't be split, or a non-`assert` test string, fails with a warning. A completion runs with `__name__ == "__main__"`, so one that calls `sys.exit` under that guard fails. All of a completion's tests run in one child, so a test that hangs fails them all. The child doesn't get the trainer's environment variables or `PYTHONPATH`.
-- Reward weights are applied once. These rewards multiplied their score by `weight` and the trainer then applied it again, so a run with weight `w` scored `w` squared: `math_reasoning`, `diversity`, `fluency`, `relevance`, `brevity`, `image_relevance` and `audio_quality` now return the unweighted score (a run with `weight` 0.2 sees scores 5 times larger than before; weight 1.0 changes nothing). `sentiment`, `safety` and `toxicity` weighted only `batch_compute`, so it differed from `compute`; it is now unweighted too. Code that calls these rewards directly and relied on the weight being applied inside them must multiply by `weight` itself.
+
 
 ### Fixed
+- HumanEval `check()` with a loop, a local variable or a multi-line assert is graded instead of counted as failed: the trainer runs `check` and forwards the candidate's calls to a confined child, so a correct solution to those tasks no longer scores 0.
+- `SafeCodeExecutor` in its default restricted mode can import a short list of harmless standard modules (`typing`, `math`, `re`, `collections`, ...). Before, any import made a correct solution fail, including the `from typing import List` at the top of most HumanEval prompts. `os`, `sys` and `subprocess` are still refused.
 - Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with `'NoneType' object is not subscriptable` in `compute_soft_weights`. The repeated completions now get the same uniform importance as the first.
 - Counterfactual GRPO code tasks (TRL) grade by value like the code rewards. Before, a completion that printed `PASS:0`, `PASS:1` and so on, or exited with status 0, could score full marks, and the MBPP+ output comparison ran inside the same process as the candidate, so an object with an `__eq__` that always returns True matched everything. The candidate's results now come back as plain data and are compared in the trainer, against the reference solution's results from its own child process.
 - Data: chat lists stored as text, as in a CSV (`"[{'content': ..., 'role': ...}]"`), are parsed and flattened like real lists, so KTO and other trainers no longer train on the repr string.
@@ -39,16 +57,18 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - TRL counterfactual GRPO: a dataset named in capitals, such as `HuggingFaceH4/MATH-500`, is set up as a math dataset, as on Unsloth. Before, it went to the generic loader and failed with `KeyError: 'train'`.
 - SGLang adapter sync: every training process generates with the synced adapter, not only the main one, and only the main process unloads it. Unsloth PACE raises for `rollout_backend="sglang"` instead of generating with transformers. Adapter tensors are dropped only for whole vision or audio module names (on top of #32 and #41).
 - SGLang adapter sync with Unsloth 4-bit models, such as counterfactual GRPO by default: the pre-quantized `unsloth/<model>-bnb-4bit` base now matches a server running the full-precision `<model>`, instead of failing the base-model check.
-- Code rewards read the tests a dataset ships: MBPP's `test_list` and HumanEval's `test` plus `entry_point`, as well as `test_cases`. A HumanEval completion that only writes the function body is graded as prompt plus completion. Before, every reward took its no-test branch on these datasets.
-- `code_correctness` strips a Markdown fence, and a bare answer keeps the imports above its first `def`.
-- `code_execution` without tests works on a worker thread; it used `signal.alarm`, which fails there.
-- `code_correctness` and `code_quality` return unweighted scores. The trainer applies `weight`, so it was applied twice.
-- `mbpp_reward` no longer leaves a temporary file behind on every call, and honours `params["timeout"]`.
-- The `deepseek_humaneval` and `gbmpo_l2_code` recipes name the real dataset, `openai/openai_humaneval` (`openai/humaneval` returns 401).
-- `examples/grpo_code_gen_trl_mbpp.py` trains with `mbpp_reward`, as it says, not `code_quality`.
-
 ### Security
 - Code rewards (`code_execution`, `code_correctness`, `mbpp_reward`, `code_verifiable`) no longer run completions in the training process, and grade by value. Each call runs the code in a fresh `sys.executable -I` child with a temporary working directory, a minimal environment, a process group killed on timeout, CPU and file-size limits, and a memory limit on Linux. The child returns plain values and the trainer compares them, so printed `PASS` lines, exit status 0, `sys.exit`/`os._exit`, an always-equal `__eq__` and patching `math.isclose` no longer earn a pass, end the trainer or change later grades, and `while True` no longer hangs it. `code_correctness` scores 0 and warns when no tests arrive, instead of 0.5 for anything that compiles. The child is not a sandbox: it can still read the user's files, use the network and signal the trainer (see the reward functions guide). Reported by Ebin Babu Thomas (@ebt55).
+
+### Known limitations
+- Kernel confinement is best effort: without seccomp/Landlock (non-Linux, old kernels, some
+  containers) the child is a separate process with resource limits only. `RLIMIT_NPROC` has no
+  effect when running as root (the seccomp filter still blocks `fork`/`clone` there).
+- Threads cannot be started in candidate code (as before, via `RLIMIT_NPROC=0`). BLAS libraries are told to use one
+  thread, so `numpy` imports and numpy return values (scalars, arrays) are graded as plain values.
+- HumanEval helpers (`poly`, `encode_cyclic`, ...) are taken from the task prompt. When no prompt
+  reaches the reward, tasks that need one score 0, rather than trusting the candidate's own copy.
+  Body-only answers need the raw (untemplated) prompt to be completed.
 
 ## [0.1.10] — 2026-08-05
 

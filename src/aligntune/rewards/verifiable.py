@@ -15,6 +15,7 @@ These verifiable rewards provide signal that is deterministic, transparent, and 
 from typing import Optional, Any, Dict, Callable, Tuple
 from abc import ABC, abstractmethod
 import logging
+import os
 import re
 import json
 import signal
@@ -256,33 +257,8 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return self._execute_safely(code)
 
     def _extract_code(self, text: str) -> Optional[str]:
-        """Extract code from text (handles markdown code blocks)."""
-        # Try markdown code blocks first
-        patterns = [
-            r'```python\s*(.*?)```',
-            r'```\s*(.*?)```',
-        ]
-
-        for pattern in patterns:
-            matches = re.findall(pattern, text, re.DOTALL)
-            if matches:
-                # Return last match (likely the actual solution)
-                return matches[-1].strip()
-
-        # If no blocks found, try to extract function definition
-        lines = text.split('\n')
-        code_lines = []
-        in_code = False
-        for line in lines:
-            if line.strip().startswith('def ') or line.strip().startswith('class '):
-                in_code = True
-            if in_code:
-                code_lines.append(line)
-
-        if code_lines:
-            return '\n'.join(code_lines)
-
-        return None
+        """Code from a completion, as the other code rewards read it (fences, imports above the first def)."""
+        return _code_grader.extract_code(text) or None
 
     def _execute_safely(self, code: str) -> bool:
         """Whether the code runs to its end in a child process (see ``_code_grader``)."""
@@ -302,6 +278,10 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         # Handle string test cases (expected output)
         if isinstance(test_cases, str):
             return self._check_output(code, test_cases)
+
+        # A HumanEval check() that can't be split into asserts (loops, locals, multi-line asserts)
+        if isinstance(test_cases, list) and len(test_cases) == 1 and isinstance(test_cases[0], _code_grader.HumanEvalCheck):
+            return self._check_assertions(code, test_cases)
 
         # Handle list of assertion strings
         if isinstance(test_cases, list) and all(isinstance(t, str) for t in test_cases):
@@ -327,16 +307,37 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         return status == "ok" and all(passed)
 
     def _check_io_pairs(self, code: str, test_cases: list) -> bool:
-        """Check each pair: the text of the ``input`` expression's value must equal ``expected_output``."""
+        """Check each pair against the value the candidate returns.
+
+        ``input`` is an expression string (``"add(1, 2)"``) or, as in code_correctness, the
+        argument(s) for the candidate's first function (a list or tuple of several values is spread).
+        Text in ``expected_output`` is compared with the printed value; any other
+        ``expected_output`` is compared as a value of the same type (numbers interchange).
+        """
         items = []
         for test_case in test_cases:
             input_val = test_case.get('input', '')
-            items.append({"expr": input_val if isinstance(input_val, str) else repr(input_val)})
+            if isinstance(input_val, str):
+                items.append({"expr": input_val})
+            else:
+                items.append({"call": input_val, "no_args": True})
         run = _code_grader.run_candidate(code, self.timeout, items)
         if run.status != "ok":
             return False
         for value, test_case in zip(run.values, test_cases):
-            if value is _code_grader.FAILED or str(value).strip() != str(test_case.get('expected_output', '')).strip():
+            if value is _code_grader.FAILED:
+                return False
+            expected = test_case.get('expected_output', '')
+            if isinstance(expected, str):
+                if str(value).strip() != expected.strip():
+                    return False
+            elif isinstance(value, bool) or isinstance(expected, bool):
+                if value is not expected:
+                    return False
+            elif isinstance(value, (int, float)) and isinstance(expected, (int, float)):
+                if value != expected:
+                    return False
+            elif type(value) is not type(expected) or value != expected:
                 return False
         return True
 
@@ -381,15 +382,19 @@ class SQLVerifiableReward(VerifiableReward):
         if not self._validate_syntax(completion):
             return False
 
-        # If no reference, just syntax check is enough
+        # If no reference, this is a syntax check only (any query that parses passes).
         if not reference:
             return True
 
-        # If reference is provided and execute is enabled, validate result
-        if self.execute:
-            return self._validate_result(completion, reference)
-
-        return True
+        # A reference can only be checked by running both queries. Without execute=True we cannot
+        # verify the result, so do not pay (this used to return True for any parseable query).
+        if not self.execute:
+            if not getattr(self, "_warned_no_execute", False):
+                self._warned_no_execute = True
+                logger.warning("SQLVerifiableReward: a reference was given but execute=False; "
+                               "results cannot be checked, so the reward is 0. Set params.execute=True.")
+            return False
+        return self._validate_result(completion, reference)
 
     def _validate_syntax(self, query: str) -> bool:
         """Validate SQL syntax using sqlglot."""
@@ -400,29 +405,59 @@ class SQLVerifiableReward(VerifiableReward):
             logger.debug(f"SQL syntax validation failed: {e}")
             return False
 
-    def _validate_result(self, query: str, expected: str) -> bool:
-        """Validate SQL query result by execution."""
+    def _connect_readonly(self):
+        """Open db_path read-only, so a generated query cannot modify the user's database.
+        ':memory:' gives a fresh empty database each time."""
+        import sqlite3
+        if self.db_path in (None, "", ":memory:"):
+            return sqlite3.connect(":memory:")
+        from urllib.parse import quote
+        return sqlite3.connect(f"file:{quote(os.path.abspath(self.db_path))}?mode=ro", uri=True)
+
+    def _run_query(self, query: str, timeout: float = 5.0):
+        """Run one read-only statement with a time limit; returns the rows."""
+        import time as _time
+        conn = self._connect_readonly()
         try:
-            import sqlite3
-            conn = sqlite3.connect(self.db_path)
+            deadline = _time.monotonic() + timeout
+            conn.set_progress_handler(lambda: 1 if _time.monotonic() > deadline else 0, 10_000)
             cursor = conn.cursor()
+            cursor.execute(query)  # execute() runs a single statement only
+            return cursor.fetchall()
+        finally:
+            conn.close()
 
-            # Execute query
-            cursor.execute(query)
-            result = cursor.fetchall()
+    @staticmethod
+    def _normalise_rows(rows):
+        return sorted((tuple(r) if isinstance(r, (list, tuple)) else (r,) for r in rows), key=repr)
 
-            # For now, just check if query executes without error
-            # Full result comparison would require parsing expected result format
-            return True
+    def _validate_result(self, query: str, expected: str) -> bool:
+        """Run the query and compare its rows with the reference.
 
+        The reference may be a SQL query (run on the same database) or the expected rows as
+        JSON / a Python literal, e.g. [[1, "a"], [2, "b"]]. Row order is ignored.
+        """
+        try:
+            actual = self._run_query(query)
         except Exception as e:
             logger.debug(f"SQL execution failed: {e}")
             return False
-        finally:
-            try:
-                conn.close()
-            except:
-                pass
+        try:
+            if isinstance(expected, str) and self._validate_syntax(expected) and \
+                    not expected.lstrip().startswith(("[", "(")):
+                want = self._run_query(expected)
+            elif isinstance(expected, str):
+                try:
+                    want = json.loads(expected)
+                except ValueError:
+                    import ast as _ast
+                    want = _ast.literal_eval(expected)
+            else:
+                want = expected
+            return self._normalise_rows(actual) == self._normalise_rows(want)
+        except Exception as e:
+            logger.debug(f"SQL reference could not be evaluated: {e}")
+            return False
 
 
 class JSONSchemaVerifiableReward(VerifiableReward):

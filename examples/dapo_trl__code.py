@@ -112,13 +112,13 @@ TRAIN_DATASET = "google-research-datasets/mbpp"
 OUTPUT_DIR = "output/grpo_mbpp_comparison"
 
 print("="*90)
-print("GRPO TRAINING WITH MBPP - CODE GENERATION EVALUATION")
+print("DAPO TRAINING WITH MBPP - CODE GENERATION EVALUATION")
 print("="*90)
 print("\nThis pipeline will:")
-print("  1. Train a GRPO model with mbpp_reward (code execution + test cases)")
+print("  1. Train a DAPO model with mbpp_reward (runs each completion against the MBPP tests)")
 print("  2. Evaluate Base Model and GRPO on MBPP and HumanEval")
 print("  3. Evaluate Pass@K (k=1,2,5,10)")
-print("  4. Compare GRPO vs Base Model on both datasets")
+print("  4. Compare DAPO vs Base Model on both datasets")
 print("="*90 + "\n")
 
 print("✅ Setup complete!")
@@ -131,6 +131,16 @@ print(f"💾 Output: {OUTPUT_DIR}")
 """## DAPO Model Training"""
 
 from aligntune.core.backend_factory import create_rl_trainer
+
+REWARDS = [
+    {
+        # Runs each completion against the row's MBPP `test_list` asserts in a separate process.
+        # (code_quality alone never runs the code: it scored comment-only answers above correct ones.)
+        "type": "mbpp_reward",
+        "weight": 1.0,
+        "params": {},
+    },
+]
 
 dapo_trainer = create_rl_trainer(
     model_name="meta-llama/Llama-3.2-3B-Instruct",
@@ -162,13 +172,7 @@ dapo_trainer = create_rl_trainer(
     lora_target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                          "gate_proj", "up_proj", "down_proj"],
 
-    rewards=[
-        {
-            "type": "code_quality",
-            "weight": 1.0,
-            "params": {},
-        },
-    ],
+    rewards=REWARDS,
     save_steps=50,
     logging_steps=10,
     loggers=["tensorboard"],
@@ -177,9 +181,9 @@ dapo_trainer = create_rl_trainer(
 
 print("\n=== Starting DAPO Training ===")
 print("Dynamic Adaptive Policy Optimization for Code Generation")
-print("\nRewards:")
-print("  1. Code Quality (weight: 0.6) - Syntax, style, efficiency checks")
-print("  2. Efficiency (weight: 0.4) - Code complexity and builtin usage")
+print("\nRewards actually configured:")
+for r in REWARDS:
+    print(f"  - {r['type']} (weight {r['weight']}, params {r['params']}); tests come from the `test_list` column")
 print("\nDAPO Features:")
 print("  - Dynamic sampling strategy")
 print("  - Adaptive policy updates")
