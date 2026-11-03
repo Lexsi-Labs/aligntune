@@ -65,3 +65,15 @@ def test_gsm8k_grading_gets_the_same_cleanup():
 )
 def test_grading_that_must_not_change(response, gold, expected):
     assert grade_answer_auto(response, gold, "math") is expected
+
+
+@pytest.mark.parametrize(
+    "response, gold, task",
+    [
+        ("**The answer is: 8.**", "#### 8", "gsm8k"),
+        ("Therefore, the answer is: **230.**", "#### 230", "gsm8k"),
+        ("So the answer is **\\frac{14}{3}**.", "\\frac{14}{3}", "math"),
+    ],
+)
+def test_markdown_bold_around_a_sentence_answer_is_dropped(response, gold, task):
+    assert grade_answer_auto(response, gold, task)

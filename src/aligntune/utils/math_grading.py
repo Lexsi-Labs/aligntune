@@ -556,8 +556,10 @@ grade_answer = grade_math_answer
 # =============================================================================
 
 def _clean_phrase_answer(pred: str) -> str:
-    """Trim the colon, full stop and closing paragraph around an answer taken from a sentence."""
-    return pred.lstrip(": \n").split("\n\n")[0].rstrip(". \n")
+    """Trim the colon, full stop, markdown bold and closing paragraph around an answer taken from a sentence."""
+    pred = pred.lstrip(": \n").split("\n\n")[0]
+    # "**The answer is: 8.**" and "the answer is: **230.**": drop the bold markers too.
+    return pred.strip("* \n").rstrip(". \n").strip("* ").rstrip(". ")
 
 
 def extract_math_answer(text: str) -> str:

@@ -97,3 +97,39 @@ def test_rl_config_values_override_factory_defaults(tmp_path):
     assert config.train.learning_rate == 5e-6
     assert config.logging.output_dir == str(tmp_path / "run")
     assert config.datasets[0].max_samples == 3
+
+
+def _backend_chosen(factory, **kwargs):
+    with mock.patch.object(
+        BackendFactory,
+        "create_trainer",
+        new=lambda config, backend_config: backend_config,
+    ):
+        return factory(**kwargs).backend.value
+
+
+def test_sft_explicit_backend_overrides_config(tmp_path):
+    config = _sft_config(tmp_path / "run")
+    config["backend"] = "unsloth"
+
+    assert _backend_chosen(create_sft_trainer, config=config, backend="trl") == "trl"
+
+
+def test_sft_config_without_backend_keeps_explicit_backend(tmp_path):
+    # The parsed config fills in backend="auto"; that default must not win either.
+    config = _sft_config(tmp_path / "run")
+    del config["backend"]
+
+    assert _backend_chosen(create_sft_trainer, config=config, backend="trl") == "trl"
+
+
+def test_rl_explicit_backend_overrides_config(tmp_path):
+    config = {
+        "algo": "dpo",
+        "backend": "unsloth",
+        "model": {"name_or_path": "Qwen/Qwen2.5-0.5B-Instruct"},
+        "datasets": [{"name": "toy/prefs"}],
+        "logging": {"output_dir": str(tmp_path / "run")},
+    }
+
+    assert _backend_chosen(create_rl_trainer, config=config, backend="trl") == "trl"

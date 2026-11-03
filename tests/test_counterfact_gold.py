@@ -122,3 +122,34 @@ def test_unsloth_reward_reads_a_fraction_gold(completion):
     trainer.prompt_to_answer = {"p": extract_counterfact_gold({"answer": "#### 1/3"})}
     assert trainer._combined_reward_function([completion], prompts=["p"]) == [1.0]
     assert trainer._combined_reward_function(["so 0.5"], prompts=["p"]) == [0.0]
+
+
+@pytest.mark.parametrize(
+    "name, routed",
+    [
+        ("HuggingFaceH4/MATH-500", "math"),
+        ("EleutherAI/hendrycks_math", "math"),
+        ("openai/GSM8K", "math"),
+        ("openai/gsm8k", "math"),
+        ("google-research-datasets/mbpp", "code"),
+    ],
+)
+def test_trl_routes_math_dataset_names_case_insensitively(name, routed):
+    from types import SimpleNamespace
+    from unittest import mock
+
+    from aligntune.backends.trl.rl.counterfact_grpo.counterfact_grpo import (
+        TRLCounterFactGRPOTrainer,
+    )
+
+    trainer = object.__new__(TRLCounterFactGRPOTrainer)
+    trainer.config = SimpleNamespace(
+        dataset=SimpleNamespace(name=name, split="test", config_name=None, system_prompt=None, max_samples=None),
+        train=SimpleNamespace(enable_thinking=False),
+    )
+    with mock.patch.object(TRLCounterFactGRPOTrainer, "_setup_math_data") as math_setup, mock.patch.object(
+        TRLCounterFactGRPOTrainer, "_setup_mbpp_data"
+    ) as code_setup:
+        trainer.setup_data()
+    assert trainer.dataset_type == routed
+    assert (math_setup.called, code_setup.called) == (routed == "math", routed == "code")

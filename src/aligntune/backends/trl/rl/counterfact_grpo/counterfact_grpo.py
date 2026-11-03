@@ -383,7 +383,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             self._setup_mbpp_data(dataset_name, split, system_prompt)
             return
 
-        elif "gsm8k" in dataset_name or "math" in dataset_name:
+        elif "gsm8k" in dataset_name.lower() or "math" in dataset_name.lower():  # "MATH-500" too, as on Unsloth
             self.dataset_type = "math"
             self._setup_math_data(dataset_name, split, system_prompt, ds_config=config_name,
                                   max_samples=self._get_config_value(dataset_config, 'max_samples', default=None))
@@ -445,7 +445,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         # GSM8K requires config="main" to be specified
         if ds_config:
             raw_dataset = load_dataset(ds_name, ds_config, split=split)
-        elif "gsm8k" in ds_name:
+        elif "gsm8k" in ds_name.lower():
             raw_dataset = load_dataset(ds_name, "main", split=split)
         else:
             raw_dataset = load_dataset(ds_name, split=split)
