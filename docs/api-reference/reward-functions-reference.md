@@ -87,10 +87,10 @@ AlignTune provides **50+ prebuilt reward functions** covering all major aspects 
 - **Example**: `{"type": "code_syntax", "params": {"language": "python"}}`
 
 #### 13. **Code Execution Reward** (`code_execution`)
-- **Purpose**: Tests if code runs without errors
-- **Parameters**: `timeout`, `safe_mode`
+- **Purpose**: Fraction of tests passed, graded by value in a child process; with no tests, whether the code runs to its end. See [How model-written code is run and graded](../user-guide/reward-functions.md#how-model-written-code-is-run-and-graded) for what the child process limits and what it doesn't
+- **Parameters**: `timeout`, `memory_limit_mb`, `test_cases`
 - **Use Case**: Code generation, programming education
-- **Example**: `{"type": "code_execution", "params": {"timeout": 5, "safe_mode": true}}`
+- **Example**: `{"type": "code_execution", "params": {"timeout": 5}}`
 
 #### 14. **Code Completeness Reward** (`code_completeness`)
 - **Purpose**: Measures code completeness and structure
@@ -234,7 +234,6 @@ rewards:
  weight: 1.5
  params:
  timeout: 5
- safe_mode: true
  - type: "code_completeness"
  weight: 1.0
  - type: "helpfulness"

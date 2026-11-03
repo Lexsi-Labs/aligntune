@@ -245,7 +245,15 @@ def parse_config_to_unified(config_dict: Dict[str, Any], training_type: str = "r
         parsed['eval_steps'] = train_section.get('eval_steps', 100)
         parsed['eval_interval'] = train_section.get('eval_interval', 100)
         parsed['eval_strategy'] = train_section.get('eval_strategy', 'no')
-    
+
+        # Pass every other train key through instead of silently dropping it
+        # (gradient_checkpointing, optimizer, lr_scheduler, dataloader_num_workers,
+        # dataset_num_proc, ...). The factories read them from kwargs and forward
+        # the rest to the backend config via extra_params.
+        for key, value in train_section.items():
+            if parsed.get(key) is None:
+                parsed[key] = value
+
     # Parse logging section
     if 'logging' in config_dict:
         logging_cfg = config_dict['logging']

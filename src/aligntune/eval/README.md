@@ -87,7 +87,7 @@ src/aligntune/eval/
 ├── rl_evaluator.py     # RLEvaluator: Handles RL-specific logic
 ├── core.py             # (Legacy) EvalRunner for backward compatibility
 ├── lm_eval_integration.py # (Legacy) Wrappers for EleutherAI lm-eval
-├── safe_executor.py    # Sandbox for code execution
+├── safe_executor.py    # Runs code in a child process (not a sandbox)
 └── metrics/            # Strategy Pattern Implementations
     ├── base.py         # Abstract base + safe_compute wrapper
     ├── generic.py      # Perplexity, Accuracy
@@ -144,3 +144,9 @@ evaluator.add_metric(DiversityMetric())
 * **Benchmarks:** `lm_eval` (optional)
 
 If optional dependencies are missing, specific metrics will be disabled gracefully via Safe Compute.
+
+### Code execution (`safe_executor.py`)
+
+`SafeCodeExecutor` runs generated code in a separate Python process with a timeout, CPU, file-size and (on Linux) memory limits, a minimal environment and an empty working directory. By default the code also sees only a short list of builtins, so `import` and `open` fail; `SafeCodeExecutor(restrict_builtins=False)` lifts that.
+
+It is not a sandbox. The restricted builtins can be got around, and the code can still read your files, use the network and signal other processes. Run untrusted code in a container or VM.

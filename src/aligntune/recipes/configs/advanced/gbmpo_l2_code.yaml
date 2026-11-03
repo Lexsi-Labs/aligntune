@@ -2,7 +2,7 @@ recipe:
   name: "gbmpo-l2-code"
   description: "GBMPO with L2 divergence for code generation with fine-grained policy control"
   model: "deepseek-ai/deepseek-coder-6.7b-instruct"
-  dataset: "openai/humaneval"
+  dataset: "openai/openai_humaneval"
   task: "code_generation"
   algorithm: "gbmpo"
   backend: "trl"
@@ -25,7 +25,7 @@ config:
     lora_dropout: 0.1
     lora_target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   datasets:
-    - name: "openai/humaneval"
+    - name: "openai/openai_humaneval"
       split: "test"
       column_mapping:
         text: "prompt"

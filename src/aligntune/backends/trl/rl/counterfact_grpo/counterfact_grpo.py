@@ -24,12 +24,14 @@ from torch.utils.data import DataLoader
 import numpy as np
 
 from aligntune.core.rl.trainer_base import TrainerBase
+from aligntune.rewards import _code_grader
 from aligntune.core.rl.config import UnifiedConfig
 from aligntune.core.rl.registries import DatasetRegistry, RewardRegistry
 from aligntune.core.rl.caching import DatasetCache
 from aligntune.core.rl.sample_logger import generate_and_log_samples
 from aligntune.core.sft.evaluator import EnhancedEvaluator
-from aligntune.utils.math_grading import extract_math_gold, extract_math_answer, grade_math_answer
+from aligntune.utils.math_grading import extract_math_answer, grade_math_answer
+from aligntune.utils.counterfact_gold import extract_counterfact_gold
 from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
@@ -165,90 +167,18 @@ def _run_code_in_sandbox(
     timeout_seconds: int = 5
 ) -> Tuple[bool, int, List[str]]:
     """
-    Run code in a subprocess sandbox with timeout.
+    Run the code and its tests in one child process; grade the asserts by value here.
+    Printed text and the exit code don't count.
     Returns: (execution_success, tests_passed, error_messages)
     """
-    error_messages = []
-
-    # Block input() to prevent hanging
-    input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
-
-    # Create the test script
-    test_script = f"""
-import sys
-import traceback
-
-# Block input
-{input_blocker}
-
-# Setup code
-{setup_code}
-
-# Generated code
-{code}
-
-# Test execution
-results = []
-for i, test_code in enumerate({repr(tests)}):
-    try:
-        exec(test_code)
-        results.append(f"PASS:{{i}}")
-    except Exception as e:
-        results.append(f"FAIL:{{i}}:{{type(e).__name__}}:{{str(e)}}")
-
-# Output results
-for result in results:
-    print(result)
-"""
-
-    temp_file = None
-    try:
-        # Write to temporary file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            f.write(test_script)
-            temp_file = f.name
-
-        # Run in subprocess with timeout
-        result = subprocess.run(
-            [sys.executable, temp_file],
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds
-        )
-
-        # Parse output
-        tests_passed = 0
-        if result.returncode == 0:
-            for line in result.stdout.strip().split('\n'):
-                if line.startswith('PASS:'):
-                    tests_passed += 1
-                elif line.startswith('FAIL:'):
-                    parts = line.split(':', 3)
-                    if len(parts) >= 4:
-                        error_messages.append(f"Test {parts[1]}: {parts[2]} - {parts[3]}")
-            execution_success = True
-        else:
-            execution_success = False
-            if result.stderr:
-                error_messages.append(f"Execution error: {result.stderr[:200]}")
-
-        return execution_success, tests_passed, error_messages
-
-    except subprocess.TimeoutExpired:
-        error_messages.append("Code execution timed out (infinite loop)")
-        return False, 0, error_messages
-    except Exception as e:
-        error_messages.append(f"Sandbox error: {str(e)}")
-        return False, 0, error_messages
-    finally:
-        # Clean up temp file
-        if temp_file:
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-
-
+    program = code if not setup_code else setup_code + "\n\n" + code
+    status, passed = _code_grader.grade(program, tests, timeout_seconds)
+    if status == "timeout":
+        return False, 0, ["Code execution timed out (infinite loop)"]
+    if status != "ok":
+        return False, 0, ["Execution error: the code did not run to its end"]
+    errors = [f"Test {i}: failed" for i, ok in enumerate(passed) if not ok]
+    return True, sum(passed), errors
 
 
 # ============================================================================
@@ -256,6 +186,7 @@ for result in results:
 # ============================================================================
 class TRLCounterFactGRPOTrainer(TrainerBase):
     KEEP_COLUMNS = True
+    SUPPORTS_SGLANG_ROLLOUT = True  # setup_trainer passes SGLangRollout as TRL's rollout_func
     """Counterfactual GRPO trainer using custom CounterfactualGRPOTrainer with enhanced rewards."""
     
     def __init__(self, config: UnifiedConfig):
@@ -419,21 +350,6 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         logger.info(f"Model device: {next(self.model.parameters()).device}")
         logger.info("=" * 80)
     
-    def parse_gsm8k_gold(self,ans: str) -> str:
-            """Parse gold answer from GSM8K format (#### answer)."""
-            import re
-            m = re.search(r"####\s*(.+)$", ans, flags=re.MULTILINE)
-            if not m:
-                nums = re.findall(r"-?\d+(?:\.\d+)?", ans.replace(",", ""))
-                return nums[-1] if nums else ""
-            s = m.group(1).strip().replace(",", "")
-            if re.fullmatch(r"-?\d+/\d+", s):
-                num, den = s.split("/")
-                try:
-                    return str(float(num) / float(den))
-                except:
-                    return s
-            return s
 
     def setup_data(self) -> None:
         """Setup datasets for GRPO training using unified DataManager."""
@@ -467,7 +383,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             self._setup_mbpp_data(dataset_name, split, system_prompt)
             return
 
-        elif "gsm8k" in dataset_name or "math" in dataset_name:
+        elif "gsm8k" in dataset_name.lower() or "math" in dataset_name.lower():  # "MATH-500" too, as on Unsloth
             self.dataset_type = "math"
             self._setup_math_data(dataset_name, split, system_prompt, ds_config=config_name,
                                   max_samples=self._get_config_value(dataset_config, 'max_samples', default=None))
@@ -529,7 +445,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         # GSM8K requires config="main" to be specified
         if ds_config:
             raw_dataset = load_dataset(ds_name, ds_config, split=split)
-        elif "gsm8k" in ds_name:
+        elif "gsm8k" in ds_name.lower():
             raw_dataset = load_dataset(ds_name, "main", split=split)
         else:
             raw_dataset = load_dataset(ds_name, split=split)
@@ -558,7 +474,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             answer = item.get(answer_col, "") if answer_col else ""
 
             # Extract gold answer for math
-            gold_answer = (extract_math_gold(answer) or self.parse_gsm8k_gold(str(answer))) if answer else None
+            gold_answer = extract_counterfact_gold(item, answer_col) or None
 
             # Format prompt
             formatted_prompt = self._format_math_prompt(question, system_prompt)
@@ -863,91 +779,33 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
         Run evalplus-style tests by comparing outputs to canonical solution.
         Returns: (execution_success, tests_passed, error_messages)
         """
+        def call(inp):
+            args = f"*{inp!r}" if isinstance(inp, (list, tuple)) else repr(inp)
+            return {"expr": f"{entry_point}({args})"}
+
+        items = [call(inp) for inp in base_inputs]
+        # The canonical solution is trusted but runs in its own child; only plain data comes back.
+        expected = _code_grader.run_candidate(canonical_solution, timeout_seconds, items)
+        actual = _code_grader.run_candidate(code, timeout_seconds, items)
+        if "timeout" in (expected.status, actual.status):
+            return False, 0, ["Code execution timed out"]
+        if actual.status != "ok":
+            return False, 0, ["Execution error: the code did not run to its end"]
+        if expected.status != "ok":
+            return False, 0, ["Canonical solution did not run to its end"]
         error_messages = []
         passed = 0
-
-        # Block input() to prevent hanging
-        input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
-
-        # Create test script that compares generated vs canonical outputs
-        test_script = f'''
-import sys
-import traceback
-
-# Block input
-{input_blocker}
-
-# Canonical solution
-{canonical_solution}
-_canonical_func = {entry_point}
-
-# Generated solution
-{code}
-_generated_func = {entry_point}
-
-# Test inputs
-base_inputs = {repr(base_inputs)}
-
-# Run tests
-results = []
-for i, inp in enumerate(base_inputs):
-    try:
-        if isinstance(inp, (list, tuple)):
-            expected = _canonical_func(*inp)
-            actual = _generated_func(*inp)
-        else:
-            expected = _canonical_func(inp)
-            actual = _generated_func(inp)
-
-        if expected == actual:
-            results.append(f"PASS:{{i}}")
-        else:
-            results.append(f"FAIL:{{i}}:expected={{expected}},got={{actual}}")
-    except Exception as e:
-        results.append(f"ERROR:{{i}}:{{type(e).__name__}}:{{str(e)[:50]}}")
-
-for r in results:
-    print(r)
-'''
-
-        temp_file = None
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(test_script)
-                temp_file = f.name
-
-            result = subprocess.run(
-                [sys.executable, temp_file],
-                capture_output=True,
-                text=True,
-                timeout=timeout_seconds
-            )
-
-            if result.returncode == 0:
-                for line in result.stdout.strip().split('\n'):
-                    if line.startswith('PASS:'):
-                        passed += 1
-                    elif line.startswith('FAIL:') or line.startswith('ERROR:'):
-                        error_messages.append(line)
-                return True, passed, error_messages
+        for i, (want, got) in enumerate(zip(expected.values, actual.values)):
+            try:
+                ok = want is not _code_grader.FAILED and got is not _code_grader.FAILED and bool(want == got)
+            except Exception:
+                ok = False
+            if ok:
+                passed += 1
             else:
-                error_messages.append(f"Execution error: {result.stderr[:200]}")
-                return False, 0, error_messages
+                error_messages.append(f"FAIL:{i}")
+        return True, passed, error_messages
 
-        except subprocess.TimeoutExpired:
-            error_messages.append("Code execution timed out")
-            return False, 0, error_messages
-        except Exception as e:
-            error_messages.append(f"Sandbox error: {str(e)}")
-            return False, 0, error_messages
-        finally:
-            if temp_file:
-                try:
-                    os.unlink(temp_file)
-                except:
-                    pass
-
-    
     def _compute_code_rewards(self, completions: List, **kwargs) -> List[float]:
         """Compute rewards for code generation (MBPP)."""
         prompts = kwargs.get("prompts", [""] * len(completions))
@@ -1461,6 +1319,20 @@ for r in results:
                 return [0.0] * (len(prompts) if prompts else 1)
             return self._combined_reward_function(completions, prompts=prompts, **kwargs)
 
+        # SGLang generates through TRL's rollout_func hook; CounterfactualGRPOTrainer only
+        # changes the loss, so it keeps that hook. The constructor fails fast if the server is down.
+        sglang_kwargs = {}
+        rollout_backend = self._get_config_value(
+            self.config.train, 'rollout_backend', default='hf')
+        if rollout_backend == "sglang":
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRollout
+            sglang_kwargs["rollout_func"] = SGLangRollout(
+                self._get_config_value(
+                    self.config.train, 'sglang_server_url', default='http://127.0.0.1:30000'),
+                sync_dir=self._get_config_value(
+                    self.config.train, 'sglang_sync_dir', default=None),
+            )
+
         if should_use_pure_trl:
             logger.info("PURE_TRL_MODE enabled - using pure TRL API with CounterfactualGRPOTrainer")
             self.trainer = CounterfactualGRPOTrainer(
@@ -1481,6 +1353,7 @@ for r in results:
                 extra_verbose=extra_verbose,
                 extra_verbose_log_path=extra_verbose_log_path,
                 extra_verbose_sample_rate=extra_verbose_sample_rate,
+                **sglang_kwargs,
             )
         else:
             try:
@@ -1505,6 +1378,7 @@ for r in results:
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
                     extra_verbose_sample_rate=extra_verbose_sample_rate,
+                    **sglang_kwargs,
                 )
             except ImportError:
                 logger.info("Using pure TRL, using reward_function parameter")
@@ -1526,7 +1400,12 @@ for r in results:
                     extra_verbose=extra_verbose,
                     extra_verbose_log_path=extra_verbose_log_path,
                     extra_verbose_sample_rate=extra_verbose_sample_rate,
+                    **sglang_kwargs,
                 )
+
+        if sglang_kwargs:
+            from aligntune.backends.trl.rl.rollout.sglang_rollout import SGLangRolloutCallback
+            self.trainer.add_callback(SGLangRolloutCallback(sglang_kwargs["rollout_func"]))
 
         log_gpu_memory("After trainer creation")
 

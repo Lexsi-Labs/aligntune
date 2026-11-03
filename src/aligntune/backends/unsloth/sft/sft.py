@@ -188,6 +188,9 @@ class UnslothSFTTrainer(SFTTrainerBase):
                 """Convert DataManager's SFT messages to Unsloth's text field."""
                 if "text" in dataset.column_names:
                     return dataset.select_columns(["text"])
+                # instruction_following gives prompt/completion, not messages
+                from aligntune.data.processors import ColumnMapper
+                dataset = ColumnMapper.ensure_sft_messages(dataset)
                 if "messages" not in dataset.column_names:
                     raise ValueError(
                         "Unsloth SFT expects DataManager output with either "
@@ -199,6 +202,10 @@ class UnslothSFTTrainer(SFTTrainerBase):
                     [name for name in names if name in dataset.column_names]
                 )
 
+                # datasets fingerprints map() functions by pickling their closure;
+                # capturing `self` here would serialize the whole model to host RAM.
+                tokenizer = self.tokenizer
+
                 def formatting_prompts_func(examples):
                     conversations = examples["messages"]
                     template_kwargs = examples.get(
@@ -207,14 +214,14 @@ class UnslothSFTTrainer(SFTTrainerBase):
                     texts = []
                     for conversation, kwargs in zip(conversations, template_kwargs):
                         try:
-                            text = self.tokenizer.apply_chat_template(
+                            text = tokenizer.apply_chat_template(
                                 conversation,
                                 tokenize=False,
                                 add_generation_prompt=False,
                                 **(kwargs or {}),
                             )
                         except TypeError:
-                            text = self.tokenizer.apply_chat_template(
+                            text = tokenizer.apply_chat_template(
                                 conversation,
                                 tokenize=False,
                                 add_generation_prompt=False,

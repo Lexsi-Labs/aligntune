@@ -811,6 +811,11 @@ class UnslothSPINTrainer(TrainerBase):
                 # Step 2: Train DPO
                 logger.info(f"Step 2: Training DPO on {len(preference_dataset)} pairs...")
 
+                # DPOTrainer adds a "ref" adapter to PEFT models; drop the one
+                # left by the previous round's trainer so it can be re-added.
+                if "ref" in (getattr(self.model, "peft_config", None) or {}):
+                    self.model.delete_adapter("ref")
+
                 # Create DPO trainer
                 dpo_trainer = DPOTrainer(
                     model=self.model,

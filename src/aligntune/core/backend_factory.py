@@ -9,6 +9,8 @@ This module provides a clean backend selection system where users can choose:
 The factory pattern ensures proper backend selection and fallback handling.
 """
 
+import functools
+import inspect
 import logging
 import os
 from typing import Dict, Any, Optional, Type, List, Union
@@ -756,7 +758,44 @@ _register_backends()
 
 
 
+# Already read from the parsed config inside the factories ("config" in the
+# parsed dict is a dataset subset name, not the config itself).
+_RESOLVED_IN_BODY = {"config", "model_name", "dataset_name", "algorithm", "backend"}
+
+
+def _config_fills_named_params(training_type: str):
+    """Let a ``config`` fill the factory's named parameters, not just ``**kwargs``.
+
+    The factories merge the parsed config into ``**kwargs`` only, so named
+    parameters such as ``max_seq_length`` or ``output_dir`` kept their
+    signature defaults and silently ignored the config.
+    Precedence: explicit argument > config > signature default.
+    """
+    def decorator(factory):
+        signature = inspect.signature(factory)
+
+        @functools.wraps(factory)
+        def wrapper(*args, **kwargs):
+            passed = signature.bind_partial(*args, **kwargs).arguments
+            config = passed.get("config")
+            if config is None:
+                return factory(*args, **kwargs)
+            config_dict = load_config(config) if isinstance(config, (str, Path)) else dict(config)
+            parsed = parse_config_to_unified(config_dict, training_type=training_type)
+            from_config = {
+                name: parsed[name]
+                for name in signature.parameters
+                if name in parsed and name not in passed and name not in _RESOLVED_IN_BODY
+            }
+            return factory(*args, **from_config, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 # Convenience functions for easy backend selection
+@_config_fills_named_params("sft")
 def create_sft_trainer(
     model_name: Optional[str] = None,
     dataset_name: Optional[str] = None,
@@ -798,7 +837,9 @@ def create_sft_trainer(
         # Extract required parameters
         model_name = model_name or kwargs.pop('model_name', None)
         dataset_name = dataset_name or kwargs.pop('dataset_name', None)
-        backend = kwargs.pop('backend', backend)
+        from_config_backend = kwargs.pop('backend', backend)
+        if backend == 'auto':  # an explicit backend argument wins over the config
+            backend = from_config_backend
 
         # Update seed if it was in config but not kwargs
         if 'seed' in kwargs:
@@ -1056,6 +1097,7 @@ def create_sft_trainer(
     return BackendFactory.create_trainer(config, backend_config)
 
 
+@_config_fills_named_params("rl")
 def create_rl_trainer(
     model_name: Optional[str] = None,
     dataset_name: Optional[str] = None,
@@ -1123,7 +1165,9 @@ def create_rl_trainer(
         model_name = model_name or kwargs.pop('model_name', None)
         dataset_name = dataset_name or kwargs.pop('dataset_name', None)
         algorithm = algorithm or kwargs.pop('algorithm', None)
-        backend = kwargs.pop('backend', backend)
+        from_config_backend = kwargs.pop('backend', backend)
+        if backend == 'auto':  # an explicit backend argument wins over the config
+            backend = from_config_backend
 
         # Update seed if it was in config
         if 'seed' in kwargs:
@@ -1468,6 +1512,11 @@ def create_rl_trainer(
             enable_thinking=kwargs.get('enable_thinking', False),
             fast_inference=kwargs.get('fast_inference', False),  # Unsloth vLLM fast inference
             vllm_gpu_memory_utilization=kwargs.get('vllm_gpu_memory_utilization', 0.7),  # vLLM GPU memory (0.95 for max speed)
+            # Rollout backend: previously never forwarded, so the Python API always used 'hf'.
+            rollout_backend=kwargs.get('rollout_backend', 'hf'),
+            vllm_tensor_parallel_size=kwargs.get('vllm_tensor_parallel_size', 1),
+            sglang_server_url=kwargs.get('sglang_server_url', 'http://127.0.0.1:30000'),
+            sglang_sync_dir=kwargs.get('sglang_sync_dir'),
             gbmpo_l2_coefficient=kwargs.get('gbmpo_l2_coefficient', 0.0001),
             gbmpo_divergence_type=kwargs.get('gbmpo_divergence_type'),
             optimizer=kwargs.get('optimizer', kwargs.get('optim', 'adamw_torch')),

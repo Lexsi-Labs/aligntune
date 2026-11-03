@@ -583,7 +583,7 @@ def _ensure_entrypoint(code: str, expected_name: str) -> str:
 def _flexible_signature_shim(expected_name: str) -> str:
     """Handle argument count mismatches gracefully.
 
-    Note: Disabled for now as SafeCodeExecutor runs in restricted namespace.
+    Note: Disabled; the entrypoint aliasing is sufficient.
     """
     # Return empty string - the entrypoint aliasing should be sufficient
     return ""
@@ -628,13 +628,13 @@ def validate_mbpp_with_execution(pred: str, gold: str) -> float:
         code = _ensure_entrypoint(code, expected_name)
 
         # Run each test case separately to count passes
+        # Each assert is evaluated in the child and compared here, so code that
+        # exits early or defines nothing passes none of them.
+        asserts = [tc for tc in test_cases_raw if isinstance(tc, str) and tc.strip().startswith("assert")]
         tests_passed = 0
-        for tc in test_cases_raw:
-            if isinstance(tc, str):
-                test_code = code + "\n\n" + tc + "\n"
-                result = executor.execute(test_code, test_cases=[])
-                if result.success and not result.error:
-                    tests_passed += 1
+        if asserts:
+            result = executor.execute(code, test_cases=asserts)
+            tests_passed = sum(1 for t in result.test_results if t.get("passed"))
 
         # Return fractional score
         return float(tests_passed / len(test_cases_raw)) if test_cases_raw else 0.0
@@ -1552,7 +1552,7 @@ def _ensure_entrypoint(code: str, expected_name: str) -> str:
 def _flexible_signature_shim(expected_name: str) -> str:
     """Handle argument count mismatches gracefully.
 
-    Note: Disabled for now as SafeCodeExecutor runs in restricted namespace.
+    Note: Disabled; the entrypoint aliasing is sufficient.
     """
     # Return empty string - the entrypoint aliasing should be sufficient
     return ""
@@ -1597,13 +1597,13 @@ def validate_mbpp_with_execution(pred: str, gold: str) -> float:
         code = _ensure_entrypoint(code, expected_name)
 
         # Run each test case separately to count passes
+        # Each assert is evaluated in the child and compared here, so code that
+        # exits early or defines nothing passes none of them.
+        asserts = [tc for tc in test_cases_raw if isinstance(tc, str) and tc.strip().startswith("assert")]
         tests_passed = 0
-        for tc in test_cases_raw:
-            if isinstance(tc, str):
-                test_code = code + "\n\n" + tc + "\n"
-                result = executor.execute(test_code, test_cases=[])
-                if result.success and not result.error:
-                    tests_passed += 1
+        if asserts:
+            result = executor.execute(code, test_cases=asserts)
+            tests_passed = sum(1 for t in result.test_results if t.get("passed"))
 
         # Return fractional score
         return float(tests_passed / len(test_cases_raw)) if test_cases_raw else 0.0

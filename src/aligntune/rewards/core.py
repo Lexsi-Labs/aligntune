@@ -26,6 +26,7 @@ from aligntune.utils.math_grading import (
     extract_math_answer,
     extract_gsm8k_answer,
 )
+from aligntune.rewards import _code_grader
 
 logger = logging.getLogger(__name__)
 
@@ -333,9 +334,9 @@ class SentimentReward(RewardFunction):
                 if isinstance(result, list):
                     result = result[0]
                 if result['label'].lower() == target_sentiment.lower():
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch sentiment analysis failed, falling back to sequential: {e}")
@@ -437,9 +438,9 @@ class SafetyReward(RewardFunction):
                     result = result[0]
                 # Reward non-toxic content
                 if result['label'].lower() in ['non-toxic', 'safe', 'clean']:
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch safety analysis failed, falling back to sequential: {e}")
@@ -741,9 +742,9 @@ class ToxicityReward(RewardFunction):
                     result = result[0]
                 # Reward non-toxic content (invert toxicity score)
                 if result['label'].lower() in ['non-toxic', 'safe']:
-                    rewards.append(result['score'] * self.config.weight)
+                    rewards.append(result['score'])
                 else:
-                    rewards.append((1.0 - result['score']) * self.config.weight)
+                    rewards.append(1.0 - result['score'])
             return rewards
         except Exception as e:
             logger.warning(f"Batch toxicity analysis failed, falling back to sequential: {e}")
@@ -912,255 +913,58 @@ class CodeExecutionReward(RewardFunction):
         super().__init__(config)
         self.timeout = config.params.get('timeout', 5.0)
         self.test_cases = config.params.get('test_cases', [])
+        self.memory_limit_mb = config.params.get('memory_limit_mb', _code_grader.DEFAULT_MEMORY_LIMIT_MB)
 
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        # Get test cases from kwargs or config
-        test_cases = kwargs.get('test_cases', self.test_cases)
+        # Tests from the row (test_cases, MBPP's test_list, HumanEval's test and entry_point) or the config
+        test_cases, setup = _code_grader.tests_from_columns(kwargs)
+        if not test_cases:
+            test_cases = self.test_cases
 
-        # Debug: log when test_cases are received
         if test_cases:
             logger.debug(f"CodeExecutionReward: received {len(test_cases)} test cases")
         else:
             logger.debug(f"CodeExecutionReward: NO test cases (kwargs keys: {list(kwargs.keys())})")
 
-        # Extract code from response
         code = self._extract_code(text)
         if not code:
             logger.debug("CodeExecutionReward: no code extracted")
             return 0.0
+        code = _code_grader.with_prompt(code, text, kwargs)
+        if setup:
+            code = code + "\n\n" + setup
 
-        # If test cases provided, validate against them
         if test_cases:
             score = self._validate_with_test_cases(code, test_cases)
             logger.debug(f"CodeExecutionReward: validation score = {score}")
             return score
-        else:
-            # Otherwise, just check if code executes without error
-            return 1.0 if self._execute_code_safely(code) else 0.0
+        # Otherwise, check that the code runs to its end in a child process
+        status, _ = _code_grader.grade(code, [], self.timeout, memory_limit_mb=self.memory_limit_mb)
+        return 1.0 if status == "ok" else 0.0
 
     def _extract_code(self, text: str) -> str:
         """Extract Python code from model response.
 
-        Returns the FIRST code block containing a function definition,
-        or combines all code blocks if needed.
+        Returns the first fenced block containing a function definition, else the
+        first fenced block. Without a fence: the whole text if it parses, else the
+        import lines plus everything from the first ``def`` on.
         """
-        # Try markdown code blocks first
-        patterns = [
-            r'```python\s*(.*?)```',
-            r'```\s*(.*?)```',
-        ]
-
-        all_code_blocks = []
-        for pattern in patterns:
-            matches = re.findall(pattern, text, re.DOTALL)
-            all_code_blocks.extend(matches)
-
-        if all_code_blocks:
-            # Find the FIRST block that contains a function definition
-            for block in all_code_blocks:
-                if 'def ' in block:
-                    return block.strip()
-            # Fallback: return first block
-            return all_code_blocks[0].strip()
-
-        # Try to find function definition directly
-        lines = text.split('\n')
-        code_lines = []
-        in_function = False
-        for line in lines:
-            if line.strip().startswith('def '):
-                in_function = True
-            if in_function:
-                code_lines.append(line)
-
-        if code_lines:
-            return '\n'.join(code_lines)
-
-        # Return full text as fallback
-        return text.strip()
-
-    def _execute_code_safely(self, code: str) -> bool:
-        """Safely execute code and return success status with timeout."""
-        try:
-            import signal
-
-            def timeout_handler(signum, frame):
-                raise TimeoutError("Code execution timed out")
-
-            # Set timeout (Unix only)
-            old_handler = None
-            if hasattr(signal, 'SIGALRM'):
-                old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                signal.alarm(int(self.timeout))
-
-            try:
-                # Use full builtins for proper execution
-                namespace = {'__builtins__': __builtins__}
-                exec(code, namespace)
-                return True
-            finally:
-                # Cancel timeout
-                if hasattr(signal, 'SIGALRM'):
-                    signal.alarm(0)
-                    if old_handler:
-                        signal.signal(signal.SIGALRM, old_handler)
-
-        except Exception as e:
-            logger.debug(f"Code execution failed: {e}")
-            return False
+        return _code_grader.extract_code(text)
 
     def _validate_with_test_cases(self, code: str, test_cases: List[Any]) -> float:
-        """Validate code against test cases.
+        """Fraction of tests passed: run in a child process, compared by value here.
 
         Handles both:
         - MBPP-style assertion strings: 'assert func(x) == y'
         - Dict-style: {'input': x, 'expected_output': y}
-
-        Returns: float score (0.0 to 1.0) based on fraction of tests passed
         """
         if not test_cases:
             return 0.0
-
-        passed = 0
-        total = len(test_cases)
-
-        for test_case in test_cases:
-            try:
-                if isinstance(test_case, str) and test_case.strip().startswith('assert'):
-                    # MBPP-style assertion string
-                    if self._run_assertion_test(code, test_case):
-                        passed += 1
-                elif isinstance(test_case, dict):
-                    # Dict-style test case
-                    if self._run_dict_test(code, test_case):
-                        passed += 1
-                else:
-                    logger.debug(f"Unknown test case format: {type(test_case)}")
-            except Exception as e:
-                logger.debug(f"Test case validation failed: {e}")
-                continue
-
-        return passed / total if total > 0 else 0.0
-
-    def _run_assertion_test(self, code: str, assertion: str) -> bool:
-        """Run a single MBPP-style assertion test using subprocess for safety."""
-        import subprocess
-        import tempfile
-        import os
-
-        # Create a temporary file with the test code
-        test_code = f'''{code}
-
-{assertion}
-print("PASS")
-'''
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(test_code)
-                temp_file = f.name
-
-            # Run in subprocess with timeout
-            result = subprocess.run(
-                ['python', temp_file],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout
-            )
-
-            # Clean up
-            os.unlink(temp_file)
-
-            # Check if test passed
-            return result.returncode == 0 and "PASS" in result.stdout
-
-        except subprocess.TimeoutExpired:
-            logger.debug("Assertion test timed out")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
-        except Exception as e:
-            logger.debug(f"Assertion test error: {e}")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
-
-    def _run_dict_test(self, code: str, test_case: Dict[str, Any]) -> bool:
-        """Run a single dict-style test case using subprocess for safety."""
-        import subprocess
-        import tempfile
-        import os
-        import json
-
-        test_input = test_case.get('input')
-        expected_output = test_case.get('expected_output')
-
-        # Build test script
-        test_code = f'''{code}
-
-import json
-
-# Get the function (first callable that's not builtin)
-functions = {{k: v for k, v in dict(globals()).items()
-            if callable(v) and not k.startswith('_') and k not in ('json',)}}
-if not functions:
-    exit(1)
-
-main_func = list(functions.values())[0]
-test_input = {repr(test_input)}
-expected_output = {repr(expected_output)}
-
-if isinstance(test_input, (list, tuple)) and len(test_input) > 1:
-    actual_output = main_func(*test_input)
-else:
-    actual_output = main_func(test_input) if test_input is not None else main_func()
-
-# Compare outputs
-def compare(actual, expected):
-    import math
-    if isinstance(actual, float) and isinstance(expected, float):
-        return math.isclose(actual, expected, rel_tol=1e-5, abs_tol=1e-9)
-    if isinstance(actual, (list, tuple)) and isinstance(expected, (list, tuple)):
-        if len(actual) != len(expected):
-            return False
-        return all(compare(a, e) for a, e in zip(actual, expected))
-    return actual == expected
-
-if compare(actual_output, expected_output):
-    print("PASS")
-'''
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(test_code)
-                temp_file = f.name
-
-            result = subprocess.run(
-                ['python', temp_file],
-                capture_output=True,
-                text=True,
-                timeout=self.timeout
-            )
-
-            os.unlink(temp_file)
-            return result.returncode == 0 and "PASS" in result.stdout
-
-        except subprocess.TimeoutExpired:
-            logger.debug("Dict test timed out")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
-        except Exception as e:
-            logger.debug(f"Dict test error: {e}")
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
-            return False
+        _, passed = _code_grader.grade(
+            code, test_cases, self.timeout, compare=self._compare_outputs, no_args=True,
+            memory_limit_mb=self.memory_limit_mb,
+        )
+        return sum(passed) / len(test_cases)
 
     def _compare_outputs(self, actual: Any, expected: Any) -> bool:
         """Compare actual and expected outputs."""
@@ -1460,7 +1264,7 @@ class MathReasoningReward(RewardFunction):
             components += 1
         
         final_score = (total_score / components) if components > 0 else 0.0
-        return final_score * self.config.weight
+        return final_score
     
     def _evaluate_correctness(self, response: str, reference: str) -> float:
         """Evaluate answer correctness using shared math_grading module.
@@ -1651,10 +1455,10 @@ class CodeQualityReward(RewardFunction):
             total_score += self._evaluate_efficiency(text, language)
             components += 1
         
-        final_score = (total_score / components) if components > 0 else 0.0
-        return final_score * self.config.weight
-    
-    # ... [Include all the helper methods from your grpo_trainer.py]
+        # Unweighted: the trainer applies the configured weight.
+        return (total_score / components) if components > 0 else 0.0
+
+
     def _evaluate_syntax(self, code: str, language: str) -> float:
         if language.lower() == "python":
             try:
@@ -1745,45 +1549,42 @@ class CodeQualityReward(RewardFunction):
 
 
 class CodeCorrectnessReward(RewardFunction):
-    """Reward function for code correctness based on test cases."""
-    
+    """Fraction of test cases the code passes, graded by value outside the trainer.
+
+    Tests come from the row (``test_cases``, MBPP's ``test_list``, or HumanEval's
+    ``test`` plus ``entry_point``) or from ``params["test_cases"]``. With no tests
+    the score is 0.0 and a warning is logged.
+    """
+
     def __init__(self, config: RewardConfig):
         super().__init__(config)
         self.test_cases = config.params.get('test_cases', [])
         self.timeout = config.params.get('timeout', 5.0)
-    
+        self.memory_limit_mb = config.params.get('memory_limit_mb', _code_grader.DEFAULT_MEMORY_LIMIT_MB)
+        self._warned_no_tests = False
+
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
-        test_cases = kwargs.get('test_cases', self.test_cases)
-        
+        test_cases, setup = _code_grader.tests_from_columns(kwargs)
         if not test_cases:
-            try:
-                compile(text, '<string>', 'exec')
-                return 0.5 * self.config.weight
-            except:
-                return 0.0
-        
-        passed = sum(1 for test_case in test_cases if self._run_test_case(text, test_case))
-        return (passed / len(test_cases)) * self.config.weight if test_cases else 0.0
-    
-    # ... [Include all the helper methods]
-    def _run_test_case(self, code: str, test_case: Dict[str, Any]) -> bool:
-        try:
-            namespace = {'__builtins__': __builtins__}
-            exec(code, namespace)
-            functions = {k: v for k, v in namespace.items() 
-                        if callable(v) and not k.startswith('_') and k != '__builtins__'}
-            if not functions:
-                return False
-            main_func = list(functions.values())[0]
-            test_input = test_case.get('input')
-            expected_output = test_case.get('expected_output')
-            if isinstance(test_input, (list, tuple)) and len(test_input) > 1:
-                actual_output = main_func(*test_input)
-            else:
-                actual_output = main_func(test_input)
-            return self._compare_outputs(actual_output, expected_output)
-        except:
-            return False
+            test_cases = self.test_cases
+        if not test_cases:
+            if not self._warned_no_tests:
+                logger.warning(
+                    "code_correctness got no tests (test_cases, test_list, or test plus entry_point), "
+                    "so every completion scores 0.0."
+                )
+                self._warned_no_tests = True
+            return 0.0
+
+        code = _code_grader.with_prompt(_code_grader.extract_code(text), text, kwargs)
+        if setup:
+            code = code + "\n\n" + setup
+        # Unweighted: the trainer applies the configured weight.
+        _, passed = _code_grader.grade(
+            code, test_cases, self.timeout, compare=self._compare_outputs,
+            memory_limit_mb=self.memory_limit_mb,
+        )
+        return sum(passed) / len(test_cases)
 
     def _compare_outputs(self, actual: Any, expected: Any) -> bool:
         if isinstance(actual, float) and isinstance(expected, float):
@@ -1828,7 +1629,7 @@ class DiversityReward(RewardFunction):
                     except:
                         score += 0.25
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class FluencyReward(RewardFunction):
@@ -1877,7 +1678,7 @@ class FluencyReward(RewardFunction):
             connector_count = sum(1 for conn in connectors if conn in text.lower())
             score += min(connector_count / 10, 0.2)
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class RelevanceReward(RewardFunction):
@@ -1907,7 +1708,7 @@ class RelevanceReward(RewardFunction):
         elif len(words) < 20:
             score += 0.1
         
-        return min(score, 1.0) * self.config.weight
+        return min(score, 1.0)
 
 
 class BrevityReward(RewardFunction):
@@ -1924,14 +1725,14 @@ class BrevityReward(RewardFunction):
         word_count = len(words)
         
         if word_count <= ideal_length:
-            return 1.0 * self.config.weight
+            return 1.0
         elif word_count <= max_length:
             penalty = (word_count - ideal_length) / (max_length - ideal_length)
-            return (1.0 - penalty * 0.5) * self.config.weight
+            return 1.0 - penalty * 0.5
         else:
             excess = word_count - max_length
             penalty = min(excess / max_length, 1.0)
-            return max(0.0, 0.5 - penalty) * self.config.weight
+            return max(0.0, 0.5 - penalty)
 
 
 class ImageRelevanceReward(RewardFunction):
@@ -1941,7 +1742,7 @@ class ImageRelevanceReward(RewardFunction):
         # Placeholder implementation - returns neutral reward
         # TODO: Implement actual image relevance scoring when multi-modal support is added
         logger.warning("ImageRelevanceReward is a placeholder - multi-modal support not yet implemented")
-        return 0.5 * self.config.weight
+        return 0.5
 
 
 class AudioQualityReward(RewardFunction):
@@ -1951,7 +1752,7 @@ class AudioQualityReward(RewardFunction):
         # Placeholder implementation - returns neutral reward
         # TODO: Implement actual audio quality scoring when multi-modal support is added
         logger.warning("AudioQualityReward is a placeholder - multi-modal support not yet implemented")
-        return 0.5 * self.config.weight
+        return 0.5
 
 
 class InstructionFollowingReward(RewardFunction):
@@ -2776,7 +2577,8 @@ class MBPPReward:
             # Sanitize and execute
             sanitized_code = self._prepare_for_exec(completion_code, expected_func)
             execution_success, passed, error_messages = self._run_code_in_sandbox(
-                code=sanitized_code, setup_code=setup_code, tests=tests, timeout_seconds=5
+                code=sanitized_code, setup_code=setup_code, tests=tests,
+                timeout_seconds=self.config.params.get('timeout', 5),
             )
             
             # Calculate base reward
@@ -2872,13 +2674,12 @@ class MBPPReward:
     def compute(self, text: str, reference: Optional[str] = None, **kwargs) -> float:
         """Compute reward for a single completion."""
         # Extract test data from kwargs
-        test_cases = kwargs.get('test_cases', None)
+        test_cases, setup_code = _code_grader.tests_from_columns(kwargs)
         sample_id = kwargs.get('sample_id', 0)
         prompt_text = kwargs.get('prompt', "")
         
         if test_cases is not None:
             tests = test_cases if isinstance(test_cases, list) else []
-            setup_code = ""
         else:
             if prompt_text:
                 id_match = re.search(r"__SAMPLE_ID:(\d+)__", prompt_text)
@@ -2896,9 +2697,10 @@ class MBPPReward:
         if not expected_func:
             return -0.10
         
-        sanitized_code = self._prepare_for_exec(text, expected_func)
+        sanitized_code = self._prepare_for_exec(_code_grader.with_prompt(text, text, kwargs), expected_func)
         execution_success, passed, error_messages = self._run_code_in_sandbox(
-            code=sanitized_code, setup_code=setup_code, tests=tests, timeout_seconds=5
+            code=sanitized_code, setup_code=setup_code, tests=tests,
+            timeout_seconds=self.config.params.get('timeout', 5),
         )
         
         base_reward = float(passed / len(tests)) if tests else 0.0
@@ -2993,79 +2795,21 @@ class MBPPReward:
             return code + f"\n\n# alias for grader\n{expected_name} = {actual}\n"
         return f"def {expected_name}(*args, **kwargs):\n    raise NotImplementedError\n\n" + code
     
-    def _run_code_in_sandbox(self, code: str, setup_code: str, tests: List[str], timeout_seconds: int = 5) -> Tuple[bool, int, List[str]]:
-        """Run code in a subprocess sandbox with timeout."""
-        import subprocess
-        import tempfile
-        import sys
-        
-        error_messages = []
-        input_blocker = "import builtins; builtins.input = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no input'))"
+    def _run_code_in_sandbox(self, code: str, setup_code: str, tests: List[str], timeout_seconds: float = 5) -> Tuple[bool, int, List[str]]:
+        """Run the code and its tests in one child process; grade the asserts by value here.
 
-        test_script = f"""
-import sys
-import traceback
+        Returns (ran to its end, tests passed, error messages). Printed text and the
+        exit code don't count.
+        """
+        program = code if not setup_code else setup_code + "\n\n" + code
+        status, passed = _code_grader.grade(program, tests, timeout_seconds)
+        if status == "timeout":
+            return False, 0, ["Code execution timed out (infinite loop)"]
+        if status != "ok":
+            return False, 0, ["Execution error: the code did not run to its end"]
+        errors = [f"Test {i}: failed" for i, ok in enumerate(passed) if not ok]
+        return True, sum(passed), errors
 
-# Block input
-{input_blocker}
-
-# Setup code
-{setup_code}
-
-# Generated code
-{code}
-
-# Test execution
-results = []
-for i, test_code in enumerate({repr(tests)}):
-    try:
-        exec(test_code)
-        results.append(f"PASS:{{i}}")
-    except Exception as e:
-        results.append(f"FAIL:{{i}}:{{type(e).__name__}}:{{str(e)}}")
-
-# Output results
-for result in results:
-    print(result)
-"""
-
-        try:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-                f.write(test_script)
-                temp_file = f.name
-
-            result = subprocess.run([sys.executable, temp_file], capture_output=True, text=True, timeout=timeout_seconds)
-
-            tests_passed = 0
-            if result.returncode == 0:
-                for line in result.stdout.strip().split("\n"):
-                    if line.startswith("PASS:"):
-                        tests_passed += 1
-                    elif line.startswith("FAIL:"):
-                        parts = line.split(":", 3)
-                        if len(parts) >= 4:
-                            error_messages.append(f"Test {parts[1]}: {parts[2]} - {parts[3]}")
-                execution_success = True
-            else:
-                execution_success = False
-                if result.stderr:
-                    error_messages.append(f"Execution error: {result.stderr[:200]}")
-
-            return execution_success, tests_passed, error_messages
-
-        except subprocess.TimeoutExpired:
-            error_messages.append("Code execution timed out (infinite loop)")
-            return False, 0, error_messages
-        except Exception as e:
-            error_messages.append(f"Sandbox error: {str(e)}")
-            return False, 0, error_messages
-        finally:
-            try:
-                if "temp_file" in locals():
-                    os.unlink(temp_file)
-            except:
-                pass
-    
     def _calculate_format_penalties(self, text: str) -> float:
         """Calculate format penalties."""
         penalties = 0.0

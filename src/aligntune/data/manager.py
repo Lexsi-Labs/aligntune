@@ -1,3 +1,4 @@
+import ast
 import json
 import logging
 import warnings
@@ -47,6 +48,14 @@ class DataManager:
         privileged_context_column: Optional[str] = None,
         keep_columns: Optional[bool] = None,
     ):
+        # The trainer-level TaskType and the config parser's default use several
+        # names for plain SFT ("supervised_fine_tuning", ...); the data layer only
+        # knows "sft", so those names failed with "is not a valid TaskType".
+        sft_names = ("supervised_fine_tuning", "text_generation", "chat_completion")
+        task_name = task_type.value if hasattr(task_type, "value") else task_type
+        if isinstance(task_name, str) and task_name.lower() in sft_names:
+            task_type = "sft"
+
         # Map preference algorithms to DPO schema (except KTO which has its own schema)
         if isinstance(task_type, str):
             task_type = task_type.lower()
@@ -243,24 +252,36 @@ class DataManager:
         if len(dataset) == 0:
             return dataset
 
-        def is_chat_list(value: Any) -> bool:
-            return (
+        def as_chat_list(value: Any) -> Optional[list]:
+            # CSV and other text sources store a chat list as its Python repr
+            # ("[{'content': ..., 'role': ...}]"); parse it back.
+            if isinstance(value, str):
+                text = value.strip()
+                if not (text.startswith("[{") and text.endswith("}]")):
+                    return None
+                try:
+                    value = ast.literal_eval(text)
+                except (ValueError, SyntaxError, MemoryError, RecursionError):
+                    return None
+            if (
                 isinstance(value, list) and len(value) > 0
                 and all(isinstance(turn, dict) and "content" in turn for turn in value)
-            )
+            ):
+                return value
+            return None
 
         columns_to_flatten = [
             column for column in cls._CURATOR_TEXT_COLUMNS
-            if column in dataset.column_names and is_chat_list(dataset[0].get(column))
+            if column in dataset.column_names and as_chat_list(dataset[0].get(column)) is not None
         ]
         if not columns_to_flatten:
             return dataset
 
         def flatten_row(example: Dict[str, Any]) -> Dict[str, Any]:
             for column in columns_to_flatten:
-                value = example.get(column)
-                if is_chat_list(value):
-                    example[column] = "\n\n".join(str(turn.get("content", "")) for turn in value)
+                turns = as_chat_list(example.get(column))
+                if turns is not None:
+                    example[column] = "\n\n".join(str(turn.get("content", "")) for turn in turns)
             return example
 
         return dataset.map(flatten_row, desc="Flattening chat-format columns for curation")
@@ -318,7 +339,31 @@ class DataManager:
         def add_canonical_fields(
             row: Dict[str, Any], index: int
         ) -> Dict[str, Any]:
-            row.update(canonical_rows[index])
+            canonical = canonical_rows[index]
+            # CuratorKIT's parquet reader turns every null cell into "", so a
+            # null list/float column (e.g. ``rating`` on tie rows) lands in
+            # ``metadata`` as a string next to lists/floats on other rows and
+            # Arrow cannot store the mixed column. Put the original null back.
+            metadata = canonical.get("metadata")
+            if isinstance(metadata, dict):
+                canonical = dict(canonical)
+                canonical["metadata"] = {
+                    key: (None if value == "" and row.get(key, "") is None else value)
+                    for key, value in metadata.items()
+                }
+            # A canonical field that CuratorKIT left blank (e.g. ``input`` when
+            # the dataset's own ``input`` column is the prompt) must not erase
+            # the original column of the same name.
+            canonical = {
+                key: value
+                for key, value in canonical.items()
+                if not (
+                    value in ("", None)
+                    and isinstance(row.get(key), (str, list))
+                    and len(row.get(key)) > 0
+                )
+            }
+            row.update(canonical)
             return row
 
         return restored.map(add_canonical_fields, with_indices=True)
