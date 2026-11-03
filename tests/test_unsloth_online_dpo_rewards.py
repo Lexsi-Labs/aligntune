@@ -11,9 +11,10 @@ from types import SimpleNamespace
 
 import pytest
 
-pytest.importorskip("unsloth")
-
-from aligntune.backends.unsloth.rl.online_dpo.online_dpo import UnslothOnlineDPOTrainer  # noqa: E402
+try:
+    from aligntune.backends.unsloth.rl.online_dpo.online_dpo import UnslothOnlineDPOTrainer
+except (ImportError, NotImplementedError) as e:  # Unsloth raises NotImplementedError when there is no GPU
+    pytest.skip(f"Unsloth is not usable here: {e}", allow_module_level=True)
 
 
 def _trainer(rewards):
