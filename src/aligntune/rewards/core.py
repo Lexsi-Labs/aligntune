@@ -593,12 +593,14 @@ class MathCorrectnessReward(RewardFunction):
         """Extract mathematical expressions from text."""
         # Pattern for simple arithmetic expressions
         pattern = r'\d+\.?\d*\s*[+\-*/]\s*\d+\.?\d*'
-        expressions = re.findall(pattern, text)
         
         # Also look for equations
         equation_pattern = r'\d+\.?\d*\s*[+\-*/]\s*\d+\.?\d*\s*=\s*\d+\.?\d*'
         equations = re.findall(equation_pattern, text)
         
+        # Skip each equation's left side: on its own it always evaluates, so it
+        # would score a wrong equation as half right.
+        expressions = re.findall(pattern, re.sub(equation_pattern, " ", text))
         return expressions + equations
     
     def _evaluate_math_expression(self, expr: str) -> bool:
