@@ -136,6 +136,19 @@ class ColumnMapper:
         return dataset
 
     @staticmethod
+    def ensure_sft_messages(dataset: Dataset) -> Dataset:
+        """Give prompt/completion rows a ``messages`` column.
+
+        Only the plain ``sft`` task builds ``messages``; ``instruction_following``
+        returns ``prompt`` and ``completion``. A trainer that formats chats from
+        ``messages`` (Unsloth SFT) calls this first. Data that already has
+        ``messages`` is returned as it is.
+        """
+        if "messages" in dataset.column_names:
+            return dataset
+        return ColumnMapper._normalize_sft_messages(ColumnMapper._combine_sft_input(dataset))
+
+    @staticmethod
     def _combine_sft_input(dataset: Dataset) -> Dataset:
         """Combine an optional instruction input/context into ``prompt``."""
         if "prompt" not in dataset.column_names or "input" not in dataset.column_names:

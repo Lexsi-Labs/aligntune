@@ -80,3 +80,28 @@ def test_csv_chat_lists_are_read_as_text(tmp_path):
 
     assert train[0]["prompt"].startswith("What is 0 plus 0?")
     assert not any(str(value).startswith("[{") for value in train["prompt"])
+
+
+def test_instruction_following_rows_can_be_turned_into_messages(orca_file):
+    # instruction_following gives prompt/completion; Unsloth SFT formats chats from
+    # ``messages``, and used to stop with "expects a 'messages' column".
+    from aligntune.data.processors import ColumnMapper
+
+    train = DataManager(task_type="instruction_following").load_dataset(orca_file)["train"]
+    assert "messages" not in train.column_names
+
+    train = ColumnMapper.ensure_sft_messages(train)
+
+    roles = [[turn["role"] for turn in row] for row in train["messages"]]
+    assert all(r == ["user", "assistant"] for r in roles)
+    assert train["messages"][0][0]["content"].startswith("Question 0")
+
+
+def test_ensure_sft_messages_leaves_existing_messages_alone(tmp_path):
+    from aligntune.data.processors import ColumnMapper
+
+    path = tmp_path / "chat.jsonl"
+    path.write_text(json.dumps({"messages": [{"role": "user", "content": "hi"}, {"role": "assistant", "content": "hello"}]}) + "\n")
+    train = DataManager(task_type="sft").load_dataset(str(path))["train"]
+
+    assert ColumnMapper.ensure_sft_messages(train)["messages"] == train["messages"]

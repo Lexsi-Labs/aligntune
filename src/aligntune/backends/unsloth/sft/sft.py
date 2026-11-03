@@ -188,6 +188,9 @@ class UnslothSFTTrainer(SFTTrainerBase):
                 """Convert DataManager's SFT messages to Unsloth's text field."""
                 if "text" in dataset.column_names:
                     return dataset.select_columns(["text"])
+                # instruction_following gives prompt/completion, not messages
+                from aligntune.data.processors import ColumnMapper
+                dataset = ColumnMapper.ensure_sft_messages(dataset)
                 if "messages" not in dataset.column_names:
                     raise ValueError(
                         "Unsloth SFT expects DataManager output with either "

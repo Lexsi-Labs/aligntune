@@ -211,6 +211,8 @@ class UnslothOnlineDPOTrainer(TrainerBase):
         if rewards_config:
             prepared = prepare_trl_rewards(rewards_config)
             reward_funcs.extend(prepared.functions)
+            # TRL wants one processing class per reward function; plain functions have none.
+            processing_classes.extend([None] * len(prepared.functions))
             explicit_weights = getattr(self.config.train, "reward_weights", None)
             reward_weights.extend(resolve_trl_reward_weights(prepared, explicit_weights))
 
