@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # Fallback for builds with no git metadata and no SETUPTOOLS_SCM_PRETEND_VERSION
 # (e.g. building a wheel from an unpacked sdist locally). Keep in sync with the
 # latest released tag.
-fallback_version = "0.1.10"
+fallback_version = "0.1.31"
 # Don't append a local "+g<hash>" / ".dev" segment - PyPI rejects local
 # versions, and the publish workflow already guards against dev versions.
 local_scheme = "no-local-version"
