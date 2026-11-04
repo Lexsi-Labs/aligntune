@@ -37,6 +37,9 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 
 ### Fixed
+- `CurriculumSampler.update_pass_rate()` keeps a rate seeded with `set_pass_rate()`; a pass no longer lowers it (#48, @ANDROIDHASSAN).
+- `math_correctness` counts each equation once; a wrong equation such as `2 + 2 = 5` now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).
+- `LogicalConsistencyReward` and `HallucinationReward` match contradiction pairs as whole words, so "impossible" or "know" alone no longer lowers the score (#50, @ANDROIDHASSAN).
 - HumanEval `check()` with a loop, a local variable or a multi-line assert is graded instead of counted as failed: the trainer runs `check` and forwards the candidate's calls to a confined child, so a correct solution to those tasks no longer scores 0.
 - `SafeCodeExecutor` in its default restricted mode can import a short list of harmless standard modules (`typing`, `math`, `re`, `collections`, ...). Before, any import made a correct solution fail, including the `from typing import List` at the top of most HumanEval prompts. `os`, `sys` and `subprocess` are still refused.
 - Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with `'NoneType' object is not subscriptable` in `compute_soft_weights`. The repeated completions now get the same uniform importance as the first.

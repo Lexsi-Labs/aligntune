@@ -306,6 +306,14 @@ class TestPassRateTracking:
         rate = curriculum_sampler._pass_rates[5]["pass_rate"]
         assert abs(rate - 5/6) < 0.01
 
+    def test_update_pass_rate_keeps_seeded_rate(self, curriculum_sampler):
+        """A pass after set_pass_rate() must not lower the seeded rate."""
+        curriculum_sampler.set_pass_rate(6, pass_rate=0.9)
+        curriculum_sampler.update_pass_rate(6, passed=True)
+
+        # Running average of the seeded 0.9 (weight 1) and one pass
+        assert abs(curriculum_sampler._pass_rates[6]["pass_rate"] - 0.95) < 1e-9
+
 
 # ============================================================================
 # TEST: CURRICULUM STATISTICS

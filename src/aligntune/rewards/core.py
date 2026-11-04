@@ -593,12 +593,14 @@ class MathCorrectnessReward(RewardFunction):
         """Extract mathematical expressions from text."""
         # Pattern for simple arithmetic expressions
         pattern = r'\d+\.?\d*\s*[+\-*/]\s*\d+\.?\d*'
-        expressions = re.findall(pattern, text)
         
         # Also look for equations
         equation_pattern = r'\d+\.?\d*\s*[+\-*/]\s*\d+\.?\d*\s*=\s*\d+\.?\d*'
         equations = re.findall(equation_pattern, text)
         
+        # Skip each equation's left side: on its own it always evaluates, so it
+        # would score a wrong equation as half right.
+        expressions = re.findall(pattern, re.sub(equation_pattern, " ", text))
         return expressions + equations
     
     def _evaluate_math_expression(self, expr: str) -> bool:
@@ -1046,7 +1048,8 @@ class LogicalConsistencyReward(RewardFunction):
         
         text_lower = text.lower()
         for pos, neg in contradictions:
-            if pos in text_lower and neg in text_lower:
+            # Whole words: "impossible" contains "possible"
+            if re.search(rf"\b{pos}\b", text_lower) and re.search(rf"\b{neg}\b", text_lower):
                 consistency_score -= 0.2
         
         # Check for logical connectors
@@ -1123,7 +1126,8 @@ class HallucinationReward(RewardFunction):
                 ("correct", "incorrect"), ("right", "wrong")
             ]
             for pos, neg in contradiction_pairs:
-                if pos in text_lower and neg in text_lower:
+                # Whole words: "incorrect" contains "correct"
+                if re.search(rf"\b{pos}\b", text_lower) and re.search(rf"\b{neg}\b", text_lower):
                     contradiction_score -= 0.3
                     break
         
@@ -1133,8 +1137,8 @@ class HallucinationReward(RewardFunction):
             # Check if text contradicts previous context
             context_text = ' '.join(context).lower()
             # Simple check: if text mentions opposite of context
-            if any(word in text_lower for word in ["not", "never", "no"]) and \
-               any(word in context_text for word in ["yes", "always", "all"]):
+            if any(re.search(rf"\b{word}\b", text_lower) for word in ["not", "never", "no"]) and \
+               any(re.search(rf"\b{word}\b", context_text) for word in ["yes", "always", "all"]):
                 context_consistency -= 0.2
         
         # Calculate base score
