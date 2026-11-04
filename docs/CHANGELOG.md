@@ -8,21 +8,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.1.31] — 2026-11-05
+
+### Changed
+- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
+
+### Fixed
+- `CurriculumSampler.update_pass_rate()` keeps a rate seeded with `set_pass_rate()`; a pass no longer lowers it (#48, @ANDROIDHASSAN).
+- `math_correctness` counts each equation once; a wrong equation such as `2 + 2 = 5` now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).
+- `LogicalConsistencyReward` and `HallucinationReward` match contradiction pairs as whole words, so "impossible" or "know" alone no longer lowers the score (#50, @ANDROIDHASSAN).
+
+## [0.1.30] — 2026-11-03 (includes the unpublished 0.1.29)
+
 ### Added
 - SGLang rollout backend for GRPO (`rollout_backend="sglang"`): generation goes to a running SGLang server over HTTP, and weights sync once per optimizer step, as a LoRA adapter on a `--enable-lora` server or as streamed full weights (#32, @chayan-bit).
 - SGLang rollout on Unsloth GRPO-family and counterfactual GRPO trainers, with Gemma 3 weight names, vision adapter tensors, regex LoRA `target_modules` and full sync for 4-bit models (#41, @zeralyngkhoi19).
 
 ### Changed
-- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
 - SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).
 - `create_rl_trainer` now passes `rollout_backend` to the trainer, so `rollout_backend="vllm"` turns vLLM rollout on. Before, the argument was ignored and the trainer used `hf` (#32, @chayan-bit).
 - Code rewards: a function must return plain Python data (`None`, `bool`, `int`, `float`, `str`, `list`, `tuple`, `set`, `frozenset`, `dict`); NumPy scalars, `bytes`, custom classes and results of more than 100,000 values in all now fail the test. An `assert` shape that can't be split, or a non-`assert` test string, fails with a warning. A completion runs with `__name__ == "__main__"`, so one that calls `sys.exit` under that guard fails. All of a completion's tests run in one child, so a test that hangs fails them all. The child doesn't get the trainer's environment variables or `PYTHONPATH`.
 - Reward weights are applied once. These rewards multiplied their score by `weight` and the trainer then applied it again, so a run with weight `w` scored `w` squared: `math_reasoning`, `diversity`, `fluency`, `relevance`, `brevity`, `image_relevance` and `audio_quality` now return the unweighted score (a run with `weight` 0.2 sees scores 5 times larger than before; weight 1.0 changes nothing). `sentiment`, `safety` and `toxicity` weighted only `batch_compute`, so it differed from `compute`; it is now unweighted too. Code that calls these rewards directly and relied on the weight being applied inside them must multiply by `weight` itself.
 
 ### Fixed
-- `CurriculumSampler.update_pass_rate()` keeps a rate seeded with `set_pass_rate()`; a pass no longer lowers it (#48, @ANDROIDHASSAN).
-- `math_correctness` counts each equation once; a wrong equation such as `2 + 2 = 5` now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).
-- `LogicalConsistencyReward` and `HallucinationReward` match contradiction pairs as whole words, so "impossible" or "know" alone no longer lowers the score (#50, @ANDROIDHASSAN).
 - ORPO (TRL) no longer trains on NaN: a row whose chosen or rejected completion has no tokens after tokenization (a prompt longer than `max_length` leaves no room for it) made the loss, then every gradient, NaN, and the run logged a loss of 0.0 while learning nothing. Such rows are now dropped with a warning.
 - A model merged with `MergekitMerger` keeps the chat template: mergekit leaves it out of the output, so a merged chat model could not format a conversation. It is copied from the base (or first) model when the output has none.
 - Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with `'NoneType' object is not subscriptable` in `compute_soft_weights`. The repeated completions now get the same uniform importance as the first.

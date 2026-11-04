@@ -9,6 +9,18 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 ## [Unreleased]
 
+## [0.1.31] — 2026-11-05
+
+### Changed
+- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
+
+### Fixed
+- `CurriculumSampler.update_pass_rate()` keeps a rate seeded with `set_pass_rate()`; a pass no longer lowers it (#48, @ANDROIDHASSAN).
+- `math_correctness` counts each equation once; a wrong equation such as `2 + 2 = 5` now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).
+- `LogicalConsistencyReward` and `HallucinationReward` match contradiction pairs as whole words, so "impossible" or "know" alone no longer lowers the score (#50, @ANDROIDHASSAN).
+
+## [0.1.30] — 2026-11-03 (includes the unpublished 0.1.29)
+
 ### Security
 - **Code rewards no longer run model-generated code in the trainer process.** `code_execution`,
   `code_correctness`, `mbpp_reward`, `code_verifiable` and the counterfactual-GRPO code reward now run
@@ -31,15 +43,11 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 - SGLang rollout on Unsloth GRPO-family and counterfactual GRPO trainers, with Gemma 3 weight names, vision adapter tensors, regex LoRA `target_modules` and full sync for 4-bit models (#41, @zeralyngkhoi19).
 
 ### Changed
-- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
 - SFT runs that don't set `max_steps` now train for exactly `num_epochs`. Before, the epochs were turned into steps with a floor of 10, so small datasets ran more steps than asked (#36, fixed in #39, @zeralyngkhoi19).
 - `create_rl_trainer` now passes `rollout_backend` to the trainer, so `rollout_backend="vllm"` turns vLLM rollout on. Before, the argument was ignored and the trainer used `hf` (#32, @chayan-bit).
 
 
 ### Fixed
-- `CurriculumSampler.update_pass_rate()` keeps a rate seeded with `set_pass_rate()`; a pass no longer lowers it (#48, @ANDROIDHASSAN).
-- `math_correctness` counts each equation once; a wrong equation such as `2 + 2 = 5` now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).
-- `LogicalConsistencyReward` and `HallucinationReward` match contradiction pairs as whole words, so "impossible" or "know" alone no longer lowers the score (#50, @ANDROIDHASSAN).
 - HumanEval `check()` with a loop, a local variable or a multi-line assert is graded instead of counted as failed: the trainer runs `check` and forwards the candidate's calls to a confined child, so a correct solution to those tasks no longer scores 0.
 - `SafeCodeExecutor` in its default restricted mode can import a short list of harmless standard modules (`typing`, `math`, `re`, `collections`, ...). Before, any import made a correct solution fail, including the `from typing import List` at the top of most HumanEval prompts. `os`, `sys` and `subprocess` are still refused.
 - Counterfactual GRPO (TRL): a batch whose distinct completions all have no answer region, and which repeats one of them, no longer crashes with `'NoneType' object is not subscriptable` in `compute_soft_weights`. The repeated completions now get the same uniform importance as the first.
