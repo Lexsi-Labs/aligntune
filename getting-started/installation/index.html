@@ -1856,10 +1856,51 @@
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev]"</span>
 </code></pre></div>
 <h3 id="install-with-optional-dependencies">Install with Optional Dependencies<a class="headerlink" href="#install-with-optional-dependencies" title="Permanent link">&para;</a></h3>
-<p>AlignTune does not currently define <code>eval</code> or <code>all</code> extras, only <code>dev</code>
-and <code>docs</code> are declared in <code>pyproject.toml</code>. Evaluation tooling (<code>lm-eval</code>,
-<code>scikit-learn</code>, <code>rouge-score</code>, <code>sacrebleu</code>, <code>nltk</code>, <code>evaluate</code>) is already included
-in the base install, so a plain <code>pip install aligntune</code> covers it.</p>
+<p>A plain <code>pip install aligntune</code> runs SFT, DPO, GRPO, merging and evaluation of your own
+models. Heavier or platform-specific packages are extras you add when you need them:</p>
+<table>
+<thead>
+<tr>
+<th>Extra</th>
+<th>Adds</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aligntune[vllm]</code></td>
+<td><code>trl[vllm]</code></td>
+<td>vLLM generation (Linux with CUDA; it pins its own torch)</td>
+</tr>
+<tr>
+<td><code>aligntune[eval]</code></td>
+<td><code>lm-eval</code></td>
+<td>LM-eval benchmark tasks</td>
+</tr>
+<tr>
+<td><code>aligntune[wandb]</code></td>
+<td><code>wandb</code></td>
+<td>Weights &amp; Biases logging</td>
+</tr>
+<tr>
+<td><code>aligntune[tokenizer]</code></td>
+<td><code>PyICU</code></td>
+<td>Unicode script checks when extending SentencePiece tokenizers (needs the system ICU headers)</td>
+</tr>
+<tr>
+<td><code>aligntune[unsloth]</code></td>
+<td><code>xformers</code>, <code>diffusers</code></td>
+<td>Optional extras for the Unsloth backend on Linux/Windows x86_64</td>
+</tr>
+<tr>
+<td><code>aligntune[all]</code></td>
+<td>all of the above</td>
+<td>The previous full install</td>
+</tr>
+</tbody>
+</table>
+<p>Combine them with a comma, for example <code>pip install "aligntune[eval,wandb]"</code>. <code>torch</code> is capped
+below 2.14 in the base install so that Unsloth can import.</p>
 <p>Unsloth (faster training on CUDA GPUs) needs no separate install — it is
 vendored inside the <code>aligntune</code> package. See <a href="#unsloth">Unsloth</a> below.</p>
 <h3 id="install-with-uv">Install with <code>uv</code><a class="headerlink" href="#install-with-uv" title="Permanent link">&para;</a></h3>
@@ -1916,9 +1957,9 @@ falls back to the TRL backend. See
 </ul>
 <h3 id="optional-dependencies">Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>wandb</code> - Weights &amp; Biases logging</li>
+<li><code>wandb</code> - Weights &amp; Biases logging (<code>aligntune[wandb]</code>)</li>
 <li><code>tensorboard</code> - TensorBoard logging</li>
-<li><code>lm-eval</code> - Language model evaluation</li>
+<li><code>lm-eval</code> - Language model evaluation (<code>aligntune[eval]</code>)</li>
 <li><code>scikit-learn</code> - Evaluation metrics</li>
 <li><code>seqeval</code> - Sequence evaluation</li>
 </ul>
