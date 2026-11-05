@@ -1324,7 +1324,7 @@ class MathReasoningReward(RewardFunction):
                           'then', 'next', 'after that', 'subsequently',
                           'therefore', 'thus', 'so', 'because', 'since', 'hence',
                           'we have', 'we get', 'we obtain', 'it follows']
-        step_count = sum(1 for indicator in step_indicators if indicator in response.lower())
+        step_count = sum(1 for indicator in step_indicators if re.search(rf"\b{indicator}\b", response.lower()))
         if step_count >= 2:
             score += 0.4
         elif step_count >= 1:
@@ -1370,8 +1370,13 @@ class MathReasoningReward(RewardFunction):
         # Check for units (unit conversion awareness)
         units = ['meter', 'm', 'kilogram', 'kg', 'second', 's', 'hour', 'h',
                 'dollar', '$', 'percent', '%', 'degree', '°', 'celsius', 'fahrenheit',
-                'inch', 'foot', 'mile', 'pound', 'ounce', 'liter', 'l', 'gallon']
-        unit_count = sum(1 for unit in units if unit in response.lower())
+                'inch', 'foot', 'mile', 'pound', 'ounce', 'liter', 'l', 'gallon',
+                'minute', 'feet', 'yard', 'km', 'cm', 'mm', 'ml', 'mg']
+        # A unit stands on its own ("5 m", "3 dollars"); "the" holds no "h" and "it's" no "s".
+        unit_count = sum(
+            1 for unit in units
+            if re.search(rf"(?<![a-z'’]){re.escape(unit)}(?:e?s)?(?![a-z])", response.lower())
+        )
         if unit_count > 0:
             score += min(0.2, unit_count * 0.1)
         
