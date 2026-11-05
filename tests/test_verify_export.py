@@ -9,6 +9,7 @@ Tests:
 - Stub classes for Phase 2 adapters
 """
 
+import importlib.util
 import sys
 import tempfile
 import types
@@ -27,6 +28,9 @@ from aligntune.eval.model_adapters import (
     OllamaModelAdapter,
 )
 from aligntune.eval.alignment_auditor import AlignmentAuditor, AuditReport
+
+# These tests patch the real vllm.LLM class, so they need vllm installed (it is a declared dependency).
+requires_vllm = pytest.mark.skipif(importlib.util.find_spec("vllm") is None, reason="vllm is not installed")
 
 
 @pytest.fixture
@@ -251,6 +255,7 @@ class TestVLLMModelAdapterInstantiation:
             with pytest.raises(ImportError, match="vllm is not installed"):
                 VLLMModelAdapter(model_path="/path/to/model")
 
+    @requires_vllm
     @patch("vllm.LLM")
     def test_vllm_adapter_init_with_mock_vllm(self, mock_llm_class):
         """Test VLLMModelAdapter can be instantiated with mocked vllm.LLM."""
@@ -268,6 +273,7 @@ class TestVLLMModelAdapterInstantiation:
         assert adapter.gpu_memory_utilization == 0.8
         assert adapter.backend_name == "vllm"
 
+    @requires_vllm
     @patch("vllm.LLM")
     def test_vllm_adapter_backend_name(self, mock_llm_class):
         """Test VLLMModelAdapter reports correct backend name."""
@@ -280,6 +286,7 @@ class TestVLLMModelAdapterInstantiation:
 class TestVLLMModelAdapterGenerate:
     """Tests for VLLMModelAdapter.generate() method."""
 
+    @requires_vllm
     @patch("vllm.LLM")
     def test_vllm_generate_returns_list(self, mock_llm_class):
         """Test VLLMModelAdapter.generate() returns List[str]."""
@@ -299,6 +306,7 @@ class TestVLLMModelAdapterGenerate:
             assert len(results) == 1
             assert isinstance(results[0], str)
 
+    @requires_vllm
     @patch("vllm.LLM")
     def test_vllm_generate_handles_empty_prompts(self, mock_llm_class):
         """Test VLLMModelAdapter.generate() handles empty prompt list."""
@@ -310,6 +318,7 @@ class TestVLLMModelAdapterGenerate:
 
         assert results == []
 
+    @requires_vllm
     @patch("vllm.LLM")
     def test_vllm_generate_batch(self, mock_llm_class):
         """Test VLLMModelAdapter.generate() handles batch of prompts."""
@@ -334,6 +343,7 @@ class TestVLLMModelAdapterGenerate:
             for result in results:
                 assert isinstance(result, str)
 
+    @requires_vllm
     @patch("vllm.LLM")
     def test_vllm_close(self, mock_llm_class):
         """Test VLLMModelAdapter.close() calls shutdown."""
@@ -1049,6 +1059,7 @@ class TestBuildAdapterFallbackChain:
 class TestAdapterBackendNames:
     """Tests for all adapter backend_name properties."""
 
+    @requires_vllm
     def test_all_adapters_have_unique_backend_names(
         self, mock_llama_cpp_module, mock_ollama_module
     ):

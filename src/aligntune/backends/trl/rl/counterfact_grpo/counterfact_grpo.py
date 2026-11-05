@@ -838,7 +838,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
 
             # Get test data for this prompt
             prompt = prompts[i] if i < len(prompts) else ""
-            test_data = self.prompt_to_data.get(prompt, {})
+            test_data = self._data_for_prompt(prompt)
 
             # Get expected function name and test inputs
             expected_func = test_data.get("expected_func") or test_data.get("entry_point")
@@ -931,6 +931,17 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
 
         return rewards
 
+    def _data_for_prompt(self, prompt) -> Dict:
+        """Look up the stored gold data for a prompt.
+
+        Prompts can arrive as chat-message lists (unhashable); those have no
+        entry in the string-keyed table, so they yield no gold data instead of
+        raising TypeError.
+        """
+        if not isinstance(prompt, str):
+            return {}
+        return self.prompt_to_data.get(prompt, {})
+
     def _compute_math_rewards(self, completions: List, **kwargs) -> List[float]:
         """Compute rewards for math reasoning (GSM8K)."""
         prompts = kwargs.get("prompts", [""] * len(completions))
@@ -958,7 +969,7 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
 
             # Get gold answer
             prompt = prompts[i] if i < len(prompts) else ""
-            data = self.prompt_to_data.get(prompt, {})
+            data = self._data_for_prompt(prompt)
             gold_answer = data.get("gold_answer")
 
             if gold_answer is None:

@@ -9,6 +9,7 @@ Based on the GRPO implementation pattern with PPO-specific adaptations.
 """
 
 import logging
+from aligntune.utils.trainer_compat import ensure_save_model_compat
 import time
 import yaml
 import re
@@ -915,6 +916,7 @@ class TRLPPOTrainer(TrainerBase):
 
         # Save model
         logger.info(f"Saving model to {output_dir}")
+        ensure_save_model_compat(self.trainer)
         self.trainer.save_model(output_dir)
         self.write_provenance(output_dir)
         self.tokenizer.save_pretrained(output_dir)
@@ -1045,6 +1047,7 @@ class TRLPPOTrainer(TrainerBase):
             logger.info(f"Saving PPO model to: {save_path}")
 
             # Save using trainer
+            ensure_save_model_compat(self.trainer)
             self.trainer.save_model(save_path)
             self.write_provenance(save_path)
             self.tokenizer.save_pretrained(save_path)

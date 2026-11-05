@@ -938,9 +938,10 @@ class CodeExecutionReward(RewardFunction):
             score = self._validate_with_test_cases(code, test_cases)
             logger.debug(f"CodeExecutionReward: validation score = {score}")
             return score
-        # Otherwise, check that the code runs to its end in a child process
-        status, _ = _code_grader.grade(code, [], self.timeout, memory_limit_mb=self.memory_limit_mb)
-        return 1.0 if status == "ok" else 0.0
+        # No tests: running is not evidence of a correct answer (a stub runs), so nothing is paid.
+        from aligntune.rewards.verifiable import _warn_no_tests_once
+        _warn_no_tests_once(type(self).__name__, kwargs)
+        return 0.0
 
     def _extract_code(self, text: str) -> str:
         """Extract Python code from model response.

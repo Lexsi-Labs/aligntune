@@ -187,7 +187,8 @@ def test_imports_above_the_first_def_are_kept():
 def test_no_test_path_works_on_a_worker_thread():
     def run():
         box = []
-        t = threading.Thread(target=lambda: box.append(reward("code_execution").compute(fence("x = 1"))))
+        t = threading.Thread(target=lambda: box.append(
+            reward("code_execution").compute(fence("def one():\n    return 1"), test_cases=["assert one() == 1"])))
         t.start()
         t.join()
         return box
@@ -298,11 +299,11 @@ def test_oversized_result_fails(monkeypatch):
 def test_correct_answer_scores_one_everywhere():
     assert score("code_execution", GOOD, test_cases=ASSERTS) == 1.0
     assert score("code_execution", GOOD, test_cases=DICTS) == 1.0
-    assert score("code_execution", GOOD) == 1.0
+    assert score("code_execution", GOOD) == 0.0  # no tests: nothing is paid
     assert score("code_correctness", GOOD, test_cases=DICTS) == 1.0
     assert score("code_correctness", GOOD, test_cases=ASSERTS) == 1.0
     assert score("code_verifiable", GOOD, ASSERTS) == 1.0
-    assert score("code_verifiable", GOOD) == 1.0
+    assert score("code_verifiable", GOOD) == 0.0  # no tests: nothing is paid
     assert score("mbpp_reward", GOOD, test_list=ASSERTS) > 0.9
 
 

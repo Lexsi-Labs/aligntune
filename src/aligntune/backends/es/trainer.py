@@ -521,6 +521,19 @@ class ESTrainerBackend(ESTrainerBase):
         logger.info(f"Generated {len(adapters)} adapter variants")
         return adapters
 
+    def _render_prompt(self, prompt):
+        """Return a text prompt; render chat-message lists with the chat template."""
+        if isinstance(prompt, str) or not isinstance(prompt, (list, tuple)):
+            return prompt
+        if getattr(self.tokenizer, "chat_template", None):
+            return self.tokenizer.apply_chat_template(
+                list(prompt), tokenize=False, add_generation_prompt=True
+            )
+        return "\n".join(
+            f"{m.get('role', 'user')}: {m.get('content', '')}" if isinstance(m, dict) else str(m)
+            for m in prompt
+        )
+
     def generate_and_score(self, adapters: List[AdapterInfo]) -> np.ndarray:
         """
         Evaluate all adapters on the same batch of prompts.
@@ -556,6 +569,9 @@ class ESTrainerBackend(ESTrainerBase):
         # Get current batch of prompts
         batch = self.task.get_batch()
         prompts = batch.get('prompt', batch.get('input', []))
+        # Chat-message prompts (lists of {"role", "content"}) must be rendered to
+        # text before they reach the tokenizer.
+        prompts = [self._render_prompt(p) for p in prompts]
 
         fitness_scores = []
         num_return_sequences = getattr(self.config.es, "num_return_sequences", 1)
