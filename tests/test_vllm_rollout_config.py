@@ -232,6 +232,22 @@ class TestGRPOTrainerIntegration(unittest.TestCase):
             # Check for logging of backend
             assert "Rollout backend:" in content
 
+    def test_grpo_vllm_rollout_without_env_flag_raises_clear_error(self):
+        """Test that rollout_backend='vllm' without ALIGNTUNE_ENABLE_VLLM=1 raises a clear error."""
+        import types
+
+        from aligntune.backends.trl.rl.grpo.grpo import TRLGRPOTrainer
+
+        trainer = object.__new__(TRLGRPOTrainer)
+        trainer.config = types.SimpleNamespace(
+            train=types.SimpleNamespace(rollout_backend="vllm", max_steps=1),
+            model=types.SimpleNamespace(),
+            logging=types.SimpleNamespace(),
+        )
+        with patch.dict("os.environ", {"ALIGNTUNE_ENABLE_VLLM": "0"}):
+            with self.assertRaisesRegex(ValueError, "needs ALIGNTUNE_ENABLE_VLLM=1"):
+                trainer.setup_trainer()
+
 
 class TestPPOTrainerIntegration(unittest.TestCase):
     """Test vLLM config flow through PPO trainer."""
