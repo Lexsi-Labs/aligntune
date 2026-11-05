@@ -178,8 +178,13 @@ def build_sft_config(
     # replaces trl.trainer.sft_config.SFTConfig when its trainers are patched,
     # and an instance of the stale class can't be pickled by torch.save() at
     # checkpoint time ("not the same object as trl.trainer.sft_config.SFTConfig").
+    # device_map="cpu" keeps the model on the CPU; train there too, otherwise the
+    # Trainer moves the model to a GPU when one is present.
+    if getattr(getattr(config, "model", None), "device_map", None) == "cpu":
+        config_dict.setdefault("use_cpu", True)
+
     import trl.trainer.sft_config as _sft_config_module
-    sft_config = _sft_config_module.SFTConfig(**config_dict)
+    sft_config =_sft_config_module.SFTConfig(**config_dict)
 
     # Backfill anything else the caller passed to create_sft_trainer() that
     # isn't already explicitly threaded above (packing, seed, report_to,

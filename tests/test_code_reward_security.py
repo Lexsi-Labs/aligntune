@@ -61,10 +61,10 @@ def test_code_correctness_without_tests_pays_nothing():
     assert r.compute("def f(*a, **k):\n    pass") == 0.0
 
 
-def test_code_execution_without_tests_still_pays_a_stub():
-    """Documented limitation: with no tests, code_execution can only check that code runs."""
+def test_code_execution_without_tests_pays_nothing():
+    """With no tests running is not evidence of a correct answer (a stub runs), so nothing is paid."""
     r = build("code_execution")
-    assert r.compute("```python\ndef f(*a, **k):\n    pass\n```") == 1.0
+    assert r.compute("```python\ndef f(*a, **k):\n    pass\n```") == 0.0
 
 
 @pytest.mark.parametrize("tail", ["import sys\nsys.exit(0)", "raise SystemExit(0)", "import os\nos._exit(0)"])

@@ -509,7 +509,11 @@ class UnslothCounterFactGRPOTrainer(TrainerBase):
 
         # Get gold answers from prompt→answer mapping
         if prompts:
-            answers = [self.prompt_to_answer.get(p, "0") for p in prompts]
+            # chat-message prompts are lists (unhashable): no gold entry -> "0"
+            answers = [
+                self.prompt_to_answer.get(p, "0") if isinstance(p, str) else "0"
+                for p in prompts
+            ]
         else:
             answers = list(self.prompt_to_answer.values())
 
