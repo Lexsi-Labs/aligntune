@@ -1960,16 +1960,17 @@ class TemporalConsistencyReward(RewardFunction):
         ]
         
         for past_term, future_term in temporal_pairs:
-            if past_term in previous_text and future_term in text_lower:
+            past_word, future_word = rf"\b{past_term}\b", rf"\b{future_term}\b"
+            if re.search(past_word, previous_text) and re.search(future_word, text_lower):
                 score -= 0.3
-            if future_term in previous_text and past_term in text_lower:
+            if re.search(future_word, previous_text) and re.search(past_word, text_lower):
                 score -= 0.3
         
         # Check for timeline consistency
         time_indicators = ['now', 'currently', 'today', 'yesterday', 'tomorrow',
                           'recently', 'soon', 'later', 'earlier', 'previously']
-        text_times = [ind for ind in time_indicators if ind in text_lower]
-        prev_times = [ind for ind in time_indicators if ind in previous_text]
+        text_times = [ind for ind in time_indicators if re.search(rf"\b{ind}\b", text_lower)]
+        prev_times = [ind for ind in time_indicators if re.search(rf"\b{ind}\b", previous_text)]
         
         # Check for anachronisms (basic)
         modern_terms = ['computer', 'internet', 'smartphone', 'email', 'website']
