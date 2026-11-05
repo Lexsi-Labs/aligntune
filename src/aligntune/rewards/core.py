@@ -2058,8 +2058,8 @@ class ReadabilityReward(RewardFunction):
         
         # Simple Flesch-like readability score
         # Shorter sentences and words = higher readability
-        sentence_score = 1.0 - min(1.0, (avg_sentence_length - 10) / 30)  # Optimal around 10-20 words
-        word_score = 1.0 - min(1.0, (avg_word_length - 4) / 6)  # Optimal around 4-5 chars
+        sentence_score = 1.0 - max(0.0, min(1.0, (avg_sentence_length - 10) / 30))  # Optimal around 10-20 words
+        word_score = 1.0 - max(0.0, min(1.0, (avg_word_length - 4) / 6))  # Optimal around 4-5 chars
         
         # Check for complex punctuation (reduces readability)
         complex_punct = text.count(';') + text.count(':') + text.count('—')
