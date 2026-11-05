@@ -520,7 +520,7 @@ def get_available_trainers() -> dict:
     """Returns a dictionary of available trainer types."""
     return {
         "Unsloth": _check_unsloth_available(),
-        "TRL": TRL_AVAILABLE,
+        "TRL": _check_trl_available(),
         "Unified": UNIFIED_AVAILABLE,
         "BackendFactory": BACKEND_FACTORY_AVAILABLE,
     }
@@ -540,7 +540,7 @@ def check_dependencies() -> dict:
     """Check all dependencies and return status."""
     return {
         "unsloth": _check_unsloth_available(),
-        "trl": TRL_AVAILABLE,
+        "trl": _check_trl_available(),
         "unified_rl": UNIFIED_RL_AVAILABLE,
         "unified_sft": UNIFIED_SFT_AVAILABLE,
         "eval": EVAL_AVAILABLE,
@@ -552,7 +552,7 @@ def get_missing_dependencies() -> list:
     """Get list of missing dependencies with installation instructions."""
     missing = []
     
-    if not TRL_AVAILABLE:
+    if not _check_trl_available():
         missing.append("TRL: pip install trl")
     
     if not UNSLOTH_AVAILABLE:
