@@ -9,6 +9,7 @@ import unsloth
 from unsloth import FastLanguageModel
 
 import logging
+from aligntune.utils.trainer_compat import ensure_save_model_compat
 import time
 import yaml
 import copy
@@ -2181,6 +2182,7 @@ class UnslothPPOTrainer(TrainerBase):
             # Save
             output_dir = self._get_config_value(self.config.logging, 'output_dir', './output/ppo')
             logger.info(f"Saving to: {output_dir}")
+            ensure_save_model_compat(self.trainer)
             self.trainer.save_model(output_dir)
             self.write_provenance(output_dir)
             self.tokenizer.save_pretrained(output_dir)

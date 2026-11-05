@@ -9,6 +9,29 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 ## [Unreleased]
 
+## [0.1.31] — 2026-11-05
+
+### Changed
+- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. torch is capped below 2.14 so a plain install resolves a torch and torchvision pair that Unsloth accepts. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
+- `code_execution` and `code_verifiable` with no tests now give 0.0 (they used to pay any code that runs,
+  a stub included) and warn once: pass `test_cases`, `reference`, MBPP's `test_list`, or HumanEval's
+  `test` + `entry_point`.
+
+### Fixed
+- `CurriculumSampler.update_pass_rate()` keeps a rate seeded with `set_pass_rate()`; a pass no longer lowers it (#48, @ANDROIDHASSAN).
+- `math_correctness` counts each equation once; a wrong equation such as `2 + 2 = 5` now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).
+- `LogicalConsistencyReward` and `HallucinationReward` match contradiction pairs as whole words, so "impossible" or "know" alone no longer lowers the score (#50, @ANDROIDHASSAN).
+- ES trainer: chat-message (list) prompts are rendered with the chat template instead of failing in the tokenizer (`text input must be of type str ...`).
+- `counterfact_grpo` (TRL and Unsloth) no longer crashes with `TypeError: unhashable type: 'list'` when the dataset's prompts are chat-message lists.
+- Unsloth Online DPO: prompts are cut to `max_prompt_length` before training, so a prompt plus its completion no longer overruns `max_seq_length` (`The size of tensor a (256) must match the size of tensor b (257)`).
+- PPO (TRL and Unsloth): `save_model` no longer fails with `'PPOTrainer' object has no attribute 'is_distributed_loading_by_transformers'` on transformers 5.22 (works on 5.17 and later alike).
+- TRL SFT: `model.device_map: cpu` now also trains on the CPU (`use_cpu=True`); the Trainer used to move the
+  model to a GPU when one was present.
+- Unsloth ORPO: prompts are cut to `max_prompt_length` and rows whose chosen or rejected completion has no
+  token left are dropped (long prompts made the log-probabilities, then the weights, NaN).
+
+## [0.1.30] — 2026-11-03 (includes the unpublished 0.1.29)
+
 ### Security
 - **Code rewards no longer run model-generated code in the trainer process.** `code_execution`,
   `code_correctness`, `mbpp_reward`, `code_verifiable` and the counterfactual-GRPO code reward now run

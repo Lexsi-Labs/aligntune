@@ -320,6 +320,13 @@ class UnslothOnlineDPOTrainer(TrainerBase):
 
         output_dir = self._get_config_value(self.config.logging, 'output_dir', default="./outputs")
 
+        # Unsloth caps the context at max_seq_length and Online DPO does not truncate prompts itself:
+        # a prompt plus its completion that does not fit crashes generate()/the forward pass.
+        from aligntune.core.rl.prompt_utils import truncate_prompts
+        _mpl = int(getattr(self.config.train, 'max_prompt_length', 512) or 512)
+        self.train_dataset = truncate_prompts(self.train_dataset, self.tokenizer, _mpl)
+        self.eval_dataset = truncate_prompts(self.eval_dataset, self.tokenizer, _mpl)
+
         self.trainer = OnlineDPOTrainer(
             model=self.model,
             ref_model=self.reference_model,

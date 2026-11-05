@@ -272,6 +272,13 @@ class UnslothORPOTrainer(TrainerBase):
                 ORPOTrainer.concatenated_forward = _patched_concatenated_forward
                 ORPOTrainer._aligntune_length_patched = True
 
+            # A prompt longer than max_prompt_length is cut here: left whole it fills the context, Unsloth's forward
+            # pass is silently shortened, and the log-probabilities (then the weights) turn NaN.
+            from aligntune.core.rl.prompt_utils import truncate_prompts
+            _mpl = int(getattr(self.config.train, 'max_prompt_length', 512) or 512)
+            self.train_dataset = truncate_prompts(self.train_dataset, self.tokenizer, _mpl)
+            self.eval_dataset = truncate_prompts(self.eval_dataset, self.tokenizer, _mpl)
+
             # Create trainer
             self.trainer = ORPOTrainer(
                 model=self.model,
@@ -280,6 +287,16 @@ class UnslothORPOTrainer(TrainerBase):
                 eval_dataset=self.eval_dataset,
                 args=orpo_config,
             )
+
+            # Rows whose chosen or rejected completion has no token left after tokenization make the loss NaN
+            # (ORPO averages log-probabilities over the completion's tokens), and every later step trains on NaN weights.
+            from aligntune.core.rl.prompt_utils import drop_rows_without_completion_tokens
+            self.trainer.train_dataset, dropped = drop_rows_without_completion_tokens(self.trainer.train_dataset)
+            if dropped:
+                logger.warning(
+                    "ORPO: dropped %d of %d training rows whose chosen or rejected completion has no tokens "
+                    "after tokenization (a prompt longer than max_length leaves no room for it); "
+                    "they would have made the loss NaN.", dropped, dropped + len(self.trainer.train_dataset))
 
             logger.info("Unsloth ORPOTrainer setup completed")
 

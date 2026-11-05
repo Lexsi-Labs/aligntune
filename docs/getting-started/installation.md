@@ -34,10 +34,20 @@ pip install -e ".[dev]"
 
 ### Install with Optional Dependencies
 
-AlignTune does not currently define `eval` or `all` extras, only `dev`
-and `docs` are declared in `pyproject.toml`. Evaluation tooling (`lm-eval`,
-`scikit-learn`, `rouge-score`, `sacrebleu`, `nltk`, `evaluate`) is already included
-in the base install, so a plain `pip install aligntune` covers it.
+A plain `pip install aligntune` runs SFT, DPO, GRPO, merging and evaluation of your own
+models. Heavier or platform-specific packages are extras you add when you need them:
+
+| Extra | Adds | Use it for |
+|---|---|---|
+| `aligntune[vllm]` | `trl[vllm]` | vLLM generation (Linux with CUDA; it pins its own torch) |
+| `aligntune[eval]` | `lm-eval` | LM-eval benchmark tasks |
+| `aligntune[wandb]` | `wandb` | Weights & Biases logging |
+| `aligntune[tokenizer]` | `PyICU` | Unicode script checks when extending SentencePiece tokenizers (needs the system ICU headers) |
+| `aligntune[unsloth]` | `xformers`, `diffusers` | Optional extras for the Unsloth backend on Linux/Windows x86_64 |
+| `aligntune[all]` | all of the above | The previous full install |
+
+Combine them with a comma, for example `pip install "aligntune[eval,wandb]"`. `torch` is capped
+below 2.14 in the base install so that Unsloth can import.
 
 Unsloth (faster training on CUDA GPUs) needs no separate install — it is
 vendored inside the `aligntune` package. See [Unsloth](#unsloth) below.
@@ -110,9 +120,9 @@ aligntune info
 
 ### Optional Dependencies
 
-- `wandb` - Weights & Biases logging
+- `wandb` - Weights & Biases logging (`aligntune[wandb]`)
 - `tensorboard` - TensorBoard logging
-- `lm-eval` - Language model evaluation
+- `lm-eval` - Language model evaluation (`aligntune[eval]`)
 - `scikit-learn` - Evaluation metrics
 - `seqeval` - Sequence evaluation
 

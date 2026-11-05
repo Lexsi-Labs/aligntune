@@ -161,8 +161,17 @@ cd aligntune
 pip install -e .          # or:  uv pip install -e .
 ```
 
-Either command pulls every runtime dependency (CuratorKIT for data curation,
-plus the full ML stack) from `pyproject.toml` - no extra steps.
+Either command installs what SFT, DPO, GRPO and merging need (CuratorKIT for data curation, plus the
+core ML stack). Heavier or platform-specific packages are extras:
+
+| Extra | Adds | Use it for |
+|---|---|---|
+| `aligntune[vllm]` | `trl[vllm]` | vLLM generation (Linux with CUDA; it pins its own torch) |
+| `aligntune[eval]` | `lm-eval` | LM-eval benchmark tasks |
+| `aligntune[wandb]` | `wandb` | Weights & Biases logging |
+| `aligntune[tokenizer]` | `PyICU` | Unicode script checks when extending SentencePiece tokenizers (needs the system ICU headers) |
+| `aligntune[unsloth]` | `xformers`, `diffusers` | Optional extras for the Unsloth backend on Linux/Windows x86_64 |
+| `aligntune[all]` | all of the above | The previous full install |
 
 `mergekit`, `unsloth`, `unsloth_zoo`, and `tokenizer-extension` are **vendored
 inside the `aligntune` package itself** (under `third_party/`, built into the

@@ -196,6 +196,17 @@ class MathVerifiableReward(VerifiableReward):
         return False
 
 
+_NO_TESTS_WARNED = set()
+
+
+def _warn_no_tests_once(name: str, kwargs: Dict[str, Any]) -> None:
+    if name not in _NO_TESTS_WARNED:
+        _NO_TESTS_WARNED.add(name)
+        logger.warning(f"{name}: no tests reached this reward (row keys: {sorted(kwargs)[:20]}); it scores 0.0 "
+                       f"without tests. Pass `reference`, `test_cases`, MBPP's `test_list`, or "
+                       f"HumanEval's `test` + `entry_point`.")
+
+
 class CodeExecutionVerifiableReward(VerifiableReward):
     """Reward for code execution correctness.
 
@@ -253,8 +264,9 @@ class CodeExecutionVerifiableReward(VerifiableReward):
         if test_cases:
             return self._validate_test_cases(code, test_cases)
 
-        # Otherwise just check if code runs without error
-        return self._execute_safely(code)
+        # No tests: code that merely runs (a stub included) is not paid.
+        _warn_no_tests_once(type(self).__name__, row)
+        return False
 
     def _extract_code(self, text: str) -> Optional[str]:
         """Code from a completion, as the other code rewards read it (fences, imports above the first def)."""

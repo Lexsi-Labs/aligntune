@@ -143,8 +143,9 @@ class TestCodeExecutionVerifiableReward:
 
     def test_verify_valid_code(self, reward):
         """Test verification of valid Python code."""
-        code = "```python\nx = 1 + 1\nassert x == 2\n```"
-        assert reward.verify(code) is True
+        code = "```python\ndef two():\n    return 1 + 1\n```"
+        assert reward.verify(code, test_cases=["assert two() == 2"]) is True
+        assert reward.verify(code) is False  # no tests: nothing is paid
 
     def test_verify_invalid_code(self, reward):
         """Test verification fails for invalid code."""
@@ -164,10 +165,10 @@ class TestCodeExecutionVerifiableReward:
         assert "def hello()" in code
 
     def test_compute_valid_code(self, reward):
-        """Test compute() returns 1.0 for valid code."""
-        code = "```python\nx = 1 + 1\nassert x == 2\n```"
-        score = reward.compute(code)
-        assert score == 1.0
+        """Valid code that passes its test scores 1.0; without a test nothing is paid."""
+        code = "```python\ndef two():\n    return 1 + 1\n```"
+        assert reward.compute(code, test_cases=["assert two() == 2"]) == 1.0
+        assert reward.compute(code) == 0.0
 
     def test_compute_invalid_code(self, reward):
         """Test compute() returns 0.0 for invalid code."""
@@ -184,7 +185,7 @@ class TestCodeExecutionVerifiableReward:
     def test_code_with_output(self, reward):
         """Test code that produces output."""
         code = "```python\nprint('hello')\n```"
-        assert reward.verify(code) is True
+        assert reward.verify(code) is False  # runs, but no tests: nothing is paid
 
     def test_code_with_function(self, reward):
         """Test code with function definition."""
@@ -192,10 +193,9 @@ class TestCodeExecutionVerifiableReward:
 def add(a, b):
     return a + b
 
-result = add(2, 3)
-assert result == 5
 """
-        assert reward.verify(code) is True
+        assert reward.verify(code, test_cases=["assert add(2, 3) == 5"]) is True
+        assert reward.verify(code) is False  # no tests: nothing is paid
 
     def test_extract_code_function_definition(self, reward):
         """Test extraction prioritizes function definitions."""

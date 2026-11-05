@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 # Fallback for builds with no git metadata and no SETUPTOOLS_SCM_PRETEND_VERSION
 # (e.g. building a wheel from an unpacked sdist locally). Keep in sync with the
 # latest released tag.
-fallback_version = "0.1.10"
+fallback_version = "0.1.31"
 # Don't append a local "+g<hash>" / ".dev" segment - PyPI rejects local
 # versions, and the publish workflow already guards against dev versions.
 local_scheme = "no-local-version"
@@ -107,7 +107,12 @@ dependencies = [
     # third_party/unsloth/PATCH_NOTES.md). Left as a floor only, same
     # reasoning as the datasets pin above - don't force a downgrade of an
     # already-working torch install based on an unverified upstream cap.
-    "torch>=2.4.0",
+    # Upper bound: without vLLM (now an extra) nothing holds torch down, and a
+    # plain install resolved torch 2.15 with torchvision 0.29, which Unsloth
+    # refuses to import ("torch==2.15.0 requires torchvision>=0.30.0"), so the
+    # Unsloth backend was silently replaced by TRL. torch 2.13 / torchvision 0.28
+    # and torch 2.11 / torchvision 0.26 import Unsloth.
+    "torch>=2.4.0,<2.14",
     "torchvision",
 
     # Core Python dependencies
@@ -142,9 +147,8 @@ dependencies = [
     "requests>=2.28.0",
     "heapdict>=1.0.1",
 
-    # "trl==1.7.1",
-    # "vllm==0.10",
-    "trl[vllm]==1.7.1",
+    # vLLM is an extra (aligntune[vllm]): it pins its own torch and has no macOS wheel.
+    "trl==1.7.1",
 
     # unsloth and unsloth_zoo (2026.7.2) are vendored in-tree - see
     # third_party/unsloth/PATCH_NOTES.md and
@@ -159,13 +163,11 @@ dependencies = [
     "packaging>=24.1",
     "tyro",
     "hf_transfer",
-    "diffusers",
     "nest-asyncio",
     "pillow",
     "regex",
     "msgspec",
     "filelock",
-    "xformers>=0.0.27.post2; (\"linux\" in sys_platform or sys_platform == \"win32\") and (platform_machine == \"AMD64\" or platform_machine == \"x86_64\")",
     "triton>=3.0.0; \"linux\" in sys_platform",
     "triton-windows; sys_platform == \"win32\" and (platform_machine == \"AMD64\" or platform_machine == \"x86_64\")",
     "cut_cross_entropy; python_version >= \"3.10\" and (sys_platform != \"darwin\" or platform_machine != \"arm64\")",
@@ -173,8 +175,7 @@ dependencies = [
     "mlx-lm>=0.22.0; sys_platform == \"darwin\" and platform_machine == \"arm64\"",
     "mlx-vlm>=0.4.4; sys_platform == \"darwin\" and platform_machine == \"arm64\"",
 
-    # Logging and monitoring
-    "wandb>=0.15.0",
+    # Logging and monitoring (wandb is an extra: aligntune[wandb])
     "tensorboard>=2.12.0",
     "matplotlib>=3.5.0",
 
@@ -183,7 +184,6 @@ dependencies = [
     "rouge-score>=0.1.2",
     "bert-score>=0.3.13",
     "sacrebleu>=2.3.0",
-    "lm-eval>=0.4.0",
     "nltk>=3.8.0",
     
     #Extra
@@ -192,10 +192,6 @@ dependencies = [
 
     # Dataset curation and HF/Parquet connectors (published on PyPI)
     "curatorkit[connectors]>=0.1.15",
-
-    # Required for SentencePiece tokenizer support (Llama, Mistral, Gemma, etc.)
-    # PyICU provides Unicode script detection for merge rule validation
-    "PyICU>=2.10",
 
     # Required for TextToLoRA/Doc2LoRA hypernetwork text embeddings, and optional
     # semantic-similarity reward/eval scoring
@@ -220,6 +216,19 @@ dependencies = [
 # CuratorKIT (dataset curation) is licensed under the Lexsi Labs Source Available
 # License (noncommercial); it is opt-in so the MIT core has no restrictive hard dep.
 curation = ["curatorkit[all]"]
+# Heavy or platform-specific packages the core install leaves out. Each is imported only
+# where it is used, so a plain install still runs SFT, DPO, GRPO and merging.
+vllm = ["trl[vllm]==1.7.1"]
+eval = ["lm-eval>=0.4.0"]
+wandb = ["wandb>=0.15.0"]
+# Unicode script detection for SentencePiece merge-rule validation (needs the system ICU headers).
+tokenizer = ["PyICU>=2.10"]
+# Faster attention and vision-model extras for the vendored Unsloth backend.
+unsloth = [
+    "xformers>=0.0.27.post2; (\"linux\" in sys_platform or sys_platform == \"win32\") and (platform_machine == \"AMD64\" or platform_machine == \"x86_64\")",
+    "diffusers",
+]
+all = ["aligntune[vllm,eval,wandb,tokenizer,unsloth]"]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
