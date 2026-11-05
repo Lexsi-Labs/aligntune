@@ -170,7 +170,7 @@ core ML stack). Heavier or platform-specific packages are extras:
 | `aligntune[eval]` | `lm-eval` | LM-eval benchmark tasks |
 | `aligntune[wandb]` | `wandb` | Weights & Biases logging |
 | `aligntune[tokenizer]` | `PyICU` | Unicode script checks when extending SentencePiece tokenizers (needs the system ICU headers) |
-| `aligntune[unsloth]` | `xformers`, `diffusers` | The Unsloth backend on Linux/Windows x86_64 |
+| `aligntune[unsloth]` | `xformers`, `diffusers` | Optional extras for the Unsloth backend on Linux/Windows x86_64 |
 | `aligntune[all]` | all of the above | The previous full install |
 
 `mergekit`, `unsloth`, `unsloth_zoo`, and `tokenizer-extension` are **vendored

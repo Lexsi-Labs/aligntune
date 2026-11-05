@@ -145,7 +145,7 @@ for prompt, result in zip(prompts, results):
 
 ### 4. Benchmark Evaluation
 
-Run standard benchmarks with lm-eval:
+Run standard benchmarks with lm-eval (install it with `pip install "aligntune[eval]"`):
 
 ```python
 from aligntune.eval.lm_eval_integration import LMEvalRunner
