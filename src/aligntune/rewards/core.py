@@ -1229,7 +1229,8 @@ class HonestyReward(RewardFunction):
         ]
         
         honesty_count = sum(1 for indicator in honesty_indicators if indicator in text_lower)
-        dishonesty_count = sum(1 for indicator in dishonesty_indicators if indicator in text_lower)
+        # Match at a word start, so "lie" does not fire inside "believe".
+        dishonesty_count = sum(1 for indicator in dishonesty_indicators if re.search(r"\b" + indicator, text_lower))
         
         # Calculate score
         score = min(1.0, honesty_count * 0.2)
