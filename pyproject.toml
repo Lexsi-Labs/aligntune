@@ -107,7 +107,12 @@ dependencies = [
     # third_party/unsloth/PATCH_NOTES.md). Left as a floor only, same
     # reasoning as the datasets pin above - don't force a downgrade of an
     # already-working torch install based on an unverified upstream cap.
-    "torch>=2.4.0",
+    # Upper bound: without vLLM (now an extra) nothing holds torch down, and a
+    # plain install resolved torch 2.15 with torchvision 0.29, which Unsloth
+    # refuses to import ("torch==2.15.0 requires torchvision>=0.30.0"), so the
+    # Unsloth backend was silently replaced by TRL. torch 2.13 / torchvision 0.28
+    # and torch 2.11 / torchvision 0.26 import Unsloth.
+    "torch>=2.4.0,<2.14",
     "torchvision",
 
     # Core Python dependencies

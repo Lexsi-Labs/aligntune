@@ -12,7 +12,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ## [0.1.31] — 2026-11-05
 
 ### Changed
-- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
+- **Lighter core install.** `vllm` (`trl[vllm]`), `lm-eval`, `wandb`, `PyICU`, `xformers` and `diffusers` are no longer installed by `pip install aligntune`; on macOS the install failed on vLLM, and on Kaggle or Colab vLLM could replace the preinstalled torch. They are extras: `aligntune[vllm]`, `aligntune[eval]`, `aligntune[wandb]`, `aligntune[tokenizer]`, `aligntune[unsloth]`, or `aligntune[all]` for the old set. The package imports without them. torch is capped below 2.14 so a plain install resolves a torch and torchvision pair that Unsloth accepts. If you used vLLM generation, LM-eval tasks or W&B logging, add the extra (#37).
 - `code_execution` and `code_verifiable` with no tests now give 0.0 (they used to pay any code that runs,
   a stub included) and warn once: pass `test_cases`, `reference`, MBPP's `test_list`, or HumanEval's
   `test` + `entry_point`.
