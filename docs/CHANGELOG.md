@@ -8,6 +8,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- `HonestyReward` matches dishonesty terms at a word start, so "lie" no longer fires inside "believe" (#55, @ANDROIDHASSAN).
+- `FluencyReward` matches transitions and connectors as whole words: "or" is not in "words" (#56, @ANDROIDHASSAN).
+- `ConcisenessReward` counts a filler next to punctuation ("Basically,") and the two-word "you know" (#57, @ANDROIDHASSAN).
+- `ReadabilityReward` caps the sentence and word scores at 1, so a very short sentence cannot hide long words or punctuation (#58, @ANDROIDHASSAN).
+- `TemporalConsistencyReward` matches temporal pairs and time words as whole words: "old" is not in "told" (#59, @ANDROIDHASSAN).
+- `MathReasoningReward` matches step words and units as whole words ("the" holds no unit "h"), and recognises minutes, feet, yards, km, cm, mm, ml and mg (#60, @ANDROIDHASSAN).
+- `aligntune info` and the dependency checks report the TRL status from the live check; `rollout_backend="vllm"` without `ALIGNTUNE_ENABLE_VLLM=1` raises a clear error; a registry reward that fails with Unsloth's `apply_qkv` error logs a hint to use `backend="trl"` (#61, @N0VA06).
+
 ## [0.1.31] — 2026-11-05
 
 ### Changed
