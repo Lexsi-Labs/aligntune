@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
 <title>Changelog - AlignTune</title>
@@ -1647,6 +1647,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="[Unreleased]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1673,7 +1690,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1723,7 +1740,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed_1" class="md-nav__link">
+  <a href="#fixed_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1934,6 +1951,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="[Unreleased]">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1960,7 +1994,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -2010,7 +2044,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed_1" class="md-nav__link">
+  <a href="#fixed_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -2116,6 +2150,16 @@
 <p>Format follows <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>.</p>
 <hr />
 <h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>HonestyReward</code> matches dishonesty terms at a word start, so "lie" no longer fires inside "believe" (#55, @ANDROIDHASSAN).</li>
+<li><code>FluencyReward</code> matches transitions and connectors as whole words: "or" is not in "words" (#56, @ANDROIDHASSAN).</li>
+<li><code>ConcisenessReward</code> counts a filler next to punctuation ("Basically,") and the two-word "you know" (#57, @ANDROIDHASSAN).</li>
+<li><code>ReadabilityReward</code> caps the sentence and word scores at 1, so a very short sentence cannot hide long words or punctuation (#58, @ANDROIDHASSAN).</li>
+<li><code>TemporalConsistencyReward</code> matches temporal pairs and time words as whole words: "old" is not in "told" (#59, @ANDROIDHASSAN).</li>
+<li><code>MathReasoningReward</code> matches step words and units as whole words ("the" holds no unit "h"), and recognises minutes, feet, yards, km, cm, mm, ml and mg (#60, @ANDROIDHASSAN).</li>
+<li><code>aligntune info</code> and the dependency checks report the TRL status from the live check; <code>rollout_backend="vllm"</code> without <code>ALIGNTUNE_ENABLE_VLLM=1</code> raises a clear error; a registry reward that fails with Unsloth's <code>apply_qkv</code> error logs a hint to use <code>backend="trl"</code> (#61, @N0VA06).</li>
+</ul>
 <h2 id="0131-2026-11-05">[0.1.31] — 2026-11-05<a class="headerlink" href="#0131-2026-11-05" title="Permanent link">&para;</a></h2>
 <h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2124,7 +2168,7 @@
   a stub included) and warn once: pass <code>test_cases</code>, <code>reference</code>, MBPP's <code>test_list</code>, or HumanEval's
   <code>test</code> + <code>entry_point</code>.</li>
 </ul>
-<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>CurriculumSampler.update_pass_rate()</code> keeps a rate seeded with <code>set_pass_rate()</code>; a pass no longer lowers it (#48, @ANDROIDHASSAN).</li>
 <li><code>math_correctness</code> counts each equation once; a wrong equation such as <code>2 + 2 = 5</code> now scores 0.0, not 0.5 (#49, @ANDROIDHASSAN).</li>
@@ -2151,7 +2195,7 @@
 <li>Code rewards: a function must return plain Python data (<code>None</code>, <code>bool</code>, <code>int</code>, <code>float</code>, <code>str</code>, <code>list</code>, <code>tuple</code>, <code>set</code>, <code>frozenset</code>, <code>dict</code>); NumPy scalars, <code>bytes</code>, custom classes and results of more than 100,000 values in all now fail the test. An <code>assert</code> shape that can't be split, or a non-<code>assert</code> test string, fails with a warning. A completion runs with <code>__name__ == "__main__"</code>, so one that calls <code>sys.exit</code> under that guard fails. All of a completion's tests run in one child, so a test that hangs fails them all. The child doesn't get the trainer's environment variables or <code>PYTHONPATH</code>.</li>
 <li>Reward weights are applied once. These rewards multiplied their score by <code>weight</code> and the trainer then applied it again, so a run with weight <code>w</code> scored <code>w</code> squared: <code>math_reasoning</code>, <code>diversity</code>, <code>fluency</code>, <code>relevance</code>, <code>brevity</code>, <code>image_relevance</code> and <code>audio_quality</code> now return the unweighted score (a run with <code>weight</code> 0.2 sees scores 5 times larger than before; weight 1.0 changes nothing). <code>sentiment</code>, <code>safety</code> and <code>toxicity</code> weighted only <code>batch_compute</code>, so it differed from <code>compute</code>; it is now unweighted too. Code that calls these rewards directly and relied on the weight being applied inside them must multiply by <code>weight</code> itself.</li>
 </ul>
-<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>ORPO (TRL) no longer trains on NaN: a row whose chosen or rejected completion has no tokens after tokenization (a prompt longer than <code>max_length</code> leaves no room for it) made the loss, then every gradient, NaN, and the run logged a loss of 0.0 while learning nothing. Such rows are now dropped with a warning.</li>
 <li>A model merged with <code>MergekitMerger</code> keeps the chat template: mergekit leaves it out of the output, so a merged chat model could not format a conversation. It is copied from the base (or first) model when the output has none.</li>
@@ -2381,7 +2425,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.prune", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../assets/extra.js"></script>
       
