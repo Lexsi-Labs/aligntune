@@ -137,6 +137,12 @@ class RewardBridge:
                 try:
                     score = call_reward_safely(scorer, completion, **row_kwargs)
                 except Exception as exc:
+                    if "apply_qkv" in str(exc) or "apply_o" in str(exc):
+                        logger.warning(
+                            f"Registry reward '{reward_name}' runs a model of the same family as "
+                            f"the Unsloth policy; Unsloth patches that family's attention for the "
+                            f"whole process. Use backend='trl' for rewards that run a model."
+                        )
                     raise RuntimeError(
                         f"Registry reward '{reward_name}' failed for completion {index}: {exc}"
                     ) from exc

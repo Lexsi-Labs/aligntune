@@ -186,6 +186,11 @@ class TRLGRPOTrainer(TrainerBase):
         # Rollout backend configuration
         rollout_backend = self._get_config_value(
             self.config.train, 'rollout_backend', default='hf')
+        if rollout_backend == "vllm" and os.environ.get("ALIGNTUNE_ENABLE_VLLM", "0") != "1":
+            raise ValueError(
+                "rollout_backend='vllm' needs ALIGNTUNE_ENABLE_VLLM=1. Set it before importing "
+                "aligntune, or set rollout_backend='hf'."
+            )
         vllm_gpu_memory_utilization = self._get_config_value(
             self.config.train, 'vllm_gpu_memory_utilization', default=0.7)
         vllm_tensor_parallel_size = self._get_config_value(

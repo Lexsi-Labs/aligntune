@@ -1229,7 +1229,8 @@ class HonestyReward(RewardFunction):
         ]
         
         honesty_count = sum(1 for indicator in honesty_indicators if indicator in text_lower)
-        dishonesty_count = sum(1 for indicator in dishonesty_indicators if indicator in text_lower)
+        # Match at a word start, so "lie" does not fire inside "believe".
+        dishonesty_count = sum(1 for indicator in dishonesty_indicators if re.search(r"\b" + indicator, text_lower))
         
         # Calculate score
         score = min(1.0, honesty_count * 0.2)
@@ -1324,7 +1325,7 @@ class MathReasoningReward(RewardFunction):
                           'then', 'next', 'after that', 'subsequently',
                           'therefore', 'thus', 'so', 'because', 'since', 'hence',
                           'we have', 'we get', 'we obtain', 'it follows']
-        step_count = sum(1 for indicator in step_indicators if indicator in response.lower())
+        step_count = sum(1 for indicator in step_indicators if re.search(rf"\b{indicator}\b", response.lower()))
         if step_count >= 2:
             score += 0.4
         elif step_count >= 1:
@@ -1370,8 +1371,13 @@ class MathReasoningReward(RewardFunction):
         # Check for units (unit conversion awareness)
         units = ['meter', 'm', 'kilogram', 'kg', 'second', 's', 'hour', 'h',
                 'dollar', '$', 'percent', '%', 'degree', '°', 'celsius', 'fahrenheit',
-                'inch', 'foot', 'mile', 'pound', 'ounce', 'liter', 'l', 'gallon']
-        unit_count = sum(1 for unit in units if unit in response.lower())
+                'inch', 'foot', 'mile', 'pound', 'ounce', 'liter', 'l', 'gallon',
+                'minute', 'feet', 'yard', 'km', 'cm', 'mm', 'ml', 'mg']
+        # A unit stands on its own ("5 m", "3 dollars"); "the" holds no "h" and "it's" no "s".
+        unit_count = sum(
+            1 for unit in units
+            if re.search(rf"(?<![a-z'’]){re.escape(unit)}(?:e?s)?(?![a-z])", response.lower())
+        )
         if unit_count > 0:
             score += min(0.2, unit_count * 0.1)
         
@@ -1675,12 +1681,12 @@ class FluencyReward(RewardFunction):
             transitions = ['however', 'therefore', 'moreover', 'furthermore', 
                           'additionally', 'consequently', 'thus', 'hence', 
                           'meanwhile', 'similarly', 'in contrast', 'for example']
-            has_transitions = any(trans in text.lower() for trans in transitions)
+            has_transitions = any(re.search(rf"\b{trans}\b", text.lower()) for trans in transitions)
             if has_transitions:
                 score += 0.2
             
             connectors = ['and', 'but', 'or', 'because', 'so', 'then', 'when', 'if']
-            connector_count = sum(1 for conn in connectors if conn in text.lower())
+            connector_count = sum(1 for conn in connectors if re.search(rf"\b{conn}\b", text.lower()))
             score += min(connector_count / 10, 0.2)
         
         return min(score, 1.0)
@@ -1865,7 +1871,8 @@ class ConcisenessReward(RewardFunction):
         # Check for filler words
         filler_words = ['um', 'uh', 'like', 'you know', 'actually', 'basically', 
                        'literally', 'really', 'very', 'quite', 'rather', 'somewhat']
-        filler_count = sum(1 for word in words if word.lower() in filler_words)
+        # Search the text, not its split words: "Basically," and "you know" are not split words.
+        filler_count = len(re.findall(r"\b(?:" + "|".join(filler_words) + r")\b", text.lower()))
         filler_ratio = filler_count / word_count if word_count > 0 else 0.0
         
         # Check for repetitive phrases
@@ -1960,16 +1967,17 @@ class TemporalConsistencyReward(RewardFunction):
         ]
         
         for past_term, future_term in temporal_pairs:
-            if past_term in previous_text and future_term in text_lower:
+            past_word, future_word = rf"\b{past_term}\b", rf"\b{future_term}\b"
+            if re.search(past_word, previous_text) and re.search(future_word, text_lower):
                 score -= 0.3
-            if future_term in previous_text and past_term in text_lower:
+            if re.search(future_word, previous_text) and re.search(past_word, text_lower):
                 score -= 0.3
         
         # Check for timeline consistency
         time_indicators = ['now', 'currently', 'today', 'yesterday', 'tomorrow',
                           'recently', 'soon', 'later', 'earlier', 'previously']
-        text_times = [ind for ind in time_indicators if ind in text_lower]
-        prev_times = [ind for ind in time_indicators if ind in previous_text]
+        text_times = [ind for ind in time_indicators if re.search(rf"\b{ind}\b", text_lower)]
+        prev_times = [ind for ind in time_indicators if re.search(rf"\b{ind}\b", previous_text)]
         
         # Check for anachronisms (basic)
         modern_terms = ['computer', 'internet', 'smartphone', 'email', 'website']
@@ -2058,8 +2066,8 @@ class ReadabilityReward(RewardFunction):
         
         # Simple Flesch-like readability score
         # Shorter sentences and words = higher readability
-        sentence_score = 1.0 - min(1.0, (avg_sentence_length - 10) / 30)  # Optimal around 10-20 words
-        word_score = 1.0 - min(1.0, (avg_word_length - 4) / 6)  # Optimal around 4-5 chars
+        sentence_score = 1.0 - max(0.0, min(1.0, (avg_sentence_length - 10) / 30))  # Optimal around 10-20 words
+        word_score = 1.0 - max(0.0, min(1.0, (avg_word_length - 4) / 6))  # Optimal around 4-5 chars
         
         # Check for complex punctuation (reduces readability)
         complex_punct = text.count(';') + text.count(':') + text.count('—')
