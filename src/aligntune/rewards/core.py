@@ -1676,12 +1676,12 @@ class FluencyReward(RewardFunction):
             transitions = ['however', 'therefore', 'moreover', 'furthermore', 
                           'additionally', 'consequently', 'thus', 'hence', 
                           'meanwhile', 'similarly', 'in contrast', 'for example']
-            has_transitions = any(trans in text.lower() for trans in transitions)
+            has_transitions = any(re.search(rf"\b{trans}\b", text.lower()) for trans in transitions)
             if has_transitions:
                 score += 0.2
             
             connectors = ['and', 'but', 'or', 'because', 'so', 'then', 'when', 'if']
-            connector_count = sum(1 for conn in connectors if conn in text.lower())
+            connector_count = sum(1 for conn in connectors if re.search(rf"\b{conn}\b", text.lower()))
             score += min(connector_count / 10, 0.2)
         
         return min(score, 1.0)
