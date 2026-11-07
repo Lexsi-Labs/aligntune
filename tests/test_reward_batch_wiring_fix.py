@@ -34,6 +34,9 @@ Bugs covered (one test class per bug):
    `OnlineDPOTrainer` calls TRL-batch-style
    (`reward_func(prompts=..., completions=..., ...)`) -- same
    not-callable crash on the very first call.
+7. `RewardBridge.wrap_registry_reward` gave no hint when a reward failed with
+   `apply_qkv`: Unsloth patches the attention of the policy's model family for
+   the whole process, so a reward model of the same family crashes.
 """
 import sys
 import types
@@ -363,3 +366,31 @@ class TestOnlineDPORegistryWrapping:
             prompts=["p0"], completions=["one two three"], completion_ids=[[1, 2, 3]]
         )
         assert rewards == [1.0]
+
+
+# ===========================================================================
+# 7. RewardBridge: hint for the Unsloth apply_qkv reward crash
+# ===========================================================================
+
+class TestRewardBridgeUnslothHint:
+    def _wrap(self, error):
+        from aligntune.core.rl.reward_handler import RewardBridge
+
+        def reward(text, **kwargs):
+            raise error
+
+        return RewardBridge.wrap_registry_reward(reward, "guard_reward")
+
+    def test_apply_qkv_error_logs_backend_hint(self, caplog):
+        wrapped = self._wrap(AttributeError("'LlamaAttention' object has no attribute 'apply_qkv'"))
+        with caplog.at_level("WARNING", logger="aligntune.core.rl.reward_handler"):
+            with pytest.raises(RuntimeError, match="apply_qkv"):
+                wrapped(prompts=["p0"], completions=["c0"])
+        assert "Use backend='trl'" in caplog.text
+
+    def test_other_errors_do_not_log_backend_hint(self, caplog):
+        wrapped = self._wrap(ValueError("bad input"))
+        with caplog.at_level("WARNING", logger="aligntune.core.rl.reward_handler"):
+            with pytest.raises(RuntimeError, match="bad input"):
+                wrapped(prompts=["p0"], completions=["c0"])
+        assert "Use backend='trl'" not in caplog.text
