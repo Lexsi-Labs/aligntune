@@ -71,7 +71,7 @@ class ConfigurationError(AlignTuneError):
         if "model" in message.lower() and "not found" in message.lower():
             suggestions.extend([
                 "Ensure model name is correct (e.g., 'meta-llama/Meta-Llama-3-8B')",
-                "Run 'huggingface-cli login' if using private models",
+                "Run 'hf auth login' if using private models",
                 "Check model availability at https://huggingface.co/models"
             ])
 

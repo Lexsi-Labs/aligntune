@@ -113,7 +113,7 @@ def _resolve_token(token: Optional[str] = None) -> str:
     if not token:
         raise ValueError(
             "No HuggingFace token found. Pass token=..., set HF_TOKEN / HF_LEXSI, "
-            "or run huggingface-cli login."
+            "or run hf auth login."
         )
     return token
 

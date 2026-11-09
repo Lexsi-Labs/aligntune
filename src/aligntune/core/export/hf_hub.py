@@ -48,7 +48,7 @@ class HFHubExporter(BaseExporter):
         if not self.token:
             logger.warning(
                 "No HF token found. Set HF_TOKEN environment variable or "
-                "login with 'huggingface-cli login'"
+                "login with 'hf auth login'"
             )
 
     def _get_adapter_files(self, checkpoint_path: Union[str, Path]) -> list:
@@ -132,6 +132,9 @@ class HFHubExporter(BaseExporter):
             raise ValueError("HuggingFace token required for upload")
 
         api = HfApi(token=self.token)
+        # upload_file and upload_folder take no `private`: the repository's
+        # visibility is set when it is created (an existing repository keeps its own).
+        api.create_repo(self.repo_id, private=self.private, exist_ok=True)
 
         if self.adapter_only:
             logger.info(f"Uploading adapters to {self.repo_id}")
@@ -143,7 +146,6 @@ class HFHubExporter(BaseExporter):
                     path_or_fileobj=str(adapter_file),
                     path_in_repo=adapter_file.name,
                     repo_id=self.repo_id,
-                    private=self.private,
                 )
         else:
             logger.info(f"Uploading full model to {self.repo_id}")
@@ -155,7 +157,6 @@ class HFHubExporter(BaseExporter):
             api.upload_folder(
                 folder_path=str(model_dir),
                 repo_id=self.repo_id,
-                private=self.private,
             )
 
             # Upload tokenizer if available
@@ -168,7 +169,6 @@ class HFHubExporter(BaseExporter):
                             path_or_fileobj=str(file),
                             path_in_repo=file.name,
                             repo_id=self.repo_id,
-                            private=self.private,
                         )
 
         hub_url = f"https://huggingface.co/{self.repo_id}"

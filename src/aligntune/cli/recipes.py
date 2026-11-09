@@ -91,7 +91,7 @@ def list(
 
     if any(r.requires_auth for r in recipes):
         console.print("\n[red]🔐[/red] Recipes marked with 🔐 require Hugging Face authentication")
-        console.print("Run [bold]huggingface-cli login[/bold] to authenticate")
+        console.print("Run [bold]hf auth login[/bold] to authenticate")
 
 
 @app.command()
@@ -214,18 +214,13 @@ def run(
 
     # Check authentication requirement
     if recipe.requires_auth:
-        import subprocess
         try:
-            result = subprocess.run(
-                ["huggingface-cli", "whoami"],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            console.print(f"[green]✅ Authenticated as: {result.stdout.strip()}[/green]")
-        except (subprocess.CalledProcessError, FileNotFoundError):
+            from huggingface_hub import whoami
+
+            console.print(f"[green]✅ Authenticated as: {whoami()['name']}[/green]")
+        except Exception:
             console.print("[red]❌ Authentication required but not logged in.[/red]")
-            console.print("Run: [bold]huggingface-cli login[/bold]")
+            console.print("Run: [bold]hf auth login[/bold]")
             return
 
     # Apply overrides to config

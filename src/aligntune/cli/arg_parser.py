@@ -128,7 +128,7 @@ def add_model_args(parser: argparse.ArgumentParser) -> None:
     model_group.add_argument(
         "--use_auth_token",
         action="store_true",
-        help="Will use the token generated when running `huggingface-cli login`"
+        help="Will use the token generated when running `hf auth login`"
     )
 
 

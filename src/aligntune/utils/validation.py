@@ -459,7 +459,7 @@ def validate_model_access(model_name: str) -> Tuple[bool, str]:
             return True, f"Model {model_name} is accessible remotely"
         except Exception as e2:
             if "authentication" in str(e2).lower():
-                return False, f"Model {model_name} requires authentication. Run 'huggingface-cli login'"
+                return False, f"Model {model_name} requires authentication. Run 'hf auth login'"
             else:
                 return False, f"Model {model_name} is not accessible: {str(e2)}"
 
@@ -477,7 +477,7 @@ def validate_dataset_access(dataset_name: str) -> Tuple[bool, str]:
         return True, f"Dataset {dataset_name} is accessible ({len(configs)} configs)"
     except Exception as e:
         if "authentication" in str(e).lower() or "403" in str(e):
-            return False, f"Dataset {dataset_name} requires authentication. Run 'huggingface-cli login'"
+            return False, f"Dataset {dataset_name} requires authentication. Run 'hf auth login'"
         else:
             return False, f"Dataset {dataset_name} is not accessible: {str(e)}"
 

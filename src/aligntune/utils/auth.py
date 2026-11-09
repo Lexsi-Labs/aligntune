@@ -23,7 +23,7 @@ def setup_hf_auth(token: Optional[str] = None, write_permission: bool = False) -
     
     Args:
         token: HuggingFace token. If None, will try to use existing token or prompt for login.
-        write_permission: Whether to request write permission.
+        write_permission: Unused. huggingface_hub.login does not take it; the token's scope decides.
         
     Returns:
         bool: True if authentication successful, False otherwise.
@@ -49,7 +49,10 @@ def setup_hf_auth(token: Optional[str] = None, write_permission: bool = False) -
             return False
         
         # Non-interactive login with token only
-        login(token=effective_token, write_permission=write_permission)
+        # huggingface_hub.login no longer takes write_permission: the token's own scope decides.
+        if write_permission:
+            logger.warning("write_permission is ignored: the token's own scope decides.")
+        login(token=effective_token)
         logger.info("Successfully authenticated with provided/environment token")
         
         # Verify authentication
