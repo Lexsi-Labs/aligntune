@@ -297,7 +297,7 @@ class TokenizationTrainer:
             except Exception as e:
                 logger.warning(
                     f"Failed to push to HuggingFace Hub: {e}\n"
-                    f"Make sure you're logged in with: huggingface-cli login"
+                    f"Make sure you're logged in with: hf auth login"
                 )
                 self.results['hub_push_error'] = str(e)
 

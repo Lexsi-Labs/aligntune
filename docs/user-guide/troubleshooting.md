@@ -232,7 +232,7 @@ from aligntune.core.backend_factory import create_rl_trainer, BackendType
 
 2. **Check Dataset Access**:
  - Some datasets require authentication
- - Use `huggingface-cli login` to authenticate
+ - Use `hf auth login` to authenticate
 
 3. **Use Local Dataset**:
  ```python
@@ -368,7 +368,7 @@ from aligntune.core.backend_factory import create_rl_trainer, BackendType
 
 2. **Check Model Access**:
  - Some models require authentication
- - Use `huggingface-cli login` to authenticate
+ - Use `hf auth login` to authenticate
 
 3. **Use Local Model**:
  ```python

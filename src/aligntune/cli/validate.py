@@ -338,7 +338,7 @@ def model(
         # Additional info
         if "requires authentication" in message.lower():
             console.print(f"\n[yellow]💡 To access this model:[/yellow]")
-            console.print("  1. Run: huggingface-cli login")
+            console.print("  1. Run: hf auth login")
             console.print("  2. Make sure you have access to the model (some are gated)")
             console.print("  3. Check your token permissions")
 
@@ -400,7 +400,7 @@ def dataset(
         # Additional info
         if "requires authentication" in message.lower():
             console.print(f"\n[yellow]💡 To access this dataset:[/yellow]")
-            console.print("  1. Run: huggingface-cli login")
+            console.print("  1. Run: hf auth login")
             console.print("  2. Make sure you have access to the dataset (some are gated)")
             console.print("  3. Check your token permissions")
 
