@@ -353,6 +353,12 @@ class UnslothClassificationTrainer:
 
         # Tokenize based on task type
         if self.task_type == TaskType.TEXT_CLASSIFICATION:
+            from aligntune.data.classification import ClassificationLabelEncoder
+
+            label_column = self.config.dataset.label_column
+            encoder = ClassificationLabelEncoder().fit(
+                list(train_dataset[label_column]) + list(eval_dataset[label_column])
+            )
             def tokenize_function(examples):
                 """Tokenize text classification data."""
                 result = self.tokenizer(
@@ -361,14 +367,8 @@ class UnslothClassificationTrainer:
                     padding=False,
                     max_length=self.config.model.max_seq_length
                 )
-                # Get labels and convert to 0-indexed if needed (PyTorch expects 0-indexed)
-                labels = examples[self.config.dataset.label_column]
-                if isinstance(labels, list) and len(labels) > 0:
-                    min_label = min(labels)
-                    if min_label > 0:
-                        # Labels are 1-indexed, convert to 0-indexed
-                        labels = [l - 1 for l in labels]
-                result['labels'] = labels
+                # Class ids: text labels mapped, 1-indexed integers shifted, same rule for every batch
+                result['labels'] = [encoder.encode(label) for label in examples[label_column]]
                 return result
 
         else:  # TOKEN_CLASSIFICATION

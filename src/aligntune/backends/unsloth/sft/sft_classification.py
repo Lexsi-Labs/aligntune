@@ -93,11 +93,9 @@ class UnslothTextClassificationTrainer(SFTTrainerBase):
                 padding=False,
                 max_length=self.config.model.max_seq_length,
             )
-            labels = examples['labels']
-            # Remap 1-indexed labels to 0-indexed
-            if isinstance(labels, list) and labels and isinstance(labels[0], int) and min(labels) > 0:
-                labels = [l - 1 for l in labels]
-            result['labels'] = labels
+            # build_sft_datasets already encoded the labels (0..N-1); shifting a
+            # batch with no 0 again would move it to the wrong classes.
+            result['labels'] = examples['labels']
             return result
 
         self.train_dataset = raw_train.map(tokenize, batched=True, remove_columns=raw_train.column_names)
@@ -158,7 +156,7 @@ class UnslothTextClassificationTrainer(SFTTrainerBase):
             eval_dataset=self.eval_dataset,
             data_collator=DataCollatorWithPadding(tokenizer=self.tokenizer, pad_to_multiple_of=8),
             compute_metrics=compute_metrics,
-            tokenizer=self.tokenizer,
+            processing_class=self.tokenizer,
         )
 
     def train(self):
