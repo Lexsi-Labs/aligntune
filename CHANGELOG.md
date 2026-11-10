@@ -10,6 +10,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ## [Unreleased]
 
 ### Fixed
+- Multi-turn `messages` SFT data trains on the conversation's last assistant turn: `prompt` and `completion` came from the first exchange, and `instruction_following` dropped `messages`, so it trained on the first reply. `prompt` is now the last user turn, `completion` the last assistant turn, and `messages` is kept for `instruction_following` as for `sft` (#64).
 - Hugging Face Hub uploads work again: `HFHubExporter` created the repository with `private=` passed to `upload_file` and `upload_folder`, which never accepted it (a `TypeError`), so it now sets the visibility when it creates the repository. `setup_hf_auth` no longer passes `write_permission` to `login`, which does not take it (the error was swallowed and logged as a failed login). `aligntune recipes run` checks the login with `huggingface_hub.whoami()` instead of the `huggingface-cli` command, which huggingface_hub 2.x no longer installs, and messages say `hf auth login`.
 - `HonestyReward` matches dishonesty terms at a word start, so "lie" no longer fires inside "believe" (#55, @ANDROIDHASSAN).
 - `FluencyReward` matches transitions and connectors as whole words: "or" is not in "words" (#56, @ANDROIDHASSAN).
