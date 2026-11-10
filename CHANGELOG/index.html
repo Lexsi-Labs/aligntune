@@ -2152,6 +2152,7 @@
 <h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
 <ul>
+<li>Hugging Face Hub uploads work again: <code>HFHubExporter</code> created the repository with <code>private=</code> passed to <code>upload_file</code> and <code>upload_folder</code>, which never accepted it (a <code>TypeError</code>), so it now sets the visibility when it creates the repository. <code>setup_hf_auth</code> no longer passes <code>write_permission</code> to <code>login</code>, which does not take it (the error was swallowed and logged as a failed login). <code>aligntune recipes run</code> checks the login with <code>huggingface_hub.whoami()</code> instead of the <code>huggingface-cli</code> command, which huggingface_hub 2.x no longer installs, and messages say <code>hf auth login</code>.</li>
 <li><code>HonestyReward</code> matches dishonesty terms at a word start, so "lie" no longer fires inside "believe" (#55, @ANDROIDHASSAN).</li>
 <li><code>FluencyReward</code> matches transitions and connectors as whole words: "or" is not in "words" (#56, @ANDROIDHASSAN).</li>
 <li><code>ConcisenessReward</code> counts a filler next to punctuation ("Basically,") and the two-word "you know" (#57, @ANDROIDHASSAN).</li>
