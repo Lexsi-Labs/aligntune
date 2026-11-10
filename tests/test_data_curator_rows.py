@@ -105,3 +105,22 @@ def test_ensure_sft_messages_leaves_existing_messages_alone(tmp_path):
     train = DataManager(task_type="sft").load_dataset(str(path))["train"]
 
     assert ColumnMapper.ensure_sft_messages(train)["messages"] == train["messages"]
+
+
+@pytest.mark.parametrize("task_type", ["sft", "instruction_following"])
+@pytest.mark.parametrize("gate", [True, False])
+def test_multi_turn_messages_target_the_last_assistant_turn(tmp_path, task_type, gate):
+    # Issue #64: prompt/completion came from the first exchange.
+    turns = [
+        {"role": "system", "content": "SYS"},
+        {"role": "user", "content": "U1"},
+        {"role": "assistant", "content": "A1"},
+        {"role": "user", "content": "U2"},
+        {"role": "assistant", "content": "TARGET"},
+    ]
+    path = tmp_path / "chat.jsonl"
+    path.write_text(json.dumps({"messages": turns}) + "\n")
+    train = DataManager(task_type=task_type, curator_schema_gate=gate).load_dataset(str(path))["train"]
+
+    assert (train[0]["prompt"], train[0]["completion"]) == ("U2", "TARGET")
+    assert train[0]["messages"] == turns

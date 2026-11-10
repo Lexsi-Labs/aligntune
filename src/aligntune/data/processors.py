@@ -80,6 +80,17 @@ class ColumnMapper:
                 messages = coerce_messages(example.get(conversation_column))
                 if messages:
                     example["messages"] = messages
+                    # CuratorKIT's prompt/completion come from the FIRST exchange;
+                    # the training target is the LAST assistant turn.
+                    last = max(
+                        (i for i, m in enumerate(messages) if m["role"] == "assistant"),
+                        default=None,
+                    )
+                    if last is not None:
+                        users = [m for m in messages[:last] if m["role"] == "user"]
+                        if users:
+                            example["prompt"] = users[-1]["content"]
+                        example["completion"] = messages[last]["content"]
                 return example
 
             dataset = dataset.map(
@@ -415,6 +426,12 @@ class ColumnMapper:
 
                 dataset = dataset.map(fill_prompt, desc="Filling blank prompt from instruction")
             dataset = self._combine_sft_input(dataset)
+            return self._normalize_sft_messages(dataset)
+        if self.task_type == TaskType.INSTRUCTION_FOLLOWING and any(
+            column in dataset.column_names
+            for column in ("messages", "conversations", "conversation")
+        ):
+            # Multi-turn data: keep every turn, as for SFT.
             return self._normalize_sft_messages(dataset)
         if self.task_type == TaskType.DISTILLATION_OFFLINE:
             # Offline distillation consumes the same full user/assistant

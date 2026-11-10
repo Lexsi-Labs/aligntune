@@ -318,7 +318,7 @@ class DataManager:
         # prompt/completion. Preserve accepted source rows long enough for the
         # SFT normalizer to rebuild their complete ``messages`` sequence.
         preserve_sft_conversations = (
-            self.task_type == TaskType.SFT
+            self.task_type in (TaskType.SFT, TaskType.INSTRUCTION_FOLLOWING)
             and any(
                 column in dataset.column_names
                 for column in ("messages", "conversations", "conversation")
