@@ -10,6 +10,8 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ## [Unreleased]
 
 ### Fixed
+- Text and token classification train on transformers 5: the trainers passed `tokenizer=` to `Trainer`, which transformers 5 removed, so every run stopped with a `TypeError`. They pass `processing_class=`.
+- Text classification with text labels ("positive", or "0"/"1") no longer raises a `TypeError`: `Classification_trainer.py` encodes labels with `ClassificationLabelEncoder` over the whole dataset. `sft_classification.py` no longer shifts already-encoded labels again for a batch that has no 0, which put those rows in the wrong class.
 - Multi-turn `messages` SFT data trains on the conversation's last assistant turn: `prompt` and `completion` came from the first exchange, and `instruction_following` dropped `messages`, so it trained on the first reply. `prompt` is now the last user turn, `completion` the last assistant turn, and `messages` is kept for `instruction_following` as for `sft` (#64).
 - Hugging Face Hub uploads work again: `HFHubExporter` created the repository with `private=` passed to `upload_file` and `upload_folder`, which never accepted it (a `TypeError`), so it now sets the visibility when it creates the repository. `setup_hf_auth` no longer passes `write_permission` to `login`, which does not take it (the error was swallowed and logged as a failed login). `aligntune recipes run` checks the login with `huggingface_hub.whoami()` instead of the `huggingface-cli` command, which huggingface_hub 2.x no longer installs, and messages say `hf auth login`.
 - `HonestyReward` matches dishonesty terms at a word start, so "lie" no longer fires inside "believe" (#55, @ANDROIDHASSAN).

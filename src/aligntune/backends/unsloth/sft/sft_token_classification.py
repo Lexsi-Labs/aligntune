@@ -174,7 +174,7 @@ class UnslothTokenClassificationTrainer(SFTTrainerBase):
             eval_dataset=self.eval_dataset,
             data_collator=DataCollatorForTokenClassification(tokenizer=self.tokenizer, pad_to_multiple_of=8),
             compute_metrics=compute_metrics,
-            tokenizer=self.tokenizer,
+            processing_class=self.tokenizer,
         )
 
     def train(self):
