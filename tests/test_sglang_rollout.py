@@ -33,7 +33,8 @@ def _inside_tmp(path):
     """Resolve a client-supplied path; the fake server only serves the temp dir."""
     real = os.path.realpath(path)
     base = os.path.realpath(tempfile.gettempdir())
-    assert real == base or real.startswith(base + os.sep), f"path outside temp dir: {path}"
+    if not real.startswith(base + os.sep):
+        raise ValueError(f"path outside temp dir: {path}")
     return real
 
 
@@ -80,7 +81,8 @@ class FakeSGLang(BaseHTTPRequestHandler):
             ok = self.weight_update_ok and bool(shards(_inside_tmp(payload["model_path"])))
             return self._reply(200, {"success": ok, "message": "ok" if ok else "load failed"})
         if self.path == "/load_lora_adapter":
-            ok = os.path.exists(_inside_tmp(os.path.join(payload["lora_path"], "adapter_model.safetensors")))
+            adapter = _inside_tmp(os.path.join(payload["lora_path"], "adapter_model.safetensors"))
+            ok = os.path.exists(adapter)
             return self._reply(200 if ok else 400, {"success": ok})
         if self.path == "/unload_lora_adapter":
             time.sleep(self.unload_delay_s)
