@@ -80,7 +80,7 @@ class FakeSGLang(BaseHTTPRequestHandler):
             ok = self.weight_update_ok and bool(shards(_inside_tmp(payload["model_path"])))
             return self._reply(200, {"success": ok, "message": "ok" if ok else "load failed"})
         if self.path == "/load_lora_adapter":
-            ok = os.path.exists(os.path.join(_inside_tmp(payload["lora_path"]), "adapter_model.safetensors"))
+            ok = os.path.exists(_inside_tmp(os.path.join(payload["lora_path"], "adapter_model.safetensors")))
             return self._reply(200 if ok else 400, {"success": ok})
         if self.path == "/unload_lora_adapter":
             time.sleep(self.unload_delay_s)
