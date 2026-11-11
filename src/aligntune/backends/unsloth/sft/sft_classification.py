@@ -81,9 +81,12 @@ class UnslothTextClassificationTrainer(SFTTrainerBase):
 
     def setup_data(self):
         from ....core.sft.dataset_builder import build_sft_datasets
-        raw_train, raw_eval = build_sft_datasets(
-            config=self.config, tokenizer=self.tokenizer, task_type=self.task_type
+        from ....data.classification import attach_label_names
+        raw_train, raw_eval, label_encoder = build_sft_datasets(
+            config=self.config, tokenizer=self.tokenizer, task_type=self.task_type,
+            return_label_encoder=True,
         )
+        attach_label_names(self.model, label_encoder, raw_train, raw_eval)
         self._ensure_pad_token()
 
         def tokenize(examples):
