@@ -180,10 +180,11 @@ def _apply_document_packing(dataset: Dataset, tokenizer: Any, config: SFTConfig)
     return packed_dataset
 
 
-def build_sft_datasets(config: SFTConfig, tokenizer: Any, task_type: TaskType) -> Tuple[Dataset, Optional[Dataset]]:
+def build_sft_datasets(config: SFTConfig, tokenizer: Any, task_type: TaskType, return_label_encoder: bool = False):
     """
     Load, split, format, and pack datasets based on the SFT config.
-    Returns a tuple of (train_dataset, eval_dataset).
+    Returns a tuple of (train_dataset, eval_dataset), or (train_dataset, eval_dataset,
+    label_encoder) with ``return_label_encoder=True`` (the encoder is None for non-classification tasks).
     """
     logger.info("=" * 80)
     logger.info(f"Building SFT Datasets: {config.dataset.name}")
@@ -305,4 +306,6 @@ def build_sft_datasets(config: SFTConfig, tokenizer: Any, task_type: TaskType) -
             logger.warning(f"Could not create eval split: {str(e)}")
 
     logger.info(f"Dataset Setup Complete -> Train: {len(train_dataset)} | Eval: {len(eval_dataset) if eval_dataset else 0}")
+    if return_label_encoder:
+        return train_dataset, eval_dataset, label_encoder
     return train_dataset, eval_dataset

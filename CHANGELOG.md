@@ -10,6 +10,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ## [Unreleased]
 
 ### Fixed
+- Text and token classification keep the class names: with text labels, the trainers save `model.config.id2label` and `label2id` (padded to the model's number of outputs with `LABEL_i`, so `num_labels` and the saved model are unchanged), and a saved model's predictions read back as names. LoRA runs save only the adapter, so there the names stay on the in-memory model. Numeric text labels ("2", "10") get ids in numeric order, not text order. Labels that need more classes than the model has outputs stop with a clear `ValueError` before training.
 - Text and token classification train on transformers 5: the trainers passed `tokenizer=` to `Trainer`, which transformers 5 removed, so every run stopped with a `TypeError`. They pass `processing_class=`.
 - Text classification with text labels ("positive", or "0"/"1") no longer raises a `TypeError`: `Classification_trainer.py` encodes labels with `ClassificationLabelEncoder` over the whole dataset. `sft_classification.py` no longer shifts already-encoded labels again for a batch that has no 0, which put those rows in the wrong class.
 - Multi-turn `messages` SFT data trains on the conversation's last assistant turn: `prompt` and `completion` came from the first exchange, and `instruction_following` dropped `messages`, so it trained on the first reply. `prompt` is now the last user turn, `completion` the last assistant turn, and `messages` is kept for `instruction_following` as for `sft` (#64).

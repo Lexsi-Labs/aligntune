@@ -54,6 +54,14 @@ def _source_column(
     )
 
 
+def _label_sort_key(name: str) -> tuple:
+    """Numeric text ("2", "10", "-1") first, in numeric order; other names after, as text."""
+    try:
+        return (0, int(name.strip()), name)
+    except ValueError:  # not an integer ("pos", "--1", "²")
+        return (1, 0, name)
+
+
 class ClassificationLabelEncoder:
     """Stable encoder shared by train and evaluation splits."""
 
@@ -86,11 +94,18 @@ class ClassificationLabelEncoder:
             self.offset = unique[0] if unique[0] > 0 and contiguous else 0
             self.mapping = None
         else:
-            # Sort names so label IDs do not depend on dataset shuffle order.
-            classes = sorted({str(value) for value in flat})
+            # Sort names so label IDs do not depend on dataset shuffle order;
+            # numeric text ("2", "10") sorts as numbers, not as text.
+            classes = sorted({str(value) for value in flat}, key=_label_sort_key)
             self.mapping = {name: index for index, name in enumerate(classes)}
         self.fitted = True
         return self
+
+    def label_names(self) -> Optional[Dict[int, str]]:
+        """id -> name for text labels (for model.config.id2label); None for integer labels."""
+        if self.mapping is None:
+            return None
+        return {index: name for name, index in self.mapping.items()}
 
     def encode(self, value: Any) -> Any:
         if isinstance(value, (list, tuple)):
@@ -164,3 +179,36 @@ def normalize_token_classification(
         return {"tokens": tokens, "labels": labels}
 
     return dataset.map(convert, remove_columns=dataset.column_names), encoder
+
+
+def attach_label_names(model: Any, encoder: Optional[ClassificationLabelEncoder], *datasets: Optional[Dataset]) -> None:
+    """Check the encoded labels fit the model's head and keep the class names on the model.
+
+    ``datasets`` are the already-normalized splits (``labels`` column). More classes than
+    ``model.config.num_labels`` raises ``ValueError`` (training would otherwise fail later with
+    an index error, or silently drop classes). Text labels' id -> name mapping is saved to
+    ``model.config.id2label``/``label2id`` so predictions can be read back.
+    """
+    labels = [
+        value
+        for dataset in datasets
+        if dataset is not None
+        for value in ClassificationLabelEncoder._flatten(dataset["labels"])
+    ]
+    config = getattr(model, "config", None)
+    num_labels = getattr(config, "num_labels", None)
+    if labels and num_labels:
+        num_classes = max(int(value) for value in labels) + 1
+        if num_classes > num_labels:
+            raise ValueError(
+                f"The labels need {num_classes} classes but the model has num_labels={num_labels}. "
+                "Set model.num_labels to at least the number of classes."
+            )
+    names = encoder.label_names() if encoder is not None else None
+    if names and config is not None:
+        # transformers derives num_labels from len(id2label), so pad to the head's size:
+        # fewer names than outputs must not shrink num_labels, or the saved config no
+        # longer matches the classifier weights and the model won't reload.
+        size = max(num_labels or 0, len(names))
+        config.id2label = {index: names.get(index, f"LABEL_{index}") for index in range(size)}
+        config.label2id = {name: index for index, name in config.id2label.items()}
