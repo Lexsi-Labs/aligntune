@@ -8,12 +8,12 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     env:
       SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.event.release.tag_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3
         with:
           fetch-depth: 0
           ref: ${{ github.event.release.tag_name }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Send release notes to Slack
         id: slack
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 # v1.24.0
         with:
           channel-id: "aligntune-release"
           payload: |
