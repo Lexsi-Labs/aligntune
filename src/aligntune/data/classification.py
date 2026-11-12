@@ -8,6 +8,7 @@ before tokenization.
 
 from __future__ import annotations
 
+import math
 from numbers import Integral
 from typing import Any, Dict, Iterable, Optional, Tuple
 
@@ -54,12 +55,28 @@ def _source_column(
     )
 
 
-def _label_sort_key(name: str) -> tuple:
-    """Numeric text ("2", "10", "-1") first, in numeric order; other names after, as text."""
+def _parse_number(name: str) -> Optional[Any]:
+    """Return the number ``name`` spells ("2", "-1", "10.0", "1e3"), or None for any other text."""
+    text = name.strip()
     try:
-        return (0, int(name.strip()), name)
-    except ValueError:  # not an integer ("pos", "--1", "²")
-        return (1, 0, name)
+        return int(text)
+    except ValueError:
+        pass
+    try:
+        value = float(text)
+    except ValueError:
+        return None
+    return value if math.isfinite(value) else None  # "nan" and "inf" are names, not numbers
+
+
+def _order_labels(names: Iterable[str]) -> list[str]:
+    """One rule for every label type (int, float, text): if every label spells a number, sort by
+    value ("1" < "2" < "10", "1.0" < "2.0" < "10.0"); otherwise sort as plain text."""
+    names = list(names)
+    parsed = {name: _parse_number(name) for name in names}
+    if all(value is not None for value in parsed.values()):
+        return sorted(names, key=lambda name: (parsed[name], name))
+    return sorted(names)
 
 
 class ClassificationLabelEncoder:
@@ -95,8 +112,8 @@ class ClassificationLabelEncoder:
             self.mapping = None
         else:
             # Sort names so label IDs do not depend on dataset shuffle order;
-            # numeric text ("2", "10") sorts as numbers, not as text.
-            classes = sorted({str(value) for value in flat}, key=_label_sort_key)
+            # numeric labels (float 10.0, text "10") sort by value, not as text.
+            classes = _order_labels({str(value) for value in flat})
             self.mapping = {name: index for index, name in enumerate(classes)}
         self.fitted = True
         return self

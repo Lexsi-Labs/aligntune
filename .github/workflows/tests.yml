@@ -5,8 +5,9 @@
 #   - vLLM / SGLang server integration tests and anything needing a GPU or MPS.
 #   - Tests that download models or datasets from the Hub, or use W&B: they need network
 #     access and credentials and are slow or flaky on shared runners.
-#   - The rest of tests/: not yet verified green on CPU-only runners; files are added to
-#     the list below once they are.
+#
+# The command below is an explicit list of files. Add a file there when it needs no GPU,
+# no network access and no credentials.
 name: tests
 
 on:
