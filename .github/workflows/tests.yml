@@ -1,0 +1,58 @@
+# CPU test subset for pull requests and main.
+#
+# Deliberately not run here:
+#   - tests/test_*_unsloth.py and other Unsloth tests: Unsloth is GPU-only and is not installed.
+#   - vLLM / SGLang server integration tests and anything needing a GPU or MPS.
+#   - Tests that download models or datasets from the Hub, or use W&B: they need network
+#     access and credentials and are slow or flaky on shared runners.
+#
+# The command below is an explicit list of files. Add a file there when it needs no GPU,
+# no network access and no credentials.
+name: tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install (CPU torch, no GPU extras)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e . pytest pytest-timeout pytest-rerunfailures
+      - name: Run CPU tests
+        run: |
+          python -m pytest -p no:cacheprovider -o addopts="" \
+            --timeout=300 --reruns 2 --only-rerun OSError --only-rerun ConnectionError \
+            tests/test_classification_label_names.py \
+            tests/test_sglang_rollout.py \
+            tests/test_classification_labels.py \
+            tests/test_config.py \
+            tests/test_config_compat.py \
+            tests/test_yaml_train_keys.py \
+            tests/test_code_confinement.py \
+            tests/test_safe_executor.py \
+            tests/test_sft_config_pickle.py \
+            tests/test_gsm8k_grading.py \
+            tests/test_math_answer_extraction.py

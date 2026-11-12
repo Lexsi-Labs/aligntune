@@ -9,6 +9,7 @@ import contextlib
 import json
 import os
 import sys
+import tempfile
 import threading
 import time
 from contextlib import nullcontext
@@ -26,6 +27,17 @@ from aligntune.backends.trl.rl.rollout.sglang_rollout import (
 )
 
 EOS = 2
+
+
+def _inside_tmp(path):
+    """Resolve a client-supplied path; the fake server only serves the temp dir
+    and /dev/shm (where SGLangRollout syncs weights by default on Linux)."""
+    real = os.path.realpath(path)
+    for root in (tempfile.gettempdir(), "/dev/shm"):
+        base = os.path.realpath(root)
+        if real.startswith(base + os.sep):
+            return real
+    raise ValueError(f"path outside temp dir: {path}")
 
 
 class FakeSGLang(BaseHTTPRequestHandler):
@@ -68,10 +80,11 @@ class FakeSGLang(BaseHTTPRequestHandler):
                 [{"output_ids": [len(ids), EOS]} for ids in payload["input_ids"] for _ in range(n)],
             )
         if self.path == "/update_weights_from_disk":
-            ok = self.weight_update_ok and bool(shards(payload["model_path"]))
+            ok = self.weight_update_ok and bool(shards(_inside_tmp(payload["model_path"])))
             return self._reply(200, {"success": ok, "message": "ok" if ok else "load failed"})
         if self.path == "/load_lora_adapter":
-            ok = os.path.exists(os.path.join(payload["lora_path"], "adapter_model.safetensors"))
+            adapter = _inside_tmp(os.path.join(payload["lora_path"], "adapter_model.safetensors"))
+            ok = os.path.exists(adapter)
             return self._reply(200 if ok else 400, {"success": ok})
         if self.path == "/unload_lora_adapter":
             time.sleep(self.unload_delay_s)

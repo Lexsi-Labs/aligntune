@@ -352,6 +352,7 @@ class UnslothClassificationTrainer:
         eval_dataset = split['test']
 
         # Tokenize based on task type
+        encoder = None  # only text labels have class names; token tags are already ids
         if self.task_type == TaskType.TEXT_CLASSIFICATION:
             from aligntune.data.classification import ClassificationLabelEncoder
 
@@ -420,6 +421,11 @@ class UnslothClassificationTrainer:
             remove_columns=eval_dataset.column_names,
             desc="Tokenizing eval dataset"
         )
+
+        # Head size check and id2label/label2id on the model (setup_model has run, so the
+        # head size is known); the same call the TextClassification/TokenClassification trainers make.
+        from aligntune.data.classification import attach_label_names
+        attach_label_names(self.model, encoder, self.train_dataset, self.eval_dataset)
 
         print(f"✓ Dataset loaded - Train: {len(self.train_dataset)}, Eval: {len(self.eval_dataset)}")
         logger.info(f"Dataset loaded - Train: {len(self.train_dataset)}, Eval: {len(self.eval_dataset)}")
