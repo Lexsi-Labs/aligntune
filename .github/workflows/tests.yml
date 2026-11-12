@@ -45,4 +45,13 @@ jobs:
           python -m pytest -p no:cacheprovider -o addopts="" \
             --timeout=300 --reruns 2 --only-rerun OSError --only-rerun ConnectionError \
             tests/test_classification_label_names.py \
-            tests/test_sglang_rollout.py
+            tests/test_sglang_rollout.py \
+            tests/test_classification_labels.py \
+            tests/test_config.py \
+            tests/test_config_compat.py \
+            tests/test_yaml_train_keys.py \
+            tests/test_code_confinement.py \
+            tests/test_safe_executor.py \
+            tests/test_sft_config_pickle.py \
+            tests/test_gsm8k_grading.py \
+            tests/test_math_answer_extraction.py
