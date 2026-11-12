@@ -30,12 +30,14 @@ EOS = 2
 
 
 def _inside_tmp(path):
-    """Resolve a client-supplied path; the fake server only serves the temp dir."""
+    """Resolve a client-supplied path; the fake server only serves the temp dir
+    and /dev/shm (where SGLangRollout syncs weights by default on Linux)."""
     real = os.path.realpath(path)
-    base = os.path.realpath(tempfile.gettempdir())
-    if not real.startswith(base + os.sep):
-        raise ValueError(f"path outside temp dir: {path}")
-    return real
+    for root in (tempfile.gettempdir(), "/dev/shm"):
+        base = os.path.realpath(root)
+        if real.startswith(base + os.sep):
+            return real
+    raise ValueError(f"path outside temp dir: {path}")
 
 
 class FakeSGLang(BaseHTTPRequestHandler):
