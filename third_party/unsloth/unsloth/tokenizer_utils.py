@@ -747,7 +747,9 @@ def _template_ends_with_toplevel_for(chat_template):
     try:
         import jinja2
         import jinja2.nodes
-        ast = jinja2.Environment().parse(chat_template)
+        import jinja2.sandbox
+        # Parse only, never rendered; the sandbox matches how templates are rendered below.
+        ast = jinja2.sandbox.SandboxedEnvironment().parse(chat_template)
     except Exception:
         return False
 
@@ -799,7 +801,9 @@ def _has_add_generation_prompt_block(chat_template):
     try:
         import jinja2
         import jinja2.nodes
-        ast = jinja2.Environment().parse(chat_template)
+        import jinja2.sandbox
+        # Parse only, never rendered; the sandbox matches how templates are rendered below.
+        ast = jinja2.sandbox.SandboxedEnvironment().parse(chat_template)
     except Exception:
         return "if add_generation_prompt" in chat_template and "%}" in chat_template
     for if_node in ast.find_all(jinja2.nodes.If):
