@@ -167,10 +167,9 @@ def _exported_trainer(module_name, class_name, monkeypatch, rows):
     return trainer
 
 
-EXPORTED = [
-    ("aligntune.backends.trl.sft.Classification_trainer", "ClassificationTrainer"),
-    ("aligntune.backends.unsloth.sft.Classification_trainer", "UnslothClassificationTrainer"),
-]
+# Only the TRL class is called for real: importing the Unsloth module needs a GPU (it imports
+# unsloth), so the Unsloth copy is covered by the source check below.
+EXPORTED = [("aligntune.backends.trl.sft.Classification_trainer", "ClassificationTrainer")]
 
 
 @pytest.mark.parametrize("module_name,class_name", EXPORTED)
