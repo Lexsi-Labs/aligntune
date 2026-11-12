@@ -29,6 +29,7 @@ __all__ = [
 import subprocess
 import sys
 import os
+import stat
 import time
 import re
 import ast
@@ -975,7 +976,8 @@ def _place_prebuilt_binaries(extracted_root, install_folder):
         is_lib = entry.startswith("lib") or any(s in entry for s in lib_suffixes)
         if not is_lib:
             if not IS_WINDOWS:
-                os.chmod(target, 0o755)
+                # Add the owner's execute bit; keep the read/exec bits the archive set.
+                os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
             n_executables += 1
     if n_executables == 0:
         raise RuntimeError("Unsloth: No executables found in the prebuilt archive.")
