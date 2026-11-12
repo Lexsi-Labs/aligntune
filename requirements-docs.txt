@@ -6,19 +6,19 @@
 # They are not required for using AlignTune.
 
 # MkDocs core and theme
-mkdocs>=1.5.0
-mkdocs-material>=9.5.0
+mkdocs>=1.6.1
+mkdocs-material>=9.8.1
 
 # MkDocs plugins
-mkdocs-jupyter>=0.24.0
-mkdocstrings[python]>=0.24.0
+mkdocs-jupyter>=0.26.3
+mkdocstrings[python]>=1.0.8
 
 # Markdown extensions (used by mkdocs-material)
-pymdown-extensions>=10.0.0
+pymdown-extensions>=13.0
 
 # Code highlighting
-pygments>=2.15.0
+pygments>=2.21.0
 
 # Jupyter notebook support (for notebook examples in docs)
-jupyter>=1.0.0
-ipykernel>=6.25.0
+jupyter>=1.1.1
+ipykernel>=7.4.0

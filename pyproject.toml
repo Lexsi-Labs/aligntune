@@ -89,7 +89,7 @@ dependencies = [
     # >=5.15 is needed for North Micro Vision (cohere_compass); <6 until verified.
     "transformers>=5.15,<6",
     # unsloth/unsloth_zoo's own metadata caps this at <4.4.0, but that's
-    # incompatible with trl==1.7.1 below (needs datasets>=4.7.0) - trl's
+    # incompatible with trl==1.17.1 below (needs datasets>=4.7.0) - trl's
     # requirement wins since it's a hard pin already in use elsewhere in
     # this project. Left as a floor only; not verified against unsloth's
     # actual (not just declared) behavior at datasets>=4.7.0.
@@ -112,7 +112,7 @@ dependencies = [
     # refuses to import ("torch==2.15.0 requires torchvision>=0.30.0"), so the
     # Unsloth backend was silently replaced by TRL. torch 2.13 / torchvision 0.28
     # and torch 2.11 / torchvision 0.26 import Unsloth.
-    "torch>=2.4.0,<2.14",
+    "torch>=2.4.0,<2.16",
     "torchvision",
 
     # Core Python dependencies
@@ -148,7 +148,7 @@ dependencies = [
     "heapdict>=1.0.1",
 
     # vLLM is an extra (aligntune[vllm]): it pins its own torch and has no macOS wheel.
-    "trl==1.7.1",
+    "trl==1.17.1",
 
     # unsloth and unsloth_zoo (2026.7.2) are vendored in-tree - see
     # third_party/unsloth/PATCH_NOTES.md and
@@ -218,7 +218,7 @@ dependencies = [
 curation = ["curatorkit[all]"]
 # Heavy or platform-specific packages the core install leaves out. Each is imported only
 # where it is used, so a plain install still runs SFT, DPO, GRPO and merging.
-vllm = ["trl[vllm]==1.7.1"]
+vllm = ["trl[vllm]==1.17.1"]
 eval = ["lm-eval>=0.4.0"]
 wandb = ["wandb>=0.15.0"]
 # Unicode script detection for SentencePiece merge-rule validation (needs the system ICU headers).
