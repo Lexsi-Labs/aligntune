@@ -9,6 +9,9 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 ## [Unreleased]
 
+### Added
+- TRL SFT can resume an interrupted run: `create_sft_trainer(..., resume_from_checkpoint="output/checkpoint-500")` (or `train.resume_from_checkpoint` in a config) is passed to `Trainer.train()`. The default `None` keeps the current behaviour. The Unsloth SFT trainers and the CLI `--resume` option do not use it yet.
+
 ### Fixed
 - Text and token classification keep the class names: with text labels, the trainers (including `ClassificationTrainer` in `Classification_trainer.py`, for TRL and Unsloth) save `model.config.id2label` and `label2id` (padded to the model's number of outputs with `LABEL_i`, so `num_labels` and the saved model are unchanged), and a saved model's predictions read back as names. LoRA runs save only the adapter, so there the names stay on the in-memory model. Numeric labels (text "2" and "10", or floats such as `10.0`) get ids in numeric order, not text order; if any label is not a number, all labels sort as text. Labels that need more classes than the model has outputs stop with a clear `ValueError` before training, in `ClassificationTrainer` too.
 - Text and token classification train on transformers 5: the trainers passed `tokenizer=` to `Trainer`, which transformers 5 removed, so every run stopped with a `TypeError`. They pass `processing_class=`.
