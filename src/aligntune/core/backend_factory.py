@@ -1005,6 +1005,7 @@ def create_sft_trainer(
         train=SFTTrainingConfig(
             epochs=num_epochs,
             max_steps=kwargs.get('max_steps'),
+            resume_from_checkpoint=kwargs.get('resume_from_checkpoint'),
             per_device_batch_size=batch_size,
             per_device_eval_batch_size=kwargs.get('eval_batch_size', batch_size),
             learning_rate=learning_rate,

@@ -344,6 +344,7 @@ trainer = create_sft_trainer(
  # Training settings
  num_epochs=3,
  max_steps=None, # Use epochs instead
+ resume_from_checkpoint=None, # TRL only: path to a HF checkpoint folder (not a file), e.g. "output/checkpoint-500"
  batch_size=4,
  gradient_accumulation_steps=4, # Effective batch size = 16
  learning_rate=2e-4,
