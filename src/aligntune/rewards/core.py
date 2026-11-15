@@ -2704,11 +2704,11 @@ class MBPPReward:
             tests = tests_info.get("tests", [])
         
         if not tests:
-            return -0.10
+            return 0.0  # nothing to grade: the bottom of the [0, 1] range, as the clip below gives every failure
         
         expected_func = entry_name(tests)
         if not expected_func:
-            return -0.10
+            return 0.0
         
         sanitized_code = self._prepare_for_exec(_code_grader.with_prompt(text, text, kwargs), expected_func)
         execution_success, passed, error_messages = self._run_code_in_sandbox(

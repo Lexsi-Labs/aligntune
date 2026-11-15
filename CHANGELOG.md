@@ -42,7 +42,7 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
   syntax tree. They took the first name before a `(`, so `assert set(f(x)) == ...` named the builtin `set` (and
   `assert f (x) == ...` named nothing in `mbpp_reward`), and correct answers scored below 0.
 - **Results change for `mbpp_reward`: scores are clipped to [0, 1]** (they were [-0.5, 1]), last, after the tie-breaker. A
-  wrong answer, a crash and a timeout all score 0, and the format penalties and the brevity bonus only move passing
+  wrong answer, a crash, a timeout and a row with no tests all score 0, and the format penalties and the brevity bonus only move passing
   answers (a correct answer in a code fence still scores 0.98).
 - Text and token classification keep the class names: with text labels, the trainers (including `ClassificationTrainer` in `Classification_trainer.py`, for TRL and Unsloth) save `model.config.id2label` and `label2id` (padded to the model's number of outputs with `LABEL_i`, so `num_labels` and the saved model are unchanged), and a saved model's predictions read back as names. LoRA runs save only the adapter, so there the names stay on the in-memory model. Numeric labels (text "2" and "10", or floats such as `10.0`) get ids in numeric order, not text order; if any label is not a number, all labels sort as text. Labels that need more classes than the model has outputs stop with a clear `ValueError` before training, in `ClassificationTrainer` too.
 - Text and token classification train on transformers 5: the trainers passed `tokenizer=` to `Trainer`, which transformers 5 removed, so every run stopped with a `TypeError`. They pass `processing_class=`.

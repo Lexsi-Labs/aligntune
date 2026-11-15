@@ -607,3 +607,12 @@ def test_non_data_results_cross_as_their_truth_value_only():
 
     assert type(run.values[0]) is collections.Counter and run.values[0] == {"a": 2, "b": 1}
     assert type(run.values[1]) is collections.OrderedDict and run.values[2] == 1 + 2j and run.values[3] is None
+
+
+def test_mbpp_reward_stays_in_0_1_without_tests_or_a_function_to_test():
+    assert score("mbpp_reward", GOOD) == 0.0
+    assert score("mbpp_reward", GOOD, test_list=["assert True == True"]) == 0.0
+    from aligntune.core.rl.reward_handler import prepare_trl_rewards
+
+    fn = prepare_trl_rewards([{"type": "mbpp_reward", "weight": 1.0, "params": {}}]).functions[0]
+    assert all(0.0 <= s <= 1.0 for s in in_child(lambda: list(fn(prompts=["p", "p"], completions=[GOOD, "x"], completion_ids=None))))
