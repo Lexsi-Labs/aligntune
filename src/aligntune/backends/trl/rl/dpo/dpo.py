@@ -11,6 +11,7 @@ from typing import Dict, Any
 from aligntune.core.rl import TrainerBase
 from aligntune.core.registry import TaskType
 from aligntune.core.model_loader import build_model
+from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.core.rl.config import UnifiedConfig
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
@@ -125,6 +126,7 @@ class TRLDPOTrainer(TrainerBase):
                 dpo_kwargs['eval_strategy'] = eval_strategy
             if save_strategy is not None:
                 dpo_kwargs['save_strategy'] = save_strategy
+            dpo_kwargs.update(PrecisionHandler.cpu_only_training_args())
             dpo_config = DPOConfig(**dpo_kwargs)
 
             # Backfill anything else the caller set (e.g. gradient_accumulation_steps,

@@ -12,6 +12,7 @@ from aligntune.core.distill.config import UnifiedDistillConfig
 from aligntune.core.distill.trainer_base import DistillTrainerBase
 from aligntune.core.callbacks import TrainerCallback
 from aligntune.core.registry import TaskType
+from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
 logger = logging.getLogger(__name__)
@@ -113,6 +114,8 @@ class TRLSDFTTrainer(DistillTrainerBase):
             seed=self.config.train.seed,
             optim=optim_scheduler['optimizer_name'],
             lr_scheduler_type=optim_scheduler['scheduler_name'],
+            # No GPU: TRL's bf16 default would stop TrainingArguments.
+            **PrecisionHandler.cpu_only_training_args(),
             # SDFT-specific
             teacher_model_kind=self.config.model.teacher_model_kind or "base",
             distillation_mode=self.config.train.distillation_mode or "topk_logits",  # topk_logits, full_logits, sampled_token

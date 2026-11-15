@@ -12,6 +12,7 @@ from aligntune.core.distill.config import UnifiedDistillConfig
 from aligntune.core.distill.trainer_base import DistillTrainerBase
 from aligntune.core.callbacks import TrainerCallback
 from aligntune.core.registry import TaskType
+from aligntune.core.precision_handler import PrecisionHandler
 from aligntune.utils.config_extractor import extract_extra_and_missing_params
 
 logger = logging.getLogger(__name__)
@@ -170,6 +171,8 @@ class TRLDistillationTrainer(DistillTrainerBase):
             seed=self.config.train.seed,
             optim=optim_scheduler['optimizer_name'],
             lr_scheduler_type=optim_scheduler['scheduler_name'],
+            # No GPU: TRL's bf16 default would stop TrainingArguments.
+            **PrecisionHandler.cpu_only_training_args(),
             # Distillation
             lmbda=configured_lmbda,
             beta=self.config.train.beta if self.config.train.beta is not None else 1.0,
