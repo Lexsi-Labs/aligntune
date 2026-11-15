@@ -9,6 +9,9 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 
 ## [Unreleased]
 
+### Added
+- TRL SFT can resume an interrupted run: `create_sft_trainer(..., resume_from_checkpoint="output/checkpoint-500")` (or `train.resume_from_checkpoint` in a config) is passed to `Trainer.train()`. The default `None` keeps the current behaviour. The Unsloth SFT trainers and the CLI `--resume` option do not use it yet.
+
 ### Fixed
 - **Code rewards: the child that runs model-written code is confined more tightly on Linux.** Landlock used to let it read
   all of `/proc`, `/dev`, `/sys`, `/etc`, `/opt` and every `sys.path` entry, so a completion could read other processes'

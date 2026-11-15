@@ -60,6 +60,20 @@ def test_sft_explicit_arguments_override_config(tmp_path):
     assert config.train.per_device_batch_size == 1
 
 
+def test_sft_resume_from_checkpoint_reaches_train_config(tmp_path):
+    config = create_sft_trainer(
+        config=_sft_config(tmp_path / "run"), resume_from_checkpoint="run/checkpoint-500"
+    )
+
+    assert config.train.resume_from_checkpoint == "run/checkpoint-500"
+
+
+def test_sft_resume_from_checkpoint_defaults_to_none(tmp_path):
+    config = create_sft_trainer(config=_sft_config(tmp_path / "run"))
+
+    assert config.train.resume_from_checkpoint is None
+
+
 def test_sft_config_file_path_values_override_factory_defaults(tmp_path):
     yaml = pytest.importorskip("yaml")
     path = tmp_path / "sft.yaml"

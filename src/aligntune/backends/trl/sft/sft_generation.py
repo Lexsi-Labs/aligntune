@@ -184,7 +184,12 @@ class TRLSFTTrainer(SFTTrainerBase):
         logger.info(f"Starting TRL SFT Training - Task: {self.task_type.value}")
         logger.info("=" * 80)
 
-        train_result = self.trainer.train()
+        # Long-running corpus jobs need ordinary HF checkpoint recovery.  This
+        # is intentionally opt-in: caller code can attach
+        # ``config.train.resume_from_checkpoint`` without changing defaults.
+        train_result = self.trainer.train(
+            resume_from_checkpoint=getattr(self.config.train, "resume_from_checkpoint", None)
+        )
         training_duration = time.time() - start_time
 
         logger.info(f"Training completed in {training_duration:.2f} seconds")
