@@ -718,21 +718,48 @@ def _bound_names(code: str) -> set:
 
 
 def _own_builtins(code: str, test: str) -> frozenset:
-    """Builtin names in ``test`` that mean the candidate's function: the task's function shares a builtin's name
-    (MBPP 126 asks for a ``sum(a, b)``), so plain Python would call the candidate's definition.
+    """The one builtin name in ``test`` that means the candidate's function: the task's function shares a builtin's
+    name (MBPP 126 asks for a ``sum(a, b)``), so plain Python would call the candidate's definition.
 
-    Only where the test calls no other non-builtin function and calls that name once: a candidate can't take
-    over a builtin that wraps its answer (``set(f(x)) == {...}``) or computes the expected side
-    (``sorted(g(1)) == sorted([...])``); there the test still fails, as before."""
+    Only for the function under test: the callee of a call that is the whole assert (``assert is_prime(7)``) or one
+    whole side of a single top-level comparison, whose name the candidate binds, that occurs nowhere else in the
+    assert, whose arguments call no other builtin name the candidate binds, and only when the assert calls no
+    non-builtin function at all. Every other builtin name is the real one (a candidate-bound one fails the test), so
+    a candidate can't take over a builtin on the expected side or around its answer (``f(x) == sorted([...])``,
+    ``len(f(x)) == 3``). Any other shape gets nothing here, as before."""
     try:
-        called = [n.func.id for n in ast.walk(ast.parse(test.strip()))
-                  if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)]
+        body = ast.parse(test.strip()).body
     except (SyntaxError, ValueError, MemoryError, RecursionError):
         return frozenset()
-    if any(name not in _BUILTIN_NAMES for name in called):
+    if len(body) != 1 or not isinstance(body[0], ast.Assert):
         return frozenset()
+    t = body[0].test
     bound = _bound_names(code)
-    return frozenset(name for name in called if name in bound and called.count(name) == 1)
+
+    def bound_builtin_call(n: ast.AST) -> bool:
+        return isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in _BUILTIN_NAMES and n.func.id in bound
+
+    if not any(bound_builtin_call(n) for n in ast.walk(t)):
+        return frozenset()
+    sides = [t] if not isinstance(t, ast.Compare) else [t.left, *t.comparators] if len(t.ops) == 1 else []
+    under_test = [s for s in sides if bound_builtin_call(s)]
+    called = [n.func.id for n in ast.walk(t) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)]
+    ok = len(under_test) == 1 and all(name in _BUILTIN_NAMES for name in called)
+    if ok:
+        call = under_test[0]
+        name = call.func.id
+        ok = sum(1 for n in ast.walk(t) if isinstance(n, ast.Name) and n.id == name) == 1 and not any(
+            bound_builtin_call(n) for a in [*call.args, *(k.value for k in call.keywords)] for n in ast.walk(a))
+    if not ok:
+        if not _own_logged:
+            _own_logged.append(True)
+            logger.debug("A test calls a builtin's name that the candidate defines, but not as the one function under "
+                         "test: the real builtin is meant, so the test fails: %.80s", test)
+        return frozenset()
+    return frozenset({name})
+
+
+_own_logged: List[bool] = []
 
 
 def _bound_builtins(code: str, test: str, own: frozenset = frozenset()) -> bool:
