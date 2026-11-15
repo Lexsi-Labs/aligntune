@@ -7,7 +7,10 @@ they failed on every CPU-only machine. ``PrecisionHandler.cpu_only_training_args
 returns ``bf16=False, fp16=False, use_cpu=True`` only when there is no GPU, so
 GPU runs keep their settings.
 
-GPU availability is mocked; no model or dataset is loaded.
+GPU availability is mocked; no model or dataset is loaded. The trainer tests
+run the no-GPU case only: a GPU-backed ``TrainingArguments`` cannot be built on
+a CPU runner. With a GPU the helper returns nothing (tested below), so the
+trainers' configs are what they were.
 """
 
 from types import SimpleNamespace
@@ -40,11 +43,15 @@ def gpu(request):
         yield request.param
 
 
-def _check(args, gpu):
-    if gpu:
-        assert args.use_cpu is False and args.bf16 is True  # TRL's default, unchanged
-    else:
-        assert args.use_cpu is True and args.bf16 is False and args.fp16 is False
+@pytest.fixture
+def no_gpu():
+    with mock.patch("torch.cuda.is_available", return_value=False), \
+            mock.patch("transformers.training_args.is_torch_bf16_gpu_available", return_value=False):
+        yield
+
+
+def _check(args):
+    assert args.use_cpu is True and args.bf16 is False and args.fp16 is False
 
 
 def test_helper(gpu):
@@ -66,7 +73,7 @@ _OPTIM = {
 }
 
 
-def test_dpo(tmp_path, gpu):
+def test_dpo(tmp_path, no_gpu):
     from aligntune.backends.trl.rl.dpo.dpo import TRLDPOTrainer
     from aligntune.core.backend_factory import BackendFactory, create_rl_trainer
 
@@ -81,7 +88,7 @@ def test_dpo(tmp_path, gpu):
     with mock.patch.object(TRLDPOTrainer, "_setup_optimizer_scheduler", return_value=_OPTIM), \
             mock.patch("trl.DPOTrainer", new=_stub_trainer), pytest.raises(_Built) as built:
         trainer.setup_trainer()
-    _check(built.value.training_args, gpu)
+    _check(built.value.training_args)
 
 
 def _distill_trainer(cls, tmp_path):
@@ -102,7 +109,7 @@ def _distill_trainer(cls, tmp_path):
     return trainer
 
 
-def test_distillation(tmp_path, gpu):
+def test_distillation(tmp_path, no_gpu):
     pytest.importorskip("trl.experimental.distillation")
     from aligntune.backends.trl.distill.distillation import distillation as mod
 
@@ -112,10 +119,10 @@ def test_distillation(tmp_path, gpu):
             mock.patch.object(mod, "extract_extra_and_missing_params", return_value={}), \
             pytest.raises(_Built) as built:
         trainer.train()
-    _check(built.value.training_args, gpu)
+    _check(built.value.training_args)
 
 
-def test_sdft(tmp_path, gpu):
+def test_sdft(tmp_path, no_gpu):
     sdft_module = pytest.importorskip("trl.experimental.sdft")
     from aligntune.backends.trl.distill.sdft import sdft as mod
 
@@ -124,4 +131,4 @@ def test_sdft(tmp_path, gpu):
             mock.patch.object(mod, "extract_extra_and_missing_params", return_value={}), \
             pytest.raises(_Built) as built:
         trainer.train()
-    _check(built.value.training_args, gpu)
+    _check(built.value.training_args)
