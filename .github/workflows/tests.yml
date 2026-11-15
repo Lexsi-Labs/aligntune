@@ -54,6 +54,8 @@ jobs:
             tests/test_factory_config_precedence.py \
             tests/test_sft_resume_cli.py \
             tests/test_chat_template_auto.py \
+            tests/test_cpu_only_training_args.py \
+            tests/test_auto_backend_pad_token.py \
             tests/test_code_confinement.py \
             tests/test_safe_executor.py \
             tests/test_sft_config_pickle.py \

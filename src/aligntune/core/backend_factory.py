@@ -372,6 +372,36 @@ class RLAlgorithm(Enum):
 from .sft.config import TaskType
 
 
+def _auto_backend_for_tokenizer(backend_config: "BackendConfig", name_or_path, trust_remote_code=False) -> "BackendConfig":
+    """With backend="auto", use TRL when Unsloth would refuse the tokenizer.
+
+    Unsloth needs a pad token distinct from eos. When the tokenizer has none and
+    no reserved or unk token it can reuse (SmolLM2, for example), Unsloth adds a
+    temporary one and stops with "Could not find a valid pad token". TRL trains
+    these models with pad = eos, so "auto" picks TRL for them. An explicit
+    backend="unsloth" is left alone.
+    """
+    if backend_config.backend != BackendType.UNSLOTH or not name_or_path:
+        return backend_config
+    try:
+        from transformers import AutoTokenizer
+        from unsloth_zoo.pad_token import fix_pad_token
+
+        tokenizer = AutoTokenizer.from_pretrained(name_or_path, trust_remote_code=trust_remote_code)
+        # allow_add=False only reports; it never adds a token or raises.
+        result = fix_pad_token(tokenizer, allow_add=False)
+    except Exception as e:  # can't tell: keep the recommended backend
+        logger.debug(f"Unsloth pad-token pre-check skipped for {name_or_path}: {e}")
+        return backend_config
+    if result["reason"] is None or result["changed"]:
+        return backend_config
+    logger.warning(
+        f"backend='auto': Unsloth has no usable pad token for {name_or_path} "
+        f"(pad token {result['reason']}), so using TRL. Pass backend='unsloth' to force it."
+    )
+    return BackendConfig(backend_config.training_type, BackendType.TRL, backend_config.algorithm)
+
+
 def _check_resume_supported(config, backend_config: "BackendConfig") -> None:
     """Refuse ``train.resume_from_checkpoint`` where the trainer would ignore it.
 
@@ -1101,7 +1131,11 @@ def create_sft_trainer(
     
     # Create backend config
     if backend == "auto":
-        backend_config = BackendFactory.get_recommended_backend(TrainingType.SFT)
+        backend_config = _auto_backend_for_tokenizer(
+            BackendFactory.get_recommended_backend(TrainingType.SFT),
+            config.model.tokenizer_name_or_path or config.model.name_or_path,
+            config.model.trust_remote_code,
+        )
     else:
         if hasattr(backend, 'value'):  # BackendType enum
             backend_type = backend
@@ -1639,7 +1673,11 @@ def create_rl_trainer(
     algorithm_enum = RLAlgorithm(algorithm.lower())
 
     if backend == "auto":
-        backend_config = BackendFactory.get_recommended_backend(TrainingType.RL, algorithm_enum)
+        backend_config = _auto_backend_for_tokenizer(
+            BackendFactory.get_recommended_backend(TrainingType.RL, algorithm_enum),
+            config.model.name_or_path,
+            getattr(config.model, "trust_remote_code", False),
+        )
     else:
         if hasattr(backend, 'value'):  # BackendType enum
             backend_type = backend
@@ -1804,7 +1842,10 @@ def create_distill_trainer(
 
     # Create backend config
     if backend == "auto":
-        backend_config = BackendFactory.get_recommended_backend(TrainingType.DISTILL)
+        backend_config = _auto_backend_for_tokenizer(
+            BackendFactory.get_recommended_backend(TrainingType.DISTILL),
+            config.model.student_model,
+        )
     else:
         if hasattr(backend, 'value'):  # BackendType enum
             backend_type = backend
