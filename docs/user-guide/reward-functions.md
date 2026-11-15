@@ -298,7 +298,7 @@ completion inside the training process. Each call starts a fresh interpreter
   custom `__eq__` can't earn a pass, and a literal expected value never reaches the child.
   When the task's function shares a builtin's name (MBPP's `sum(a, b)`), the completion's
   definition is used only as the function under test: the whole assert, or one whole side of a
-  single comparison, named nowhere else in the assert, in an assert that calls no other function.
+  single comparison, named nowhere else in the assert, in an assert that names nothing else of the completion's.
   A builtin the completion redefines anywhere else fails the test.
 - **Asserts** are split with `ast`: comparisons (`==`, `!=`, `<` and the like, chained,
   `in`, `is`), `not x`, `math.isclose(a, b, ...)` and bare `assert x`. Any other shape, or

@@ -398,6 +398,8 @@ TAKEOVERS = [
     ("isinstance", "def isinstance(*a): return True", "assert isinstance(f(1), list)"),
     ("any", "def any(*a): return True", "assert any(f(1))"),
     ("any", "def any(*a): return True", "assert any([f(1)]) == True"),
+    ("len", "VALUE = [1]\ndef len(x): return 3", "assert len(VALUE) == 3"),
+    ("sorted", "class S:\n    def run(self): return [0]\ns = S()\ndef sorted(x): return [1, 2, 3]", "assert sorted(s.run()) == [1, 2, 3]"),
     ("sum", "def sum(*a): return 5\ndef len(x): return 5", "assert sum(len([1])) == 5"),
 ]
 

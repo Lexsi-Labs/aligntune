@@ -723,8 +723,8 @@ def _own_builtins(code: str, test: str) -> frozenset:
 
     Only for the function under test: the callee of a call that is the whole assert (``assert is_prime(7)``) or one
     whole side of a single top-level comparison, whose name the candidate binds, that occurs nowhere else in the
-    assert, whose arguments call no other builtin name the candidate binds, and only when the assert calls no
-    non-builtin function at all. Every other builtin name is the real one (a candidate-bound one fails the test), so
+    assert, whose arguments call no other builtin name the candidate binds, and only when the assert names nothing
+    else of the candidate's (no other function, constant or object: ``len(VALUE)``, ``sorted(s.run())``). Every other builtin name is the real one (a candidate-bound one fails the test), so
     a candidate can't take over a builtin on the expected side or around its answer (``f(x) == sorted([...])``,
     ``len(f(x)) == 3``). Any other shape gets nothing here, as before."""
     try:
@@ -743,8 +743,8 @@ def _own_builtins(code: str, test: str) -> frozenset:
         return frozenset()
     sides = [t] if not isinstance(t, ast.Compare) else [t.left, *t.comparators] if len(t.ops) == 1 else []
     under_test = [s for s in sides if bound_builtin_call(s)]
-    called = [n.func.id for n in ast.walk(t) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)]
-    ok = len(under_test) == 1 and all(name in _BUILTIN_NAMES for name in called)
+    names = [n.id for n in ast.walk(t) if isinstance(n, ast.Name)]  # no candidate name but the one under test
+    ok = len(under_test) == 1 and all(name in _BUILTIN_NAMES or name == "math" for name in names)
     if ok:
         call = under_test[0]
         name = call.func.id

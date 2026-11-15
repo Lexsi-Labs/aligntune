@@ -36,11 +36,11 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
   an object that a test only checks for truth (`assert f(x)` on an `re.Match`: only its truth value crosses, and it
   equals nothing), or when the task's function shares a builtin's name (MBPP's `sum(a, b)`). For the last, the completion's
   definition is used only as the function under test (the whole assert, or one whole side of a single comparison, named
-  nowhere else in the assert, in an assert that calls no other function); a builtin the completion redefines anywhere
+  nowhere else in the assert, in an assert that names nothing else of the completion's); a builtin the completion redefines anywhere
   else, on the expected side or around its answer, still fails the test.
-- `mbpp_reward` finds the function under test from the assert's syntax tree. It took the first name before a `(`, so
-  `assert set(f(x)) == ...` named the builtin `set` and `assert f (x) == ...` named nothing, and correct answers scored
-  below 0.
+- `mbpp_reward`, and the code reward of the counterfactual GRPO trainer, find the function under test from the assert's
+  syntax tree. They took the first name before a `(`, so `assert set(f(x)) == ...` named the builtin `set` (and
+  `assert f (x) == ...` named nothing in `mbpp_reward`), and correct answers scored below 0.
 - **Results change for `mbpp_reward`: scores are clipped to [0, 1]** (they were [-0.5, 1]), last, after the tie-breaker. A
   wrong answer, a crash and a timeout all score 0, and the format penalties and the brevity bonus only move passing
   answers (a correct answer in a code fence still scores 0.98).
