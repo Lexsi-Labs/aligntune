@@ -290,9 +290,16 @@ completion inside the training process. Each call starts a fresh interpreter
   A HumanEval completion that only writes the function body is graded as prompt plus
   completion.
 - **Values, not output.** The child sends back plain data only: exact `None`, `bool`, `int`,
-  `float`, `str`, `list`, `tuple`, `set`, `frozenset` and `dict`. The trainer does the
-  comparison. Printed text such as `PASS`, the exit code, a subclass or an object with
-  its own `__eq__` can't earn a pass, and a literal expected value never reaches the child.
+  `float`, `complex`, `str`, `list`, `tuple`, `set`, `frozenset` and `dict`, plus
+  `collections.Counter`, `OrderedDict` and `defaultdict`, which the trainer rebuilds from their
+  items. Any other value (an `re.Match`, a subclass, an object with its own `__eq__`) crosses as
+  its truth value only: `assert f(x)` and `assert not f(x)` work as in Python, and it equals
+  nothing. The trainer does the comparison. Printed text such as `PASS`, the exit code or a
+  custom `__eq__` can't earn a pass, and a literal expected value never reaches the child.
+  When the task's function shares a builtin's name (MBPP's `sum(a, b)`), the completion's
+  definition is used only as the function under test: the whole assert, or one whole side of a
+  single comparison, named nowhere else in the assert, in an assert that names nothing else of the completion's.
+  A builtin the completion redefines anywhere else fails the test.
 - **Asserts** are split with `ast`: comparisons (`==`, `!=`, `<` and the like, chained,
   `in`, `is`), `not x`, `math.isclose(a, b, ...)` and bare `assert x`. Any other shape, or
   a test that isn't an `assert` string, fails with a warning. `input`/`expected_output`
@@ -311,11 +318,22 @@ completion inside the training process. Each call starts a fresh interpreter
 | Environment: only `PATH` and the locale; `HOME`, `TMPDIR` and the working directory are an empty temporary directory, removed afterwards; no standard input | all platforms |
 | Result read back: at most 16 MB and 100,000 values (nested ones included), never followed through a link or a FIFO; a set or dict whose values hash alike is refused before it is built; a tampered result scores 0 and never raises | all platforms |
 
-**What it does not limit.** This is not a sandbox. The child runs as the same user as
-the trainer, so it can read any file that user can read (a token file in your home
-directory, for example), use the network, write outside its directory, and signal other
-processes, the trainer included. A process that calls `setsid` leaves the group and is
-not killed. Everything inside the child belongs to the completion, so a determined one
+**Kernel confinement (Linux).** Before the completion runs, the child applies a seccomp
+filter (no signals to other processes, `ptrace`, sockets, new processes or threads, and no
+calls that change other processes), drops its capabilities, and applies a Landlock ruleset
+(writes only in its own directory; reads only from the interpreter's prefixes, the system
+library directories and its own `/proc` entry). It reports what it got over a pipe it closes
+before the completion runs. On Linux a child without seccomp is refused (the completion scores
+0) unless `ALIGNTUNE_SANDBOX_ALLOW_NO_SECCOMP=1`; `ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1` also
+refuses a child without Landlock, and `=any` refuses one with neither. The trainer is not
+dumpable while a child is alive.
+
+**What it does not limit.** Without that confinement (macOS, Windows, or Linux with the
+opt-out) this is not a sandbox. The child runs as the same user as the trainer, so it can
+read any file that user can read (a token file in your home directory, for example), use the
+network, write outside its directory, and signal other processes, the trainer included. A
+process that calls `setsid` leaves the group and is found by an environment marker on Linux
+only. Everything inside the child belongs to the completion, so a determined one
 can write values of its own choosing into its result. That scores only where the needed
 value can be guessed without the expected output, such as `assert f(x)` or
 `assert f(x) == True`, so prefer tests whose expected values vary. Run training in a

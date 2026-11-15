@@ -43,9 +43,22 @@ def test_correct_answer_still_passes_with_patched_builtins():
     assert passes(THREE + "import builtins\nbuiltins.len = lambda x: 5\n", "assert len(f()) == 3")
 
 
-def test_name_clash_with_a_builtin_fails_with_a_warning(caplog):
+def test_a_task_function_named_like_a_builtin_is_the_candidates():
+    """MBPP 126 asks for ``sum(a, b)``: its tests call only that name, so the candidate's definition is used."""
+    code = "def sum(a,b):\n    s = 0\n    for i in range(1, min(a, b)):\n        if a % i == 0 and b % i == 0:\n            s += i\n    return s\n"
+    assert passes(code, "assert sum(10,15) == 6")
+    assert passes(code, "assert sum(100,150) == 93")
+    assert not passes(code, "assert sum(10,15) == 7")
+    assert not passes("def sorted(x): return [1]\n", "assert sorted([2, 1]) == [1, 2]")  # graded, and wrong
+
+
+@pytest.mark.parametrize("test", [
+    "assert sorted(f()) == [9, 9]",  # the builtin wraps the candidate's answer
+    "assert sorted([7]) == sorted([1, 2])",  # called twice: it would compute the expected side too
+])
+def test_a_builtin_the_candidate_redefines_is_not_taken_over_otherwise(caplog, test):
     with caplog.at_level("WARNING"):
-        assert not passes("def sorted(x): return [1]\n", "assert sorted([2, 1]) == [1, 2]")
+        assert not passes("def f(): return [1]\ndef sorted(x, **k): return [9, 9]\n", test)
     assert "builtin's name" in caplog.text
 
 
@@ -364,3 +377,34 @@ def test_equal_elements_are_accepted_and_distinct_colliding_ones_refused_in_the_
 )
 def test_distinct_colliding_ints_are_still_refused(test):
     assert not passes(HASHES, test)
+
+
+# A wrong answer (f returns 0) plus a redefined builtin that would make the assert hold if the candidate's builtin
+# were used: on the expected side, around the call, or as the callee of a whole side. Every one must score 0.
+TAKEOVERS = [
+    ("sorted", "def sorted(*a, **k): return 0", "assert f(1) == sorted([3, 1, 2])"),
+    ("sorted", "def sorted(*a, **k): return [1, 2, 3]", "assert sorted(f(1)) == [1, 2, 3]"),
+    ("len", "def len(x): return 3", "assert len(f(1)) == 3"),
+    ("len", "def len(x): return 0", "assert f(1) == len([1, 2, 3])"),
+    ("set", "def set(*a): return {1, 2}", "assert set(f(1)) == {1, 2}"),
+    ("set", "def set(*a): return 0", "assert f(1) == set([1, 2])"),
+    ("abs", "def abs(x): return 0", "assert abs(f(1) - 2.5) < 1e-6"),
+    ("round", "def round(*a): return 2.5", "assert round(f(1), 2) == 2.5"),
+    ("sum", "def sum(*a): return 6", "assert sum(f(1)) == 6"),
+    ("sum", "def sum(*a): return 0", "assert f(1) == sum([1, 2, 3])"),
+    ("sum", "def sum(*a): return 3", "assert sum(1, 2) == sum([3])"),
+    ("max", "def max(*a): return 9", "assert max(f(1)) == 9"),
+    ("min", "def min(*a): return 0", "assert f(1) == min([4, 5])"),
+    ("isinstance", "def isinstance(*a): return True", "assert isinstance(f(1), list)"),
+    ("any", "def any(*a): return True", "assert any(f(1))"),
+    ("any", "def any(*a): return True", "assert any([f(1)]) == True"),
+    ("len", "VALUE = [1]\ndef len(x): return 3", "assert len(VALUE) == 3"),
+    ("sorted", "class S:\n    def run(self): return [0]\ns = S()\ndef sorted(x): return [1, 2, 3]", "assert sorted(s.run()) == [1, 2, 3]"),
+    ("sum", "def sum(*a): return 5\ndef len(x): return 5", "assert sum(len([1])) == 5"),
+]
+
+
+@pytest.mark.parametrize("name, redefined, test", TAKEOVERS, ids=[f"{n}-{i}" for i, (n, _, _) in enumerate(TAKEOVERS)])
+def test_a_redefined_builtin_never_makes_a_wrong_answer_pass(name, redefined, test):
+    code = "def f(x):\n    return 0\n" + redefined + "\n"
+    assert not passes(code, test)

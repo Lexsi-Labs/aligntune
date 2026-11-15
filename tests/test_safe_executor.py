@@ -57,7 +57,9 @@ def test_import_and_open_are_refused_by_default():
 def test_restrictions_can_be_relaxed():
     relaxed = SafeCodeExecutor(restrict_builtins=False)
     assert relaxed.execute("import os").success
-    assert relaxed.execute("open('/etc/hosts').close()").success
+    # open() is allowed once builtins are relaxed. The file is one the child may read under the Linux confinement
+    # (the standard library); /etc/hosts is outside it there.
+    assert relaxed.execute("import os\nopen(os.__file__).close()").success
 
 
 def test_restricted_tests_still_work():

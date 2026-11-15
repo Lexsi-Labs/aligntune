@@ -153,7 +153,7 @@ def test_custom_equality_does_not_pass(text, python_on_path):
     assert score("code_execution", text, test_cases=DICTS) == 0.0
     assert score("code_execution", text, test_cases=ASSERTS) == 0.0
     assert score("code_verifiable", text, ASSERTS) == 0.0
-    assert score("mbpp_reward", text, test_list=ASSERTS) < 0.0
+    assert score("mbpp_reward", text, test_list=ASSERTS) == 0.0
 
 
 def test_operator_overloads_do_not_pass_computed_asserts(python_on_path):
@@ -247,7 +247,7 @@ def test_grandchild_dies_with_the_timeout(tmp_path):
         f"    open({str(mark)!r}, 'w').write('x')\n    os._exit(0)\nwhile True: pass"
     )
     assert score("code_execution", code, test_cases=ASSERTS, params={"timeout": 1.0}) == 0.0
-    assert score("mbpp_reward", code, test_cases=ASSERTS, params={"timeout": 1.0}) < 0.0
+    assert score("mbpp_reward", code, test_cases=ASSERTS, params={"timeout": 1.0}) == 0.0
     in_child(lambda: __import__("time").sleep(3.5))
     assert not mark.exists()
 
@@ -462,7 +462,7 @@ def test_source_that_breaks_the_compiler_scores_zero(text):
     assert score("code_execution", text, test_cases=ASSERTS) == 0.0
     assert score("code_execution", text) == 0.0
     assert score("code_correctness", text, test_cases=DICTS) == 0.0
-    assert score("mbpp_reward", text, test_list=ASSERTS) < 0.0
+    assert score("mbpp_reward", text, test_list=ASSERTS) == 0.0
 
 
 _COLLIDE = "M = 2**61 - 1\ncolliding = lambda n: [k * M for k in range(1, n + 1)]\n"
@@ -551,3 +551,68 @@ def test_counterfact_wrong_and_hanging_solutions():
     assert hang[:2] == (False, 0) and "timed out" in hang[2][0]
     hang = in_child(lambda: cf_evalplus("while True:\n    pass"))
     assert hang[:2] == (False, 0) and "timed out" in hang[2][0]
+
+
+# --- correct answers whose results are not plain builtin data, or whose function shares a builtin's name ---------
+
+# MBPP reference solutions and tests (sanitized split), and one HumanEval-style assert that wraps the call in abs().
+CORRECT = {
+    "mbpp_88_counter": ("import collections\ndef freq_count(list1):\n  freq_count= collections.Counter(list1)\n  return freq_count",
+                        ["assert freq_count([10,10,10,10,20,20,20,20,40,40,50,50,30])==({10: 4, 20: 4, 40: 2, 50: 2, 30: 1})",
+                         "assert freq_count([1,2,3,4,3,2,4,1,3,1,4])==({1:3, 2:2,3:3,4:3})"]),
+    "mbpp_126_named_sum": ("def sum(a,b): \n    sum = 0\n    for i in range (1,min(a,b)): \n        if (a % i == 0 and b % i == 0): \n"
+                           "            sum += i \n    return sum",
+                           ["assert sum(10,15) == 6", "assert sum(100,150) == 93", "assert sum(4,6) == 3"]),
+    "mbpp_590_complex": ("import cmath\ndef polar_rect(x,y):\n cn = complex(x,y)\n cn=cmath.polar(cn)\n cn1 = cmath.rect(2, cmath.pi)\n"
+                         " return (cn,cn1)",
+                         ["assert polar_rect(3,4)==((5.0, 0.9272952180016122), (-2+2.4492935982947064e-16j))",
+                          "assert polar_rect(4,7)==((8.06225774829855, 1.0516502125483738), (-2+2.4492935982947064e-16j))"]),
+    "mbpp_737_match": ("import re \nregex = '^[aeiouAEIOU][A-Za-z0-9_]*'\ndef check_str(string): \n\treturn re.search(regex, string)",
+                       ['assert check_str("annie")', 'assert not check_str("dawood")', 'assert check_str("Else")']),
+    "mbpp_2_set_wrapper": ("def similar_elements(test_tup1, test_tup2):\n  res = tuple(set(test_tup1) & set(test_tup2))\n  return (res) ",
+                           ["assert set(similar_elements((3, 4, 5, 6),(5, 7, 4, 10))) == set((4, 5))"]),
+    "mbpp_77_space_before_call": ("def is_Diff(n): \n    return (n % 11 == 0) ",
+                                  ["assert is_Diff (12345) == False", "assert is_Diff(1212112) == True"]),
+    "abs_wrapper": ("def truncate_number(number: float) -> float:\n    return number % 1.0",
+                    ["assert abs(truncate_number(3.5) - 0.5) < 1e-6"]),
+}
+
+
+@pytest.mark.parametrize("case", sorted(CORRECT))
+def test_correct_answers_score_full_marks(case):
+    code, tests = CORRECT[case]
+    assert score("code_execution", fence(code), test_cases=tests) == 1.0
+    assert score("code_correctness", fence(code), test_cases=tests) == 1.0
+    assert score("code_verifiable", fence(code), tests) == 1.0
+    assert score("mbpp_reward", code, test_list=tests) == 1.0  # bare, so no format penalty applies
+    assert score("mbpp_reward", fence(code), test_list=tests) >= 0.98  # the fence costs 0.02 (a short answer earns some back)
+
+
+def test_non_data_results_cross_as_their_truth_value_only():
+    from aligntune.rewards import _code_grader as g
+
+    code = ("import re, collections\n"
+            "class C(collections.Counter):\n    def __eq__(self, o): return True\n"
+            "def m(s): return re.search('a', s)\n"
+            "def c(): return C(a=1)\n"
+            "def od(): return collections.OrderedDict([(1, 2)])\n"
+            "def dd(): return collections.defaultdict(int, {1: 2})\n")
+    status, passed = g.grade(code, ["assert m('a')", "assert not m('b')", "assert m('a') == True", "assert c() == {'z': 9}",
+                                    "assert c()", "assert od() == {1: 2}", "assert dd() == {1: 2}"])
+    # an re.Match is truthy and equals nothing; a Counter with its own __eq__ is not a Counter, so it can't pass ==
+    assert (status, passed) == ("ok", [True, True, False, False, True, True, True])
+    run = g.run_candidate(code + "def k(): return collections.Counter('aab')\n", 10,
+                          [{"expr": "k()"}, {"expr": "od()"}, {"expr": "1+2j"}, {"expr": "m('b')"}])
+    import collections
+
+    assert type(run.values[0]) is collections.Counter and run.values[0] == {"a": 2, "b": 1}
+    assert type(run.values[1]) is collections.OrderedDict and run.values[2] == 1 + 2j and run.values[3] is None
+
+
+def test_mbpp_reward_stays_in_0_1_without_tests_or_a_function_to_test():
+    assert score("mbpp_reward", GOOD) == 0.0
+    assert score("mbpp_reward", GOOD, test_list=["assert True == True"]) == 0.0
+    from aligntune.core.rl.reward_handler import prepare_trl_rewards
+
+    fn = prepare_trl_rewards([{"type": "mbpp_reward", "weight": 1.0, "params": {}}]).functions[0]
+    assert all(0.0 <= s <= 1.0 for s in in_child(lambda: list(fn(prompts=["p", "p"], completions=[GOOD, "x"], completion_ids=None))))

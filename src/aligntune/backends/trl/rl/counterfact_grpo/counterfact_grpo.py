@@ -25,6 +25,7 @@ import numpy as np
 
 from aligntune.core.rl.trainer_base import TrainerBase
 from aligntune.rewards import _code_grader
+from aligntune.rewards._code_sandbox import entry_name
 from aligntune.core.rl.config import UnifiedConfig
 from aligntune.core.rl.registries import DatasetRegistry, RewardRegistry
 from aligntune.core.rl.caching import DatasetCache
@@ -149,15 +150,11 @@ def _prepare_code_for_exec(generated: str, expected_name: str) -> str:
 
 
 def _extract_function_name_from_test(test_case) -> Optional[str]:
-    """Extract function name from test assertion."""
+    """The function an assert tests (from its syntax tree: ``set(f(x)) == ...`` tests ``f``, not ``set``)."""
     # Handle case where test_case is a list
     if isinstance(test_case, list):
         test_case = test_case[0] if test_case else ""
-    test_case = str(test_case)
-    match = re.search(r'(\w+)\s*\([^)]*\)', test_case)
-    if match:
-        return match.group(1)
-    return None
+    return entry_name([str(test_case)])
 
 
 def _run_code_in_sandbox(

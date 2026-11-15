@@ -27,6 +27,7 @@ from aligntune.utils.math_grading import (
     extract_gsm8k_answer,
 )
 from aligntune.rewards import _code_grader
+from aligntune.rewards._code_sandbox import entry_name
 
 logger = logging.getLogger(__name__)
 
@@ -2581,8 +2582,7 @@ class MBPPReward:
                 rewards.append(-0.10)
                 continue
             
-            # Extract expected function name and arity
-            expected_func, expected_arity = self._extract_function_info_from_test(tests[0])
+            expected_func = entry_name(tests)
             if not expected_func:
                 rewards.append(-0.10)
                 continue
@@ -2671,8 +2671,8 @@ class MBPPReward:
                         tie_breaker = 0.03 * (len(sorted_items) - rank - 1) / (len(sorted_items) - 1) - 0.015
                         rewards[orig_idx] += tie_breaker
         
-        # Step 10: Soft clip to [-0.5, 1.0]
-        rewards = [max(-0.5, min(1.0, r)) for r in rewards]
+        # Step 10: clip to [0, 1], last, so no penalty pushes a score below 0 and no bonus lifts a failure above it
+        rewards = [max(0.0, min(1.0, r)) for r in rewards]
         
         # Sanity check
         import math
@@ -2704,11 +2704,11 @@ class MBPPReward:
             tests = tests_info.get("tests", [])
         
         if not tests:
-            return -0.10
+            return 0.0  # nothing to grade: the bottom of the [0, 1] range, as the clip below gives every failure
         
-        expected_func, expected_arity = self._extract_function_info_from_test(tests[0])
+        expected_func = entry_name(tests)
         if not expected_func:
-            return -0.10
+            return 0.0
         
         sanitized_code = self._prepare_for_exec(_code_grader.with_prompt(text, text, kwargs), expected_func)
         execution_success, passed, error_messages = self._run_code_in_sandbox(
@@ -2735,31 +2735,7 @@ class MBPPReward:
                 brevity_bonus = 0.01
         
         total_reward = base_reward + format_penalties + brevity_bonus
-        return max(-0.5, min(1.0, total_reward))
-    
-    def _extract_function_info_from_test(self, test_str: str) -> Tuple[Optional[str], int]:
-        """Extract function name and arity from test string."""
-        try:
-            match = re.search(r'(\w+)\([^)]*\)', test_str)
-            if match:
-                func_name = match.group(1)
-                args_match = re.search(r'\(([^)]*)\)', test_str)
-                if args_match:
-                    args_str = args_match.group(1)
-                    if not args_str.strip():
-                        arity = 0
-                    else:
-                        arity = args_str.count(',') + 1
-                        if args_str.startswith('(') and args_str.endswith(')'):
-                            inner = args_str[1:-1].strip()
-                            if inner and ',' in inner:
-                                arity = 1
-                else:
-                    arity = 0
-                return func_name, arity
-        except:
-            pass
-        return None, 0
+        return max(0.0, min(1.0, total_reward))
     
     def _prepare_for_exec(self, generated: str, expected_name: str) -> str:
         """Sanitize and prepare generated code for execution."""

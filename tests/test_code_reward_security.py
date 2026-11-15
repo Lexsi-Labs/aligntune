@@ -111,7 +111,7 @@ def test_tests_reach_rewards_through_trl_bridge_for_humaneval_and_mbpp():
     p = prepare_trl_rewards([{"type": "mbpp_reward", "weight": 1.0, "params": {}}]).functions[0]
     s = p(prompts=["p", "p"], completions=["```python\n" + mb["reference_solution"] + "\n```", "I cannot."],
           completion_ids=None, test_list=[mb["assert_tests"]] * 2)
-    assert s[0] >= 0.95 and s[1] < 0
+    assert s[0] >= 0.95 and s[1] == 0.0
 
 
 # --- Counterfactual GRPO harnesses (same values-out sandbox) -------------------------------

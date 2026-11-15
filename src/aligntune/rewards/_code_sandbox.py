@@ -7,15 +7,18 @@ timeout that kills the child's whole process group.
 On Linux the child also confines itself before it runs the candidate (best effort, see
 ``isolation_status``):
 
-* a seccomp filter makes ``kill``/``tgkill``/``pidfd_send_signal``, ``ptrace``, ``socket``,
-  ``io_uring_setup``, ``fork``/``clone`` and ``execve`` fail with EPERM, so the candidate cannot
-  signal or trace the trainer, open network connections or start other programs;
+* a seccomp filter refuses signals to other processes, ``ptrace``, sockets, new processes and the
+  other calls listed in ``_code_confine``, so the candidate cannot signal or trace the trainer, open
+  network connections or start other programs;
+* its capabilities are dropped;
 * a Landlock ruleset allows writes only inside the child's temp directory and reads only from the
-  Python installation and system directories (not the user's home), and on kernels with Landlock
-  ABI 4+ blocks TCP bind/connect.
+  interpreter's prefixes and the system library directories (not the user's home, not another
+  process's ``/proc`` entry), and on kernels with Landlock ABI 4+ blocks TCP bind/connect.
 
-Set ``ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1`` to refuse to run candidate code (score 0) when the
-kernel offers neither.
+The child reports the isolation it really got over a pipe it closes before the candidate runs, and the
+trainer decides on that report (see ``_code_confine``: on Linux a child without seccomp is refused by
+default, and ``ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION`` can ask for more). The trainer is held non-dumpable
+while a child lives, and a child's leftovers are cleaned up as in ``_code_grader``.
 
 Assertion tests are graded "values out": the child runs only the candidate code plus the calls the
 asserts make to the candidate's function, and sends back the results as plain data (None, bool,
@@ -34,13 +37,23 @@ import json
 import logging
 import os
 import re
-import select
+import selectors
 import shutil
 import struct
 import subprocess
 import sys
 import tempfile
 import time
+
+from aligntune.rewards._code_confine import (
+    hold_parent,
+    judge_report,
+    reap,
+    refuses_without_seccomp,
+    release_parent,
+    require_isolation,
+    start_child,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -125,9 +138,16 @@ if req["mode"] == "program":
     sys.stdout = io.TextIOWrapper(os.fdopen(1, "wb", closefd=False), encoding="utf-8", errors="replace")
     sys.stdin = io.StringIO(req.get("stdin") or "")
 iso = isolate(req["tmp"], req["require"])
+_report = int(sys.argv[-1])  # the write end of the report pipe (-1 on Windows); closed before the candidate runs
+if _report >= 0:
+    os.write(_report, json.dumps(iso).encode())
+    os.close(_report)
+if req["require"] and not ((iso["seccomp"] and iso["landlock"] and iso.get("caps_dropped", True))
+                           if req["require"] == "full" else (iso["seccomp"] or iso["landlock"])):
+    os._exit(3)
+if req["refuse_no_seccomp"] and not iso["seccomp"]:  # the default on Linux: no seccomp, no candidate
+    os._exit(3)
 load = None
-if req["require"] and not (iso["seccomp"] or iso["landlock"]):
-    load = "isolation unavailable"
 ns = {"__name__": "__candidate__"}
 if load is None:
     try:
@@ -147,11 +167,11 @@ if mode == "calls":
                 calls.append(out(eval(src, ns)))
             except BaseException as e:
                 calls.append({"err": type(e).__name__ + ": " + str(e)[:200]})
-    wr({"load": load, "calls": calls, "iso": iso})
+    wr({"load": load, "calls": calls})
 elif mode == "program":
-    wr({"load": load, "iso": iso})
+    wr({"load": load})
 else:  # serve: answer calls until the trainer closes the pipe
-    wr({"load": load, "iso": iso})
+    wr({"load": load})
     while load is None:
         try:
             msg = rd()
@@ -173,8 +193,6 @@ else:  # serve: answer calls until the trainer closes the pipe
 _codec_ns = {}
 exec(_CODEC, _codec_ns)  # our own constant source: gives the trainer-side encoder for call arguments
 _enc = _codec_ns["enc"]
-
-_ISO_WARNED = []
 
 
 def _dec(v, d=0):
@@ -224,31 +242,18 @@ class SandboxClosed(Exception):
     pass
 
 
-def _require_isolation():
-    return os.environ.get("ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION", "").strip().lower() in ("1", "true", "yes")
-
-
-def _note_isolation(iso):
-    if _ISO_WARNED or not isinstance(iso, dict):
-        return
-    if not (iso.get("seccomp") and iso.get("landlock")):
-        _ISO_WARNED.append(True)
-        logger.warning(
-            "Code-reward sandbox: kernel isolation is partial (seccomp=%s, landlock ABI=%s). Candidate "
-            "code still runs in a separate process with limits, but may be able to signal other "
-            "processes or read/write the user's files. Set ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1 to refuse.",
-            iso.get("seccomp"), iso.get("landlock"))
-
-
 class _Child:
-    """One sandboxed child process and its framed JSON channel (stdin/stdout of the child)."""
+    """One sandboxed child process and its framed JSON channel (stdin/stdout of the child).
+
+    The trainer stays non-dumpable from the start until ``close()``; the child's isolation report is judged
+    before anything is sent or read, and a child that did not get what is required is refused."""
 
     def __init__(self, req, timeout, mem_bytes):
         self.tmp = tempfile.mkdtemp(prefix="aligntune_code_")
         self.deadline = time.monotonic() + timeout
-        self.proc = None
+        self.proc, self.marker, self.state, self.held = None, "", None, False
         self._buf = b""
-        req = dict(req, tmp=self.tmp, require=_require_isolation(),
+        req = dict(req, tmp=self.tmp, require=require_isolation(), refuse_no_seccomp=refuses_without_seccomp(),
                    limits={"RLIMIT_CPU": int(timeout) + 1, "RLIMIT_AS": mem_bytes,
                            "RLIMIT_FSIZE": 10 * 1024 ** 2, "RLIMIT_NPROC": 0, "RLIMIT_CORE": 0})
         env = {"PATH": "/usr/bin:/bin", "HOME": self.tmp, "TMPDIR": self.tmp, "LANG": "C.UTF-8",
@@ -257,35 +262,41 @@ class _Child:
                "OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1",
                "NUMEXPR_NUM_THREADS": "1", "VECLIB_MAXIMUM_THREADS": "1", "BLIS_NUM_THREADS": "1"}
         try:
-            self.proc = subprocess.Popen([sys.executable, "-I", "-c", _CHILD], stdin=subprocess.PIPE,
-                                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=self.tmp,
-                                         env=env, start_new_session=True)
-            self.send(req)
+            self.held = hold_parent()
+            self.proc, self.marker, self.state = start_child(
+                [sys.executable, "-I", "-c", _CHILD], timeout, env=env, first_input=self._frame(req),
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, cwd=self.tmp)
+            if not judge_report(self.state):
+                raise SandboxClosed("isolation unavailable")
         except BaseException:
             self.close()
             raise
 
-    def send(self, obj):
+    @staticmethod
+    def _frame(obj):
         b = json.dumps(obj).encode("utf-8", "surrogatepass")
+        return struct.pack(">I", len(b)) + b
+
+    def send(self, obj):
         try:
-            self.proc.stdin.write(struct.pack(">I", len(b)) + b)
+            self.proc.stdin.write(self._frame(obj))
             self.proc.stdin.flush()
         except (BrokenPipeError, OSError, ValueError) as e:
             raise SandboxClosed(str(e))
 
     def _read(self, n):
+        # selectors, not select.select: that fails for descriptors >= 1024 (a trainer with many open files)
         fd = self.proc.stdout.fileno()
-        while len(self._buf) < n:
-            left = self.deadline - time.monotonic()
-            if left <= 0:
-                raise SandboxTimeout("timed out")
-            r, _, _ = select.select([fd], [], [], left)
-            if not r:
-                raise SandboxTimeout("timed out")
-            chunk = os.read(fd, 1 << 16)
-            if not chunk:
-                raise SandboxClosed("exited before reporting")
-            self._buf += chunk
+        with selectors.DefaultSelector() as sel:
+            sel.register(fd, selectors.EVENT_READ)
+            while len(self._buf) < n:
+                left = self.deadline - time.monotonic()
+                if left <= 0 or not sel.select(left):
+                    raise SandboxTimeout("timed out")
+                chunk = os.read(fd, 1 << 16)
+                if not chunk:
+                    raise SandboxClosed("exited before reporting")
+                self._buf += chunk
         data, self._buf = self._buf[:n], self._buf[n:]
         return data
 
@@ -299,25 +310,17 @@ class _Child:
             raise SandboxClosed("malformed reply")
 
     def close(self):
-        p = self.proc
+        p, self.proc = self.proc, None
         if p is not None:
             for s in (p.stdin, p.stdout):
                 try:
                     s.close()
                 except Exception:  # noqa: BLE001
                     pass
-            try:
-                os.killpg(p.pid, 9)
-            except Exception:  # noqa: BLE001
-                pass
-            try:
-                p.kill()
-            except Exception:  # noqa: BLE001
-                pass
-            try:
-                p.wait(timeout=5)
-            except Exception:  # noqa: BLE001
-                pass
+            reap(p, self.marker, self.state)
+        if self.held:
+            self.held = False
+            release_parent()
         shutil.rmtree(self.tmp, ignore_errors=True)
 
 
@@ -343,7 +346,6 @@ def run_calls(code, calls, setup="", timeout=5.0, mem_bytes=1024**3):
             child.close()
     if not isinstance(out, dict):
         return "malformed reply", [("err", "malformed reply")] * len(calls)
-    _note_isolation(out.get("iso"))
     results = []
     for item in out.get("calls", []) if isinstance(out.get("calls"), list) else []:
         try:
@@ -365,7 +367,6 @@ def run_program(code, stdin="", timeout=5.0, mem_bytes=1024**3, max_output=1_000
         out = child.recv()
         if not isinstance(out, dict):
             return "malformed reply", ""
-        _note_isolation(out.get("iso"))
         try:
             with open(os.path.join(child.tmp, "stdout.txt"), "rb") as f:
                 text = f.read(max_output).decode("utf-8", "replace")
@@ -405,7 +406,6 @@ class CandidateSession:
         try:
             self._child = _Child({"mode": "serve", "code": code, "setup": setup or ""}, timeout, mem_bytes)
             out = self._child.recv()
-            _note_isolation(out.get("iso") if isinstance(out, dict) else None)
             load = out.get("load") if isinstance(out, dict) else "malformed reply"
             self.load = None if load is None else str(load)
         except SandboxTimeout:

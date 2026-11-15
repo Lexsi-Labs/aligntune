@@ -9,20 +9,28 @@ limit, no core dumps and, on Linux, an address-space (memory) limit. macOS
 refuses a memory limit, so there the wall clock is the only bound on memory.
 
 The child sends back plain data only: exact ``None``, ``bool``, ``int``,
-``float``, ``str``, ``list``, ``tuple``, ``set``, ``frozenset`` and ``dict``.
-No subclass and no object with its own ``__eq__`` crosses. The trainer then does
-the comparison, so printed text, the exit code and a custom ``__eq__`` can't earn
-a pass, and a literal expected value in a test never reaches the child.
+``float``, ``complex``, ``str``, ``list``, ``tuple``, ``set``, ``frozenset`` and
+``dict``, plus ``collections.Counter`` and ``OrderedDict`` (rebuilt here from
+their items) and a ``defaultdict`` (as a dict). Any other value, a subclass or an
+object with its own ``__eq__`` included, crosses as its truth value only: it
+passes ``assert f(x)`` or ``assert not f(x)`` as in Python (an ``re.Match``) and
+equals nothing. The trainer then does the comparison, so printed text, the exit
+code and a custom ``__eq__`` can't earn a pass, and a literal expected value in a
+test never reaches the child.
 
 This limits what a completion can score and keeps it out of the trainer's
 process. On Linux the child also confines itself before the candidate runs
 (see ``_code_confine``): seccomp refuses signals to other processes, ``ptrace``,
-sockets and new processes, and Landlock limits writes to the child's own
-directory and reads to the Python installation and system directories. That
-is best effort. Where the kernel offers neither, the child runs as the same
-user and can read any file that user can read, use the network, and signal
-other processes, the trainer included; a warning says so, and
-``ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1`` refuses to run then. Everything in
+sockets, new processes and calls that change other processes, its capabilities
+are dropped, and Landlock limits writes to the child's own directory and reads
+to the interpreter's prefixes and the system directories (not another process's
+``/proc`` entry). The child reports what it got over a pipe it closes before
+the candidate runs, and the trainer decides on that report: on Linux a child
+without seccomp is refused unless ``ALIGNTUNE_SANDBOX_ALLOW_NO_SECCOMP=1``, and
+``ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION`` can ask for more. Elsewhere (macOS,
+Windows) the child runs as the same user and can read any file that user can
+read, use the network, and signal other processes, the trainer included; a
+warning says so. Everything in
 the child belongs to the candidate, so a determined one can write values of its
 own choosing into the result. That only scores where the value it needs is known
 without the expected output, such as a test that wants ``True``. Use
@@ -40,20 +48,25 @@ import math
 import operator
 import os
 import re
-import signal
 import stat
 import subprocess
 import sys
 import tempfile
-from collections import Counter
+from collections import Counter, OrderedDict
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence, Tuple, cast
 
 from aligntune.rewards._code_confine import (
     ISOLATE_SOURCE,
     SINGLE_THREAD_ENV,
-    note_isolation_once,
+    hold_parent,
+    judge_report,
+    reap,
+    refuses_without_seccomp,
+    release_parent,
     require_isolation,
+    start_child,
 )
+from aligntune.rewards._code_sandbox import _Opaque
 
 logger = logging.getLogger(__name__)
 
@@ -88,15 +101,28 @@ def _main():
         job = json.load(f)
     os.unlink(sys.argv[1])
     out = open(sys.argv[2], "w")
+    report = int(sys.argv[4])  # the write end of the report pipe, inherited from the grader (-1 on Windows)
     sys.argv = ["candidate"]
     # Last step before the candidate: the job is read and the result file is open, so confining
-    # now costs the harness nothing. See _code_confine for what it stops.
+    # now costs the harness nothing. See _code_confine for what it stops. The state it really got goes
+    # to the grader over the report pipe, which is closed before the candidate runs (it can't write to
+    # it or find it), and the candidate does not run if a required layer failed.
     state = isolate(os.getcwd(), job.get("require", False))
-    if job.get("require") and not (state["seccomp"] or state["landlock"]):
+    if report >= 0:
+        os.write(report, json.dumps(state).encode())
+        os.close(report)
+    if job.get("require") and not (
+            (state["seccomp"] and state["landlock"] and state.get("caps_dropped", True)) if job["require"] == "full"
+            else (state["seccomp"] or state["landlock"])):
+        os._exit(3)
+    if job.get("refuse_no_seccomp") and not state["seccomp"]:  # the default on Linux: no seccomp, no candidate
         os._exit(3)
 
+    import collections
     _type, _callable, _isinstance, _eval, _exception = type, callable, isinstance, eval, Exception
     _list, _tuple, _set, _frozenset, _dict, _bool, _int, _str, _float = list, tuple, set, frozenset, dict, bool, int, str, float
+    _complex, _TypeError, _dict_items = complex, TypeError, dict.items
+    _Counter, _OrderedDict, _defaultdict = collections.Counter, collections.OrderedDict, collections.defaultdict
     _repr, _module, _function, _getattr, _len, _hasattr = repr, types.ModuleType, types.FunctionType, getattr, len, hasattr
     _dump, _close, _exit, _flush = json.dump, out.close, os._exit, sys.stdout.flush
 
@@ -106,13 +132,16 @@ def _main():
             return x
         if t is _float:
             return {"f": _repr(x)}
+        if t is _complex:
+            return {"c": [_repr(x.real), _repr(x.imag)]}
         if t is _list or t is _tuple or t is _set or t is _frozenset:
             return {t.__name__: [enc(i) for i in x]}
-        if t is _dict:
-            return {"dict": [[enc(k), enc(v)] for k, v in x.items()]}
+        if t is _dict or t is _defaultdict or t is _Counter or t is _OrderedDict:
+            # a defaultdict crosses as a dict (its factory can't); Counter and OrderedDict keep their type
+            return {"dict" if t is _defaultdict else t.__name__: [[enc(k), enc(v)] for k, v in _dict_items(x)]}
         if _str(_getattr(t, "__module__", "")).split(".")[0] == "numpy" and _callable(_getattr(x, "tolist", None)):
             return enc(x.tolist())
-        raise TypeError("not plain data")
+        raise _TypeError("not plain data")
 
     allow = job.get("builtins")
     ns = {"__name__": "__main__",
@@ -150,7 +179,10 @@ def _main():
                     value = f()
                 else:
                     value = f(arg)
-            values.append(enc(value))
+            try:
+                values.append(enc(value))
+            except _TypeError:  # not plain data (an re.Match, say): only its truth value crosses
+                values.append({"o": _bool(value)})
         except _exception:
             values.append({"e": 0})
     _dump(values, out)
@@ -174,6 +206,8 @@ class _Failed:
 
 FAILED = _Failed()
 _CONTAINERS = {"list": list, "tuple": tuple, "set": set, "frozenset": frozenset}
+# Counter and OrderedDict are rebuilt here from their items, so their __eq__ is the standard library's.
+_MAPPINGS = {"dict": dict, "Counter": lambda pairs: Counter(dict(pairs)), "OrderedDict": OrderedDict}
 
 
 MAX_RESULT_ELEMENTS = 100_000
@@ -224,10 +258,15 @@ def _decode(value: Any, budget: Optional[List[int]] = None) -> Any:
             return FAILED
         if kind == "f":
             return float(payload)
-        if kind == "dict":
+        if kind == "c":
+            real, imag = payload
+            return complex(float(real), float(imag))
+        if kind == "o" and type(payload) is bool:
+            return _Opaque(payload)
+        if kind in _MAPPINGS:
             pairs = [(_decode(k, budget), _decode(v, budget)) for k, v in payload]
             _hashed([k for k, _ in pairs])
-            return dict(pairs)
+            return _MAPPINGS[kind](pairs)
         items = [_decode(i, budget) for i in payload]
         if kind in ("set", "frozenset"):
             _hashed(items)
@@ -280,7 +319,7 @@ def run_candidate(
     modules it may import. That narrows what a completion can reach by name;
     it does not stop a determined one.
     """
-    proc = None
+    proc, marker, state, held = None, "", None, False  # state: what the child says its isolation is
     limits = [["RLIMIT_CPU", math.ceil(timeout) + 1], ["RLIMIT_FSIZE", MAX_RESULT_BYTES], ["RLIMIT_CORE", 0]]
     if sys.platform.startswith("linux"):
         limits.append(["RLIMIT_AS", int(memory_limit_mb) << 20])
@@ -295,19 +334,17 @@ def run_candidate(
             with open(job, "w") as f:
                 json.dump({"code": code, "items": list(items), "builtins": None if builtins_allow is None else list(builtins_allow),
                            "imports": None if imports_allow is None else list(imports_allow),
-                           "require": require_isolation()}, f)
+                           "require": require_isolation(), "refuse_no_seccomp": refuses_without_seccomp()}, f)
             env = {k: os.environ[k] for k in _ENV_NAMES if k in os.environ}
             env.update(HOME=work, TMPDIR=work, **SINGLE_THREAD_ENV)
-            note_isolation_once()
-            proc = subprocess.Popen(
-                [sys.executable, "-I", harness, job, result, json.dumps(limits)],
-                cwd=work,
-                env=env,
-                stdin=subprocess.DEVNULL,
-                stdout=stdout if capture_stdout else subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True,
+            held = hold_parent()
+            proc, marker, state = start_child(
+                [sys.executable, "-I", harness, job, result, json.dumps(limits)], timeout,
+                cwd=work, env=env, stdin=subprocess.DEVNULL,
+                stdout=stdout if capture_stdout else subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
+            if not judge_report(state):
+                return Run("error", None)
             try:
                 proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
@@ -327,12 +364,9 @@ def run_candidate(
             return Run("error", None)
         finally:
             if proc is not None:
-                # A child that calls setsid leaves the group and isn't killed; a container covers that.
-                try:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                except (OSError, AttributeError):
-                    proc.kill()
-                proc.wait()
+                reap(proc, marker, state)
+            if held:
+                release_parent()
 
 
 # ---------------------------------------------------------------------------
@@ -371,7 +405,8 @@ _METHODS = frozenset(
     "isdigit isalpha isalnum isupper islower find issubset issuperset union intersection "
     "difference symmetric_difference copy".split()
 )
-_PLAIN = (bool, int, float, str, list, tuple, set, frozenset, dict, type(None))
+_PLAIN = (bool, int, float, complex, str, list, tuple, set, frozenset, dict, Counter, OrderedDict, type(None))
+_SIZED = (str, list, tuple, set, frozenset, dict, Counter, OrderedDict)
 _BUILTIN_NAMES = frozenset(dir(builtins))
 # Every container, string and repeat the trainer builds or reads while evaluating a test is held to
 # this many elements, and an assert may visit this many nodes, so a forged value or a big literal
@@ -407,7 +442,7 @@ def _small(v: Any, *things: Any, hashed: bool = False) -> None:
     elements are about to become set members or dict keys.
     """
     for t in things:
-        if type(t) in (str, list, tuple, set, frozenset, dict) or type(t) in _VIEWS:
+        if type(t) in _SIZED or type(t) in _VIEWS:
             if len(t) > _MAX_REPEAT:
                 raise _Fail
             v.touched += len(t)
@@ -441,13 +476,16 @@ def _is_chain(node: ast.expr) -> bool:
     return isinstance(node, ast.Name)
 
 
-def _candidate(node: ast.expr) -> bool:
-    """Whether ``node`` is the candidate's: a name it defines, or a call to one (``f(1)``, ``mod.f(1)``)."""
+def _candidate(node: ast.expr, own: frozenset = frozenset()) -> bool:
+    """Whether ``node`` is the candidate's: a name it defines, or a call to one (``f(1)``, ``mod.f(1)``).
+    Names in ``own`` are builtin names the candidate's function takes over (see :func:`_own_builtins`)."""
     if isinstance(node, ast.Call):
-        return _is_chain(node.func) and _candidate(node.func)
+        return _is_chain(node.func) and _candidate(node.func, own)
     if isinstance(node, ast.Attribute):
-        return _is_chain(node) and _candidate(node.value)
+        return _is_chain(node) and _candidate(node.value, own)
     if isinstance(node, ast.Name):
+        if node.id in own:
+            return True
         if node.id in _FUNCS or node.id == "math":
             return False
         if node.id in _BUILTIN_NAMES:
@@ -512,7 +550,7 @@ def _compile_node(node: ast.expr, calls: List[str]) -> Ev:
         return lambda v: literal
     except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
         pass
-    if _candidate(node):
+    if _candidate(node, getattr(calls, "own", frozenset())):
         calls.append(ast.unparse(node))
         i = len(calls) - 1
 
@@ -634,19 +672,27 @@ def _compile_slice(node: ast.expr, calls: List[str]) -> Ev:
     return _compile(node, calls)
 
 
+class _Calls(list):
+    """The candidate calls of one assert, plus the builtin names the candidate takes over."""
+
+    own: frozenset = frozenset()
+
+
 @functools.lru_cache(maxsize=4096)
-def plan_assert(assertion: str) -> Optional[Tuple[Tuple[str, ...], Callable[[List[Any]], bool]]]:
+def plan_assert(assertion: str, own: frozenset = frozenset()) -> Optional[Tuple[Tuple[str, ...], Callable[[List[Any]], bool]]]:
     """Split ``assert ...`` into the candidate calls the child runs and the check the trainer applies.
 
     The child only runs the candidate's own calls and returns plain data. The
     trainer evaluates the rest (``and``, ``or``, ``not``, chained comparisons,
     arithmetic, whitelisted builtins, ``math`` functions and methods of plain
-    data). Returns None, and warns once per test, for anything else.
+    data). Builtin names in ``own`` are the candidate's (see :func:`_own_builtins`).
+    Returns None, and warns once per test, for anything else.
     """
     try:
         body = ast.parse(assertion.strip()).body
         if len(body) == 1 and isinstance(body[0], ast.Assert):
-            calls: List[str] = []
+            calls = _Calls()
+            calls.own = own
             ev = _compile(body[0].test, calls)
             return tuple(calls), lambda values: bool(ev(_Vals(values)))
     except (SyntaxError, ValueError, MemoryError, RecursionError, _Undecomposable):
@@ -671,9 +717,54 @@ def _bound_names(code: str) -> set:
     return names
 
 
-def _bound_builtins(code: str, test: str) -> bool:
+def _own_builtins(code: str, test: str) -> frozenset:
+    """The one builtin name in ``test`` that means the candidate's function: the task's function shares a builtin's
+    name (MBPP 126 asks for a ``sum(a, b)``), so plain Python would call the candidate's definition.
+
+    Only for the function under test: the callee of a call that is the whole assert (``assert is_prime(7)``) or one
+    whole side of a single top-level comparison, whose name the candidate binds, that occurs nowhere else in the
+    assert, whose arguments call no other builtin name the candidate binds, and only when the assert names nothing
+    else of the candidate's (no other function, constant or object: ``len(VALUE)``, ``sorted(s.run())``). Every other builtin name is the real one (a candidate-bound one fails the test), so
+    a candidate can't take over a builtin on the expected side or around its answer (``f(x) == sorted([...])``,
+    ``len(f(x)) == 3``). Any other shape gets nothing here, as before."""
+    try:
+        body = ast.parse(test.strip()).body
+    except (SyntaxError, ValueError, MemoryError, RecursionError):
+        return frozenset()
+    if len(body) != 1 or not isinstance(body[0], ast.Assert):
+        return frozenset()
+    t = body[0].test
+    bound = _bound_names(code)
+
+    def bound_builtin_call(n: ast.AST) -> bool:
+        return isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in _BUILTIN_NAMES and n.func.id in bound
+
+    if not any(bound_builtin_call(n) for n in ast.walk(t)):
+        return frozenset()
+    sides = [t] if not isinstance(t, ast.Compare) else [t.left, *t.comparators] if len(t.ops) == 1 else []
+    under_test = [s for s in sides if bound_builtin_call(s)]
+    names = [n.id for n in ast.walk(t) if isinstance(n, ast.Name)]  # no candidate name but the one under test
+    ok = len(under_test) == 1 and all(name in _BUILTIN_NAMES or name == "math" for name in names)
+    if ok:
+        call = under_test[0]
+        name = call.func.id
+        ok = sum(1 for n in ast.walk(t) if isinstance(n, ast.Name) and n.id == name) == 1 and not any(
+            bound_builtin_call(n) for a in [*call.args, *(k.value for k in call.keywords)] for n in ast.walk(a))
+    if not ok:
+        if not _own_logged:
+            _own_logged.append(True)
+            logger.debug("A test calls a builtin's name that the candidate defines, but not as the one function under "
+                         "test: the real builtin is meant, so the test fails: %.80s", test)
+        return frozenset()
+    return frozenset({name})
+
+
+_own_logged: List[bool] = []
+
+
+def _bound_builtins(code: str, test: str, own: frozenset = frozenset()) -> bool:
     used = {n.id for n in ast.walk(ast.parse(test.strip())) if isinstance(n, ast.Name)}
-    return bool(used & (set(_FUNCS) | {"math"}) & _bound_names(code))
+    return bool(used & (set(_FUNCS) | {"math"}) & _bound_names(code) - own)
 
 
 def grade(
@@ -699,12 +790,13 @@ def grade(
     checks: List[Optional[Tuple[List[int], Callable[[List[Any]], bool]]]] = []
     for test in tests:
         if isinstance(test, str):
-            plan = plan_assert(test)
+            own = _own_builtins(code, test)
+            plan = plan_assert(test, own)
             if plan is None:
                 checks.append(None)
                 continue
             calls, check = plan
-            if _bound_builtins(code, test):
+            if _bound_builtins(code, test, own):
                 logger.warning("Test uses a builtin's name that the candidate defines, so it counts as failed: %.120s", test)
                 checks.append(None)
                 continue
