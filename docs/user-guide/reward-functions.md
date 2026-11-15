@@ -290,9 +290,14 @@ completion inside the training process. Each call starts a fresh interpreter
   A HumanEval completion that only writes the function body is graded as prompt plus
   completion.
 - **Values, not output.** The child sends back plain data only: exact `None`, `bool`, `int`,
-  `float`, `str`, `list`, `tuple`, `set`, `frozenset` and `dict`. The trainer does the
-  comparison. Printed text such as `PASS`, the exit code, a subclass or an object with
-  its own `__eq__` can't earn a pass, and a literal expected value never reaches the child.
+  `float`, `complex`, `str`, `list`, `tuple`, `set`, `frozenset` and `dict`, plus
+  `collections.Counter`, `OrderedDict` and `defaultdict`, which the trainer rebuilds from their
+  items. Any other value (an `re.Match`, a subclass, an object with its own `__eq__`) crosses as
+  its truth value only: `assert f(x)` and `assert not f(x)` work as in Python, and it equals
+  nothing. The trainer does the comparison. Printed text such as `PASS`, the exit code or a
+  custom `__eq__` can't earn a pass, and a literal expected value never reaches the child.
+  When the task's function shares a builtin's name (MBPP's `sum(a, b)`), an assert that calls
+  no other function and calls that name once uses the completion's definition.
 - **Asserts** are split with `ast`: comparisons (`==`, `!=`, `<` and the like, chained,
   `in`, `is`), `not x`, `math.isclose(a, b, ...)` and bare `assert x`. Any other shape, or
   a test that isn't an `assert` string, fails with a warning. `input`/`expected_output`

@@ -31,6 +31,18 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
   behaviour. `ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1` (or `true`, `yes`, `full`) now needs seccomp and Landlock both and the
   capabilities gone; `=any` needs one of the two, which is what `1` meant before. macOS and Windows have no seccomp and keep
   the process limits and a warning.
+- Code rewards no longer score correct answers 0 or partly when the answer returns a `collections.Counter`, an
+  `OrderedDict`, a `defaultdict` or a complex number (these now cross as plain data and are rebuilt in the trainer), or
+  an object that a test only checks for truth (`assert f(x)` on an `re.Match`: only its truth value crosses, and it
+  equals nothing), or when the task's function shares a builtin's name (MBPP's `sum(a, b)`). For the last, an assert that
+  calls no other function and calls that name once uses the completion's definition; a builtin the completion redefines
+  anywhere else still fails the test.
+- `mbpp_reward` finds the function under test from the assert's syntax tree. It took the first name before a `(`, so
+  `assert set(f(x)) == ...` named the builtin `set` and `assert f (x) == ...` named nothing, and correct answers scored
+  below 0.
+- **Results change for `mbpp_reward`: scores are clipped to [0, 1]** (they were [-0.5, 1]), last, after the tie-breaker. A
+  wrong answer, a crash and a timeout all score 0, and the format penalties and the brevity bonus only move passing
+  answers (a correct answer in a code fence still scores 0.98).
 - Text and token classification keep the class names: with text labels, the trainers (including `ClassificationTrainer` in `Classification_trainer.py`, for TRL and Unsloth) save `model.config.id2label` and `label2id` (padded to the model's number of outputs with `LABEL_i`, so `num_labels` and the saved model are unchanged), and a saved model's predictions read back as names. LoRA runs save only the adapter, so there the names stay on the in-memory model. Numeric labels (text "2" and "10", or floats such as `10.0`) get ids in numeric order, not text order; if any label is not a number, all labels sort as text. Labels that need more classes than the model has outputs stop with a clear `ValueError` before training, in `ClassificationTrainer` too.
 - Text and token classification train on transformers 5: the trainers passed `tokenizer=` to `Trainer`, which transformers 5 removed, so every run stopped with a `TypeError`. They pass `processing_class=`.
 - Text classification with text labels ("positive", or "0"/"1") no longer raises a `TypeError`: `Classification_trainer.py` encodes labels with `ClassificationLabelEncoder` over the whole dataset. `sft_classification.py` no longer shifts already-encoded labels again for a batch that has no 0, which put those rows in the wrong class.

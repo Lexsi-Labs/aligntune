@@ -43,9 +43,22 @@ def test_correct_answer_still_passes_with_patched_builtins():
     assert passes(THREE + "import builtins\nbuiltins.len = lambda x: 5\n", "assert len(f()) == 3")
 
 
-def test_name_clash_with_a_builtin_fails_with_a_warning(caplog):
+def test_a_task_function_named_like_a_builtin_is_the_candidates():
+    """MBPP 126 asks for ``sum(a, b)``: its tests call only that name, so the candidate's definition is used."""
+    code = "def sum(a,b):\n    s = 0\n    for i in range(1, min(a, b)):\n        if a % i == 0 and b % i == 0:\n            s += i\n    return s\n"
+    assert passes(code, "assert sum(10,15) == 6")
+    assert passes(code, "assert sum(100,150) == 93")
+    assert not passes(code, "assert sum(10,15) == 7")
+    assert not passes("def sorted(x): return [1]\n", "assert sorted([2, 1]) == [1, 2]")  # graded, and wrong
+
+
+@pytest.mark.parametrize("test", [
+    "assert sorted(f()) == [9, 9]",  # the builtin wraps the candidate's answer
+    "assert sorted([7]) == sorted([1, 2])",  # called twice: it would compute the expected side too
+])
+def test_a_builtin_the_candidate_redefines_is_not_taken_over_otherwise(caplog, test):
     with caplog.at_level("WARNING"):
-        assert not passes("def sorted(x): return [1]\n", "assert sorted([2, 1]) == [1, 2]")
+        assert not passes("def f(): return [1]\ndef sorted(x, **k): return [9, 9]\n", test)
     assert "builtin's name" in caplog.text
 
 
