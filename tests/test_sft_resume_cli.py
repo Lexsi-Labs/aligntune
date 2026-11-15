@@ -86,7 +86,7 @@ finetune_cli = pytest.importorskip("aligntune.cli.finetune")
 
 @pytest.fixture
 def finetune_calls():
-    """The real ``create_sft_trainer`` runs; only the trainer construction is stubbed."""
+    """The real factories run; only the trainer construction is stubbed."""
     from aligntune.core.backend_factory import BackendFactory
 
     built = []
@@ -95,8 +95,7 @@ def finetune_calls():
         built.append(config)
         return _Trainer()
 
-    with mock.patch.object(BackendFactory, "create_trainer", new=fake_create_trainer), \
-            mock.patch.object(finetune_cli, "create_rl_trainer", side_effect=AssertionError("RL trainer built")):
+    with mock.patch.object(BackendFactory, "create_trainer", new=fake_create_trainer):
         yield built
 
 
@@ -121,3 +120,22 @@ def test_finetune_resume_is_refused_for_rl(finetune_calls):
 
     assert result.exit_code != 0
     assert "--resume" in result.output and "SFT" in result.output
+
+
+@pytest.mark.parametrize("method", ["dpo", "grpo"])
+def test_finetune_rl_builds_a_trainer(finetune_calls, method):
+    # It used to stop with "DistributedConfig.__init__() got an unexpected keyword
+    # argument 'num_gpus'", then passed its config to create_rl_trainer as model_name.
+    result = typer_testing.CliRunner().invoke(finetune_cli.app, [
+        "m", "d", "--method", method, "--backend", "trl", "--max-steps", "3",
+        "--beta", "0.2", "--rewards", "length:0.5",
+    ])
+
+    assert result.exit_code == 0, result.output
+    config = finetune_calls[0]
+    assert config.algo.value == method
+    assert config.model.name_or_path == "m"
+    assert config.datasets[0].name == "d"
+    assert config.train.max_steps == 3
+    assert config.train.beta == 0.2
+    assert [(r["type"], r["weight"]) for r in config.rewards] == [("length", 0.5)]

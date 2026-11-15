@@ -19,11 +19,6 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # Import core functionality
 from ..core.backend_factory import create_sft_trainer, create_rl_trainer
-from ..core.rl.config import (
-    UnifiedConfig, AlgorithmType, ModelConfig, DatasetConfig, 
-    TrainingConfig, LoggingConfig, DistributedConfig, RewardConfig
-)
-from ..core.rl.config_loader import ConfigLoader
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -117,8 +112,8 @@ def finetune(
     rewards: Optional[List[str]] = typer.Option(None, "--rewards", help="Reward functions (e.g., 'length:1.0', 'coherence:0.5')"),
     
     # Distributed Training
-    distributed: str = typer.Option("single", "--distributed", help="Distributed backend: single, ddp, fsdp, deepspeed"),
-    num_gpus: Optional[int] = typer.Option(None, "--num-gpus", help="Number of GPUs to use"),
+    distributed: str = typer.Option("single", "--distributed", help="Shown in --dry-run only; launch with accelerate or torchrun for multi-GPU"),
+    num_gpus: Optional[int] = typer.Option(None, "--num-gpus", help="Shown in --dry-run only; launch with accelerate or torchrun for multi-GPU"),
     
     # Logging and Monitoring
     log_level: str = typer.Option("INFO", "--log-level", help="Logging level: DEBUG, INFO, WARNING, ERROR"),
@@ -192,35 +187,22 @@ def finetune(
         console.print(f"[red]--resume is supported for SFT only, not '{method}'.[/red]")
         raise typer.Exit(1)
 
-    # Create configuration
+    # Both factories take keyword arguments. (A UnifiedConfig built here and
+    # passed positionally landed in model_name, after DistributedConfig had
+    # already rejected num_gpus.)
+    common = dict(
+        model_name=model, dataset_name=dataset, backend=backend,
+        output_dir=output_dir, run_name=run_name, max_steps=max_steps,
+        learning_rate=learning_rate, batch_size=batch_size,
+        gradient_accumulation_steps=gradient_accumulation_steps,
+        warmup_steps=warmup_steps, weight_decay=weight_decay,
+        max_seq_length=max_seq_length, precision=precision, use_peft=use_peft,
+        lora_r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
+        split=dataset_split, max_samples=max_samples, percent=dataset_percent,
+        dataset_num_proc=dataset_num_proc, save_steps=save_steps, eval_steps=eval_steps,
+        seed=seed, loggers=[logging_backend], config=config_file,
+    )
     try:
-        # The RL factory takes the UnifiedConfig; SFT is built from keyword arguments below.
-        config = None
-        if method != "sft":
-            config = _create_configuration(
-                model, dataset, method, backend, output_dir, run_name,
-                max_steps, learning_rate, batch_size, gradient_accumulation_steps,
-                warmup_steps, weight_decay, max_seq_length, precision,
-                use_peft, lora_r, lora_alpha, lora_dropout, beta, temperature,
-                max_prompt_length, dataset_split, max_samples, dataset_percent,
-                dataset_num_proc, dataset_text_field, packing, packing_strategy, eval_packing,
-                padding_free, pad_to_multiple_of, completion_only_loss,
-                assistant_only_loss, loss_type, activation_offloading,
-                chat_template_path, rewards, distributed, num_gpus, log_level, save_steps, eval_steps,
-                logging_backend, seed, resume, config_file,
-                kl_estimator, vf_coef, cliprange_value, gamma, lam,
-                response_length, stop_token, missing_eos_penalty, sync_ref_model,
-                ref_model_sync_steps, ref_model_mixup_alpha, rl_loss_type,
-                rl_loss_weights, f_divergence_type, f_alpha_divergence_coef,
-                reference_free, label_smoothing_rl, use_weighting,
-                rpo_alpha, ld_alpha, discopop_tau
-            )
-        
-            # Load config file overrides if provided
-            if config_file and Path(config_file).exists():
-                config_overrides = ConfigLoader.load_from_yaml(config_file)
-                config = _merge_configs(config, config_overrides)
-        
         # Create and run trainer with enhanced progress display
         from ..utils.errors import create_progress_display, HealthMonitor
 
@@ -232,28 +214,36 @@ def finetune(
 
             try:
                 if method == "sft":
-                    # The SFT factory takes keyword arguments, not the UnifiedConfig
-                    # built above (passed positionally, it landed in model_name).
                     trainer = create_sft_trainer(
-                        model_name=model, dataset_name=dataset, backend=backend,
-                        output_dir=output_dir, run_name=run_name, max_steps=max_steps,
-                        learning_rate=learning_rate, batch_size=batch_size,
-                        gradient_accumulation_steps=gradient_accumulation_steps,
-                        warmup_steps=warmup_steps, weight_decay=weight_decay,
-                        max_seq_length=max_seq_length, precision=precision, use_peft=use_peft,
-                        lora_r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
-                        split=dataset_split, max_samples=max_samples, percent=dataset_percent,
-                        dataset_num_proc=dataset_num_proc, dataset_text_field=dataset_text_field,
+                        **common, dataset_text_field=dataset_text_field,
                         packing=packing, packing_strategy=packing_strategy,
                         padding_free=padding_free, completion_only_loss=completion_only_loss,
                         assistant_only_loss=assistant_only_loss, loss_type=loss_type,
-                        save_steps=save_steps, seed=seed,
                         resume_from_checkpoint=_resume_value(resume),
-                        config=config_file,
                     )
                     progress.update(init_task, description="Starting SFT training...", status="SFT trainer ready")
                 else:
-                    trainer = create_rl_trainer(config, algorithm=method, backend=backend)
+                    trainer = create_rl_trainer(
+                        **common, algorithm=method,
+                        **_rl_options(
+                            method, beta=beta, temperature=temperature,
+                            max_prompt_length=max_prompt_length or max_seq_length // 2,
+                            kl_estimator=kl_estimator, vf_coef=vf_coef,
+                            cliprange_value=cliprange_value, gamma=gamma, lam=lam,
+                            response_length=response_length, stop_token=stop_token,
+                            missing_eos_penalty=missing_eos_penalty,
+                            sync_ref_model=sync_ref_model,
+                            ref_model_sync_steps=ref_model_sync_steps,
+                            ref_model_mixup_alpha=ref_model_mixup_alpha,
+                            loss_type=rl_loss_type, loss_weights=rl_loss_weights,
+                            f_divergence_type=f_divergence_type,
+                            f_alpha_divergence_coef=f_alpha_divergence_coef,
+                            reference_free=reference_free, label_smoothing=label_smoothing_rl,
+                            use_weighting=use_weighting, rpo_alpha=rpo_alpha,
+                            ld_alpha=ld_alpha, discopop_tau=discopop_tau,
+                            rewards=_parse_rewards(rewards),
+                        ),
+                    )
                     progress.update(init_task, description=f"Starting {method.upper()} training...", status=f"{method.upper()} trainer ready")
 
                 # Start training with health monitoring
@@ -289,114 +279,29 @@ def _resume_value(resume: Optional[str]):
     return True if resume.lower() in ("latest", "true") else resume
 
 
-def _create_configuration(
-    model: str, dataset: str, method: str, backend: str, output_dir: str, run_name: Optional[str],
-    max_steps: int, learning_rate: float, batch_size: int, gradient_accumulation_steps: int,
-    warmup_steps: int, weight_decay: float, max_seq_length: int, precision: str,
-    use_peft: bool, lora_r: int, lora_alpha: int, lora_dropout: float, beta: Optional[float],
-    temperature: float, max_prompt_length: Optional[int], dataset_split: str,
-    max_samples: Optional[int], dataset_percent: Optional[float], dataset_num_proc: Optional[int],
-    dataset_text_field: str, packing: bool, packing_strategy: str, eval_packing: Optional[bool],
-    padding_free: bool, pad_to_multiple_of: Optional[int], completion_only_loss: Optional[bool],
-    assistant_only_loss: bool, loss_type: str, activation_offloading: bool,
-    chat_template_path: Optional[str], rewards: Optional[List[str]],
-    distributed: str, num_gpus: Optional[int], log_level: str, save_steps: int, eval_steps: int,
-    logging_backend: str, seed: int, resume: Optional[str], config_file: Optional[str],
-    kl_estimator: str, vf_coef: float, cliprange_value: float, gamma: float, lam: float,
-    response_length: int, stop_token: str, missing_eos_penalty: float, sync_ref_model: bool,
-    ref_model_sync_steps: int, ref_model_mixup_alpha: float, rl_loss_type: str,
-    rl_loss_weights: Optional[List[float]], f_divergence_type: str, f_alpha_divergence_coef: float,
-    reference_free: bool, label_smoothing_rl: float, use_weighting: bool,
-    rpo_alpha: Optional[float], ld_alpha: Optional[float], discopop_tau: float
-) -> UnifiedConfig:
-    """Create UnifiedConfig from command line arguments."""
-    
-    # Map method to algorithm type
-    algorithm_map = {
-        "sft": AlgorithmType.DPO,  # Use DPO for SFT-like training
-        "dpo": AlgorithmType.DPO,
-        "ppo": AlgorithmType.PPO,
-        "grpo": AlgorithmType.GRPO,
-        "gspo": AlgorithmType.GSPO
-    }
-    
-    algo = algorithm_map.get(method, AlgorithmType.DPO)
-    
-    # Create model config
-    model_config = ModelConfig(
-        name_or_path=model,
-        max_seq_length=max_seq_length,
-        precision=precision,
-        use_peft=use_peft,
-        lora_r=lora_r,
-        lora_alpha=lora_alpha,
-        lora_dropout=lora_dropout
-    )
-    
-    # Create dataset config
-    dataset_config = DatasetConfig(
-        name=dataset,
-        split=dataset_split,
-        max_samples=max_samples,
-        percent=dataset_percent
-    )
-    
-    # Create training config
-    training_config = TrainingConfig(
-        max_steps=max_steps,
-        learning_rate=learning_rate,
-        per_device_batch_size=batch_size,
-        gradient_accumulation_steps=gradient_accumulation_steps,
-        warmup_steps=warmup_steps,
-        weight_decay=weight_decay,
-        temperature=temperature,
-        max_prompt_length=max_prompt_length or max_seq_length // 2
-    )
-    
-    # Add beta for DPO
-    if method == "dpo" and beta is not None:
-        training_config.beta = beta
-    
-    # Create logging config
-    logging_config = LoggingConfig(
-        output_dir=output_dir,
-        run_name=run_name or f"{method}_{model.split('/')[-1]}",
-        loggers=[logging_backend]
-    )
-    
-    # Create distributed config
-    distributed_config = DistributedConfig(
-        backend=distributed,
-        num_gpus=num_gpus
-    )
-    
-    # Create reward configs if provided
-    reward_configs = []
-    if rewards:
-        for reward_spec in rewards:
-            if ":" in reward_spec:
-                reward_type, weight = reward_spec.split(":", 1)
-                try:
-                    weight = float(weight)
-                except ValueError:
-                    weight = 1.0
-                reward_configs.append(RewardConfig(type=reward_type, weight=weight))
-    
-    return UnifiedConfig(
-        algo=algo,
-        model=model_config,
-        datasets=[dataset_config],
-        train=training_config,
-        logging=logging_config,
-        distributed=distributed_config,
-        rewards=reward_configs
-    )
+def _parse_rewards(rewards: Optional[List[str]]) -> List[Dict[str, Any]]:
+    """``["length:1.0", "coherence"]`` -> reward entries for ``create_rl_trainer``."""
+    entries = []
+    for spec in rewards or []:
+        reward_type, _, weight = spec.partition(":")
+        try:
+            weight = float(weight) if weight else 1.0
+        except ValueError:
+            weight = 1.0
+        entries.append({"type": reward_type, "weight": weight})
+    return entries
 
 
-def _merge_configs(base_config: UnifiedConfig, override_config: UnifiedConfig) -> UnifiedConfig:
-    """Merge configuration overrides into base configuration."""
-    # This is a simplified merge - in practice, you'd want more sophisticated merging
-    return override_config
+def _rl_options(method: str, **options: Any) -> Dict[str, Any]:
+    """RL options for ``create_rl_trainer``, without unset values.
+
+    ``loss_type`` and ``loss_weights`` are preference-loss settings (default
+    ``"sigmoid"``); they are passed for DPO only, so GRPO and PPO keep their own.
+    """
+    if method != "dpo":
+        options.pop("loss_type", None)
+        options.pop("loss_weights", None)
+    return {key: value for key, value in options.items() if value is not None}
 
 
 def _show_configuration(
