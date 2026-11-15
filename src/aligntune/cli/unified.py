@@ -151,6 +151,17 @@ def load_yaml_config(config_path: str) -> Dict[str, Any]:
         return yaml.safe_load(f)
 
 
+def _apply_resume(final_config: Dict[str, Any], algo: str, resume: Optional[str]) -> None:
+    """Put ``--resume`` into ``train.resume_from_checkpoint``; only SFT can resume."""
+    if resume is None:
+        return
+    if algo != "sft":
+        typer.echo(f"Error: --resume is supported for SFT only, not '{algo}'.")
+        raise typer.Exit(1)
+    value = True if resume.lower() in ("latest", "true") else resume
+    final_config.setdefault("train", {})["resume_from_checkpoint"] = value
+
+
 def merge_configs(yaml_config: Dict[str, Any], cli_args: Dict[str, Any]) -> Dict[str, Any]:
     """Merge YAML config with CLI arguments, CLI takes precedence."""
     merged = yaml_config.copy()
@@ -1091,6 +1102,13 @@ def train(
     distributed_backend: Optional[str] = typer.Option(
         None, "--distributed", help="Distributed backend: single, ddp, deepspeed, fsdp"
     ),
+    resume: Optional[str] = typer.Option(
+        None, "--resume",
+        help=(
+            "Resume an interrupted SFT run (TRL backend) from a checkpoint folder such as "
+            "./output/checkpoint-500, or 'latest' for the newest checkpoint in the output directory."
+        ),
+    ),
     accelerate_config: Optional[str] = typer.Option(
         None, "--accelerate-config",
         help=(
@@ -1271,6 +1289,7 @@ def train(
         # If config is provided, pass it directly to trainer
         # Determine training type
         algo = final_config.get('algo', 'sft').lower()
+        _apply_resume(final_config, algo, resume)
         
         # Set up logging
         log_lvl = final_config.get('logging', {}).get('log_level', 'INFO')
@@ -1713,6 +1732,7 @@ def train(
     
     # Determine training type
     algo = final_config.get('algo', 'sft').lower()
+    _apply_resume(final_config, algo, resume)
     
     # Set up logging
     log_lvl = final_config.get('logging', {}).get('log_level', 'INFO')

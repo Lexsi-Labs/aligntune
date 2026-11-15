@@ -128,7 +128,10 @@ def finetune(
     
     # Advanced Options
     seed: int = typer.Option(42, "--seed", help="Random seed"),
-    resume: Optional[str] = typer.Option(None, "--resume", help="Resume from checkpoint"),
+    resume: Optional[str] = typer.Option(
+        None, "--resume",
+        help="Resume an interrupted SFT run (TRL backend): a checkpoint folder, or 'latest'",
+    ),
     config_file: Optional[str] = typer.Option(None, "--config", "-c", help="YAML config file to override defaults"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Show configuration without training"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
@@ -185,31 +188,38 @@ def finetune(
         )
         return
     
+    if resume and method != "sft":
+        console.print(f"[red]--resume is supported for SFT only, not '{method}'.[/red]")
+        raise typer.Exit(1)
+
     # Create configuration
     try:
-        config = _create_configuration(
-            model, dataset, method, backend, output_dir, run_name,
-            max_steps, learning_rate, batch_size, gradient_accumulation_steps,
-            warmup_steps, weight_decay, max_seq_length, precision,
-            use_peft, lora_r, lora_alpha, lora_dropout, beta, temperature,
-            max_prompt_length, dataset_split, max_samples, dataset_percent,
-            dataset_num_proc, dataset_text_field, packing, packing_strategy, eval_packing,
-            padding_free, pad_to_multiple_of, completion_only_loss,
-            assistant_only_loss, loss_type, activation_offloading,
-            chat_template_path, rewards, distributed, num_gpus, log_level, save_steps, eval_steps,
-            logging_backend, seed, resume, config_file,
-            kl_estimator, vf_coef, cliprange_value, gamma, lam,
-            response_length, stop_token, missing_eos_penalty, sync_ref_model,
-            ref_model_sync_steps, ref_model_mixup_alpha, rl_loss_type,
-            rl_loss_weights, f_divergence_type, f_alpha_divergence_coef,
-            reference_free, label_smoothing_rl, use_weighting,
-            rpo_alpha, ld_alpha, discopop_tau
-        )
+        # The RL factory takes the UnifiedConfig; SFT is built from keyword arguments below.
+        config = None
+        if method != "sft":
+            config = _create_configuration(
+                model, dataset, method, backend, output_dir, run_name,
+                max_steps, learning_rate, batch_size, gradient_accumulation_steps,
+                warmup_steps, weight_decay, max_seq_length, precision,
+                use_peft, lora_r, lora_alpha, lora_dropout, beta, temperature,
+                max_prompt_length, dataset_split, max_samples, dataset_percent,
+                dataset_num_proc, dataset_text_field, packing, packing_strategy, eval_packing,
+                padding_free, pad_to_multiple_of, completion_only_loss,
+                assistant_only_loss, loss_type, activation_offloading,
+                chat_template_path, rewards, distributed, num_gpus, log_level, save_steps, eval_steps,
+                logging_backend, seed, resume, config_file,
+                kl_estimator, vf_coef, cliprange_value, gamma, lam,
+                response_length, stop_token, missing_eos_penalty, sync_ref_model,
+                ref_model_sync_steps, ref_model_mixup_alpha, rl_loss_type,
+                rl_loss_weights, f_divergence_type, f_alpha_divergence_coef,
+                reference_free, label_smoothing_rl, use_weighting,
+                rpo_alpha, ld_alpha, discopop_tau
+            )
         
-        # Load config file overrides if provided
-        if config_file and Path(config_file).exists():
-            config_overrides = ConfigLoader.load_from_yaml(config_file)
-            config = _merge_configs(config, config_overrides)
+            # Load config file overrides if provided
+            if config_file and Path(config_file).exists():
+                config_overrides = ConfigLoader.load_from_yaml(config_file)
+                config = _merge_configs(config, config_overrides)
         
         # Create and run trainer with enhanced progress display
         from ..utils.errors import create_progress_display, HealthMonitor
@@ -222,7 +232,25 @@ def finetune(
 
             try:
                 if method == "sft":
-                    trainer = create_sft_trainer(config, backend=backend)
+                    # The SFT factory takes keyword arguments, not the UnifiedConfig
+                    # built above (passed positionally, it landed in model_name).
+                    trainer = create_sft_trainer(
+                        model_name=model, dataset_name=dataset, backend=backend,
+                        output_dir=output_dir, run_name=run_name, max_steps=max_steps,
+                        learning_rate=learning_rate, batch_size=batch_size,
+                        gradient_accumulation_steps=gradient_accumulation_steps,
+                        warmup_steps=warmup_steps, weight_decay=weight_decay,
+                        max_seq_length=max_seq_length, precision=precision, use_peft=use_peft,
+                        lora_r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
+                        split=dataset_split, max_samples=max_samples, percent=dataset_percent,
+                        dataset_num_proc=dataset_num_proc, dataset_text_field=dataset_text_field,
+                        packing=packing, packing_strategy=packing_strategy,
+                        padding_free=padding_free, completion_only_loss=completion_only_loss,
+                        assistant_only_loss=assistant_only_loss, loss_type=loss_type,
+                        save_steps=save_steps, seed=seed,
+                        resume_from_checkpoint=_resume_value(resume),
+                        config=config_file,
+                    )
                     progress.update(init_task, description="Starting SFT training...", status="SFT trainer ready")
                 else:
                     trainer = create_rl_trainer(config, algorithm=method, backend=backend)
@@ -252,6 +280,13 @@ def finetune(
         error_msg = handle_error(e, verbose)
         console.print(error_msg)
         raise typer.Exit(1)
+
+
+def _resume_value(resume: Optional[str]):
+    """``--resume latest`` (or ``true``) means the newest checkpoint in output_dir."""
+    if resume is None:
+        return None
+    return True if resume.lower() in ("latest", "true") else resume
 
 
 def _create_configuration(

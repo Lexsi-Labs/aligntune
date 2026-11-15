@@ -12,11 +12,19 @@ from unittest import mock
 
 import pytest
 
+from aligntune.core.registry import TaskType
+
 from aligntune.core.backend_factory import (
+    BackendConfig,
     BackendFactory,
+    BackendType,
+    TrainingType,
     create_rl_trainer,
     create_sft_trainer,
 )
+
+# The real classmethod, kept before the autouse fixture below stubs it.
+_real_create_trainer = BackendFactory.create_trainer
 
 
 @pytest.fixture(autouse=True)
@@ -102,6 +110,21 @@ def test_sft_resume_from_checkpoint_refused_where_it_would_be_ignored(tmp_path, 
     cfg.pop("backend")
     with pytest.raises(ValueError, match="resume_from_checkpoint"):
         create_sft_trainer(config=cfg, resume_from_checkpoint=True, **overrides)
+
+
+@pytest.mark.parametrize(
+    "backend, task_type",
+    [(BackendType.UNSLOTH, "sft"), (BackendType.TRL, "text_classification"), (BackendType.TRL, "token_classification")],
+)
+def test_create_trainer_refuses_resume_where_it_would_be_ignored(tmp_path, backend, task_type):
+    # Callers that build an SFTConfig themselves and call BackendFactory.create_trainer
+    # get the same refusal as create_sft_trainer, before any trainer is constructed.
+    config = create_sft_trainer(
+        config=_sft_config(tmp_path / "run"), resume_from_checkpoint=True, task_type="sft"
+    )
+    config.dataset.task_type = TaskType(task_type)
+    with pytest.raises(ValueError, match="resume_from_checkpoint"):
+        _real_create_trainer(config, BackendConfig(TrainingType.SFT, backend))
 
 
 def _trl_sft_trainer(tmp_path, resume):
