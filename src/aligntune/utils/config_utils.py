@@ -279,7 +279,8 @@ def parse_config_to_unified(config_dict: Dict[str, Any], training_type: str = "r
         parsed['compute_bleu'] = eval_cfg.get('compute_bleu', True)
     
     # Top-level fields
-    parsed['chat_template'] = config_dict.get('chat_template', 'auto')
+    # A top-level chat_template wins; otherwise keep the dataset's own, then "auto".
+    parsed['chat_template'] = config_dict.get('chat_template', parsed.get('chat_template') or 'auto')
     parsed['backend'] = config_dict.get('backend', 'auto')
     
     # Caching
