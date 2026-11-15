@@ -10,6 +10,27 @@ See [docs/CHANGELOG.md](docs/CHANGELOG.md) for the full changelog.
 ## [Unreleased]
 
 ### Fixed
+- **Code rewards: the child that runs model-written code is confined more tightly on Linux.** Landlock used to let it read
+  all of `/proc`, `/dev`, `/sys`, `/etc`, `/opt` and every `sys.path` entry, so a completion could read other processes'
+  `/proc` entries, the trainer's command line among them. Reads are now limited to the interpreter's prefixes and library
+  paths, the system library directories, the child's own `/proc/<pid>` and a short list of files (`/dev/urandom`,
+  `/proc/cpuinfo`, `/etc/ld.so.cache` and the like); the user's home, a repository checkout and other `sys.path` entries are
+  refused too. The seccomp filter also refuses calls that act on other processes or on objects shared with them
+  (`prlimit64` and the `sched_set*` calls on any process but the caller, `setpriority`, `ioprio_set`, `migrate_pages`,
+  `move_pages`, `process_madvise`, `perf_event_open`, `kcmp`, SysV IPC and POSIX message queues, namespace, mount and
+  file-handle calls, `bpf`, `userfaultfd`, keyrings, `F_SETOWN`/`FIOSETOWN`) and the file changes Landlock does not cover
+  (`chown`, extended-attribute writes, `truncate` by path; `chmod` and timestamps are still allowed). The child drops every
+  capability before the completion runs. Each child, in both places that start one (asserts and input/output tests, and
+  HumanEval `check()` programs), reports the isolation it got over a pipe it closes before the completion runs, and the
+  trainer decides on that report instead of on a probe or on a reply the completion could write. The trainer marks
+  itself non-dumpable while a child is alive, and where seccomp is missing it also kills the child's leftover processes,
+  found by a marker in their environment. Replies from a HumanEval child are read with `selectors`, so a trainer with
+  more than 1024 open files no longer fails to grade.
+- **Results change for code rewards on Linux without seccomp.** A child that reports no seccomp is refused: the completion
+  is not run, scores 0, and one error names the reason. `ALIGNTUNE_SANDBOX_ALLOW_NO_SECCOMP=1` restores the best-effort
+  behaviour. `ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1` (or `true`, `yes`, `full`) now needs seccomp and Landlock both and the
+  capabilities gone; `=any` needs one of the two, which is what `1` meant before. macOS and Windows have no seccomp and keep
+  the process limits and a warning.
 - Text and token classification keep the class names: with text labels, the trainers (including `ClassificationTrainer` in `Classification_trainer.py`, for TRL and Unsloth) save `model.config.id2label` and `label2id` (padded to the model's number of outputs with `LABEL_i`, so `num_labels` and the saved model are unchanged), and a saved model's predictions read back as names. LoRA runs save only the adapter, so there the names stay on the in-memory model. Numeric labels (text "2" and "10", or floats such as `10.0`) get ids in numeric order, not text order; if any label is not a number, all labels sort as text. Labels that need more classes than the model has outputs stop with a clear `ValueError` before training, in `ClassificationTrainer` too.
 - Text and token classification train on transformers 5: the trainers passed `tokenizer=` to `Trainer`, which transformers 5 removed, so every run stopped with a `TypeError`. They pass `processing_class=`.
 - Text classification with text labels ("positive", or "0"/"1") no longer raises a `TypeError`: `Classification_trainer.py` encodes labels with `ClassificationLabelEncoder` over the whole dataset. `sft_classification.py` no longer shifts already-encoded labels again for a batch that has no 0, which put those rows in the wrong class.

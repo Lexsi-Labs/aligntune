@@ -17,12 +17,16 @@ a pass, and a literal expected value in a test never reaches the child.
 This limits what a completion can score and keeps it out of the trainer's
 process. On Linux the child also confines itself before the candidate runs
 (see ``_code_confine``): seccomp refuses signals to other processes, ``ptrace``,
-sockets and new processes, and Landlock limits writes to the child's own
-directory and reads to the Python installation and system directories. That
-is best effort. Where the kernel offers neither, the child runs as the same
-user and can read any file that user can read, use the network, and signal
-other processes, the trainer included; a warning says so, and
-``ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1`` refuses to run then. Everything in
+sockets, new processes and calls that change other processes, its capabilities
+are dropped, and Landlock limits writes to the child's own directory and reads
+to the interpreter's prefixes and the system directories (not another process's
+``/proc`` entry). The child reports what it got over a pipe it closes before
+the candidate runs, and the trainer decides on that report: on Linux a child
+without seccomp is refused unless ``ALIGNTUNE_SANDBOX_ALLOW_NO_SECCOMP=1``, and
+``ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION`` can ask for more. Elsewhere (macOS,
+Windows) the child runs as the same user and can read any file that user can
+read, use the network, and signal other processes, the trainer included; a
+warning says so. Everything in
 the child belongs to the candidate, so a determined one can write values of its
 own choosing into the result. That only scores where the value it needs is known
 without the expected output, such as a test that wants ``True``. Use
@@ -40,7 +44,6 @@ import math
 import operator
 import os
 import re
-import signal
 import stat
 import subprocess
 import sys
@@ -51,8 +54,13 @@ from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence, Tu
 from aligntune.rewards._code_confine import (
     ISOLATE_SOURCE,
     SINGLE_THREAD_ENV,
-    note_isolation_once,
+    hold_parent,
+    judge_report,
+    reap,
+    refuses_without_seccomp,
+    release_parent,
     require_isolation,
+    start_child,
 )
 
 logger = logging.getLogger(__name__)
@@ -88,11 +96,21 @@ def _main():
         job = json.load(f)
     os.unlink(sys.argv[1])
     out = open(sys.argv[2], "w")
+    report = int(sys.argv[4])  # the write end of the report pipe, inherited from the grader (-1 on Windows)
     sys.argv = ["candidate"]
     # Last step before the candidate: the job is read and the result file is open, so confining
-    # now costs the harness nothing. See _code_confine for what it stops.
+    # now costs the harness nothing. See _code_confine for what it stops. The state it really got goes
+    # to the grader over the report pipe, which is closed before the candidate runs (it can't write to
+    # it or find it), and the candidate does not run if a required layer failed.
     state = isolate(os.getcwd(), job.get("require", False))
-    if job.get("require") and not (state["seccomp"] or state["landlock"]):
+    if report >= 0:
+        os.write(report, json.dumps(state).encode())
+        os.close(report)
+    if job.get("require") and not (
+            (state["seccomp"] and state["landlock"] and state.get("caps_dropped", True)) if job["require"] == "full"
+            else (state["seccomp"] or state["landlock"])):
+        os._exit(3)
+    if job.get("refuse_no_seccomp") and not state["seccomp"]:  # the default on Linux: no seccomp, no candidate
         os._exit(3)
 
     _type, _callable, _isinstance, _eval, _exception = type, callable, isinstance, eval, Exception
@@ -280,7 +298,7 @@ def run_candidate(
     modules it may import. That narrows what a completion can reach by name;
     it does not stop a determined one.
     """
-    proc = None
+    proc, marker, state, held = None, "", None, False  # state: what the child says its isolation is
     limits = [["RLIMIT_CPU", math.ceil(timeout) + 1], ["RLIMIT_FSIZE", MAX_RESULT_BYTES], ["RLIMIT_CORE", 0]]
     if sys.platform.startswith("linux"):
         limits.append(["RLIMIT_AS", int(memory_limit_mb) << 20])
@@ -295,19 +313,17 @@ def run_candidate(
             with open(job, "w") as f:
                 json.dump({"code": code, "items": list(items), "builtins": None if builtins_allow is None else list(builtins_allow),
                            "imports": None if imports_allow is None else list(imports_allow),
-                           "require": require_isolation()}, f)
+                           "require": require_isolation(), "refuse_no_seccomp": refuses_without_seccomp()}, f)
             env = {k: os.environ[k] for k in _ENV_NAMES if k in os.environ}
             env.update(HOME=work, TMPDIR=work, **SINGLE_THREAD_ENV)
-            note_isolation_once()
-            proc = subprocess.Popen(
-                [sys.executable, "-I", harness, job, result, json.dumps(limits)],
-                cwd=work,
-                env=env,
-                stdin=subprocess.DEVNULL,
-                stdout=stdout if capture_stdout else subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True,
+            held = hold_parent()
+            proc, marker, state = start_child(
+                [sys.executable, "-I", harness, job, result, json.dumps(limits)], timeout,
+                cwd=work, env=env, stdin=subprocess.DEVNULL,
+                stdout=stdout if capture_stdout else subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
+            if not judge_report(state):
+                return Run("error", None)
             try:
                 proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
@@ -327,12 +343,9 @@ def run_candidate(
             return Run("error", None)
         finally:
             if proc is not None:
-                # A child that calls setsid leaves the group and isn't killed; a container covers that.
-                try:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                except (OSError, AttributeError):
-                    proc.kill()
-                proc.wait()
+                reap(proc, marker, state)
+            if held:
+                release_parent()
 
 
 # ---------------------------------------------------------------------------

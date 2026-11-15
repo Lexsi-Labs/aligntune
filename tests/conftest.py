@@ -172,3 +172,26 @@ def _patched_grpoconfig_init(self, *args, **kwargs):
 _GRPOConfig.__init__ = _patched_grpoconfig_init
 
 
+
+
+# With ALIGNTUNE_EXPECT_ISOLATION=1 a skipped test in the confinement module is a failure: a silent skip is how a
+# broken confinement would go unnoticed on a host that was supposed to have it.
+# The last two depend on the host, not on the confinement: an interpreter installed under /opt (GitHub runners), and
+# no root or user namespace (Ubuntu 24.04 restricts unprivileged user namespaces). CI runs the root test under sudo.
+_ALLOWED_CONFINEMENT_SKIPS = ("no kernel headers installed", "could not import", "not available in this Python build",
+                              "only meaningful off Linux", "the interpreter lives under /opt", "needs root, or a user namespace")
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    if (
+        report.skipped
+        and os.environ.get("ALIGNTUNE_EXPECT_ISOLATION", "").strip().lower() in ("1", "true", "yes")
+        and item.module.__name__.endswith("test_code_confinement")
+    ):
+        reason = str(report.longrepr[2]) if isinstance(report.longrepr, tuple) else str(report.longrepr)
+        if not any(allowed in reason for allowed in _ALLOWED_CONFINEMENT_SKIPS):
+            report.outcome = "failed"
+            report.longrepr = "skipped under ALIGNTUNE_EXPECT_ISOLATION=1: " + reason

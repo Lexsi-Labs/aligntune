@@ -56,3 +56,54 @@ jobs:
             tests/test_sft_config_pickle.py \
             tests/test_gsm8k_grading.py \
             tests/test_math_answer_extraction.py
+
+  # The code rewards' child confinement (seccomp, Landlock, capabilities) on both Linux architectures. With
+  # ALIGNTUNE_EXPECT_ISOLATION=1 the confinement tests fail instead of skipping when a layer is missing.
+  confinement:
+    name: confinement tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    env:
+      CUDA_VISIBLE_DEVICES: ""
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install (CPU torch, no GPU extras)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e . numpy pytest pytest-timeout
+      - name: Show the kernel and the isolation it offers
+        run: |
+          uname -srm
+          cat /sys/kernel/security/lsm || true
+          python -P - <<'PY'
+          import json, os, subprocess, sys
+          from aligntune.rewards import _code_confine as c
+          out = subprocess.run([sys.executable, "-I", "-c", c.ISOLATE_SOURCE + "import json\nprint(json.dumps(isolate(os.getcwd(), False)))"],
+                               capture_output=True, text=True, cwd="/tmp").stdout
+          print("child isolation (seccomp, Landlock ABI, caps_dropped):", out.strip().splitlines()[-1:])
+          PY
+      - name: Run the code reward and confinement tests
+        env:
+          ALIGNTUNE_EXPECT_ISOLATION: "1"
+        run: >-
+          python -m pytest -p no:cacheprovider -o addopts="" -rs --timeout=300
+          tests/test_code_assert_grading.py tests/test_code_reward_grading.py tests/test_code_reward_security.py
+          tests/test_code_verifiable_columns.py tests/test_code_confinement.py
+      # The capability drop needs a process that holds capabilities. The runners do not allow an unprivileged user
+      # namespace, so run that one test as real root.
+      - name: Run the capability-drop test as root
+        env:
+          ALIGNTUNE_EXPECT_ISOLATION: "1"
+        run: >-
+          sudo -E env "PATH=$PATH" python -P -m pytest tests/test_code_confinement.py
+          -k as_root_a_confined_candidate -p no:cacheprovider -o addopts="" -rs --timeout=300
