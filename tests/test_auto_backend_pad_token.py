@@ -9,9 +9,13 @@ imported.
 
 from unittest import mock
 
+import importlib.util
+import sys
+import types
+from pathlib import Path
+
 import pytest
 
-pytest.importorskip("unsloth_zoo.pad_token")
 tokenizers = pytest.importorskip("tokenizers")
 from transformers import PreTrainedTokenizerFast
 
@@ -22,6 +26,26 @@ from aligntune.core.backend_factory import (
     create_rl_trainer,
     create_sft_trainer,
 )
+
+
+@pytest.fixture(autouse=True)
+def unsloth_pad_token_module():
+    """Load the vendored ``unsloth_zoo/pad_token.py`` (no imports of its own) by path.
+
+    Importing the ``unsloth_zoo`` package itself needs a GPU, as on CI.
+    """
+    spec = importlib.util.find_spec("unsloth_zoo")
+    if spec is None or not spec.submodule_search_locations:
+        pytest.skip("unsloth_zoo is not installed")
+    path = Path(list(spec.submodule_search_locations)[0]) / "pad_token.py"
+    module_spec = importlib.util.spec_from_file_location("unsloth_zoo.pad_token", path)
+    module = importlib.util.module_from_spec(module_spec)
+    module_spec.loader.exec_module(module)
+    package = types.ModuleType("unsloth_zoo")
+    package.__path__ = []
+    package.pad_token = module
+    with mock.patch.dict(sys.modules, {"unsloth_zoo": package, "unsloth_zoo.pad_token": module}):
+        yield
 
 
 def _tokenizer(**special):
