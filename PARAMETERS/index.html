@@ -3011,6 +3011,12 @@ processed <code>DatasetDict</code> to the trainer.</p>
 <td>Maximum training steps</td>
 </tr>
 <tr>
+<td><code>resume_from_checkpoint</code></td>
+<td>str or bool</td>
+<td><code>None</code></td>
+<td>Resume an interrupted run: a Hugging Face checkpoint folder (for example <code>output/checkpoint-500</code>), or <code>True</code> for the latest <code>checkpoint-*</code> folder in <code>output_dir</code>. Passed to <code>Trainer.train()</code>, which restores the weights, optimizer, scheduler, RNG state and step count. TRL SFT only (<code>backend="trl"</code>, text generation tasks); elsewhere it raises a <code>ValueError</code></td>
+</tr>
+<tr>
 <td><code>epochs</code></td>
 <td>int</td>
 <td><code>None</code></td>

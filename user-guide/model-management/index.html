@@ -1186,10 +1186,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#load-checkpoint" class="md-nav__link">
+  <a href="#resume-from-a-checkpoint" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Load Checkpoint
+        Resume From a Checkpoint
       
     </span>
   </a>
@@ -2103,10 +2103,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#load-checkpoint" class="md-nav__link">
+  <a href="#resume-from-a-checkpoint" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Load Checkpoint
+        Resume From a Checkpoint
       
     </span>
   </a>
@@ -2459,10 +2459,25 @@ leaving <code>README.md</code> untouched.</p>
 <a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="p">)</span>
 <a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="load-checkpoint">Load Checkpoint<a class="headerlink" href="#load-checkpoint" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Resume from checkpoint</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">trainer</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="s2">"./output/checkpoint-1000"</span><span class="p">)</span>
+<h3 id="resume-from-a-checkpoint">Resume From a Checkpoint<a class="headerlink" href="#resume-from-a-checkpoint" title="Permanent link">&para;</a></h3>
+<p>An interrupted TRL SFT run continues from a saved checkpoint: the weights, optimizer,
+learning-rate scheduler, RNG state and step count are restored, and training runs the
+remaining steps.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a> <span class="o">...</span><span class="p">,</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a> <span class="n">backend</span><span class="o">=</span><span class="s2">"trl"</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a> <span class="n">output_dir</span><span class="o">=</span><span class="s2">"./output"</span><span class="p">,</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a> <span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># latest checkpoint-* folder in output_dir</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a> <span class="c1"># or a folder: resume_from_checkpoint="./output/checkpoint-1000"</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="p">)</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 </code></pre></div>
+<p>In a config file, set <code>train.resume_from_checkpoint</code>. From the command line, add
+<code>--resume latest</code> (or <code>--resume ./output/checkpoint-1000</code>) to <code>aligntune train</code>. Keep the other training settings
+(<code>max_steps</code> or <code>epochs</code>, batch size, learning rate) the same as in the interrupted run.
+A missing folder, or <code>True</code> with no checkpoint in <code>output_dir</code>, stops with a <code>ValueError</code>
+before the model loads. Other backends and the classification tasks do not support it yet
+and raise a <code>ValueError</code>.</p>
 <h2 id="model-information">Model Information<a class="headerlink" href="#model-information" title="Permanent link">&para;</a></h2>
 <h3 id="get-model-path">Get Model Path<a class="headerlink" href="#get-model-path" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># After saving</span>

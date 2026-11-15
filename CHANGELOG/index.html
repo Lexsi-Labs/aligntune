@@ -1651,6 +1651,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fixed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1718,7 +1729,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1955,6 +1966,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fixed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2022,7 +2044,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -2150,8 +2172,16 @@
 <p>Format follows <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>.</p>
 <hr />
 <h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li>TRL SFT can resume an interrupted run: <code>create_sft_trainer(..., resume_from_checkpoint="output/checkpoint-500")</code>, or <code>True</code> for the latest checkpoint in <code>output_dir</code> (also <code>train.resume_from_checkpoint</code> in a config), is passed to <code>Trainer.train()</code>, which restores the weights, optimizer, scheduler and step count. A missing folder, or <code>True</code> with no checkpoint, stops with a <code>ValueError</code> before the model loads. The default <code>None</code> keeps the current behaviour. From the command line, <code>aligntune train --resume latest</code> (or a checkpoint folder) does the same, and <code>python -m aligntune.cli.finetune --resume</code> now reaches it too. The Unsloth SFT trainers and the classification tasks do not support it yet and raise a <code>ValueError</code>, from <code>create_sft_trainer</code> and from <code>BackendFactory.create_trainer</code>, instead of starting again from step 0 (#74, @W-OK-E).</li>
+</ul>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
 <ul>
+<li>DPO, distillation, SDFT and counterfactual GRPO train on a machine with no GPU. TRL's configs default <code>bf16</code> to <code>True</code>, and <code>TrainingArguments</code> stopped these trainers with "Your setup doesn't support bf16/gpu. You need to assign use_cpu ...", even with <code>device_map="cpu"</code>. With no CUDA device and no other bf16-capable accelerator they now set <code>bf16=False</code>, <code>fp16=False</code> and <code>use_cpu=True</code> (<code>PrecisionHandler.cpu_only_training_args()</code>). Runs with a GPU, including Apple MPS, are unchanged. The other TRL trainers (SFT, GRPO, PPO, ORPO, online DPO, PACE, SPIN) already turned <code>bf16</code> off without a GPU.</li>
+<li><code>backend="auto"</code> no longer picks Unsloth for a model whose tokenizer Unsloth refuses. Unsloth needs a pad token distinct from eos; for a tokenizer with none and no reserved or unk token to reuse (SmolLM2, for example) it stopped with "Could not find a valid pad token". <code>auto</code> now checks the tokenizer first, with Unsloth's own pad-token check and before Unsloth is imported (importing it patches TRL), and uses TRL for such models, with a warning; <code>backend="unsloth"</code> still uses Unsloth.</li>
+<li>SFT runs from a config file on the TRL backend no longer import Unsloth. Config files default <code>chat_template</code> to <code>"auto"</code>, which the model loader treated as an Unsloth template name, so it imported <code>unsloth.chat_templates</code>, and that replaced TRL's <code>SFTTrainer</code> (on macOS with MLX installed, training then stopped with <code>NotImplementedError: Unsloth MLX: callbacks requires ...</code>). <code>"auto"</code> now keeps the tokenizer's own template on every backend; it was never an Unsloth template name, so nothing was applied before either. A named Unsloth template such as <code>"chatml"</code> is applied on the Unsloth backend only; on TRL it logs a warning and keeps the tokenizer's template. A <code>chat_template</code> set on a dataset in a config file is no longer replaced by the top-level default.</li>
+<li><code>python -m aligntune.cli.finetune</code> always failed, for every <code>--method</code>: building its config stopped with <code>TypeError: DistributedConfig.__init__() got an unexpected keyword argument 'num_gpus'</code>, and that config was then passed to <code>create_sft_trainer</code> / <code>create_rl_trainer</code> as the model name. It now passes its options to the factories as keyword arguments (<code>--rewards length:1.0</code> becomes a reward entry; <code>--rl-loss-type</code> and <code>--rl-loss-weight</code> apply to DPO only, so GRPO and PPO keep their own loss). <code>--num-gpus</code> and <code>--distributed</code> are not used by the factories; their help now says so (launch with accelerate or torchrun for multi-GPU).</li>
 <li>Hugging Face Hub uploads work again: <code>HFHubExporter</code> created the repository with <code>private=</code> passed to <code>upload_file</code> and <code>upload_folder</code>, which never accepted it (a <code>TypeError</code>), so it now sets the visibility when it creates the repository. <code>setup_hf_auth</code> no longer passes <code>write_permission</code> to <code>login</code>, which does not take it (the error was swallowed and logged as a failed login). <code>aligntune recipes run</code> checks the login with <code>huggingface_hub.whoami()</code> instead of the <code>huggingface-cli</code> command, which huggingface_hub 2.x no longer installs, and messages say <code>hf auth login</code>.</li>
 <li><code>HonestyReward</code> matches dishonesty terms at a word start, so "lie" no longer fires inside "believe" (#55, @ANDROIDHASSAN).</li>
 <li><code>FluencyReward</code> matches transitions and connectors as whole words: "or" is not in "words" (#56, @ANDROIDHASSAN).</li>
@@ -2184,7 +2214,7 @@
   token left are dropped (long prompts made the log-probabilities, then the weights, NaN).</li>
 </ul>
 <h2 id="0130-2026-11-03-includes-the-unpublished-0129">[0.1.30] — 2026-11-03 (includes the unpublished 0.1.29)<a class="headerlink" href="#0130-2026-11-03-includes-the-unpublished-0129" title="Permanent link">&para;</a></h2>
-<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>SGLang rollout backend for GRPO (<code>rollout_backend="sglang"</code>): generation goes to a running SGLang server over HTTP, and weights sync once per optimizer step, as a LoRA adapter on a <code>--enable-lora</code> server or as streamed full weights (#32, @chayan-bit).</li>
 <li>SGLang rollout on Unsloth GRPO-family and counterfactual GRPO trainers, with Gemma 3 weight names, vision adapter tensors, regex LoRA <code>target_modules</code> and full sync for 4-bit models (#41, @zeralyngkhoi19).</li>

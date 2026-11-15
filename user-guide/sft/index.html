@@ -2938,21 +2938,22 @@
 <a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a> <span class="c1"># Training settings</span>
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a> <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># Use epochs instead</span>
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a> <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="c1"># Effective batch size = 16</span>
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a> <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a> <span class="n">warmup_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a> <span class="n">max_grad_norm</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a> <span class="c1"># Advanced settings</span>
-<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a> <span class="n">packing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Sequence packing for efficiency</span>
-<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a> <span class="c1"># Note: For GPT2 models, use backend="trl" as GPT2 is not supported by Unsloth</span>
-<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a> <span class="n">packing_strategy</span><span class="o">=</span><span class="s2">"bfd"</span><span class="p">,</span> <span class="c1"># "bfd" or "wrapped"</span>
-<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a> <span class="n">loss_type</span><span class="o">=</span><span class="s2">"nll"</span><span class="p">,</span> <span class="c1"># "nll" or "dft"</span>
-<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a> <span class="n">completion_only_loss</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Only compute loss on completion</span>
-<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a> <span class="n">activation_offloading</span><span class="o">=</span><span class="kc">False</span> <span class="c1"># Offload activations to CPU</span>
-<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="p">)</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a> <span class="n">resume_from_checkpoint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># TRL only: a checkpoint folder such as "output/checkpoint-500", or True for the latest one in output_dir</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a> <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="c1"># Effective batch size = 16</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a> <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a> <span class="n">warmup_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a> <span class="n">max_grad_norm</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a> <span class="c1"># Advanced settings</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a> <span class="n">packing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Sequence packing for efficiency</span>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a> <span class="c1"># Note: For GPT2 models, use backend="trl" as GPT2 is not supported by Unsloth</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a> <span class="n">packing_strategy</span><span class="o">=</span><span class="s2">"bfd"</span><span class="p">,</span> <span class="c1"># "bfd" or "wrapped"</span>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a> <span class="n">loss_type</span><span class="o">=</span><span class="s2">"nll"</span><span class="p">,</span> <span class="c1"># "nll" or "dft"</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a> <span class="n">completion_only_loss</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="c1"># Only compute loss on completion</span>
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a> <span class="n">activation_offloading</span><span class="o">=</span><span class="kc">False</span> <span class="c1"># Offload activations to CPU</span>
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="dataset-configuration">Dataset Configuration<a class="headerlink" href="#dataset-configuration" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">create_sft_trainer</span><span class="p">(</span>
