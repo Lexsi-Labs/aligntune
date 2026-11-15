@@ -2587,9 +2587,16 @@ completion inside the training process. Each call starts a fresh interpreter
   A HumanEval completion that only writes the function body is graded as prompt plus
   completion.</li>
 <li><strong>Values, not output.</strong> The child sends back plain data only: exact <code>None</code>, <code>bool</code>, <code>int</code>,
-  <code>float</code>, <code>str</code>, <code>list</code>, <code>tuple</code>, <code>set</code>, <code>frozenset</code> and <code>dict</code>. The trainer does the
-  comparison. Printed text such as <code>PASS</code>, the exit code, a subclass or an object with
-  its own <code>__eq__</code> can't earn a pass, and a literal expected value never reaches the child.</li>
+  <code>float</code>, <code>complex</code>, <code>str</code>, <code>list</code>, <code>tuple</code>, <code>set</code>, <code>frozenset</code> and <code>dict</code>, plus
+  <code>collections.Counter</code>, <code>OrderedDict</code> and <code>defaultdict</code>, which the trainer rebuilds from their
+  items. Any other value (an <code>re.Match</code>, a subclass, an object with its own <code>__eq__</code>) crosses as
+  its truth value only: <code>assert f(x)</code> and <code>assert not f(x)</code> work as in Python, and it equals
+  nothing. The trainer does the comparison. Printed text such as <code>PASS</code>, the exit code or a
+  custom <code>__eq__</code> can't earn a pass, and a literal expected value never reaches the child.
+  When the task's function shares a builtin's name (MBPP's <code>sum(a, b)</code>), the completion's
+  definition is used only as the function under test: the whole assert, or one whole side of a
+  single comparison, named nowhere else in the assert, in an assert that names nothing else of the completion's.
+  A builtin the completion redefines anywhere else fails the test.</li>
 <li><strong>Asserts</strong> are split with <code>ast</code>: comparisons (<code>==</code>, <code>!=</code>, <code>&lt;</code> and the like, chained,
   <code>in</code>, <code>is</code>), <code>not x</code>, <code>math.isclose(a, b, ...)</code> and bare <code>assert x</code>. Any other shape, or
   a test that isn't an <code>assert</code> string, fails with a warning. <code>input</code>/<code>expected_output</code>
@@ -2629,11 +2636,21 @@ completion inside the training process. Each call starts a fresh interpreter
 </tr>
 </tbody>
 </table>
-<p><strong>What it does not limit.</strong> This is not a sandbox. The child runs as the same user as
-the trainer, so it can read any file that user can read (a token file in your home
-directory, for example), use the network, write outside its directory, and signal other
-processes, the trainer included. A process that calls <code>setsid</code> leaves the group and is
-not killed. Everything inside the child belongs to the completion, so a determined one
+<p><strong>Kernel confinement (Linux).</strong> Before the completion runs, the child applies a seccomp
+filter (no signals to other processes, <code>ptrace</code>, sockets, new processes or threads, and no
+calls that change other processes), drops its capabilities, and applies a Landlock ruleset
+(writes only in its own directory; reads only from the interpreter's prefixes, the system
+library directories and its own <code>/proc</code> entry). It reports what it got over a pipe it closes
+before the completion runs. On Linux a child without seccomp is refused (the completion scores
+0) unless <code>ALIGNTUNE_SANDBOX_ALLOW_NO_SECCOMP=1</code>; <code>ALIGNTUNE_SANDBOX_REQUIRE_ISOLATION=1</code> also
+refuses a child without Landlock, and <code>=any</code> refuses one with neither. The trainer is not
+dumpable while a child is alive.</p>
+<p><strong>What it does not limit.</strong> Without that confinement (macOS, Windows, or Linux with the
+opt-out) this is not a sandbox. The child runs as the same user as the trainer, so it can
+read any file that user can read (a token file in your home directory, for example), use the
+network, write outside its directory, and signal other processes, the trainer included. A
+process that calls <code>setsid</code> leaves the group and is found by an environment marker on Linux
+only. Everything inside the child belongs to the completion, so a determined one
 can write values of its own choosing into its result. That scores only where the needed
 value can be guessed without the expected output, such as <code>assert f(x)</code> or
 <code>assert f(x) == True</code>, so prefer tests whose expected values vary. Run training in a
