@@ -226,7 +226,8 @@ trainer = create_sft_trainer(
 trainer.train()
 ```
 
-In a config file, set `train.resume_from_checkpoint`. Keep the other training settings
+In a config file, set `train.resume_from_checkpoint`. From the command line, add
+`--resume latest` (or `--resume ./output/checkpoint-1000`) to `aligntune train`. Keep the other training settings
 (`max_steps` or `epochs`, batch size, learning rate) the same as in the interrupted run.
 A missing folder, or `True` with no checkpoint in `output_dir`, stops with a `ValueError`
 before the model loads. Other backends and the classification tasks do not support it yet

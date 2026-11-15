@@ -68,6 +68,7 @@ aligntune train --help # To get all parameters
 | `--output-dir` | `./output` | Output directory |
 | `--seed` | `42` | Random seed |
 | `--config` | - | YAML configuration file |
+| `--resume` | - | Resume an interrupted SFT run (TRL backend) from a checkpoint folder, or `latest` for the newest checkpoint in the output directory. Other training types stop with an error |
 
 #### Examples
 
@@ -89,6 +90,9 @@ aligntune train \
 
 # Training with configuration file
 aligntune train --config src/aligntune/recipes/configs/dpo/mistral_hhrlhf.yaml
+
+# Resume an interrupted SFT run from its newest checkpoint
+aligntune train --config my_sft.yaml --resume latest
 ```
 
 ## Recipe Commands
