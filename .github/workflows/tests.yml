@@ -51,6 +51,7 @@ jobs:
             tests/test_config.py \
             tests/test_config_compat.py \
             tests/test_yaml_train_keys.py \
+            tests/test_factory_config_precedence.py \
             tests/test_code_confinement.py \
             tests/test_safe_executor.py \
             tests/test_sft_config_pickle.py \

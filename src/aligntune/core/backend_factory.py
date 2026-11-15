@@ -1085,7 +1085,20 @@ def create_sft_trainer(
         else:  # string
             backend_type = BackendType(backend.lower())
         backend_config = BackendConfig(TrainingType.SFT, backend_type)
-    
+
+    # Only the TRL SFT trainer passes resume_from_checkpoint to Trainer.train().
+    # Elsewhere it would be ignored, and the run would restart at step 0 and
+    # overwrite the checkpoints it was meant to resume from.
+    if config.train.resume_from_checkpoint and (
+        backend_config.backend != BackendType.TRL
+        or config.dataset.task_type in (TaskType.TEXT_CLASSIFICATION, TaskType.TOKEN_CLASSIFICATION)
+    ):
+        raise ValueError(
+            "resume_from_checkpoint is supported by the TRL SFT trainer only (backend='trl', "
+            f"text generation tasks); got backend={backend_config.backend.value!r}, "
+            f"task_type={config.dataset.task_type.value!r}."
+        )
+
     # Set PURE_TRL_MODE only when TRL backend is being used
     if backend_config.backend == BackendType.TRL:
         _disable_unsloth_backend()

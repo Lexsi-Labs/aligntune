@@ -74,6 +74,69 @@ def test_sft_resume_from_checkpoint_defaults_to_none(tmp_path):
     assert config.train.resume_from_checkpoint is None
 
 
+@pytest.mark.parametrize("value", ["run/checkpoint-500", True])
+def test_sft_resume_from_checkpoint_from_config_train_section(tmp_path, value):
+    cfg = _sft_config(tmp_path / "run")
+    cfg["train"]["resume_from_checkpoint"] = value
+
+    assert create_sft_trainer(config=cfg).train.resume_from_checkpoint == value
+
+
+def test_sft_resume_from_checkpoint_argument_overrides_config(tmp_path):
+    cfg = _sft_config(tmp_path / "run")
+    cfg["train"]["resume_from_checkpoint"] = "run/checkpoint-4"
+
+    config = create_sft_trainer(config=cfg, resume_from_checkpoint="run/checkpoint-8")
+
+    assert config.train.resume_from_checkpoint == "run/checkpoint-8"
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [{"backend": "unsloth"}, {"task_type": "text_classification"}, {"task_type": "token_classification"}],
+)
+def test_sft_resume_from_checkpoint_refused_where_it_would_be_ignored(tmp_path, overrides):
+    # Only the TRL SFT trainer passes the checkpoint to Trainer.train(); the others
+    # would silently start from step 0 and overwrite the run's checkpoints.
+    cfg = _sft_config(tmp_path / "run")
+    cfg.pop("backend")
+    with pytest.raises(ValueError, match="resume_from_checkpoint"):
+        create_sft_trainer(config=cfg, resume_from_checkpoint=True, **overrides)
+
+
+def _trl_sft_trainer(tmp_path, resume):
+    from aligntune.backends.trl.sft.sft_generation import TRLSFTTrainer
+
+    config = create_sft_trainer(
+        config=_sft_config(tmp_path / "run"), resume_from_checkpoint=resume
+    )
+    trainer = TRLSFTTrainer(config)
+    trainer.setup_model = mock.Mock(side_effect=AssertionError("model loaded before the check"))
+    return trainer
+
+
+@pytest.mark.parametrize("resume", ["missing", True])
+def test_trl_sft_bad_resume_fails_before_loading_the_model(tmp_path, resume):
+    # A wrong path, or True with no checkpoint-* folder in output_dir, must stop
+    # before the model and data load, not minutes later inside Trainer.train().
+    if resume == "missing":
+        resume = str(tmp_path / "run" / "checkpoint-8")
+    trainer = _trl_sft_trainer(tmp_path, resume)
+
+    with pytest.raises(ValueError, match="checkpoint"):
+        trainer.train()
+    trainer.setup_model.assert_not_called()
+
+
+def test_trl_sft_resume_true_finds_a_saved_checkpoint(tmp_path):
+    ckpt = tmp_path / "run" / "checkpoint-4"
+    ckpt.mkdir(parents=True)
+    trainer = _trl_sft_trainer(tmp_path, True)
+
+    with pytest.raises(AssertionError, match="model loaded"):
+        trainer.train()  # the check passes, so training goes on to load the model
+
+
 def test_sft_config_file_path_values_override_factory_defaults(tmp_path):
     yaml = pytest.importorskip("yaml")
     path = tmp_path / "sft.yaml"

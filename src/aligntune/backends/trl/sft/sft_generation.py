@@ -1,6 +1,7 @@
 """TRL SFT backend for causal LM / generation tasks."""
 
 import logging
+import os
 import time
 import yaml
 from pathlib import Path
@@ -95,6 +96,8 @@ class TRLSFTTrainer(SFTTrainerBase):
 
     def train(self) -> Dict[str, Any]:
         logger.info(f"Starting TRL SFT training for task: {self.task_type.value}")
+        resume_from_checkpoint = getattr(self.config.train, "resume_from_checkpoint", None)
+        self._check_resume_from_checkpoint(resume_from_checkpoint)
         self._initialize_wandb_logger()
 
         if self.model is None:
@@ -187,9 +190,7 @@ class TRLSFTTrainer(SFTTrainerBase):
         # Long-running corpus jobs need ordinary HF checkpoint recovery.  This
         # is intentionally opt-in: caller code can attach
         # ``config.train.resume_from_checkpoint`` without changing defaults.
-        train_result = self.trainer.train(
-            resume_from_checkpoint=getattr(self.config.train, "resume_from_checkpoint", None)
-        )
+        train_result = self.trainer.train(resume_from_checkpoint=resume_from_checkpoint)
         training_duration = time.time() - start_time
 
         logger.info(f"Training completed in {training_duration:.2f} seconds")
@@ -241,6 +242,28 @@ class TRLSFTTrainer(SFTTrainerBase):
             'metrics': getattr(train_result, 'metrics', {}),
             'task_type': self.task_type.value,
         }
+
+    def _check_resume_from_checkpoint(self, resume) -> None:
+        """Fail before the model and data load if there is nothing to resume from.
+
+        ``Trainer.train()`` raises the same errors, but only after loading.
+        """
+        if not resume:
+            return
+        if resume is True:
+            from transformers.trainer_utils import get_last_checkpoint
+
+            output_dir = self.config.logging.output_dir
+            if not os.path.isdir(output_dir) or get_last_checkpoint(output_dir) is None:
+                raise ValueError(
+                    f"resume_from_checkpoint=True but there is no checkpoint-* folder in "
+                    f"output_dir {output_dir!r}."
+                )
+        elif not os.path.isdir(resume):
+            raise ValueError(
+                f"resume_from_checkpoint={resume!r} is not a checkpoint folder "
+                f"(expected for example {os.path.join(self.config.logging.output_dir, 'checkpoint-500')!r})."
+            )
 
     def train_step(self, batch: Dict[str, Any]) -> Dict[str, float]:
         return {"loss": 0.0}
