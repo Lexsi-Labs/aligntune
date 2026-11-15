@@ -35,8 +35,15 @@ def _require_existing_local_path(ref, what: str) -> None:
         )
 
 
-def setup_tokenizer(tokenizer: Any, config: SFTConfig, task_type: TaskType) -> Any:
-    """Setup tokenizer with task-specific configurations."""
+def setup_tokenizer(
+    tokenizer: Any, config: SFTConfig, task_type: TaskType, use_unsloth: bool = False
+) -> Any:
+    """Setup tokenizer with task-specific configurations.
+
+    ``chat_template`` may be a Jinja template, an Unsloth template name such as
+    ``"chatml"`` (Unsloth backend only), or ``"auto"``/``None`` to keep the
+    tokenizer's own template.
+    """
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         logger.info("Set pad token to eos token")
@@ -56,8 +63,18 @@ def setup_tokenizer(tokenizer: Any, config: SFTConfig, task_type: TaskType) -> A
                 logger.info("Applied custom chat_template from config to tokenizer")
             except Exception as e:
                 logger.debug(f"Failed to set tokenizer.chat_template from config: {e}")
-        # Unsloth named templates (e.g., 'llama-3')
-        elif not ("{%" in cfg_template or "{{" in cfg_template):
+        # "auto" keeps the tokenizer's own template (it is not an Unsloth name).
+        elif cfg_template.lower() == "auto":
+            pass
+        # Unsloth named templates (e.g., 'llama-3'). Importing Unsloth patches
+        # TRL's trainers, so never do it for a TRL run.
+        elif not use_unsloth:
+            logger.warning(
+                f"chat_template={cfg_template!r} is an Unsloth template name, which needs "
+                "the Unsloth backend; keeping the tokenizer's own template. Pass a Jinja "
+                "template to set one on the TRL backend."
+            )
+        else:
             try:
                 from unsloth.chat_templates import get_chat_template
                 tokenizer = get_chat_template(
@@ -218,7 +235,7 @@ def build_model(
             if hasattr(model, 'model') and not hasattr(model.model, 'max_seq_length'):
                 model.model.max_seq_length = config.model.max_seq_length
 
-            tokenizer = setup_tokenizer(tokenizer, config, task_type)
+            tokenizer = setup_tokenizer(tokenizer, config, task_type, use_unsloth=True)
             return model, tokenizer
             
         except ImportError as e:

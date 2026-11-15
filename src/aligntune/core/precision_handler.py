@@ -108,6 +108,22 @@ class PrecisionHandler:
             return torch.float32
     
     @staticmethod
+    def cpu_only_training_args() -> Dict[str, bool]:
+        """Training-argument overrides for a machine with no GPU.
+
+        TRL's configs default ``bf16`` to ``True``, which ``TrainingArguments``
+        rejects without a GPU ("Your setup doesn't support bf16/gpu"). With no
+        CUDA device and no other bf16-capable accelerator (the check
+        ``TrainingArguments`` itself makes), return ``bf16=False, fp16=False,
+        use_cpu=True``; otherwise return nothing, so GPU runs are unchanged.
+        """
+        from transformers import training_args as hf_training_args
+
+        if torch.cuda.is_available() or hf_training_args.is_torch_bf16_gpu_available():
+            return {}
+        return {"bf16": False, "fp16": False, "use_cpu": True}
+
+    @staticmethod
     def get_training_args_precision(precision: str) -> Dict[str, bool]:
         """
         Get training arguments for fp16/bf16 flags.

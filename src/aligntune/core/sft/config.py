@@ -232,6 +232,11 @@ class TrainingConfig:
     per_device_eval_batch_size: Optional[int] = None
     gradient_accumulation_steps: int = 1
     max_steps: Optional[int] = None
+    # Hugging Face checkpoint directory used by Trainer.train(), or True for the
+    # latest checkpoint-* folder in logging.output_dir. This belongs to the
+    # runtime training config rather than ``extra_params`` so backends can
+    # consume it explicitly.
+    resume_from_checkpoint: Optional[Union[str, bool]] = None
     epochs: Optional[int] = None
     learning_rate: float = 1e-5
     weight_decay: float = 0.01

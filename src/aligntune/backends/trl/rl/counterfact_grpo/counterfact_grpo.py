@@ -1277,8 +1277,9 @@ class TRLCounterFactGRPOTrainer(TrainerBase):
             warmup_steps=warmup_ratio,
             seed=seed,
             report_to=self.config.logging.loggers if self.config.logging.loggers else [],
-            fp16=precision == "fp16",
-            bf16=precision == "bf16",
+            # On a machine with no GPU, bf16/fp16 off and use_cpu (GPU runs unchanged).
+            **{"fp16": precision == "fp16", "bf16": precision == "bf16",
+               **PrecisionHandler.cpu_only_training_args()},
             eval_strategy=eval_strategy,
             eval_steps=eval_steps,
         )

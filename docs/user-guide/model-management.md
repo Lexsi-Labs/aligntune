@@ -209,12 +209,29 @@ trainer = create_sft_trainer(
 trainer.train()
 ```
 
-### Load Checkpoint
+### Resume From a Checkpoint
+
+An interrupted TRL SFT run continues from a saved checkpoint: the weights, optimizer,
+learning-rate scheduler, RNG state and step count are restored, and training runs the
+remaining steps.
 
 ```python
-# Resume from checkpoint
-trainer.load_checkpoint("./output/checkpoint-1000")
+trainer = create_sft_trainer(
+ ...,
+ backend="trl",
+ output_dir="./output",
+ resume_from_checkpoint=True, # latest checkpoint-* folder in output_dir
+ # or a folder: resume_from_checkpoint="./output/checkpoint-1000"
+)
+trainer.train()
 ```
+
+In a config file, set `train.resume_from_checkpoint`. From the command line, add
+`--resume latest` (or `--resume ./output/checkpoint-1000`) to `aligntune train`. Keep the other training settings
+(`max_steps` or `epochs`, batch size, learning rate) the same as in the interrupted run.
+A missing folder, or `True` with no checkpoint in `output_dir`, stops with a `ValueError`
+before the model loads. Other backends and the classification tasks do not support it yet
+and raise a `ValueError`.
 
 ## Model Information
 
