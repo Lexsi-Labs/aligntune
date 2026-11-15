@@ -139,7 +139,7 @@ processed `DatasetDict` to the trainer.
 | `per_device_eval_batch_size` | int | `None` | Evaluation batch size per device; defaults to the training batch size in the factory |
 | `gradient_accumulation_steps` | int | `1` | Gradient accumulation steps |
 | `max_steps` | int | `None` | Maximum training steps |
-| `resume_from_checkpoint` | str | `None` | Path to a Hugging Face checkpoint directory (for example `output/checkpoint-500`). TRL SFT passes it to `Trainer.train()` to resume an interrupted run; other backends ignore it |
+| `resume_from_checkpoint` | str or bool | `None` | Resume an interrupted run: a Hugging Face checkpoint folder (for example `output/checkpoint-500`), or `True` for the latest `checkpoint-*` folder in `output_dir`. Passed to `Trainer.train()`, which restores the weights, optimizer, scheduler, RNG state and step count. TRL SFT only (`backend="trl"`, text generation tasks); elsewhere it raises a `ValueError` |
 | `epochs` | int | `None` | Number of training epochs; defaults to `3` when `max_steps` is unset |
 | `learning_rate` | float | `1e-5` | Learning rate |
 | `weight_decay` | float | `0.01` | Weight decay |

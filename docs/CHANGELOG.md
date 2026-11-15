@@ -9,7 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- TRL SFT can resume an interrupted run: `create_sft_trainer(..., resume_from_checkpoint="output/checkpoint-500")` (or `train.resume_from_checkpoint` in a config) is passed to `Trainer.train()`. The default `None` keeps the current behaviour. The Unsloth SFT trainers and the CLI `--resume` option do not use it yet.
+- TRL SFT can resume an interrupted run: `create_sft_trainer(..., resume_from_checkpoint="output/checkpoint-500")`, or `True` for the latest checkpoint in `output_dir` (also `train.resume_from_checkpoint` in a config), is passed to `Trainer.train()`, which restores the weights, optimizer, scheduler and step count. A missing folder, or `True` with no checkpoint, stops with a `ValueError` before the model loads. The default `None` keeps the current behaviour. The Unsloth SFT trainers, the classification tasks and the CLI `--resume` option do not support it yet; the first two raise a `ValueError` instead of starting again from step 0 (#74, @W-OK-E).
 
 ### Fixed
 - Hugging Face Hub uploads work again: `HFHubExporter` created the repository with `private=` passed to `upload_file` and `upload_folder`, which never accepted it (a `TypeError`), so it now sets the visibility when it creates the repository. `setup_hf_auth` no longer passes `write_permission` to `login`, which does not take it (the error was swallowed and logged as a failed login). `aligntune recipes run` checks the login with `huggingface_hub.whoami()` instead of the `huggingface-cli` command, which huggingface_hub 2.x no longer installs, and messages say `hf auth login`.
