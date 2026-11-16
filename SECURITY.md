@@ -11,7 +11,10 @@
 
 **Do not report security vulnerabilities in public issues.**
 
-Report them privately to: **[hello@lexsi.ai](mailto:hello@lexsi.ai)**
+Report them privately through GitHub's private vulnerability reporting, using the
+[advisory form](https://github.com/Lexsi-Labs/aligntune/security/advisories/new).
+
+If you cannot use GitHub, email **[hello@lexsi.ai](mailto:hello@lexsi.ai)** instead.
 
 Include: description, steps to reproduce, impact, affected versions (if known), and any suggested fix. We aim to acknowledge within 48 hours and will keep you updated.
 
